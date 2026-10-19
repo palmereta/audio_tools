@@ -80,7 +80,7 @@ public:
         const auto& A = Assets::get();
         const auto p2 = e.position * 2.0f;
         if (! A.switchCrop.isEmpty() && A.switchCrop.toFloat().expanded (6.0f).contains (p2)) { proc.momentary.store (true); repaint(); return; }
-        if (! A.wheelCrop.isEmpty() && A.wheelCrop.toFloat().contains (p2)) { draggingWheel = true; lastY = e.position.y; return; }
+        if (! A.wheelCrop.isEmpty() && A.wheelCrop.toFloat().contains (p2)) { draggingWheel = true; returning = false; lastY = e.position.y; return; }
         playAt (e.position);
     }
 
@@ -98,8 +98,11 @@ public:
         if (! proc.momentary.load()) playAt (e.position);   // glissando
     }
 
-    void mouseUp (const juce::MouseEvent&) override
+    void mouseUp (const juce::MouseEvent& e) override
     {
+        // La rueda vuelve sola al centro al soltarla, como una rueda de pitch bend; con Alt se queda donde quedó
+        // (para usarla como modulación fija, por ejemplo un drone por VCA INITIAL GAIN).
+        if (draggingWheel && ! e.mods.isAltDown()) returning = true;
         draggingWheel = false;
         if (proc.momentary.load()) { proc.momentary.store (false); repaint(); }
         releaseMouseNote();
@@ -156,6 +159,12 @@ private:
     void timerCallback() override
     {
         // Redibuja cuando cambia algo (teclas por MIDI externo, rueda por pitch bend, pulsador por sustain).
+        if (returning)
+        {
+            float v = proc.wheel.load() * 0.55f;                    // ~200 ms hasta el centro a 40 Hz
+            if (std::abs (v) < 0.01f) { v = 0.0f; returning = false; }
+            proc.wheel.store (v);
+        }
         uint64_t h = 0;
         for (int k = 0; k < 37; ++k) if (isDown (k)) h |= (uint64_t) 1 << k;
         const float w = proc.wheel.load(); const bool m = proc.momentary.load();
@@ -164,7 +173,7 @@ private:
 
     AT20VProcessor& proc;
     int octave = 0, mouseNote = -1, mouseKey = -1;
-    bool draggingWheel = false, shownMom = false;
+    bool draggingWheel = false, returning = false, shownMom = false;
     float lastY = 0.0f, shownWheel = 9.0f;
     uint64_t shownKeys = 0;
 };

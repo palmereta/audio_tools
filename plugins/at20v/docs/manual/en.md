@@ -92,7 +92,7 @@ Four red LEDs show activity: the MG LED blinks at the MG rate, the LED between t
 
 The keyboard has 37 keys, C to C; at OCTAVE 0 the lowest key is MIDI note 36. Click a key to play it and drag across the keys for a glissando. To the left:
 
-- The **control wheel**: drag it up or down. It snaps to its center click near the middle, and a double-click centers it.
+- The **control wheel**: drag it up or down. When you let go it springs back to the center, like a pitch bend wheel; hold Alt as you let go and it stays where it is. A double-click centers it.
 - The **momentary switch**: the round button under the wheel. Click and hold it to press it.
 
 As on the original, neither does anything by itself: they act only through their jacks in the patch bay, CONTROL WHEEL and MOMENTARY SWITCH.
@@ -197,7 +197,7 @@ The original used two filter circuits over its life. Choose one with **FILTER** 
 
 The amplifier has no knob. Its gain is EG2 plus the voltage at INITIAL GAIN, and it stops rising when the sum reaches full level. With nothing patched, EG2 alone shapes every note.
 
-> For a drone that sounds without holding a key, patch CONTROL WHEEL into VCA INITIAL GAIN and push the wheel up.
+> For a drone that sounds without holding a key, patch CONTROL WHEEL into VCA INITIAL GAIN, push the wheel up and let go with Alt held so it stays up.
 
 ### ENVELOPE GENERATOR 1
 

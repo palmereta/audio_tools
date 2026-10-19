@@ -92,7 +92,7 @@ Cuatro LEDs rojos muestran la actividad: el LED del MG titila al ritmo del MG, e
 
 El teclado tiene 37 teclas, de do a do; en OCTAVE 0 la tecla más grave es la nota MIDI 36. Hacé clic en una tecla para tocarla y arrastrá sobre las teclas para hacer un glissando. A la izquierda:
 
-- La **rueda de control**: arrastrala hacia arriba o hacia abajo. Se engancha en su punto central cerca del medio, y con doble clic se centra.
+- La **rueda de control**: arrastrala hacia arriba o hacia abajo. Al soltarla vuelve sola al centro, como una rueda de pitch bend; si la soltás con Alt apretado, queda donde está. Con doble clic se centra.
 - El **pulsador momentáneo**: el botón redondo debajo de la rueda. Hacé clic y mantenelo para apretarlo.
 
 Como en el original, ninguno de los dos hace nada por sí solo: actúan sólo a través de sus jacks en la patchera, CONTROL WHEEL y MOMENTARY SWITCH.
@@ -197,7 +197,7 @@ El original usó dos circuitos de filtro a lo largo de su vida. Elegí uno con *
 
 El amplificador no tiene perilla. Su ganancia es la EG2 más la tensión en INITIAL GAIN, y deja de subir cuando la suma llega al nivel máximo. Sin nada patcheado, la EG2 sola le da forma a cada nota.
 
-> Para un drone que suene sin mantener una tecla, patcheá CONTROL WHEEL en VCA INITIAL GAIN y subí la rueda.
+> Para un drone que suene sin mantener una tecla, patcheá CONTROL WHEEL en VCA INITIAL GAIN, subí la rueda y soltala con Alt apretado para que quede arriba.
 
 ### ENVELOPE GENERATOR 1
 

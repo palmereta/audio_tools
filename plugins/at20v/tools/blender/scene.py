@@ -23,6 +23,7 @@ OUT = os.path.abspath(arg("--out", "out"))
 MODE = arg("--mode", "all")
 SAMPLES = int(arg("--samples", "256"))
 FRAMES = int(arg("--frames", "128"))
+WHEEL_ONLY = arg("--wheel-only", "0") == "1"      # modo keys: sólo los cuadros de la rueda (out/keys/wheel_*.png)
 os.makedirs(OUT, exist_ok=True)
 
 THETA = math.radians(12.0)
@@ -547,7 +548,10 @@ def build_keyboard(pressed=False):
     wheel = mesh_obj("Wheel", lathe([(0.0, -16.0), (56.0, -16.0), (59.0, -13.0), (59.0, 13.0), (56.0, 16.0), (0.0, 16.0)], 128,
                                     radial=lambda t, r, z: r - (2.2 if (abs(z) < 13.5 and math.cos(t * 56) > 0.2) else 0.0)),
                      principled("WheelRubber", (0.022, 0.022, 0.024), 0.55))
-    wheel.rotation_euler = Euler((0, math.radians(90), 0), "XYZ")
+    # El torno deja el eje de la rueda en Z; se acuesta sobre U con Y = 90°. En orden ZYX el giro en Z se aplica
+    # primero: la rueda gira sobre su propio eje (en XYZ, girar en X la volcaba de costado).
+    wheel.rotation_mode = "ZYX"
+    wheel.rotation_euler = Euler((0, math.radians(90), 0), "ZYX")
     wheel.location = P(40, 149, 26 + 18 - 59)
     ring = mesh_obj("MswRing", lathe([(19.0, 26.0), (19.0, 29.0), (16.5, 30.0), (0.0, 30.0)], 64), MAT["nickel"])
     ring.location = P(40, 260, 0)
@@ -579,7 +583,7 @@ def mode_keys():
     os.makedirs(os.path.join(OUT, "keys"), exist_ok=True)
     meta = {}
     hulls = {}
-    for pressed in (False, True):
+    for pressed in ((False,) if WHEEL_ONLY else (False, True)):
         reset_scene(); materials(); add_lights()
         keys, wheel, cap = build_keyboard(pressed)
         _, w_u, h_u, rx, ry = key_frame()
@@ -595,7 +599,7 @@ def mode_keys():
                 c = world_to_camera_view(sc, cam, o.matrix_world @ v.co)
                 pts.append((round(c.x * rx, 1), round((1.0 - c.y) * ry, 1)))
             hulls.setdefault(n, {"black": isb, "pts": []})["pts"] += pts
-        render_to(os.path.join(OUT, "keys", "keys_down.png" if pressed else "keys_up.png"))
+        if not WHEEL_ONLY: render_to(os.path.join(OUT, "keys", "keys_down.png" if pressed else "keys_up.png"))
         if not pressed:
             meta.update(width=rx, height=ry, theta=math.degrees(KEY_THETA))
             # Rueda: filmstrip con todo lo demás como holdout.
@@ -614,12 +618,14 @@ def mode_keys():
             base_rot = wheel.rotation_euler.copy()
             # Recorte alrededor de la rueda con una cámara auxiliar del mismo encuadre: se renderiza
             # el cuadro completo y se recorta después (más simple y exacto).
-            meta["wheel"] = dict(cx=round(wc.x * rx, 1), cy=round((1.0 - wc.y) * ry, 1), frames=frames, range=70.0)
+            meta["wheel"] = dict(cx=round(wc.x * rx, 1), cy=round((1.0 - wc.y) * ry, 1), frames=frames, range=40.0)
             for f in range(frames):
-                a = -70.0 + 140.0 * f / (frames - 1)
-                wheel.rotation_euler = Euler((math.radians(a), math.radians(90), 0), "XYZ")
+                # ±40°: 2,5° por cuadro, menos de media estría (56 estrías = 6,4°), así el giro no se ve al revés.
+                a = -40.0 + 80.0 * f / (frames - 1)
+                wheel.rotation_euler = Euler((0, math.radians(90), math.radians(a)), "ZYX")
                 render_to(os.path.join(OUT, "keys", f"wheel_{f:03d}.png"))
             wheel.rotation_euler = base_rot
+            if WHEEL_ONLY: return
             # Pulsador apretado.
             for o in bpy.data.objects:
                 if o.type == "MESH": o.is_holdout = o.name not in ("MswCap",)
