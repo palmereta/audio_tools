@@ -1,0 +1,194 @@
+{
+ "name": "Formant Clav",
+ "category": "Ky",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 3,
+    "level": 96,
+    "skirt": 4,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      60,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      50,
+      66,
+      22
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "ampVel": 4
+   },
+   {
+    "form": 7,
+    "level": 86,
+    "skirt": 0,
+    "bwRes": 34,
+    "fixed": true,
+    "coarse": 17,
+    "fine": 86,
+    "eg": {
+     "level": [
+      99,
+      50,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      44,
+      60,
+      20
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "ampVel": 5
+   },
+   {
+    "form": 7,
+    "level": 72,
+    "skirt": 0,
+    "bwRes": 40,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 86,
+    "eg": {
+     "level": [
+      99,
+      40,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      40,
+      56,
+      20
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "ampVel": 6
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "formantKnob": [
+   [
+    2,
+    0,
+    1,
+    40
+   ],
+   [
+    2,
+    0,
+    2,
+    40
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "name": "Formant Cl"
+ },
+ "params": {
+  "voices": 12,
+  "ins_type": 4,
+  "ins_amount": 0.5,
+  "ins_mix": 0.8,
+  "var_type": 0,
+  "rev_send": 0.12,
+  "volume": 1.0
+ },
+ "demoNotes": "48:0.25,51:0.25,55:0.25,58:0.5,55:0.25,51:0.5"
+}

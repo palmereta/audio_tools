@@ -1,0 +1,16 @@
+
+--- AT303 ---
+AT303 is an instrument: put it on an instrument track and press play. The sequencer follows the host's transport
+and tempo (Follow host); in the standalone app press Run on the instrument. MIDI mode plays it from a keyboard or
+the piano roll: velocity 100 and up is an accent, overlapping notes slide.
+
+at303render plays a preset's pattern through the whole instrument into a file:
+  at303render out.wav --preset "Squelch Line"
+  at303render out.wav --preset "Wet Concrete" --seconds 30 --bpm 128 --at 8 cutoff=80
+On macOS: xattr -d com.apple.quarantine at303render (the first time).
+
+--- Español ---
+AT303 es un instrumento: va en una pista de instrumento y se le da play. El secuenciador sigue el transporte y el
+tempo del host (Follow host); en la aplicación independiente, apretá Run en el instrumento. En modo MIDI se toca con
+un teclado o el piano roll: velocidad 100 o más es acento, las notas superpuestas hacen slide. at303render toca el
+patrón de un preset con el instrumento completo y lo guarda en un archivo (ver los ejemplos de arriba).

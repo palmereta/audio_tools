@@ -1,0 +1,18 @@
+{
+ "name": "Bounced Four Times",
+ "category": "Studio tape",
+ "description": "Generation loss in one click: worn, a tilted head and a faint echo of the layer next door.",
+ "params": {
+  "machine": 0,
+  "speed": 2,
+  "noise": 62.5,
+  "print": 50.0,
+  "drive": 5,
+  "wear": 25,
+  "azimuth": 20,
+  "wow": 0.1,
+  "flutter": 0.06,
+  "scrape": 30
+ },
+ "order": 4
+}

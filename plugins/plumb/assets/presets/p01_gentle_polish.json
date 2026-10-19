@@ -1,0 +1,11 @@
+{
+ "name": "Gentle Polish",
+ "category": "Natural",
+ "description": "Barely there: only notes that drift a little are nudged, slowly.",
+ "order": 1,
+ "params": {
+  "amount": 70,
+  "speed": 60,
+  "style": 10
+ }
+}

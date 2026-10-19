@@ -1,0 +1,181 @@
+{
+ "name": "Breath Flute",
+ "category": "Ld",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 0,
+    "level": 96,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      95,
+      92,
+      0
+     ],
+     "time": [
+      10,
+      40,
+      50,
+      30
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 5
+   },
+   {
+    "form": 0,
+    "level": 60,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 2,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      90,
+      80,
+      0
+     ],
+     "time": [
+      12,
+      40,
+      50,
+      30
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 5
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 74,
+    "bandwidth": 24,
+    "eg": {
+     "level": [
+      99,
+      60,
+      40,
+      0
+     ],
+     "time": [
+      4,
+      40,
+      50,
+      30
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "mode": 1,
+    "transpose": 12
+   },
+   {
+    "level": 62,
+    "bandwidth": 40,
+    "eg": {
+     "level": [
+      99,
+      40,
+      20,
+      0
+     ],
+     "time": [
+      4,
+      30,
+      50,
+      30
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "mode": 1,
+    "transpose": 24
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "lfo1Wave": 4,
+  "lfo1Speed": 62,
+  "lfo1Delay": 50,
+  "lfo1Pmd": 12,
+  "name": "Breath Flu"
+ },
+ "params": {
+  "mono": 1,
+  "porta": 1,
+  "porta_time": 16,
+  "var_type": 0,
+  "rev_type": 3,
+  "rev_send": 0.3,
+  "volume": 0.82
+ },
+ "demoNotes": "72:0.5,74:0.5,76:0.5,79:1.5"
+}

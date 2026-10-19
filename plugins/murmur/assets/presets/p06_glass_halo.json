@@ -1,0 +1,15 @@
+{
+ "name": "Glass Halo",
+ "category": "Shimmer",
+ "params": {
+  "pitch": 12,
+  "pitch_rand": 12,
+  "quant": 2,
+  "feedback": 0.5,
+  "shimmer": 0.3,
+  "size": 250,
+  "density": 22,
+  "rev_mix": 0.7,
+  "mix": 0.5
+ }
+}

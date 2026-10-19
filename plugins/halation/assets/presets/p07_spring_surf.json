@@ -1,0 +1,16 @@
+{
+ "name": "Spring Surf",
+ "category": "Classic",
+ "description": "A drippy spring tank, like a guitar amp's reverb.",
+ "params": {
+  "space": 92,
+  "room": 3,
+  "size": 60,
+  "length": 45,
+  "tone": 60,
+  "character": 3,
+  "mix": 30,
+  "diffusion": 40
+ },
+ "order": 7
+}

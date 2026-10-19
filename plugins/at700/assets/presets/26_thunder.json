@@ -1,0 +1,62 @@
+{
+ "name": "Thunder",
+ "category": "FX",
+ "panel": {
+  "vcf1_cutoff": 0.2057,
+  "vcf1_res": 0.15,
+  "vcf1_mod1": 0.0,
+  "vcf1_mod2": 0.45,
+  "vcf1_mod3": 0.0,
+  "vcf1_mod4": 0.0,
+  "vcf1_adsr": 0,
+  "vcf1_lvl1": 0,
+  "vcf1_lvl2": 0,
+  "vcf1_lvl3": 0,
+  "vcf1_lvl4": 0.0,
+  "vcf1_lvl5": 1.0,
+  "adsr1_a": 0.2703,
+  "adsr1_d": 0.8767,
+  "adsr1_s": 0.0,
+  "adsr1_r": 0.8924,
+  "adsr1_mode": 0,
+  "adsr1_time": 0,
+  "vca1_gain": 0.0,
+  "vca1_mod1": 1.0,
+  "vca1_mod2": 0.0,
+  "vca1_adsr": 0,
+  "vca1_exp": 0,
+  "vca1_lvl1": 1.0,
+  "vca1_lvl2": 0,
+  "vca1_lvl3": 0,
+  "vca2_gain": 0.0,
+  "vca2_mod1": 1.0,
+  "vca2_mod2": 0.0,
+  "vca2_adsr": 0,
+  "vca2_exp": 0,
+  "vca2_lvl1": 1.0,
+  "vca2_lvl2": 0,
+  "vca2_lvl3": 0,
+  "pan_lvl1": 0.75,
+  "pan_lvl2": 1.0,
+  "pan_lvl3": 0.65,
+  "pan_pos1": 0.35,
+  "pan_pos2": 0.65,
+  "pan_pos3": 0.5,
+  "rev_lvl1": 0.7,
+  "rev_lvl2": 0,
+  "rev_lvl3": 0,
+  "monitor": 0.943
+ },
+ "settings": {
+  "voices": 1
+ },
+ "cables": [
+  {
+   "src": "noise_pink",
+   "dst": "vcf1_in",
+   "color": "white"
+  }
+ ],
+ "demoNotes": "36:4",
+ "run": false
+}

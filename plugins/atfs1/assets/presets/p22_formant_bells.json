@@ -1,0 +1,174 @@
+{
+ "name": "Formant Bells",
+ "category": "Ky",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 0,
+    "level": 96,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      70,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      70,
+      82,
+      60
+     ],
+     "hold": 0,
+     "timeScale": 3
+    }
+   },
+   {
+    "form": 0,
+    "level": 84,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 3,
+    "fine": 17,
+    "eg": {
+     "level": [
+      99,
+      50,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      60,
+      74,
+      55
+     ],
+     "hold": 0,
+     "timeScale": 3
+    }
+   },
+   {
+    "form": 1,
+    "level": 72,
+    "skirt": 1,
+    "bwRes": 0,
+    "coarse": 5,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      30,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      50,
+      64,
+      50
+     ],
+     "hold": 0,
+     "timeScale": 3
+    }
+   },
+   {
+    "form": 7,
+    "level": 70,
+    "skirt": 0,
+    "bwRes": 40,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 72,
+    "eg": {
+     "level": [
+      99,
+      20,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      44,
+      60,
+      46
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "name": "Formant Be"
+ },
+ "params": {
+  "voices": 24,
+  "var_type": 0,
+  "rev_type": 6,
+  "rev_send": 0.45,
+  "rev_time": 0.75
+ },
+ "demoNotes": "72:1,76:1,79:1,84:2"
+}

@@ -1,0 +1,20 @@
+{
+ "name": "Accent Climb",
+ "category": "Classic",
+ "description": "Four accents in a row: hear the fourth scream as C13 charges.",
+ "order": 4,
+ "params": {
+  "cutoff": 35,
+  "resonance": 85,
+  "envmod": 45,
+  "decay": 40,
+  "accent": 90,
+  "tempo": 125
+ },
+ "pattern": {
+  "pitch": "0a 0a 0a 0a 0 0 0 0 3a 3a 3a 3a 0 0 0 0",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

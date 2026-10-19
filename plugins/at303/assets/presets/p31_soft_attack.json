@@ -1,0 +1,23 @@
+{
+ "name": "Soft Attack",
+ "category": "Extended",
+ "description": "The VCA click softened and a longer slide: a smoother, rounder line.",
+ "order": 31,
+ "params": {
+  "cutoff": 40,
+  "resonance": 66,
+  "envmod": 50,
+  "decay": 55,
+  "accent": 40,
+  "soft_attack": 12,
+  "vca_click": 40,
+  "slide_time": 180,
+  "tempo": 118
+ },
+ "pattern": {
+  "pitch": "0 3s 7 10s 12 10s 7 3s 0 0 0 0 0 0 0 0",
+  "time": "NNTNNTNNNTNNNTNN",
+  "length": 16,
+  "triplet": false
+ }
+}

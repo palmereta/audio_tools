@@ -1,0 +1,20 @@
+{
+ "name": "Pressure Drop",
+ "category": "Acid",
+ "description": "The filter opens across the bar as the accents stack up.",
+ "order": 13,
+ "params": {
+  "cutoff": 28,
+  "resonance": 84,
+  "envmod": 60,
+  "decay": 42,
+  "accent": 95,
+  "tempo": 130
+ },
+ "pattern": {
+  "pitch": "0 0 0 0a 0 0 0a 0 0 0a 0 0a 0a 0a 0a 0a",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

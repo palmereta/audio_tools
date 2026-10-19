@@ -1,0 +1,16 @@
+{
+ "name": "Rising Choir",
+ "category": "Ambient",
+ "description": "Each repeat climbs a fifth and an octave: a slowly rising choir.",
+ "params": {
+  "space": 88,
+  "size": 200,
+  "length": 80,
+  "tone": 70,
+  "mix": 45,
+  "on_shimmer": 1,
+  "shimmer": 55,
+  "interval": 2
+ },
+ "order": 11
+}

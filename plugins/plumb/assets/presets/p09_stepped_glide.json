@@ -1,0 +1,18 @@
+{
+ "name": "Stepped Glide",
+ "category": "Hard",
+ "description": "Hard on the notes, a slow slide from one to the next.",
+ "order": 9,
+ "params": {
+  "amount": 100,
+  "speed": 0,
+  "style": 80,
+  "custom_character": 1,
+  "transition": 120,
+  "humanize": 0,
+  "flex": 200,
+  "hysteresis": 0,
+  "keep_vibrato": 0,
+  "keep_drift": 0
+ }
+}

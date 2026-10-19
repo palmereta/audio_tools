@@ -1,0 +1,15 @@
+
+--- Lacquer ---
+Lacquer is an effect: put it last on your master bus, press Learn and play the song (the whole song for an exact
+loudness, or its loudest 30 s for a quick result). Or open the standalone app, drop a mix on the window and export
+the master.
+
+lacquerrender is the same engine from the command line (WAV in, WAV and a JSON report out):
+  lacquerrender mix.wav master.wav --style warm --intensity 60 --target streaming --report master.json
+Styles: balanced warm bright punchy loud gentle. Targets: streaming (-14) apple (-16) loud (-11) club (-8)
+cd (-9) r128 (-23) match. On macOS: xattr -d com.apple.quarantine lacquerrender (the first time).
+
+--- Español ---
+Lacquer va último en el bus master: Learn y reproducir la canción (entera para una sonoridad exacta, o sus 30 s más
+fuertes para un resultado rápido). O abrir la app standalone, soltar una mezcla en la ventana y exportar el master.
+lacquerrender es el mismo motor por línea de comandos (ver el ejemplo de arriba).

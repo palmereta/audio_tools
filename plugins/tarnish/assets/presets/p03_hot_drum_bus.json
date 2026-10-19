@@ -1,0 +1,17 @@
+{
+ "name": "Hot Drum Bus",
+ "category": "Studio tape",
+ "description": "Driven hard with a little grit; auto gain keeps the level, the mix keeps the punch.",
+ "params": {
+  "machine": 0,
+  "speed": 1,
+  "noise": 50.0,
+  "drive": 12,
+  "saturation": 75,
+  "bias": -20,
+  "wow": 0.03,
+  "flutter": 0.02,
+  "mix": 70
+ },
+ "order": 3
+}

@@ -1,0 +1,15 @@
+{
+ "name": "Spectral Ice",
+ "category": "Ambient",
+ "description": "The tail freezes into a glassy, still cloud.",
+ "params": {
+  "space": 100,
+  "size": 200,
+  "length": 75,
+  "tone": 82,
+  "mix": 50,
+  "on_spectral": 1,
+  "spectral": 85
+ },
+ "order": 15
+}

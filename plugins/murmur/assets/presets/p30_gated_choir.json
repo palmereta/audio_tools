@@ -1,0 +1,14 @@
+{
+ "name": "Gated Choir",
+ "category": "MIDI",
+ "params": {
+  "midi_mode": 2,
+  "size": 300,
+  "density": 40,
+  "shimmer": 0.2,
+  "feedback": 0.3,
+  "spray": 0.8,
+  "rev_mix": 0.5,
+  "mix": 0.8
+ }
+}

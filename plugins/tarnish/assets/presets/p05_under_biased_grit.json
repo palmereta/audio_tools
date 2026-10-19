@@ -1,0 +1,15 @@
+{
+ "name": "Under-Biased Grit",
+ "category": "Studio tape",
+ "description": "The magnetic loop wide open: fuzz on the quiet notes, a brighter, rougher top.",
+ "params": {
+  "machine": 0,
+  "speed": 1,
+  "noise": 55.0,
+  "bias": -80,
+  "drive": 6,
+  "wow": 0.03,
+  "flutter": 0.02
+ },
+ "order": 5
+}

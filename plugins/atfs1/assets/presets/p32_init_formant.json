@@ -1,0 +1,117 @@
+{
+ "name": "Init Formant",
+ "category": "Ky",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 44,
+    "fixed": true,
+    "coarse": 16,
+    "fine": 110,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      0,
+      20,
+      20,
+      30
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "name": "Init Forma"
+ },
+ "params": {
+  "var_type": 0,
+  "rev_send": 0.1
+ },
+ "demoNotes": "48:1,55:1"
+}

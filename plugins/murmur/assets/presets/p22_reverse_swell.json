@@ -1,0 +1,13 @@
+{
+ "name": "Reverse Swell",
+ "category": "Texture",
+ "params": {
+  "reverse": 1.0,
+  "skew": 0.9,
+  "size": 500,
+  "density": 12,
+  "spray": 0.8,
+  "rev_mix": 0.4,
+  "mix": 0.6
+ }
+}

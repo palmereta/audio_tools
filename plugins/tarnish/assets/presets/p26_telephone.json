@@ -1,0 +1,11 @@
+{
+ "name": "Telephone",
+ "category": "Radio and phone",
+ "description": "A landline: 300-3400 Hz, mu-law, the handset's bump.",
+ "params": {
+  "machine": 5,
+  "line": 0,
+  "noise": 50.0
+ },
+ "order": 26
+}

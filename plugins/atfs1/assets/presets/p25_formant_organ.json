@@ -1,0 +1,176 @@
+{
+ "name": "Formant Organ",
+ "category": "Ky",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 2,
+    "level": 92,
+    "skirt": 1,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      0,
+      0,
+      0,
+      14
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 86,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 2,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      0,
+      0,
+      0,
+      14
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 72,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 4,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      0,
+      0,
+      0,
+      14
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 7,
+    "level": 74,
+    "skirt": 0,
+    "bwRes": 42,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 4,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      0,
+      0,
+      0,
+      14
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "name": "Formant Or"
+ },
+ "params": {
+  "voices": 24,
+  "ins_type": 6,
+  "ins_amount": 0.8,
+  "ins_mix": 1.0,
+  "var_type": 0,
+  "rev_send": 0.2,
+  "volume": 0.565
+ },
+ "demoNotes": "48+55+60+64:2,50+57+62+65:2"
+}

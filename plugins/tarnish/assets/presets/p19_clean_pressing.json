@@ -1,0 +1,14 @@
+{
+ "name": "Clean Pressing",
+ "category": "Vinyl",
+ "description": "Just the air of a record: a faint surface, a little crackle.",
+ "params": {
+  "machine": 3,
+  "rpm": 0,
+  "noise": 35.0,
+  "crackle": 5,
+  "wow": 0.05,
+  "flutter": 0.02
+ },
+ "order": 19
+}

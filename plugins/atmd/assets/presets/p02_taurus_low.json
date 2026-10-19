@@ -1,0 +1,33 @@
+{
+ "name": "Taurus Low",
+ "category": "Bass",
+ "params": {
+  "osc1_range": 1,
+  "osc2_range": 1,
+  "osc3_range": 2,
+  "osc1_wave": 2,
+  "osc2_wave": 3,
+  "osc3_wave": 2,
+  "osc2_freq": -0.06,
+  "osc3_freq": 0,
+  "mix_osc1": 8,
+  "mix_osc2": 6,
+  "mix_osc3": 4,
+  "mix_osc1_on": 1,
+  "mix_osc2_on": 1,
+  "mix_osc3_on": 1,
+  "filter_cutoff": -2.8,
+  "filter_emphasis": 1.5,
+  "filter_contour": 6,
+  "f_attack": 0,
+  "f_decay": 4.2,
+  "f_sustain": 3,
+  "kbd_ctrl1": 0,
+  "kbd_ctrl2": 0,
+  "l_attack": 0,
+  "l_decay": 5,
+  "l_sustain": 9,
+  "glide_on": 1,
+  "glide": 3.2
+ }
+}

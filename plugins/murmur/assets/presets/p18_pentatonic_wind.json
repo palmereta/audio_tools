@@ -1,0 +1,14 @@
+{
+ "name": "Pentatonic Wind",
+ "category": "Pitch",
+ "params": {
+  "pitch_rand": 12,
+  "quant": 6,
+  "density": 35,
+  "size": 120,
+  "pan": 1.0,
+  "spray": 1.2,
+  "rev_mix": 0.35,
+  "mix": 0.55
+ }
+}

@@ -1,0 +1,16 @@
+{
+ "name": "Answering Machine",
+ "category": "Cassette",
+ "description": "Half-speed tape, a narrow band, a voice from another room.",
+ "params": {
+  "machine": 1,
+  "formulation": 3,
+  "noise": 60.0,
+  "wow": 0.8,
+  "flutter": 0.3,
+  "drive": 8,
+  "lowcut": 300,
+  "highcut": 4500
+ },
+ "order": 10
+}

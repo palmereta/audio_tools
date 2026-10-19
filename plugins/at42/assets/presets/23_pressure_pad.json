@@ -1,0 +1,63 @@
+{
+ "name": "Pressure Pad",
+ "category": "Keys",
+ "panel": {
+  "mix_vol1": 0.0,
+  "mix_vol2": 0.0,
+  "mix_vol3": 0.0,
+  "mix_vol4": 0.0,
+  "mix_vol5": 0.6,
+  "mix_vol6": 0.55,
+  "mix_vol7": 0.0,
+  "mix_vol8": 0.0,
+  "mix_vol9": 0.0,
+  "mix_vol10": 0.0,
+  "mix_pan5": 0.4,
+  "mix_pan6": 0.6,
+  "fx_cart_l": 7,
+  "fx_prog_l": 0,
+  "fx_cart_r": 7,
+  "fx_prog_r": 0,
+  "fx_x": 0.4,
+  "fx_y": 0.4,
+  "fx_z": 0.7,
+  "fx_blend": 0.5,
+  "vcoa_wave": 4,
+  "vcoa_pw": 0.5,
+  "vcob_wave": 4,
+  "vcob_pw": 0.7,
+  "vcob_oct": 4,
+  "ega_a": 0.5,
+  "ega_s": 0.9,
+  "ega_r": 0.6,
+  "egb_a": 0.55,
+  "egb_s": 0.9,
+  "egb_r": 0.6,
+  "flt_freq_l": 0.45,
+  "flt_freq_r": 0.45,
+  "flt_mod_l": 0.5,
+  "flt_mod_r": 0.5,
+  "master": 0.493
+ },
+ "settings": {
+  "kb_press": 1,
+  "kb_rise": 0.6,
+  "kb_fall": 0.6,
+  "kb_scale": 1
+ },
+ "cables": [
+  {
+   "src": "kb_press",
+   "dst": "flt_cvl",
+   "color": "yellow"
+  },
+  {
+   "src": "kb_press",
+   "dst": "flt_cvr",
+   "color": "blue"
+  }
+ ],
+ "keyseq": [],
+ "demoKeys": "",
+ "demoNotes": "0+4+7:3,5+9+12:3"
+}

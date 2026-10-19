@@ -1,0 +1,14 @@
+{
+ "name": "Rental Copy, EP Mode",
+ "category": "Video tape",
+ "description": "Long play: 4.5 kHz of top, more hiss, a constant wobble.",
+ "params": {
+  "machine": 2,
+  "video": 1,
+  "noise": 50.0,
+  "wow": 0.35,
+  "flutter": 0.15,
+  "wear": 40
+ },
+ "order": 16
+}

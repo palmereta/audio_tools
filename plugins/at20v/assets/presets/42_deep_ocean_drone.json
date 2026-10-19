@@ -1,0 +1,59 @@
+{
+ "name": "Deep Ocean Drone",
+ "category": "Ambient",
+ "knobs": {
+  "vco1_wave": 1,
+  "vco1_pw": 0.0,
+  "vco1_scale": 0,
+  "vco2_wave": 0,
+  "vco2_pitch": 0.504,
+  "vco2_scale": 0,
+  "portamento": 0.0,
+  "master_tune": 0.5,
+  "vco1_level": 1.0,
+  "vco2_level": 0.9,
+  "fm_mg": 0.0,
+  "fm_eg1": 0.0,
+  "hpf_cutoff": 0.05,
+  "hpf_peak": 0.0,
+  "hpf_mod_mg": 0.0,
+  "hpf_mod_eg2": 0.0,
+  "lpf_cutoff": 0.25,
+  "lpf_peak": 0.7,
+  "lpf_mod_mg": 0.4,
+  "lpf_mod_eg2": 0.0,
+  "mg_wave": 0.5,
+  "mg_freq": 0.06,
+  "eg1_delay": 0.0,
+  "eg1_attack": 0.0,
+  "eg1_release": 0.0,
+  "eg2_hold": 0.0,
+  "eg2_attack": 0.65,
+  "eg2_decay": 0.6,
+  "eg2_sustain": 1.0,
+  "eg2_release": 0.7,
+  "volume": 0.7,
+  "esp_level": 0.5,
+  "esp_lowcut": 1.0,
+  "esp_highcut": 0.0,
+  "esp_cvadj": 0.5,
+  "esp_thresh": 0.5
+ },
+ "cables": [
+  {
+   "src": "pink_out",
+   "dst": "ext_sig_in",
+   "color": "red"
+  }
+ ],
+ "settings": {
+  "voices": 1,
+  "unison": 1,
+  "detune": 22,
+  "spread": 1.0,
+  "rev_on": 1,
+  "rev_size": 0.9,
+  "rev_mix": 0.4,
+  "rev_damp": 0.4
+ }
+}

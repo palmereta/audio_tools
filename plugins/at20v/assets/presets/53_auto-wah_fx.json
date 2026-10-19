@@ -1,0 +1,60 @@
+{
+ "name": "Auto-Wah FX",
+ "category": "Effect",
+ "knobs": {
+  "vco1_wave": 1,
+  "vco1_pw": 0.0,
+  "vco1_scale": 2,
+  "vco2_wave": 0,
+  "vco2_pitch": 0.5,
+  "vco2_scale": 1,
+  "portamento": 0.0,
+  "master_tune": 0.5,
+  "vco1_level": 0.0,
+  "vco2_level": 0.0,
+  "fm_mg": 0.0,
+  "fm_eg1": 0.0,
+  "hpf_cutoff": 0.0,
+  "hpf_peak": 0.0,
+  "hpf_mod_mg": 0.0,
+  "hpf_mod_eg2": 0.0,
+  "lpf_cutoff": 0.25,
+  "lpf_peak": 0.7,
+  "lpf_mod_mg": 0.0,
+  "lpf_mod_eg2": 0.8,
+  "mg_wave": 0.5,
+  "mg_freq": 0.5,
+  "eg1_delay": 0.0,
+  "eg1_attack": 0.0,
+  "eg1_release": 0.0,
+  "eg2_hold": 0.0,
+  "eg2_attack": 0.0,
+  "eg2_decay": 0.0,
+  "eg2_sustain": 1.0,
+  "eg2_release": 0.3,
+  "volume": 0.8,
+  "esp_level": 0.6,
+  "esp_lowcut": 0.0,
+  "esp_highcut": 1.0,
+  "esp_cvadj": 0.5,
+  "esp_thresh": 0.0
+ },
+ "cables": [
+  {
+   "src": "esp_amp_out",
+   "dst": "ext_sig_in",
+   "color": "red"
+  },
+  {
+   "src": "esp_trig_out",
+   "dst": "kbd_trig_in",
+   "color": "blue"
+  },
+  {
+   "src": "esp_env_out",
+   "dst": "lpf_cut_in",
+   "color": "yellow"
+  }
+ ],
+ "settings": {}
+}

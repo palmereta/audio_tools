@@ -1,0 +1,15 @@
+{
+ "name": "Worn Vinyl",
+ "category": "Vinyl",
+ "description": "A loved LP: crackle, clicks, two scratches, the stylus moving in as the song plays.",
+ "params": {
+  "machine": 3,
+  "rpm": 0,
+  "noise": 70.0,
+  "crackle": 40,
+  "scratches": 2,
+  "wow": 0.12,
+  "flutter": 0.03
+ },
+ "order": 18
+}

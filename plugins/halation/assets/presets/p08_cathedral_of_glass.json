@@ -1,0 +1,18 @@
+{
+ "name": "Cathedral of Glass",
+ "category": "Ambient",
+ "description": "An enormous bright space with a slow octave shimmer.",
+ "params": {
+  "space": 100,
+  "size": 320,
+  "length": 85,
+  "tone": 80,
+  "predelay": 60,
+  "mix": 45,
+  "on_shimmer": 1,
+  "shimmer": 35,
+  "interval": 0,
+  "mod_depth": 40
+ },
+ "order": 8
+}

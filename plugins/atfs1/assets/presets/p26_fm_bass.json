@@ -1,0 +1,136 @@
+{
+ "name": "FM Bass",
+ "category": "Bs",
+ "voice": {
+  "algorithm": 7,
+  "feedback": 6,
+  "ops": [
+   {
+    "form": 0,
+    "level": 70,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      50,
+      30,
+      0
+     ],
+     "time": [
+      0,
+      40,
+      60,
+      24
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 98,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      90,
+      80,
+      0
+     ],
+     "time": [
+      0,
+      50,
+      60,
+      24
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "name": "FM Bass"
+ },
+ "params": {
+  "mono": 1,
+  "var_type": 0,
+  "rev_send": 0.04,
+  "volume": 0.82
+ },
+ "demoNotes": "36:0.3,36:0.3,48:0.3,36:0.3,43:0.3,46:0.6"
+}

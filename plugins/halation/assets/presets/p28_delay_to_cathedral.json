@@ -1,0 +1,23 @@
+{
+ "name": "Delay to Cathedral",
+ "category": "Experimental",
+ "description": "Morph from a clean delay (A) to a vast shimmering space (B).",
+ "params": {
+  "space": 0,
+  "division": 6,
+  "length": 45,
+  "mix": 30,
+  "on_shimmer": 1,
+  "shimmer": 0,
+  "morph": 0
+ },
+ "scene_b": {
+  "space": 100,
+  "size": 300,
+  "length": 88,
+  "shimmer": 50,
+  "tone": 75,
+  "mix": 50
+ },
+ "order": 28
+}

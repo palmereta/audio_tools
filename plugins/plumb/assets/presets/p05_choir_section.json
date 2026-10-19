@@ -1,0 +1,18 @@
+{
+ "name": "Choir Section",
+ "category": "Natural",
+ "description": "Many takes of one part: every note on centre, the vibrato kept.",
+ "order": 5,
+ "params": {
+  "amount": 100,
+  "speed": 8,
+  "style": 40,
+  "custom_character": 1,
+  "transition": 40,
+  "humanize": 20,
+  "flex": 90,
+  "hysteresis": 10,
+  "keep_vibrato": 80,
+  "keep_drift": 0
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "name": "Harpsichord",
+ "category": "Brass and keys",
+ "params": {
+  "osc1_range": 4,
+  "osc2_range": 3,
+  "osc3_range": 3,
+  "osc1_wave": 5,
+  "osc2_wave": 4,
+  "osc3_wave": 2,
+  "osc2_freq": 0,
+  "osc3_freq": 0,
+  "mix_osc1": 7,
+  "mix_osc2": 6,
+  "mix_osc3": 0,
+  "mix_osc1_on": 1,
+  "mix_osc2_on": 1,
+  "mix_osc3_on": 0,
+  "filter_cutoff": 0.2,
+  "filter_emphasis": 1.5,
+  "filter_contour": 5,
+  "f_attack": 0,
+  "f_decay": 3.6,
+  "f_sustain": 0,
+  "kbd_ctrl1": 1,
+  "kbd_ctrl2": 1,
+  "l_attack": 0,
+  "l_decay": 4.4,
+  "l_sustain": 0,
+  "decay_on": 1,
+  "volume": 6.21
+ }
+}

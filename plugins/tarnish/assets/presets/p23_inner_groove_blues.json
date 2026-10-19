@@ -1,0 +1,15 @@
+{
+ "name": "Inner Groove Blues",
+ "category": "Vinyl",
+ "description": "The last track of a side: dull top, tracing distortion, crackle.",
+ "params": {
+  "machine": 3,
+  "rpm": 0,
+  "noise": 60.0,
+  "groove": 100,
+  "groove_follow": 0,
+  "saturation": 60,
+  "crackle": 25
+ },
+ "order": 23
+}

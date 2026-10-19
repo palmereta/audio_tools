@@ -1,0 +1,14 @@
+{
+ "name": "Bit Swarm",
+ "category": "Glitch",
+ "params": {
+  "size": 8,
+  "density": 150,
+  "spray": 1.0,
+  "pitch_rand": 24,
+  "quant": 1,
+  "shape": 0.0,
+  "pan": 1.0,
+  "mix": 0.5
+ }
+}

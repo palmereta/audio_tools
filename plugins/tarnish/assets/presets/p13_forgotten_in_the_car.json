@@ -1,0 +1,17 @@
+{
+ "name": "Forgotten in the Car",
+ "category": "Cassette",
+ "description": "A summer on the dashboard: a warped shell, worn oxide, a ghost echo, 6 kHz of top.",
+ "params": {
+  "machine": 1,
+  "formulation": 0,
+  "noise": 60.0,
+  "print": 83.3,
+  "wear": 70,
+  "wow": 0.9,
+  "flutter": 0.2,
+  "highcut": 6000,
+  "dropouts": 35
+ },
+ "order": 13
+}

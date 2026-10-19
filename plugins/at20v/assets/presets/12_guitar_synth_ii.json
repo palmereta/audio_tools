@@ -1,0 +1,70 @@
+{
+ "name": "Guitar Synth II",
+ "category": "Factory",
+ "knobs": {
+  "vco1_wave": 2,
+  "vco1_pw": 0.7,
+  "vco1_scale": 0,
+  "vco2_wave": 1,
+  "vco2_pitch": 0.8,
+  "vco2_scale": 0,
+  "portamento": 0.0,
+  "master_tune": 0.5,
+  "vco1_level": 1.0,
+  "vco2_level": 1.0,
+  "fm_mg": 0.2,
+  "fm_eg1": 0.0,
+  "hpf_cutoff": 0.3,
+  "hpf_peak": 0.5,
+  "hpf_mod_mg": 0.0,
+  "hpf_mod_eg2": 0.7,
+  "lpf_cutoff": 0.4,
+  "lpf_peak": 0.5,
+  "lpf_mod_mg": 0.0,
+  "lpf_mod_eg2": 0.8,
+  "mg_wave": 0.9,
+  "mg_freq": 0.6,
+  "eg1_delay": 0.0,
+  "eg1_attack": 0.0,
+  "eg1_release": 0.0,
+  "eg2_hold": 0.0,
+  "eg2_attack": 0.0,
+  "eg2_decay": 0.2,
+  "eg2_sustain": 0.5,
+  "eg2_release": 0.0,
+  "volume": 0.7,
+  "esp_level": 0.9,
+  "esp_lowcut": 0.0,
+  "esp_highcut": 0.55,
+  "esp_cvadj": 1.0,
+  "esp_thresh": 0.3
+ },
+ "cables": [
+  {
+   "src": "esp_fv_out",
+   "dst": "vco12_cv_in",
+   "color": "red"
+  },
+  {
+   "src": "esp_trig_out",
+   "dst": "kbd_trig_in",
+   "color": "blue"
+  },
+  {
+   "src": "mg_sq_out",
+   "dst": "sh_clock_in",
+   "color": "yellow"
+  },
+  {
+   "src": "pink_out",
+   "dst": "sh_in",
+   "color": "green"
+  },
+  {
+   "src": "sh_out",
+   "dst": "hpf_cut_in",
+   "color": "white"
+  }
+ ],
+ "settings": {}
+}

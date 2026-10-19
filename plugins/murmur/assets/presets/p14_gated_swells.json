@@ -1,0 +1,13 @@
+{
+ "name": "Gated Swells",
+ "category": "Rhythm",
+ "params": {
+  "sync": 3,
+  "size": 450,
+  "skew": 0.8,
+  "reverse": 0.5,
+  "spray": 0.6,
+  "rev_mix": 0.35,
+  "mix": 0.6
+ }
+}

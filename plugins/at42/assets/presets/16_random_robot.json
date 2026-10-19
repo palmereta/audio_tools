@@ -1,0 +1,53 @@
+{
+ "name": "Random Robot",
+ "category": "Sci-Fi",
+ "panel": {
+  "mix_vol1": 0.0,
+  "mix_vol2": 0.0,
+  "mix_vol3": 0.0,
+  "mix_vol4": 0.0,
+  "mix_vol5": 0.6,
+  "mix_vol6": 0.5,
+  "mix_vol7": 0.0,
+  "mix_vol8": 0.0,
+  "mix_vol9": 0.0,
+  "mix_vol10": 0.0,
+  "mix_pan5": 0.45,
+  "mix_pan6": 0.55,
+  "fx_cart_l": 8,
+  "fx_prog_l": 2,
+  "fx_cart_r": 8,
+  "fx_prog_r": 2,
+  "fx_x": 0.4,
+  "fx_y": 0.6,
+  "fx_z": 0.5,
+  "fx_blend": 0.4,
+  "vcoa_wave": 3,
+  "vcoa_oct": 5,
+  "ega_loop": 1,
+  "ega_a": 0.0,
+  "ega_d": 0.2,
+  "ega_s": 0.0,
+  "vcob_wave": 4,
+  "vcob_oct": 4,
+  "vcob_fm": 0.4,
+  "egb_hold": 1,
+  "seq_pulser": 0.62
+ },
+ "settings": {},
+ "cables": [
+  {
+   "src": "d3_shout",
+   "dst": "vcoa_voct",
+   "color": "yellow"
+  },
+  {
+   "src": "seq_clkout",
+   "dst": "d3_shclk",
+   "color": "red"
+  }
+ ],
+ "keyseq": [],
+ "demoKeys": "",
+ "demoNotes": ""
+}

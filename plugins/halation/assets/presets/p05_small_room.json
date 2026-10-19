@@ -1,0 +1,15 @@
+{
+ "name": "Small Room",
+ "category": "Classic",
+ "description": "A wooden room around the sound, short and natural.",
+ "params": {
+  "space": 100,
+  "room": 0,
+  "size": 100,
+  "length": 22,
+  "tone": 55,
+  "diffusion": 80,
+  "mix": 22
+ },
+ "order": 5
+}

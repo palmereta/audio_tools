@@ -1,0 +1,14 @@
+{
+ "name": "Half-Speed Dream",
+ "category": "Lo-fi and effects",
+ "description": "Chrome cassette slowed down an octave: dark, slow, dreamy.",
+ "params": {
+  "machine": 1,
+  "formulation": 1,
+  "noise": 50.0,
+  "varispeed": -12,
+  "wow": 0.2,
+  "flutter": 0.08
+ },
+ "order": 30
+}

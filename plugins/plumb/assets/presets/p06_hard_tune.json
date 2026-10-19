@@ -1,0 +1,11 @@
+{
+ "name": "Hard Tune",
+ "category": "Hard",
+ "description": "The effect: every note exactly on pitch, instant steps.",
+ "order": 6,
+ "params": {
+  "amount": 100,
+  "speed": 0,
+  "style": 100
+ }
+}

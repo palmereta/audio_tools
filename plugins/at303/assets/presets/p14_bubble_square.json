@@ -1,0 +1,21 @@
+{
+ "name": "Bubble Square",
+ "category": "Acid",
+ "description": "The square wave with high resonance: rounder bubbles.",
+ "order": 14,
+ "params": {
+  "waveform": 1,
+  "cutoff": 40,
+  "resonance": 84,
+  "envmod": 60,
+  "decay": 38,
+  "accent": 70,
+  "tempo": 128
+ },
+ "pattern": {
+  "pitch": "0 12 7 12a 0 10s 12 5 0 12 3s 7a 0 12 10 7",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

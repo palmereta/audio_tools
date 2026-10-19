@@ -1,0 +1,12 @@
+{
+ "name": "Instrument",
+ "category": "Voice",
+ "description": "Monophonic instruments (sax, violin, bass): the widest range, natural.",
+ "order": 17,
+ "params": {
+  "amount": 100,
+  "speed": 25,
+  "style": 20,
+  "voice": 3
+ }
+}

@@ -1,0 +1,255 @@
+{
+ "name": "Glass Choir",
+ "category": "Pd",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 40,
+    "fixed": true,
+    "coarse": 15,
+    "fine": 75,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 5
+   },
+   {
+    "form": 7,
+    "level": 88,
+    "skirt": 1,
+    "bwRes": 44,
+    "fixed": true,
+    "coarse": 16,
+    "fine": 126,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 5
+   },
+   {
+    "form": 7,
+    "level": 74,
+    "skirt": 1,
+    "bwRes": 48,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 45,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 5
+   },
+   {
+    "form": 7,
+    "level": 66,
+    "skirt": 1,
+    "bwRes": 52,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 98,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 5
+   },
+   {
+    "form": 1,
+    "level": 72,
+    "skirt": 2,
+    "bwRes": 0,
+    "coarse": 2,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      80,
+      60,
+      0
+     ],
+     "time": [
+      40,
+      60,
+      70,
+      55
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 58,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 4,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      70,
+      50,
+      0
+     ],
+     "time": [
+      30,
+      60,
+      70,
+      55
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "lfo1Wave": 4,
+  "lfo1Speed": 55,
+  "lfo1Pmd": 9,
+  "lfo1Delay": 40,
+  "formantKnob": [
+   [
+    2,
+    0,
+    0,
+    40
+   ],
+   [
+    2,
+    0,
+    1,
+    40
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "name": "Glass Choi"
+ },
+ "params": {
+  "voices": 24,
+  "var_type": 1,
+  "var_send": 0.35,
+  "rev_type": 6,
+  "rev_send": 0.45,
+  "rev_time": 0.8,
+  "volume": 0.562
+ },
+ "demoNotes": "60+64+67+71:4"
+}

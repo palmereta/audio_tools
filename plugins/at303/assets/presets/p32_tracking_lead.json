@@ -1,0 +1,21 @@
+{
+ "name": "Tracking Lead",
+ "category": "Extended",
+ "description": "Filter tracking at full: the tone follows the keys, so it plays as a lead.",
+ "order": 32,
+ "params": {
+  "cutoff": 36,
+  "resonance": 70,
+  "envmod": 40,
+  "decay": 40,
+  "accent": 55,
+  "tracking": 100,
+  "tempo": 128
+ },
+ "pattern": {
+  "pitch": "12 3u 7u 3u 12u 7u 10u 12u 0 0 0 0 0 0 0 0",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

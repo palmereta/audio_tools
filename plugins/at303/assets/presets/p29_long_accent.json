@@ -1,0 +1,21 @@
+{
+ "name": "Long Accent",
+ "category": "Extended",
+ "description": "Accent decay stretched: accented notes sweep as slowly as normal ones.",
+ "order": 29,
+ "params": {
+  "cutoff": 34,
+  "resonance": 80,
+  "envmod": 60,
+  "decay": 60,
+  "accent": 72,
+  "accent_decay": 900,
+  "tempo": 126
+ },
+ "pattern": {
+  "pitch": "0a 0 0 12 0a 0 3 0 0a 0 7 0 0a 10 5 3",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

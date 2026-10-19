@@ -1,0 +1,20 @@
+{
+ "name": "Shuffle Gate",
+ "category": "Triplets",
+ "description": "Triplets with rests: a swung, gated line.",
+ "order": 27,
+ "params": {
+  "cutoff": 46,
+  "resonance": 74,
+  "envmod": 52,
+  "decay": 34,
+  "accent": 62,
+  "tempo": 116
+ },
+ "pattern": {
+  "pitch": "0 12 7a 3 0 10s 0 0 0 0 0 0 0 0 0 0",
+  "time": "NRNNRNNRNNRNRRRR",
+  "length": 12,
+  "triplet": true
+ }
+}

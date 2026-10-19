@@ -1,0 +1,18 @@
+{
+ "name": "Dusty Cassette",
+ "category": "Cassette",
+ "description": "A ferric tape that has seen some use: wobble, dropouts, a tilted head, hiss.",
+ "params": {
+  "machine": 1,
+  "formulation": 0,
+  "noise": 55.0,
+  "drive": 3,
+  "wow": 0.25,
+  "flutter": 0.12,
+  "wear": 45,
+  "dropouts": 30,
+  "azimuth": 25,
+  "scrape": 30
+ },
+ "order": 6
+}

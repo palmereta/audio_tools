@@ -1,0 +1,11 @@
+{
+ "name": "Soft Robot",
+ "category": "Hard",
+ "description": "Hard steps with a short glide between notes.",
+ "order": 8,
+ "params": {
+  "amount": 100,
+  "speed": 6,
+  "style": 95
+ }
+}

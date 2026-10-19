@@ -1,0 +1,16 @@
+{
+ "name": "Chewed Tape",
+ "category": "Cassette",
+ "description": "The deck ate it: deep wobble, dropout clusters, badly worn.",
+ "params": {
+  "machine": 1,
+  "formulation": 0,
+  "noise": 60.0,
+  "wow": 1.5,
+  "flutter": 0.4,
+  "dropouts": 70,
+  "wear": 80,
+  "scrape": 50
+ },
+ "order": 11
+}

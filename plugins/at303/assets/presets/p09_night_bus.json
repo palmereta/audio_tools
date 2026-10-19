@@ -1,0 +1,20 @@
+{
+ "name": "Night Bus",
+ "category": "Acid",
+ "description": "A rolling line with ties that let the slides breathe.",
+ "order": 9,
+ "params": {
+  "cutoff": 36,
+  "resonance": 82,
+  "envmod": 58,
+  "decay": 60,
+  "accent": 70,
+  "tempo": 128
+ },
+ "pattern": {
+  "pitch": "0 0a 10d 0 3s 0 7 5a 3 0 0 0 0 0 0 0",
+  "time": "NNTNNTNNNTNNRNNT",
+  "length": 16,
+  "triplet": false
+ }
+}

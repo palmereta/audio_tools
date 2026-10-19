@@ -1,0 +1,17 @@
+{
+ "name": "Ducked Dub",
+ "category": "Rhythmic",
+ "description": "Dub delay that steps back while you play and blooms in the gaps.",
+ "params": {
+  "space": 20,
+  "division": 9,
+  "length": 72,
+  "tone": 40,
+  "character": 1,
+  "wear": 25,
+  "mix": 40,
+  "on_duck": 1,
+  "duck": 65
+ },
+ "order": 19
+}

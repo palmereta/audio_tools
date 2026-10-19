@@ -1,0 +1,210 @@
+[
+  {
+    "file": "overview.jpg",
+    "env": {
+      "AT20V_TAB": "0",
+      "AT20V_PRESET": "9"
+    },
+    "wait": 5,
+    "caption_en": "The SYNTH page with the Sample & Hold preset: the front panel, the patch bay and the keyboard.",
+    "caption_es": "La página SYNTH con el preset Sample & Hold: el panel frontal, la patchera y el teclado."
+  },
+  {
+    "file": "top-bar.jpg",
+    "env": {
+      "AT20V_TAB": "0",
+      "AT20V_PRESET": "14"
+    },
+    "wait": 5,
+    "crop": [
+      0.36,
+      0.0,
+      0.64,
+      0.048
+    ],
+    "caption_en": "The top bar: preset browser, SAVE, and the SYNTH and EXTENSIONS tabs.",
+    "caption_es": "La barra superior: navegador de presets, SAVE y las pestañas SYNTH y EXTENSIONS."
+  },
+  {
+    "file": "keyboard.jpg",
+    "env": {
+      "AT20V_TAB": "0",
+      "AT20V_PRESET": "0",
+      "AT20V_HOLD": "36"
+    },
+    "wait": 5,
+    "crop": [
+      0.0,
+      0.655,
+      1.0,
+      0.315
+    ],
+    "caption_en": "The keyboard with a chord held, the control wheel and the momentary switch on the left.",
+    "caption_es": "El teclado con un acorde apretado, la rueda de control y el pulsador momentáneo a la izquierda."
+  },
+  {
+    "file": "lower-bar.jpg",
+    "env": {
+      "AT20V_TAB": "0",
+      "AT20V_PRESET": "36"
+    },
+    "wait": 5,
+    "crop": [
+      0.0,
+      0.966,
+      1.0,
+      0.034
+    ],
+    "caption_en": "The lower bar: voices, MIDI activity, audio input level, octave and CPU load.",
+    "caption_es": "La barra inferior: voces, actividad MIDI, nivel de la entrada de audio, octava y carga de CPU."
+  },
+  {
+    "file": "oscillators.jpg",
+    "env": {
+      "AT20V_TAB": "0",
+      "AT20V_PRESET": "9"
+    },
+    "wait": 5,
+    "crop": [
+      0.025,
+      0.105,
+      0.165,
+      0.54
+    ],
+    "caption_en": "VOLTAGE CONTROLLED OSCILLATOR 1 and 2, with PORTAMENTO and MASTER TUNE below.",
+    "caption_es": "VOLTAGE CONTROLLED OSCILLATOR 1 y 2, con PORTAMENTO y MASTER TUNE abajo."
+  },
+  {
+    "file": "mixer-filters.jpg",
+    "env": {
+      "AT20V_TAB": "0",
+      "AT20V_PRESET": "9"
+    },
+    "wait": 5,
+    "crop": [
+      0.18,
+      0.105,
+      0.2,
+      0.54
+    ],
+    "caption_en": "VCO MIXER and FREQUENCY MODULATION, and the two filters with their cutoff modulation.",
+    "caption_es": "VCO MIXER y FREQUENCY MODULATION, y los dos filtros con su modulación de corte."
+  },
+  {
+    "file": "modulation.jpg",
+    "env": {
+      "AT20V_TAB": "0",
+      "AT20V_PRESET": "9",
+      "AT20V_HOLD": "48"
+    },
+    "wait": 5,
+    "crop": [
+      0.375,
+      0.105,
+      0.2,
+      0.54
+    ],
+    "caption_en": "The VOLTAGE CONTROLLED AMPLIFIER, the MODULATION GENERATOR and both envelope generators.",
+    "caption_es": "El VOLTAGE CONTROLLED AMPLIFIER, el MODULATION GENERATOR y los dos generadores de envolvente."
+  },
+  {
+    "file": "patch-bay.jpg",
+    "env": {
+      "AT20V_TAB": "0",
+      "AT20V_PRESET": "9"
+    },
+    "wait": 5,
+    "crop": [
+      0.558,
+      0.105,
+      0.432,
+      0.35
+    ],
+    "caption_en": "The patch bay with the cables of the Sample & Hold preset, VOLUME, SIGNAL OUT and PHONES.",
+    "caption_es": "La patchera con los cables del preset Sample & Hold, VOLUME, SIGNAL OUT y PHONES."
+  },
+  {
+    "file": "esp.jpg",
+    "env": {
+      "AT20V_TAB": "0",
+      "AT20V_PRESET": "10"
+    },
+    "wait": 5,
+    "crop": [
+      0.558,
+      0.435,
+      0.432,
+      0.21
+    ],
+    "caption_en": "The EXTERNAL SIGNAL PROCESSOR with the cables of the Guitar Synth I preset.",
+    "caption_es": "El EXTERNAL SIGNAL PROCESSOR con los cables del preset Guitar Synth I."
+  },
+  {
+    "file": "extensions.jpg",
+    "env": {
+      "AT20V_TAB": "1",
+      "AT20V_PRESET": "48"
+    },
+    "wait": 5,
+    "caption_en": "The EXTENSIONS page with the Vocoder Choir preset.",
+    "caption_es": "La página EXTENSIONS con el preset Vocoder Choir."
+  },
+  {
+    "file": "ext-vocoder.jpg",
+    "env": {
+      "AT20V_TAB": "1",
+      "AT20V_PRESET": "48"
+    },
+    "wait": 5,
+    "crop": [
+      0.03,
+      0.105,
+      0.245,
+      0.53
+    ],
+    "caption_en": "The VOCODER section and its SIGNAL LED.",
+    "caption_es": "La sección VOCODER y su LED SIGNAL."
+  },
+  {
+    "file": "ext-poly-delay.jpg",
+    "env": {
+      "AT20V_TAB": "1",
+      "AT20V_PRESET": "36"
+    },
+    "wait": 5,
+    "crop": [
+      0.268,
+      0.105,
+      0.33,
+      0.53
+    ],
+    "caption_en": "The POLYPHONY and DELAY sections.",
+    "caption_es": "Las secciones POLYPHONY y DELAY."
+  },
+  {
+    "file": "ext-reverb-system.jpg",
+    "env": {
+      "AT20V_TAB": "1",
+      "AT20V_PRESET": "38"
+    },
+    "wait": 5,
+    "crop": [
+      0.593,
+      0.105,
+      0.38,
+      0.53
+    ],
+    "caption_en": "The REVERB and SYSTEM sections.",
+    "caption_es": "Las secciones REVERB y SYSTEM."
+  },
+  {
+    "file": "patch-example.jpg",
+    "env": {
+      "AT20V_TAB": "0",
+      "AT20V_PRESET": "27"
+    },
+    "wait": 5,
+    "caption_en": "The SYNTH page with the Random Bleeps preset: MG RECTANGLE drives TRIG IN and the sample and hold.",
+    "caption_es": "La página SYNTH con el preset Random Bleeps: MG RECTANGLE dispara TRIG IN y el sample and hold."
+  }
+]

@@ -1,0 +1,21 @@
+{
+ "name": "Deep Root",
+ "category": "Bass",
+ "description": "Low and round: little resonance, the octave down, no slides.",
+ "order": 16,
+ "params": {
+  "cutoff": 22,
+  "resonance": 25,
+  "envmod": 30,
+  "decay": 35,
+  "accent": 30,
+  "drive": 10,
+  "tempo": 122
+ },
+ "pattern": {
+  "pitch": "0d 0d 0d 0 0d 0d 3d 0d 0 0 0 0 0 0 0 0",
+  "time": "NTRNNTRNNTRNNTNR",
+  "length": 16,
+  "triplet": false
+ }
+}

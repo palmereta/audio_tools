@@ -1,0 +1,43 @@
+{
+ "name": "Singing Res",
+ "category": "Lead",
+ "panel": {
+  "lfo_rate": 0.55,
+  "lfo_wave": 0,
+  "vco_mod": 0.0,
+  "vco_range": 1,
+  "pw": 0.0,
+  "pwm_src": 1,
+  "mix_pulse": 0.0,
+  "mix_saw": 0.7,
+  "mix_sub": 0.0,
+  "sub_wave": 0,
+  "mix_noise": 0.0,
+  "vcf_freq": 0.42,
+  "vcf_res": 0.78,
+  "vcf_env": 0.4,
+  "vcf_mod": 0.0,
+  "vcf_kybd": 0.8,
+  "vca_mode": 0,
+  "env_trig": 0,
+  "env_a": 0.2,
+  "env_d": 0.6,
+  "env_s": 0.6,
+  "env_r": 0.4,
+  "tune": 0.5,
+  "volume": 0.75,
+  "portamento": 0.35,
+  "porta_mode": 0,
+  "transpose": 1,
+  "bend_vco": 0.2,
+  "bend_vcf": 0.0,
+  "bend_lfo": 0.5,
+  "arp_mode": 0,
+  "hold": 0,
+  "seq_play": 0
+ },
+ "settings": {
+  "rev_on": 1,
+  "rev_mix": 0.2
+ }
+}

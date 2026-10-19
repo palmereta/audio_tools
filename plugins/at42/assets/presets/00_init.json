@@ -1,0 +1,22 @@
+{
+ "name": "Init",
+ "category": "Init",
+ "panel": {
+  "mix_vol1": 0.6,
+  "mix_vol2": 0.6,
+  "mix_vol3": 0.0,
+  "mix_vol4": 0.0,
+  "mix_vol5": 0.0,
+  "mix_vol6": 0.0,
+  "mix_vol7": 0.0,
+  "mix_vol8": 0.0,
+  "mix_vol9": 0.0,
+  "mix_vol10": 0.0,
+  "master": 0.664
+ },
+ "settings": {},
+ "cables": [],
+ "keyseq": [],
+ "demoKeys": "1",
+ "demoNotes": ""
+}

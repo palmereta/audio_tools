@@ -1,0 +1,13 @@
+{
+ "name": "Skipping CD",
+ "category": "Glitch",
+ "params": {
+  "sync": 5,
+  "size": 120,
+  "spray": 0.0,
+  "position": 0.25,
+  "chance": 0.5,
+  "shape": 0.0,
+  "mix": 0.7
+ }
+}

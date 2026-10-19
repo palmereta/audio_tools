@@ -1,0 +1,20 @@
+{
+ "name": "First Squelch",
+ "category": "Classic",
+ "description": "The default voice with a simple line: resonance high, envelope at half, one accent per beat.",
+ "order": 0,
+ "params": {
+  "cutoff": 40,
+  "resonance": 72,
+  "envmod": 55,
+  "decay": 45,
+  "accent": 65,
+  "tempo": 125
+ },
+ "pattern": {
+  "pitch": "0a 0 12s 0 3a 0 7 0 0a 0 10s 7 5a 3 0 0",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

@@ -1,0 +1,23 @@
+{
+ "name": "Fuzz Worm",
+ "category": "Driven",
+ "description": "Fuzz after the filter: the resonance turns into a buzzing worm.",
+ "order": 24,
+ "params": {
+  "cutoff": 30,
+  "resonance": 88,
+  "envmod": 50,
+  "decay": 55,
+  "accent": 60,
+  "drive_type": 3,
+  "drive": 65,
+  "drive_tone": 55,
+  "tempo": 128
+ },
+ "pattern": {
+  "pitch": "0 3s 5 7s 10 12s 10 7s 0 0 0 0 0 0 0 0",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

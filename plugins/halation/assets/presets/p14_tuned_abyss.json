@@ -1,0 +1,17 @@
+{
+ "name": "Tuned Abyss",
+ "category": "Ambient",
+ "description": "A deep tail that resonates on the notes you hold (MIDI) or on A minor.",
+ "params": {
+  "space": 100,
+  "size": 260,
+  "length": 82,
+  "tone": 40,
+  "mix": 45,
+  "on_resonator": 1,
+  "resonance": 55,
+  "chord": 3,
+  "res_root": 45
+ },
+ "order": 14
+}

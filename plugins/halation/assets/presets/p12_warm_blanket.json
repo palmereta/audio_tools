@@ -1,0 +1,16 @@
+{
+ "name": "Warm Blanket",
+ "category": "Ambient",
+ "description": "A soft, dark, wide space that wraps the sound.",
+ "params": {
+  "space": 100,
+  "room": 3,
+  "size": 180,
+  "length": 62,
+  "tone": 28,
+  "mix": 40,
+  "width": 140,
+  "mod_depth": 35
+ },
+ "order": 12
+}

@@ -1,0 +1,33 @@
+{
+ "name": "Funk Clav Bass",
+ "category": "Bass",
+ "params": {
+  "osc1_range": 3,
+  "osc2_range": 2,
+  "osc3_range": 3,
+  "osc1_wave": 5,
+  "osc2_wave": 4,
+  "osc3_wave": 2,
+  "osc2_freq": 0,
+  "osc3_freq": 0,
+  "mix_osc1": 7,
+  "mix_osc2": 5,
+  "mix_osc3": 0,
+  "mix_osc1_on": 1,
+  "mix_osc2_on": 1,
+  "mix_osc3_on": 0,
+  "filter_cutoff": -1.8,
+  "filter_emphasis": 3.5,
+  "filter_contour": 6,
+  "f_attack": 0,
+  "f_decay": 2.2,
+  "f_sustain": 1.5,
+  "kbd_ctrl1": 1,
+  "kbd_ctrl2": 0,
+  "l_attack": 0,
+  "l_decay": 2.6,
+  "l_sustain": 3,
+  "decay_on": 0,
+  "volume": 7.5
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "name": "Analog Bucket",
+ "category": "Classic",
+ "description": "Dark bucket-brigade delay, the repeats sink into the mix.",
+ "params": {
+  "space": 5,
+  "division": 8,
+  "length": 52,
+  "tone": 35,
+  "character": 2,
+  "mix": 28,
+  "pingpong": 0
+ },
+ "order": 1
+}

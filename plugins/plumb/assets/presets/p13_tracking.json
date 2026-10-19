@@ -1,0 +1,12 @@
+{
+ "name": "Tracking",
+ "category": "Live",
+ "description": "The default for recording: Tight mode, natural, fast enough to sing with.",
+ "order": 13,
+ "params": {
+  "amount": 100,
+  "speed": 18,
+  "style": 25,
+  "mode": 1
+ }
+}

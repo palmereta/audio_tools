@@ -1,0 +1,181 @@
+{
+ "name": "Tine Piano",
+ "category": "Ky",
+ "voice": {
+  "algorithm": 5,
+  "feedback": 3,
+  "ops": [
+   {
+    "form": 0,
+    "level": 56,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 14,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      40,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      40,
+      60,
+      40
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "ampVel": 4
+   },
+   {
+    "form": 0,
+    "level": 99,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      80,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      62,
+      78,
+      42
+     ],
+     "hold": 0,
+     "timeScale": 3
+    },
+    "ampVel": 3,
+    "pitchMod": 1
+   },
+   {
+    "form": 0,
+    "level": 70,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      60,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      58,
+      70,
+      40
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "ampVel": 5
+   },
+   {
+    "form": 0,
+    "level": 96,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      80,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      62,
+      78,
+      42
+     ],
+     "hold": 0,
+     "timeScale": 3
+    },
+    "ampVel": 3,
+    "detune": 3
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "name": "Tine Piano"
+ },
+ "params": {
+  "voices": 16,
+  "var_type": 6,
+  "var_rate": 0.35,
+  "var_depth": 0.35,
+  "var_send": 0.6,
+  "rev_send": 0.2,
+  "volume": 0.51
+ },
+ "demoNotes": "60+64+67:1.5,62+65+69:1.5"
+}

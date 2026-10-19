@@ -1,0 +1,14 @@
+{
+ "name": "Fifths Drone",
+ "category": "Pitch",
+ "params": {
+  "pitch_rand": 19,
+  "quant": 3,
+  "size": 1200,
+  "density": 6,
+  "shape": 1.0,
+  "spray": 0.8,
+  "rev_mix": 0.6,
+  "mix": 0.65
+ }
+}

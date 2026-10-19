@@ -1,0 +1,17 @@
+{
+ "name": "Plate Vocal",
+ "category": "Classic",
+ "description": "Bright, dense plate for vocals: short pre-delay, smooth tail.",
+ "params": {
+  "space": 100,
+  "room": 2,
+  "size": 100,
+  "length": 40,
+  "tone": 78,
+  "predelay": 25,
+  "diffusion": 90,
+  "mix": 24,
+  "mod_depth": 20
+ },
+ "order": 4
+}

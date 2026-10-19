@@ -1,0 +1,12 @@
+{
+ "name": "Octave Down",
+ "category": "Character",
+ "description": "One octave down with the formants kept: a second, deeper voice.",
+ "order": 20,
+ "params": {
+  "amount": 100,
+  "speed": 20,
+  "style": 30,
+  "transpose": -12
+ }
+}

@@ -1,0 +1,76 @@
+{
+ "name": "Space Telemetry",
+ "category": "Self-Playing",
+ "knobs": {
+  "vco1_wave": 2,
+  "vco1_pw": 0.4,
+  "vco1_scale": 3,
+  "vco2_wave": 0,
+  "vco2_pitch": 0.5,
+  "vco2_scale": 1,
+  "portamento": 0.0,
+  "master_tune": 0.5,
+  "vco1_level": 0.8,
+  "vco2_level": 0.0,
+  "fm_mg": 0.4,
+  "fm_eg1": 0.0,
+  "hpf_cutoff": 0.5,
+  "hpf_peak": 0.6,
+  "hpf_mod_mg": 0.0,
+  "hpf_mod_eg2": 0.0,
+  "lpf_cutoff": 0.8,
+  "lpf_peak": 0.4,
+  "lpf_mod_mg": 0.0,
+  "lpf_mod_eg2": 0.0,
+  "mg_wave": 0.2,
+  "mg_freq": 1.0,
+  "eg1_delay": 0.0,
+  "eg1_attack": 0.0,
+  "eg1_release": 0.0,
+  "eg2_hold": 0.0,
+  "eg2_attack": 0.0,
+  "eg2_decay": 0.12,
+  "eg2_sustain": 0.0,
+  "eg2_release": 0.1,
+  "volume": 0.7,
+  "esp_level": 0.5,
+  "esp_lowcut": 1.0,
+  "esp_highcut": 0.0,
+  "esp_cvadj": 0.5,
+  "esp_thresh": 0.5
+ },
+ "cables": [
+  {
+   "src": "white_out",
+   "dst": "sh_in",
+   "color": "red"
+  },
+  {
+   "src": "sh_out",
+   "dst": "total_in",
+   "color": "blue"
+  },
+  {
+   "src": "mg_sq_out",
+   "dst": "kbd_trig_in",
+   "color": "yellow"
+  },
+  {
+   "src": "mg_sq_out",
+   "dst": "sh_clock_in",
+   "color": "green"
+  }
+ ],
+ "settings": {
+  "mg_sync": 1,
+  "dly_on": 1,
+  "dly_time": 3,
+  "dly_fb": 0.6,
+  "dly_mix": 0.3,
+  "dly_tone": 0.8,
+  "rev_on": 1,
+  "rev_size": 0.7,
+  "rev_mix": 0.3,
+  "rev_damp": 0.4
+ }
+}

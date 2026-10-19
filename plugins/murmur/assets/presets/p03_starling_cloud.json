@@ -1,0 +1,13 @@
+{
+ "name": "Starling Cloud",
+ "category": "Clouds",
+ "params": {
+  "size": 120,
+  "density": 60,
+  "spray": 2.0,
+  "pan": 0.9,
+  "pitch_rand": 0.3,
+  "rev_mix": 0.3,
+  "mix": 0.55
+ }
+}

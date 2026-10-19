@@ -1,0 +1,16 @@
+{
+ "name": "Held Chord",
+ "category": "Stretch",
+ "params": {
+  "position": 0.5,
+  "spray": 0.1,
+  "size": 600,
+  "density": 25,
+  "pitch_rand": 7,
+  "quant": 3,
+  "shimmer": 0.2,
+  "shape": 1.0,
+  "rev_mix": 0.5,
+  "mix": 0.8
+ }
+}

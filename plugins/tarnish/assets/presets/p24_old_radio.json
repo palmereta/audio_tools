@@ -1,0 +1,14 @@
+{
+ "name": "Old Radio",
+ "category": "Radio and phone",
+ "description": "A narrow AM set: a squeezed station, a little static and fading, a small speaker.",
+ "params": {
+  "machine": 4,
+  "band": 0,
+  "noise": 50.0,
+  "compress": 60,
+  "crackle": 25,
+  "fading": 20
+ },
+ "order": 24
+}

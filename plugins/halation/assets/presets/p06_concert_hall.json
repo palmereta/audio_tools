@@ -1,0 +1,17 @@
+{
+ "name": "Concert Hall",
+ "category": "Classic",
+ "description": "A large hall with a long, warm tail.",
+ "params": {
+  "space": 100,
+  "room": 1,
+  "size": 150,
+  "length": 55,
+  "tone": 52,
+  "predelay": 30,
+  "diffusion": 85,
+  "mix": 28,
+  "mod_depth": 30
+ },
+ "order": 6
+}

@@ -1,0 +1,20 @@
+{
+ "name": "Funk Thumb",
+ "category": "Bass",
+ "description": "Syncopated sixteenths with octave jumps.",
+ "order": 19,
+ "params": {
+  "cutoff": 38,
+  "resonance": 50,
+  "envmod": 45,
+  "decay": 30,
+  "accent": 55,
+  "tempo": 112
+ },
+ "pattern": {
+  "pitch": "0 12 0 10 7 0 12a 5 0 0 0 0 0 0 0 0",
+  "time": "NRNNRNNRNRNNRNNR",
+  "length": 16,
+  "triplet": false
+ }
+}

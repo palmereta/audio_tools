@@ -1,0 +1,15 @@
+{
+ "name": "Ghost Before You",
+ "category": "Experimental",
+ "description": "Reversed swells that rise into each beat.",
+ "params": {
+  "space": 80,
+  "size": 150,
+  "length": 60,
+  "mix": 50,
+  "on_reverse": 1,
+  "reverse": 85,
+  "reverse_div": 8
+ },
+ "order": 22
+}

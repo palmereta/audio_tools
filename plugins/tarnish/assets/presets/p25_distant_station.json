@@ -1,0 +1,16 @@
+{
+ "name": "Distant Station",
+ "category": "Radio and phone",
+ "description": "Barely there: deep selective fading, static, a whistle, slightly off the station.",
+ "params": {
+  "machine": 4,
+  "band": 0,
+  "noise": 60.0,
+  "compress": 70,
+  "fading": 70,
+  "crackle": 60,
+  "whistle": 30,
+  "tuning": 20
+ },
+ "order": 25
+}

@@ -1,0 +1,14 @@
+{
+ "name": "Frozen Lows",
+ "category": "Experimental",
+ "description": "Hold the low end of the tail while the rest keeps moving.",
+ "params": {
+  "space": 100,
+  "size": 180,
+  "length": 70,
+  "mix": 45,
+  "on_freeze": 1,
+  "freeze_mode": 1
+ },
+ "order": 27
+}

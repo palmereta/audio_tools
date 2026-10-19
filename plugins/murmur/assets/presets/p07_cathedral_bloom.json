@@ -1,0 +1,17 @@
+{
+ "name": "Cathedral Bloom",
+ "category": "Shimmer",
+ "params": {
+  "size": 700,
+  "density": 14,
+  "spray": 1.0,
+  "feedback": 0.8,
+  "shimmer": 0.35,
+  "sub": 0.1,
+  "shape": 1.0,
+  "rev_mix": 0.8,
+  "rev_size": 0.95,
+  "duck": 0.4,
+  "mix": 0.6
+ }
+}

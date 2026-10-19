@@ -1,0 +1,193 @@
+{
+ "name": "Res Brass",
+ "category": "Ld",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 6,
+    "level": 99,
+    "skirt": 2,
+    "bwRes": 4,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      92,
+      86,
+      0
+     ],
+     "time": [
+      14,
+      40,
+      50,
+      30
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 5
+   },
+   {
+    "form": 5,
+    "level": 92,
+    "skirt": 3,
+    "bwRes": 2,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      90,
+      80,
+      0
+     ],
+     "time": [
+      20,
+      40,
+      50,
+      30
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 5,
+    "detune": 4
+   },
+   {
+    "form": 2,
+    "level": 80,
+    "skirt": 4,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      90,
+      80,
+      0
+     ],
+     "time": [
+      16,
+      40,
+      50,
+      30
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 5
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "pegLevel": [
+   -8,
+   0,
+   0,
+   0,
+   0
+  ],
+  "pegTime": [
+   30,
+   30,
+   30,
+   30
+  ],
+  "lfo1Wave": 4,
+  "lfo1Speed": 60,
+  "lfo1Delay": 50,
+  "lfo1Pmd": 10,
+  "filterType": 1,
+  "cutoff": 80,
+  "resonance": 8,
+  "fegLevel": [
+   40,
+   20,
+   10,
+   0
+  ],
+  "fegTime": [
+   30,
+   50,
+   60,
+   40
+  ],
+  "fegDepth": 45,
+  "name": "Res Brass"
+ },
+ "params": {
+  "filter": 1,
+  "voices": 12,
+  "var_type": 4,
+  "var_send": 0.25,
+  "rev_send": 0.25,
+  "volume": 0.815
+ },
+ "demoNotes": "53+57+60:1.2,55+58+62:1.6"
+}

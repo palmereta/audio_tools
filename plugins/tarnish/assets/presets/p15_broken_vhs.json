@@ -1,0 +1,16 @@
+{
+ "name": "Broken VHS",
+ "category": "Video tape",
+ "description": "A rental copy that has lost its tracking: servo wobble, edge damage, hum.",
+ "params": {
+  "machine": 2,
+  "video": 0,
+  "noise": 50.0,
+  "wow": 0.6,
+  "flutter": 0.2,
+  "dropouts": 50,
+  "hum": 45,
+  "wear": 40
+ },
+ "order": 15
+}

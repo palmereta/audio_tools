@@ -1,0 +1,16 @@
+{
+ "name": "Tracking Error",
+ "category": "Video tape",
+ "description": "Dropouts everywhere and the field-rate buzz in the audio.",
+ "params": {
+  "machine": 2,
+  "video": 0,
+  "noise": 55.0,
+  "dropouts": 60,
+  "wear": 60,
+  "hum": 65,
+  "wow": 0.4,
+  "flutter": 0.15
+ },
+ "order": 17
+}

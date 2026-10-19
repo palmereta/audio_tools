@@ -1,0 +1,18 @@
+{
+ "name": "Ballad",
+ "category": "Natural",
+ "description": "Long notes breathe: humanize keeps sustained notes loose, starts are corrected.",
+ "order": 3,
+ "params": {
+  "amount": 100,
+  "speed": 30,
+  "style": 15,
+  "custom_character": 1,
+  "transition": 80,
+  "humanize": 70,
+  "flex": 70,
+  "hysteresis": 15,
+  "keep_vibrato": 100,
+  "keep_drift": 40
+ }
+}

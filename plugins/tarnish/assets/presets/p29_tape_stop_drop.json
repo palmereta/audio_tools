@@ -1,0 +1,13 @@
+{
+ "name": "Tape Stop Drop",
+ "category": "Lo-fi and effects",
+ "description": "Clean tape with a one-bar stop on the button or any MIDI note.",
+ "params": {
+  "machine": 0,
+  "speed": 1,
+  "stop_sync": 5,
+  "stop_curve": 60,
+  "start_time": 0.4
+ },
+ "order": 29
+}

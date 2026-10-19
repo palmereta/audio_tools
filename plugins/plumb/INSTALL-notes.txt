@@ -1,0 +1,16 @@
+
+--- Plumb ---
+Plumb is a mono effect: put it on a vocal track (on a stereo track it corrects the sum). Set the key and the scale,
+pick the voice range, and sing. The latency it adds is reported to the host: Live 0.67 ms, Tight 2.7 ms (the
+default), Studio 21 ms. In Ableton Live it appears as "Audio Tools Plumb".
+
+plumbrender runs a WAV file through Plumb with a preset:
+  plumbrender in.wav out.wav --preset "Natural Lead" --set key=9 --set scale=2
+  plumbrender in.wav out.wav --preset "Hard Tune" --set key=4 --set scale=1 --at 6 style=50
+key is 0 to 11 from C; scale is the position in the list (0 Chromatic, 1 Major, 2 Minor, ...).
+On macOS: xattr -d com.apple.quarantine plumbrender (the first time).
+
+--- Español ---
+Plumb es un efecto mono: va en una pista de voz (en una pista estéreo corrige la suma). Fijá la tonalidad y la
+escala, elegí el rango de voz y cantá. La latencia que agrega se le informa al host: Live 0,67 ms, Tight 2,7 ms (la
+de por defecto), Studio 21 ms. plumbrender pasa un archivo WAV por Plumb con un preset (ver los ejemplos de arriba).

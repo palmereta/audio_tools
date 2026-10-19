@@ -1,0 +1,20 @@
+{
+ "name": "Squelch Line",
+ "category": "Acid",
+ "description": "Resonance near the top, accents and slides off the beat.",
+ "order": 8,
+ "params": {
+  "cutoff": 42,
+  "resonance": 88,
+  "envmod": 62,
+  "decay": 48,
+  "accent": 78,
+  "tempo": 132
+ },
+ "pattern": {
+  "pitch": "0 12a 0 3s 5 0 12 10a 0 7s 0 3a 12 0 5 3",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

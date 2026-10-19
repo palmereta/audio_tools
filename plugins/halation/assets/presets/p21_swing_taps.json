@@ -1,0 +1,14 @@
+{
+ "name": "Swing Taps",
+ "category": "Rhythmic",
+ "description": "Swung repeats that lean back into the groove.",
+ "params": {
+  "space": 10,
+  "division": 8,
+  "pattern": 7,
+  "length": 45,
+  "mix": 30,
+  "pingpong": 1
+ },
+ "order": 21
+}

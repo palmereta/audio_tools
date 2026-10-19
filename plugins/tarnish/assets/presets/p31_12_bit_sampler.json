@@ -1,0 +1,13 @@
+{
+ "name": "12-bit Sampler",
+ "category": "Lo-fi and effects",
+ "description": "The late-80s sampler sheen: 12 bits at 26 kHz, clean filters.",
+ "params": {
+  "machine": 0,
+  "speed": 0,
+  "bits": 12,
+  "rate": 26000,
+  "drive": 3
+ },
+ "order": 31
+}

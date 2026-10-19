@@ -1,0 +1,14 @@
+{
+ "name": "Added Vibrato",
+ "category": "Character",
+ "description": "A steady synthetic vibrato on every held note.",
+ "order": 23,
+ "params": {
+  "amount": 100,
+  "speed": 0,
+  "style": 100,
+  "vib_depth": 35,
+  "vib_rate": 5.5,
+  "vib_delay": 180
+ }
+}

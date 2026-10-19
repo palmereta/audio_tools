@@ -1,0 +1,12 @@
+{
+ "name": "Octave Up",
+ "category": "Character",
+ "description": "One octave up with the formants kept.",
+ "order": 21,
+ "params": {
+  "amount": 100,
+  "speed": 20,
+  "style": 30,
+  "transpose": 12
+ }
+}

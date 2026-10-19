@@ -1,0 +1,16 @@
+{
+ "name": "Collapsing Hall",
+ "category": "Experimental",
+ "description": "While you play, the hall closes in and the tail climbs.",
+ "params": {
+  "space": 90,
+  "size": 260,
+  "length": 70,
+  "mix": 45,
+  "on_breathe": 1,
+  "breathe_mode": 1,
+  "breathe_depth": 70,
+  "breathe_rate": 0.25
+ },
+ "order": 24
+}

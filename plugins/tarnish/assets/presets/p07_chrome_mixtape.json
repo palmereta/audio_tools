@@ -1,0 +1,16 @@
+{
+ "name": "Chrome Mixtape",
+ "category": "Cassette",
+ "description": "The good copy: chrome tape with mild noise reduction, a gentle wobble.",
+ "params": {
+  "machine": 1,
+  "formulation": 1,
+  "noise": 45.0,
+  "nr": 1,
+  "drive": 2,
+  "wow": 0.1,
+  "flutter": 0.06,
+  "scrape": 15
+ },
+ "order": 7
+}

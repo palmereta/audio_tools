@@ -1,0 +1,72 @@
+{
+ "name": "Chaos Arp",
+ "category": "Self-Playing",
+ "knobs": {
+  "vco1_wave": 1,
+  "vco1_pw": 0.0,
+  "vco1_scale": 2,
+  "vco2_wave": 2,
+  "vco2_pitch": 0.508,
+  "vco2_scale": 1,
+  "portamento": 0.15,
+  "master_tune": 0.5,
+  "vco1_level": 1.0,
+  "vco2_level": 0.6,
+  "fm_mg": 0.8,
+  "fm_eg1": 0.0,
+  "hpf_cutoff": 0.2,
+  "hpf_peak": 0.3,
+  "hpf_mod_mg": 0.0,
+  "hpf_mod_eg2": 0.0,
+  "lpf_cutoff": 0.4,
+  "lpf_peak": 0.7,
+  "lpf_mod_mg": 0.0,
+  "lpf_mod_eg2": 0.5,
+  "mg_wave": 0.5,
+  "mg_freq": 0.6,
+  "eg1_delay": 0.0,
+  "eg1_attack": 0.0,
+  "eg1_release": 0.0,
+  "eg2_hold": 0.0,
+  "eg2_attack": 0.0,
+  "eg2_decay": 0.3,
+  "eg2_sustain": 0.1,
+  "eg2_release": 0.25,
+  "volume": 0.7,
+  "esp_level": 0.5,
+  "esp_lowcut": 1.0,
+  "esp_highcut": 0.0,
+  "esp_cvadj": 0.5,
+  "esp_thresh": 0.5
+ },
+ "cables": [
+  {
+   "src": "pink_out",
+   "dst": "sh_in",
+   "color": "red"
+  },
+  {
+   "src": "sh_out",
+   "dst": "total_in",
+   "color": "blue"
+  },
+  {
+   "src": "mg_sq_out",
+   "dst": "kbd_trig_in",
+   "color": "yellow"
+  },
+  {
+   "src": "mg_sq_out",
+   "dst": "sh_clock_in",
+   "color": "green"
+  }
+ ],
+ "settings": {
+  "mg_sync": 1,
+  "dly_on": 1,
+  "dly_time": 6,
+  "dly_fb": 0.45,
+  "dly_mix": 0.3,
+  "dly_tone": 0.6
+ }
+}

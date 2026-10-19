@@ -1,0 +1,13 @@
+{
+ "name": "Warped LP",
+ "category": "Vinyl",
+ "description": "A warped record: a slow pitch wobble at the turn rate and a subsonic sway.",
+ "params": {
+  "machine": 3,
+  "rpm": 0,
+  "noise": 55.0,
+  "wow": 0.6,
+  "crackle": 20
+ },
+ "order": 22
+}

@@ -1,0 +1,23 @@
+{
+ "name": "Dub Pulse",
+ "category": "Bass",
+ "description": "Sparse notes with the dotted delay: room to breathe.",
+ "order": 17,
+ "params": {
+  "cutoff": 30,
+  "resonance": 40,
+  "envmod": 35,
+  "decay": 55,
+  "accent": 35,
+  "delay_mix": 30,
+  "delay_time": 2,
+  "delay_fb": 45,
+  "tempo": 118
+ },
+ "pattern": {
+  "pitch": "0d 0 7d 5d 0 0 0 0 0 0 0 0 0 0 0 0",
+  "time": "NTTRRRNRNTTRRNRR",
+  "length": 16,
+  "triplet": false
+ }
+}

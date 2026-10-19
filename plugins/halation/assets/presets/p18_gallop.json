@@ -1,0 +1,14 @@
+{
+ "name": "Gallop",
+ "category": "Rhythmic",
+ "description": "A galloping two-tap pattern for picked guitars and synths.",
+ "params": {
+  "space": 5,
+  "division": 8,
+  "pattern": 5,
+  "length": 40,
+  "tone": 65,
+  "mix": 30
+ },
+ "order": 18
+}

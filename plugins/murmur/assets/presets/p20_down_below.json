@@ -1,0 +1,13 @@
+{
+ "name": "Down Below",
+ "category": "Pitch",
+ "params": {
+  "pitch": -12,
+  "sub": 0.3,
+  "size": 600,
+  "density": 14,
+  "high_cut": 3000,
+  "rev_mix": 0.4,
+  "mix": 0.6
+ }
+}

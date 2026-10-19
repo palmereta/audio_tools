@@ -1,0 +1,13 @@
+
+--- Tarnish ---
+Tarnish is an effect: put it on a track, a bus or the master. Any MIDI note sent to it stops the tape while held
+(Speed tab); in Logic Pro use it as a MIDI-controlled effect for that.
+
+tarnishrender is the same engine from the command line:
+  tarnishrender in.wav out.wav --preset "Dusty Cassette"
+  tarnishrender in.wav out.wav --preset "Tape Stop Drop" --bpm 96 --at 8 stop=1 --at 10 stop=0
+On macOS: xattr -d com.apple.quarantine tarnishrender (the first time).
+
+--- Español ---
+Tarnish es un efecto: va en una pista, un bus o el master. Cualquier nota MIDI que le llegue para la cinta mientras
+esté sostenida (pestaña Speed). tarnishrender es el mismo motor por línea de comandos (ver los ejemplos de arriba).

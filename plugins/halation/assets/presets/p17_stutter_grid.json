@@ -1,0 +1,15 @@
+{
+ "name": "Stutter Grid",
+ "category": "Rhythmic",
+ "description": "Sixteenth-note stutters that catch the end of a phrase.",
+ "params": {
+  "space": 15,
+  "division": 5,
+  "length": 35,
+  "mix": 35,
+  "on_stutter": 1,
+  "stutter": 45,
+  "stutter_div": 2
+ },
+ "order": 17
+}

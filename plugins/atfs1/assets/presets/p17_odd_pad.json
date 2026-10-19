@@ -1,0 +1,180 @@
+{
+ "name": "Odd Pad",
+ "category": "Pd",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 4,
+    "level": 94,
+    "skirt": 3,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 4
+   },
+   {
+    "form": 4,
+    "level": 92,
+    "skirt": 3,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 4,
+    "detune": 7
+   },
+   {
+    "form": 3,
+    "level": 80,
+    "skirt": 2,
+    "bwRes": 0,
+    "coarse": 2,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 4,
+    "detune": -6
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "lfo1Wave": 4,
+  "lfo1Speed": 50,
+  "lfo1Pmd": 8,
+  "filterType": 0,
+  "cutoff": 92,
+  "resonance": 10,
+  "fegLevel": [
+   20,
+   0,
+   -6,
+   -10
+  ],
+  "fegTime": [
+   50,
+   60,
+   60,
+   60
+  ],
+  "fegDepth": 30,
+  "name": "Odd Pad"
+ },
+ "params": {
+  "filter": 1,
+  "var_type": 1,
+  "var_send": 0.4,
+  "rev_type": 2,
+  "rev_send": 0.35,
+  "volume": 0.722
+ },
+ "demoNotes": "48+55+62+67:4"
+}

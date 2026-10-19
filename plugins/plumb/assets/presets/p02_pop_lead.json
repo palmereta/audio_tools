@@ -1,0 +1,11 @@
+{
+ "name": "Pop Lead",
+ "category": "Natural",
+ "description": "Modern pop: tighter, faster, still with the vibrato.",
+ "order": 2,
+ "params": {
+  "amount": 100,
+  "speed": 12,
+  "style": 45
+ }
+}

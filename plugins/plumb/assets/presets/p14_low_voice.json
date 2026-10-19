@@ -1,0 +1,12 @@
+{
+ "name": "Low Voice",
+ "category": "Voice",
+ "description": "Bass and baritone: the detector listens from 65 Hz.",
+ "order": 14,
+ "params": {
+  "amount": 100,
+  "speed": 22,
+  "style": 25,
+  "voice": 0
+ }
+}

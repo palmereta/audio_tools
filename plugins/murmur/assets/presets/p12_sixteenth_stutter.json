@@ -1,0 +1,15 @@
+{
+ "name": "Sixteenth Stutter",
+ "category": "Rhythm",
+ "params": {
+  "sync": 5,
+  "chance": 0.7,
+  "size": 60,
+  "shape": 0.1,
+  "pitch_rand": 12,
+  "quant": 2,
+  "reverse": 0.3,
+  "spray": 0.2,
+  "mix": 0.6
+ }
+}

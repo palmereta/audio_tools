@@ -1,0 +1,20 @@
+{
+ "name": "Pocket",
+ "category": "Bass",
+ "description": "A tight two-bar feel squeezed into one: rests on the one and the three.",
+ "order": 21,
+ "params": {
+  "cutoff": 34,
+  "resonance": 48,
+  "envmod": 42,
+  "decay": 28,
+  "accent": 45,
+  "tempo": 120
+ },
+ "pattern": {
+  "pitch": "0 0 3 0 5 3 0 0 7 5 0 0 0 0 0 0",
+  "time": "RNNNRNNNRNNNRNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

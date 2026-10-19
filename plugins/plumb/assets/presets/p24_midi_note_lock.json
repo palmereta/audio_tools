@@ -1,0 +1,12 @@
+{
+ "name": "MIDI Note Lock",
+ "category": "Character",
+ "description": "The note you hold on a MIDI keyboard is the target.",
+ "order": 24,
+ "params": {
+  "amount": 100,
+  "speed": 8,
+  "style": 70,
+  "midi_mode": 2
+ }
+}

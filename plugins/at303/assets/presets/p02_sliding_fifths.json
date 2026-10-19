@@ -1,0 +1,20 @@
+{
+ "name": "Sliding Fifths",
+ "category": "Classic",
+ "description": "Fifths and octaves tied with slides: the 22 ms glide of the original circuit.",
+ "order": 2,
+ "params": {
+  "cutoff": 45,
+  "resonance": 70,
+  "envmod": 50,
+  "decay": 50,
+  "accent": 55,
+  "tempo": 125
+ },
+ "pattern": {
+  "pitch": "0 7s 12 7 0a 5s 7 0 3 7s 10 7a 0 0 0 0",
+  "time": "NNTNNNTNNNNNRNNR",
+  "length": 16,
+  "triplet": false
+ }
+}

@@ -1,0 +1,16 @@
+{
+ "name": "Triplet Rain",
+ "category": "Rhythm",
+ "params": {
+  "sync": 8,
+  "chance": 0.6,
+  "size": 150,
+  "pitch_rand": 7,
+  "quant": 4,
+  "spray": 1.0,
+  "delay_sync": 7,
+  "delay_mix": 0.2,
+  "rev_mix": 0.3,
+  "mix": 0.55
+ }
+}

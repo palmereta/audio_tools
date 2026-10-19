@@ -1,0 +1,14 @@
+{
+ "name": "Choir Rising",
+ "category": "Shimmer",
+ "params": {
+  "size": 300,
+  "density": 20,
+  "spray": 0.5,
+  "feedback": 0.7,
+  "shimmer": 0.5,
+  "rev_mix": 0.6,
+  "rev_size": 0.8,
+  "mix": 0.55
+ }
+}

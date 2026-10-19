@@ -1,0 +1,11 @@
+{
+ "name": "Backing Vocals",
+ "category": "Natural",
+ "description": "Stacks and doubles sit together: firm correction, a little vibrato.",
+ "order": 4,
+ "params": {
+  "amount": 100,
+  "speed": 10,
+  "style": 60
+ }
+}

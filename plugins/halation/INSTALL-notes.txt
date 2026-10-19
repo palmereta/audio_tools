@@ -1,0 +1,14 @@
+
+--- Halation ---
+Halation is an effect: put it on a track, or on a send with Mix at 100 %. In Logic Pro it is an Audio Unit
+music effect, so it also shows as a MIDI-controlled effect (the Resonator can follow the notes you play).
+
+halationrender is the same engine from the command line:
+  halationrender in.wav out.wav --preset "Cathedral of Glass" --tail 12 --bpm 92
+  halationrender in.wav out.wav --preset "Slow Tide" --tail 16 --at 9 on_freeze=1
+On macOS: xattr -d com.apple.quarantine halationrender (the first time).
+
+--- Español ---
+Halation es un efecto: va en una pista, o en un envío con Mix al 100 %. En Logic Pro es un efecto musical
+Audio Unit, así que también aparece como efecto controlado por MIDI (el Resonator puede seguir lo que tocás).
+halationrender es el mismo motor por línea de comandos (ver los ejemplos de arriba).

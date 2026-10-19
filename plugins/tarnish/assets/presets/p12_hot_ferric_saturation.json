@@ -1,0 +1,15 @@
+{
+ "name": "Hot Ferric Saturation",
+ "category": "Cassette",
+ "description": "Ferric tape recorded hot: the top end closes as the level rises.",
+ "params": {
+  "machine": 1,
+  "formulation": 0,
+  "noise": 50.0,
+  "drive": 10,
+  "saturation": 60,
+  "wow": 0.1,
+  "flutter": 0.06
+ },
+ "order": 12
+}

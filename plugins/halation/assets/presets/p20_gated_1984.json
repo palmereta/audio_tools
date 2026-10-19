@@ -1,0 +1,16 @@
+{
+ "name": "Gated 1984",
+ "category": "Rhythmic",
+ "description": "The big drum reverb that stops dead.",
+ "params": {
+  "space": 100,
+  "size": 150,
+  "length": 60,
+  "tone": 65,
+  "mix": 40,
+  "on_gate": 1,
+  "gate": 95,
+  "gate_hold": 280
+ },
+ "order": 20
+}

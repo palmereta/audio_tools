@@ -1,0 +1,211 @@
+[
+  {
+    "file": "overview.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "1"
+    },
+    "wait": 4,
+    "caption_en": "ATMD with the Fat Bass preset: the front panel, the left-hand controller and the 44-key keyboard.",
+    "caption_es": "El ATMD con el preset Fat Bass: el panel frontal, el controlador de la mano izquierda y el teclado de 44 teclas."
+  },
+  {
+    "file": "top-bar.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "9"
+    },
+    "wait": 4,
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      0.048
+    ],
+    "caption_en": "The top bar: preset selector, SAVE, the PANEL and SETTINGS tabs and MANUAL.",
+    "caption_es": "La barra superior: selector de presets, SAVE, las pestañas PANEL y SETTINGS y MANUAL."
+  },
+  {
+    "file": "help-bar.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "9"
+    },
+    "wait": 4,
+    "crop": [
+      0.0,
+      0.97,
+      1.0,
+      0.03
+    ],
+    "caption_en": "The help bar: what the control under the mouse does, and on the right the voices sounding, the CPU load and the version.",
+    "caption_es": "La barra de ayuda: qué hace el control que está bajo el mouse, y a la derecha las voces que suenan, la carga de CPU y la versión."
+  },
+  {
+    "file": "panel-init.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "0"
+    },
+    "wait": 4,
+    "crop": [
+      0.035,
+      0.12,
+      0.93,
+      0.33
+    ],
+    "caption_en": "The front panel with the Init preset: CONTROLLERS, OSCILLATOR BANK, MIXER, MODIFIERS and OUTPUT.",
+    "caption_es": "El panel frontal con el preset Init: CONTROLLERS, OSCILLATOR BANK, MIXER, MODIFIERS y OUTPUT."
+  },
+  {
+    "file": "controllers-oscillators.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "9"
+    },
+    "wait": 4,
+    "crop": [
+      0.04,
+      0.128,
+      0.333,
+      0.31
+    ],
+    "caption_en": "CONTROLLERS and the OSCILLATOR BANK with Lucky Lead: oscillator 3 in LO, free of the keyboard, ready to modulate.",
+    "caption_es": "CONTROLLERS y el OSCILLATOR BANK con Lucky Lead: el oscilador 3 en LO, libre del teclado, listo para modular."
+  },
+  {
+    "file": "mixer.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "15"
+    },
+    "wait": 4,
+    "crop": [
+      0.3735,
+      0.128,
+      0.2165,
+      0.31
+    ],
+    "caption_en": "The MIXER with Screamer: two oscillators at 10 and a little noise drive the filter hard.",
+    "caption_es": "El MIXER con Screamer: dos osciladores en 10 y un poco de ruido empujan fuerte al filtro."
+  },
+  {
+    "file": "modifiers.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "12"
+    },
+    "wait": 4,
+    "crop": [
+      0.578,
+      0.128,
+      0.228,
+      0.31
+    ],
+    "caption_en": "The MODIFIERS with Singing Filter: the filter with its contour on top, the loudness contour below, and the routing rockers on the left edge.",
+    "caption_es": "Los MODIFIERS con Singing Filter: el filtro con su contorno arriba, el contorno de volumen abajo y los rockers de ruteo en el borde izquierdo."
+  },
+  {
+    "file": "output.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "0"
+    },
+    "wait": 4,
+    "crop": [
+      0.804,
+      0.128,
+      0.16,
+      0.31
+    ],
+    "caption_en": "OUTPUT: main VOLUME and its ON switch, A-440, the PHONES volume, and POWER.",
+    "caption_es": "OUTPUT: el VOLUME principal con su llave ON, A-440, el volumen de PHONES y POWER."
+  },
+  {
+    "file": "left-hand.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "9",
+      "ATMD_BEND": "0.5"
+    },
+    "wait": 4,
+    "crop": [
+      0.03,
+      0.6,
+      0.2,
+      0.29
+    ],
+    "caption_en": "The left-hand controller: the GLIDE and DECAY rockers and the two wheels. The PITCH wheel is pushed up, so its centre mark sits higher.",
+    "caption_es": "El controlador de la mano izquierda: los rockers GLIDE y DECAY y las dos ruedas. La rueda PITCH está empujada hacia arriba, así que su marca del centro queda más alta."
+  },
+  {
+    "file": "keyboard-chord.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "28",
+      "ATMD_HOLD": "48,52,55,60,64"
+    },
+    "wait": 4,
+    "crop": [
+      0.03,
+      0.6,
+      0.94,
+      0.3
+    ],
+    "caption_en": "A C major chord held on the Poly Strings preset. The keyboard runs from F2 to C6.",
+    "caption_es": "Un acorde de do mayor sostenido con el preset Poly Strings. El teclado va de F2 a C6."
+  },
+  {
+    "file": "settings-page.jpg",
+    "env": {
+      "ATMD_PAGE": "1",
+      "ATMD_PRESET": "28"
+    },
+    "wait": 4,
+    "caption_en": "The SETTINGS page with the Poly Strings preset. The keyboard stays in view and keeps playing.",
+    "caption_es": "La página SETTINGS con el preset Poly Strings. El teclado queda a la vista y se sigue tocando."
+  },
+  {
+    "file": "settings-voices.jpg",
+    "env": {
+      "ATMD_PAGE": "1",
+      "ATMD_PRESET": "28"
+    },
+    "wait": 4,
+    "crop": [
+      0.045,
+      0.144,
+      0.91,
+      0.222
+    ],
+    "caption_en": "The upper row of the SETTINGS page: VOICES, EXPRESSION and KEYBOARD.",
+    "caption_es": "La fila de arriba de la página SETTINGS: VOICES, EXPRESSION y KEYBOARD."
+  },
+  {
+    "file": "settings-effects.jpg",
+    "env": {
+      "ATMD_PAGE": "1",
+      "ATMD_PRESET": "30"
+    },
+    "wait": 4,
+    "crop": [
+      0.045,
+      0.367,
+      0.91,
+      0.237
+    ],
+    "caption_en": "The lower row of the SETTINGS page with Slow Sweep Pad: DELAY, REVERB and SYSTEM.",
+    "caption_es": "La fila de abajo de la página SETTINGS con Slow Sweep Pad: DELAY, REVERB y SYSTEM."
+  },
+  {
+    "file": "manual.jpg",
+    "env": {
+      "ATMD_PAGE": "0",
+      "ATMD_PRESET": "0",
+      "ATMD_MANUAL": "1"
+    },
+    "wait": 4,
+    "caption_en": "This manual open inside the plugin.",
+    "caption_es": "Este manual abierto dentro del plugin."
+  }
+]

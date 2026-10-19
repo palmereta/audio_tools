@@ -1,0 +1,20 @@
+{
+ "name": "Triplet Roll",
+ "category": "Triplets",
+ "description": "Three steps per beat: a rolling twelve-step loop.",
+ "order": 26,
+ "params": {
+  "cutoff": 40,
+  "resonance": 80,
+  "envmod": 58,
+  "decay": 46,
+  "accent": 70,
+  "tempo": 120
+ },
+ "pattern": {
+  "pitch": "0 0 12a 0 3 7s 0 0 10a 0 5 3s 0 0 0 0",
+  "time": "NNNNNNNNNNNNRRRR",
+  "length": 12,
+  "triplet": true
+ }
+}

@@ -1,0 +1,155 @@
+{
+ "name": "Glass Marimba",
+ "category": "Ky",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 1,
+    "level": 97,
+    "skirt": 1,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      0,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      52,
+      60,
+      46
+     ],
+     "hold": 0,
+     "timeScale": 4
+    }
+   },
+   {
+    "form": 0,
+    "level": 78,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 4,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      0,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      44,
+      50,
+      40
+     ],
+     "hold": 0,
+     "timeScale": 4
+    }
+   },
+   {
+    "form": 5,
+    "level": 70,
+    "skirt": 0,
+    "bwRes": 9,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      0,
+      0,
+      0
+     ],
+     "time": [
+      0,
+      40,
+      50,
+      40
+     ],
+     "hold": 0,
+     "timeScale": 4
+    }
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "name": "Glass Mari"
+ },
+ "params": {
+  "voices": 16,
+  "rev_type": 3,
+  "rev_send": 0.3,
+  "var_type": 0,
+  "volume": 0.963
+ },
+ "demoNotes": "60:0.4,64:0.4,67:0.4,72:0.4,71:0.4,67:0.4,64:0.8"
+}

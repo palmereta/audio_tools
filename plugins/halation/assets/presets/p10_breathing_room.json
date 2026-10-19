@@ -1,0 +1,17 @@
+{
+ "name": "Breathing Room",
+ "category": "Ambient",
+ "description": "The walls move slowly in and out, the tail rises and falls like breath.",
+ "params": {
+  "space": 95,
+  "size": 160,
+  "length": 72,
+  "tone": 58,
+  "mix": 40,
+  "on_breathe": 1,
+  "breathe_mode": 0,
+  "breathe_depth": 45,
+  "breathe_rate": 0.08
+ },
+ "order": 10
+}

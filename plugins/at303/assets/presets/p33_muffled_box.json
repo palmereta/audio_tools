@@ -1,0 +1,21 @@
+{
+ "name": "Muffled Box",
+ "category": "Extended",
+ "description": "The muffler on hard: the VCA rounds every edge.",
+ "order": 33,
+ "params": {
+  "cutoff": 48,
+  "resonance": 76,
+  "envmod": 56,
+  "decay": 42,
+  "accent": 68,
+  "muffler": 2,
+  "tempo": 124
+ },
+ "pattern": {
+  "pitch": "0 0a 3 0 7 0a 5 3 0 0a 10 0 12 7a 5 3",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

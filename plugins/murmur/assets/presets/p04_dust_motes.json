@@ -1,0 +1,15 @@
+{
+ "name": "Dust Motes",
+ "category": "Clouds",
+ "params": {
+  "size": 40,
+  "density": 40,
+  "density_rand": 1.0,
+  "spray": 3.0,
+  "buffer": 10,
+  "reverse": 0.3,
+  "high_cut": 8000,
+  "rev_mix": 0.4,
+  "mix": 0.5
+ }
+}

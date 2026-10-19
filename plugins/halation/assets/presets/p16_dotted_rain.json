@@ -1,0 +1,15 @@
+{
+ "name": "Dotted Rain",
+ "category": "Rhythmic",
+ "description": "A pattern of repeats falling like rain, on the beat.",
+ "params": {
+  "space": 12,
+  "division": 8,
+  "pattern": 4,
+  "length": 50,
+  "tone": 62,
+  "mix": 32,
+  "pingpong": 1
+ },
+ "order": 16
+}

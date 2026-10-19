@@ -1,0 +1,15 @@
+{
+ "name": "Intercom",
+ "category": "Radio and phone",
+ "description": "A wall intercom: narrow, hard-driven, with mains hum.",
+ "params": {
+  "machine": 5,
+  "line": 0,
+  "noise": 55.0,
+  "drive": 10,
+  "hum": 55,
+  "lowcut": 400,
+  "highcut": 3000
+ },
+ "order": 28
+}

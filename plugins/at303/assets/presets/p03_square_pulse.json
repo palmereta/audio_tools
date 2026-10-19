@@ -1,0 +1,21 @@
+{
+ "name": "Square Pulse",
+ "category": "Classic",
+ "description": "The square wave: hollower, with the waveshaper's soft corners.",
+ "order": 3,
+ "params": {
+  "waveform": 1,
+  "cutoff": 38,
+  "resonance": 66,
+  "envmod": 58,
+  "decay": 40,
+  "accent": 60,
+  "tempo": 125
+ },
+ "pattern": {
+  "pitch": "0a 0 3 0 5 0 3s 0 0a 0 7 5 3 0 0 0",
+  "time": "NNNNNNNNNNNNNNRR",
+  "length": 16,
+  "triplet": false
+ }
+}

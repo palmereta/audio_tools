@@ -1,0 +1,19 @@
+{
+ "name": "Breathing Cloud",
+ "category": "Texture",
+ "params": {
+  "size": 250,
+  "density": 20,
+  "spray": 1.0,
+  "lfo1_target": 4,
+  "lfo1_shape": 0,
+  "lfo1_rate": 0.1,
+  "lfo1_amount": 0.8,
+  "lfo2_target": 6,
+  "lfo2_shape": 3,
+  "lfo2_rate": 0.3,
+  "lfo2_amount": 0.6,
+  "rev_mix": 0.45,
+  "mix": 0.6
+ }
+}

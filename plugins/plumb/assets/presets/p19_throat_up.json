@@ -1,0 +1,12 @@
+{
+ "name": "Throat Up",
+ "category": "Character",
+ "description": "A shorter vocal tract: brighter, younger, the pitch unchanged.",
+ "order": 19,
+ "params": {
+  "amount": 100,
+  "speed": 20,
+  "style": 25,
+  "throat": 3
+ }
+}

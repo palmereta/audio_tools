@@ -1,0 +1,17 @@
+# Builds
+build/
+build-*/
+dist/
+*.wav
+.DS_Store
+.cache/
+compile_commands.json
+
+# Renders crudos de Blender (se regeneran con tools/blender/scene.py)
+plugins/*/assets/render/out/
+plugins/*/assets/render/out_ext/
+plugins/*/assets/render/*_preview.jpg
+
+# Python
+__pycache__/
+hosttest-out/

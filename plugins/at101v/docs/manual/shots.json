@@ -1,0 +1,252 @@
+[
+  {
+    "file": "synth-panel.jpg",
+    "env": {
+      "AT101V_TAB": "0",
+      "AT101V_PRESET": "1",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "caption_en": "The SYNTH page: the front panel and the 32-key keyboard with the 101 Bass preset.",
+    "caption_es": "La página SYNTH: el panel y el teclado de 32 teclas con el preset 101 Bass."
+  },
+  {
+    "file": "top-bar.jpg",
+    "env": {
+      "AT101V_TAB": "0",
+      "AT101V_PRESET": "16",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      0.051
+    ],
+    "caption_en": "The top bar: preset selector, SAVE, RANDOM and the three page tabs.",
+    "caption_es": "La barra superior: selector de presets, SAVE, RANDOM y las tres pestañas de página."
+  },
+  {
+    "file": "lower-bar.jpg",
+    "env": {
+      "AT101V_TAB": "0",
+      "AT101V_PRESET": "16",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.0,
+      0.966,
+      1.0,
+      0.034
+    ],
+    "caption_en": "The lower bar: voices, MIDI activity, clock source, key transpose, keyboard octave and the sequencer step.",
+    "caption_es": "La barra inferior: voces, actividad MIDI, fuente de reloj, transposición, octava del teclado y paso del secuenciador."
+  },
+  {
+    "file": "panel-modulator-vco.jpg",
+    "env": {
+      "AT101V_TAB": "0",
+      "AT101V_PRESET": "9",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.026,
+      0.15,
+      0.374,
+      0.285
+    ],
+    "caption_en": "TUNE, the MODULATOR and the VCO.",
+    "caption_es": "TUNE, el MODULATOR y el VCO."
+  },
+  {
+    "file": "panel-mixer-vcf.jpg",
+    "env": {
+      "AT101V_TAB": "0",
+      "AT101V_PRESET": "16",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.389,
+      0.15,
+      0.346,
+      0.285
+    ],
+    "caption_en": "The SOURCE MIXER and the VCF.",
+    "caption_es": "El SOURCE MIXER y el VCF."
+  },
+  {
+    "file": "panel-vca-env.jpg",
+    "env": {
+      "AT101V_TAB": "0",
+      "AT101V_PRESET": "1",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.724,
+      0.15,
+      0.244,
+      0.285
+    ],
+    "caption_en": "The VCA and the ENV.",
+    "caption_es": "El VCA y el ENV."
+  },
+  {
+    "file": "panel-performance.jpg",
+    "env": {
+      "AT101V_TAB": "0",
+      "AT101V_PRESET": "1",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.018,
+      0.515,
+      0.148,
+      0.42
+    ],
+    "caption_en": "The performance panel: VOLUME, PORTAMENTO, the BENDER faders, the PORTAMENTO and TRANSPOSE switches and the bender lever.",
+    "caption_es": "El panel de ejecución: VOLUME, PORTAMENTO, los faders BENDER, las llaves PORTAMENTO y TRANSPOSE y la palanca."
+  },
+  {
+    "file": "panel-buttons.jpg",
+    "env": {
+      "AT101V_TAB": "0",
+      "AT101V_PRESET": "26",
+      "AT101V_BODY": "0",
+      "AT101V_HOLD": "60"
+    },
+    "wait": 5,
+    "crop": [
+      0.026,
+      0.419,
+      0.401,
+      0.104
+    ],
+    "caption_en": "The function row: POWER, the SEQUENCER buttons LOAD and PLAY, the ARPEGGIO buttons, HOLD and KEY TRANSPOSE.",
+    "caption_es": "La fila de funciones: POWER, los botones SEQUENCER LOAD y PLAY, los botones ARPEGGIO, HOLD y KEY TRANSPOSE."
+  },
+  {
+    "file": "settings-voices-expression.jpg",
+    "env": {
+      "AT101V_TAB": "2",
+      "AT101V_PRESET": "14",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.015,
+      0.075,
+      0.487,
+      0.43
+    ],
+    "caption_en": "The VOICES and EXPRESSION sections of the Settings page.",
+    "caption_es": "Las secciones VOICES y EXPRESSION de la página de ajustes."
+  },
+  {
+    "file": "seq-page.jpg",
+    "env": {
+      "AT101V_TAB": "1",
+      "AT101V_PRESET": "16",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "caption_en": "The SEQUENCER page playing Acid Line: accents in orange, slides in green, the red LED marks the current step.",
+    "caption_es": "La página SEQUENCER tocando Acid Line: acentos en naranja, slides en verde y el LED rojo marca el paso actual."
+  },
+  {
+    "file": "seq-toolbar.jpg",
+    "env": {
+      "AT101V_TAB": "1",
+      "AT101V_PRESET": "16",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.015,
+      0.076,
+      0.97,
+      0.169
+    ],
+    "caption_en": "The toolbar and page buttons of the Sequencer page.",
+    "caption_es": "La barra de herramientas y los botones de página de la página del secuenciador."
+  },
+  {
+    "file": "seq-lanes.jpg",
+    "env": {
+      "AT101V_TAB": "1",
+      "AT101V_PRESET": "16",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.0,
+      0.468,
+      0.56,
+      0.48
+    ],
+    "caption_en": "The lanes under the grid: ACCENT, SLIDE, TIE and PROB.",
+    "caption_es": "Los carriles debajo de la grilla: ACCENT, SLIDE, TIE y PROB."
+  },
+  {
+    "file": "settings-clock.jpg",
+    "env": {
+      "AT101V_TAB": "2",
+      "AT101V_PRESET": "29",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.5,
+      0.075,
+      0.49,
+      0.43
+    ],
+    "caption_en": "The CLOCK section of the Settings page.",
+    "caption_es": "La sección CLOCK de la página de ajustes."
+  },
+  {
+    "file": "settings-page.jpg",
+    "env": {
+      "AT101V_TAB": "2",
+      "AT101V_PRESET": "29",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "caption_en": "The Settings page with the Trance Gate Arp preset.",
+    "caption_es": "La página de ajustes con el preset Trance Gate Arp."
+  },
+  {
+    "file": "settings-effects.jpg",
+    "env": {
+      "AT101V_TAB": "2",
+      "AT101V_PRESET": "21",
+      "AT101V_BODY": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.015,
+      0.515,
+      0.97,
+      0.44
+    ],
+    "caption_en": "The lower row of the Settings page: CHARACTER, CHORUS, DELAY, REVERB and SYSTEM.",
+    "caption_es": "La fila de abajo de la página de ajustes: CHARACTER, CHORUS, DELAY, REVERB y SYSTEM."
+  },
+  {
+    "file": "body-blue-chord.jpg",
+    "env": {
+      "AT101V_TAB": "0",
+      "AT101V_PRESET": "36",
+      "AT101V_BODY": "1",
+      "AT101V_HOLD": "60"
+    },
+    "wait": 5,
+    "caption_en": "AT101V in the blue body, with a C major chord held on the Poly Brass preset.",
+    "caption_es": "El AT101V con el gabinete azul y un acorde de do mayor sostenido en el preset Poly Brass."
+  }
+]

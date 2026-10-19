@@ -1,0 +1,12 @@
+{
+ "name": "Throat Down",
+ "category": "Character",
+ "description": "A longer vocal tract: darker, bigger, the pitch unchanged.",
+ "order": 18,
+ "params": {
+  "amount": 100,
+  "speed": 20,
+  "style": 25,
+  "throat": -3
+ }
+}

@@ -1,0 +1,14 @@
+{
+ "name": "Endless Pad",
+ "category": "Ambient",
+ "description": "A tail that never ends: play a chord and it stays.",
+ "params": {
+  "space": 100,
+  "size": 250,
+  "length": 100,
+  "tone": 60,
+  "mix": 50,
+  "mod_depth": 45
+ },
+ "order": 9
+}

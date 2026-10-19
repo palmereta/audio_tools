@@ -1,0 +1,12 @@
+{
+ "name": "Hard Tune, Live",
+ "category": "Hard",
+ "description": "The effect for the stage: Live mode, 0.7 ms.",
+ "order": 7,
+ "params": {
+  "amount": 100,
+  "speed": 0,
+  "style": 100,
+  "mode": 0
+ }
+}

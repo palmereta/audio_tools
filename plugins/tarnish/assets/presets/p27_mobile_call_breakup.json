@@ -1,0 +1,13 @@
+{
+ "name": "Mobile Call Breakup",
+ "category": "Radio and phone",
+ "description": "A weak mobile call: grit, frames dropping out in bursts.",
+ "params": {
+  "machine": 5,
+  "line": 1,
+  "noise": 50.0,
+  "codec": 60,
+  "frameloss": 40
+ },
+ "order": 27
+}

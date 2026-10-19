@@ -1,0 +1,291 @@
+{
+ "name": "Formant Strings",
+ "category": "Pd",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 2,
+    "bwRes": 50,
+    "fixed": true,
+    "coarse": 16,
+    "fine": 86,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 4
+   },
+   {
+    "form": 7,
+    "level": 92,
+    "skirt": 2,
+    "bwRes": 54,
+    "fixed": true,
+    "coarse": 17,
+    "fine": 49,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 4
+   },
+   {
+    "form": 7,
+    "level": 80,
+    "skirt": 2,
+    "bwRes": 58,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 61,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 4
+   },
+   {
+    "form": 7,
+    "level": 70,
+    "skirt": 2,
+    "bwRes": 62,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 116,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 4
+   },
+   {
+    "form": 2,
+    "level": 78,
+    "skirt": 3,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 4,
+    "detune": 6
+   },
+   {
+    "form": 2,
+    "level": 76,
+    "skirt": 3,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 4,
+    "detune": -6
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "lfo1Wave": 4,
+  "lfo1Speed": 58,
+  "lfo1Pmd": 10,
+  "lfo1Delay": 50,
+  "formantKnob": [
+   [
+    2,
+    0,
+    0,
+    30
+   ],
+   [
+    2,
+    0,
+    1,
+    30
+   ],
+   [
+    2,
+    0,
+    2,
+    20
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "fmKnob": [
+   [
+    1,
+    0,
+    4,
+    40
+   ],
+   [
+    1,
+    0,
+    5,
+    40
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "name": "Formant St"
+ },
+ "params": {
+  "voices": 24,
+  "var_type": 5,
+  "var_send": 0.4,
+  "rev_type": 2,
+  "rev_send": 0.35,
+  "rev_time": 0.7,
+  "volume": 0.6
+ },
+ "demoNotes": "48+55+60+64:4"
+}

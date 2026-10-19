@@ -1,0 +1,15 @@
+{
+ "name": "Self-Oscillation",
+ "category": "Experimental",
+ "description": "Feedback at the edge: the repeats feed themselves (the limiter keeps it safe).",
+ "params": {
+  "space": 25,
+  "division": 9,
+  "length": 100,
+  "tone": 50,
+  "character": 1,
+  "wear": 30,
+  "mix": 40
+ },
+ "order": 25
+}

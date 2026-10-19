@@ -1,0 +1,20 @@
+{
+ "name": "Tied Drone",
+ "category": "Bass",
+ "description": "One long note per bar, tied, with the filter breathing on Env Mod.",
+ "order": 20,
+ "params": {
+  "cutoff": 24,
+  "resonance": 72,
+  "envmod": 68,
+  "decay": 90,
+  "accent": 20,
+  "tempo": 120
+ },
+ "pattern": {
+  "pitch": "0d 3d 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "time": "NTTTTTTTNTTTTTTT",
+  "length": 16,
+  "triplet": false
+ }
+}

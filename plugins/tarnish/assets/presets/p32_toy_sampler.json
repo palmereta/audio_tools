@@ -1,0 +1,17 @@
+{
+ "name": "Toy Sampler",
+ "category": "Lo-fi and effects",
+ "description": "8 bits at 8 kHz with the aliasing left in, a wobbly cassette under it.",
+ "params": {
+  "machine": 1,
+  "formulation": 0,
+  "noise": 60.0,
+  "bits": 8,
+  "rate": 8000,
+  "crush_mode": 1,
+  "jitter": 20,
+  "wow": 0.3,
+  "flutter": 0.1
+ },
+ "order": 32
+}

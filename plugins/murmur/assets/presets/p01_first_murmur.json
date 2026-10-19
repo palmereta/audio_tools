@@ -1,0 +1,12 @@
+{
+ "name": "First Murmur",
+ "category": "Clouds",
+ "params": {
+  "size": 180,
+  "density": 18,
+  "spray": 0.35,
+  "pan": 0.6,
+  "rev_mix": 0.25,
+  "mix": 0.5
+ }
+}

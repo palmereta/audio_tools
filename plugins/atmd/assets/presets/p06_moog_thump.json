@@ -1,0 +1,33 @@
+{
+ "name": "Moog Thump",
+ "category": "Bass",
+ "params": {
+  "osc1_range": 2,
+  "osc2_range": 1,
+  "osc3_range": 3,
+  "osc1_wave": 3,
+  "osc2_wave": 3,
+  "osc3_wave": 0,
+  "osc2_freq": 0,
+  "osc3_freq": 0,
+  "mix_osc1": 8,
+  "mix_osc2": 7,
+  "mix_osc3": 0,
+  "mix_osc1_on": 1,
+  "mix_osc2_on": 1,
+  "mix_osc3_on": 0,
+  "filter_cutoff": -3.6,
+  "filter_emphasis": 0.0,
+  "filter_contour": 7,
+  "f_attack": 0,
+  "f_decay": 1.8,
+  "f_sustain": 0,
+  "kbd_ctrl1": 0,
+  "kbd_ctrl2": 0,
+  "l_attack": 0,
+  "l_decay": 2.3,
+  "l_sustain": 0,
+  "decay_on": 1,
+  "volume": 5.03
+ }
+}

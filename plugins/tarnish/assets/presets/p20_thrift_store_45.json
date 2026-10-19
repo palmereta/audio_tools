@@ -1,0 +1,16 @@
+{
+ "name": "Thrift Store 45",
+ "category": "Vinyl",
+ "description": "A 45 from the bargain bin: busy crackle, one deep scratch, inner-groove loss.",
+ "params": {
+  "machine": 3,
+  "rpm": 1,
+  "noise": 65.0,
+  "crackle": 60,
+  "scratches": 1,
+  "groove": 50,
+  "groove_follow": 0,
+  "wow": 0.1
+ },
+ "order": 20
+}

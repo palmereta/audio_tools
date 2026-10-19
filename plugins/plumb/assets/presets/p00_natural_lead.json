@@ -1,0 +1,11 @@
+{
+ "name": "Natural Lead",
+ "category": "Natural",
+ "description": "A lead vocal kept alive: the note centre is corrected, vibrato and scoops stay.",
+ "order": 0,
+ "params": {
+  "amount": 100,
+  "speed": 20,
+  "style": 20
+ }
+}

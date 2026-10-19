@@ -1,0 +1,17 @@
+{
+ "name": "7.5 ips Demo Reel",
+ "category": "Studio tape",
+ "description": "Half the speed: the bump moves down, the top rolls off, the hiss rises.",
+ "params": {
+  "machine": 0,
+  "speed": 2,
+  "noise": 50.0,
+  "drive": 6,
+  "saturation": 60,
+  "wow": 0.08,
+  "flutter": 0.05,
+  "scrape": 25,
+  "eq": 1
+ },
+ "order": 2
+}

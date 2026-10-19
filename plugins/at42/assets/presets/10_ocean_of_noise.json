@@ -1,0 +1,62 @@
+{
+ "name": "Ocean of Noise",
+ "category": "Ambient",
+ "panel": {
+  "mix_vol1": 0.0,
+  "mix_vol2": 0.0,
+  "mix_vol3": 0.6,
+  "mix_vol4": 0.0,
+  "mix_vol5": 0.0,
+  "mix_vol6": 0.0,
+  "mix_vol7": 0.0,
+  "mix_vol8": 0.0,
+  "mix_vol9": 0.0,
+  "mix_vol10": 0.6,
+  "mix_pan3": 0.3,
+  "mix_pan10": 0.7,
+  "fx_cart_l": 0,
+  "fx_prog_l": 2,
+  "fx_cart_r": 0,
+  "fx_prog_r": 2,
+  "fx_x": 0.5,
+  "fx_y": 0.5,
+  "fx_z": 0.9,
+  "fx_blend": 0.6,
+  "d3_noise": 1.0,
+  "d3_pitch": 0.0,
+  "d3_fmamt": 1.0,
+  "d3_div": 1.0,
+  "d3_hold": 1,
+  "d6_noise": 1.0,
+  "d6_pitch": 0.0,
+  "d6_fmamt": 1.0,
+  "d6_div": 1.0,
+  "d6_hold": 1,
+  "flt_freq_l": 0.55,
+  "flt_freq_r": 0.6,
+  "flt_res_l": 0.55,
+  "flt_res_r": 0.5,
+  "lfoa_rate": 0.15,
+  "lfob_rate": 0.05,
+  "lfob_speed": 0,
+  "flt_mod_l": 0.25,
+  "flt_mod_r": 0.25,
+  "master": 0.649
+ },
+ "settings": {},
+ "cables": [
+  {
+   "src": "lfoa_out",
+   "dst": "flt_cvl",
+   "color": "blue"
+  },
+  {
+   "src": "lfob_out",
+   "dst": "flt_cvr",
+   "color": "white"
+  }
+ ],
+ "keyseq": [],
+ "demoKeys": "3,6",
+ "demoNotes": ""
+}

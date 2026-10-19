@@ -1,0 +1,20 @@
+{
+ "name": "Off The Grid",
+ "category": "Acid",
+ "description": "Rests in odd places: the line pushes and pulls against the beat.",
+ "order": 15,
+ "params": {
+  "cutoff": 44,
+  "resonance": 80,
+  "envmod": 55,
+  "decay": 52,
+  "accent": 72,
+  "tempo": 124
+ },
+ "pattern": {
+  "pitch": "0a 3 12s 0 7 5a 0 10 0 0 0 0 0 0 0 0",
+  "time": "NRNNRNTNRNNRNRNN",
+  "length": 16,
+  "triplet": false
+ }
+}

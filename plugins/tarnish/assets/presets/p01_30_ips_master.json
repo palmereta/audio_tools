@@ -1,0 +1,16 @@
+{
+ "name": "30 ips Master",
+ "category": "Studio tape",
+ "description": "The fast, clean machine for a mix bus: open top, low bump, almost no hiss.",
+ "params": {
+  "machine": 0,
+  "speed": 0,
+  "noise": 50.0,
+  "drive": 2,
+  "bias": 20,
+  "wow": 0.02,
+  "flutter": 0.015,
+  "scrape": 10
+ },
+ "order": 1
+}

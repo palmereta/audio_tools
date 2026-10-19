@@ -1,0 +1,224 @@
+[
+  {
+    "file": "overview.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "1",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "caption_en": "The full panel with the Cathedral of A preset.",
+    "caption_es": "El panel completo con el preset Cathedral of A."
+  },
+  {
+    "file": "drones.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "8",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.016,
+      0.188,
+      0.332,
+      0.206
+    ],
+    "caption_en": "Drones 1 and 2 with the Breathing Orbs preset: LFO A is patched into both cv inputs.",
+    "caption_es": "Los drones 1 y 2 con el preset Breathing Orbs: el LFO A va a las dos entradas cv."
+  },
+  {
+    "file": "drone-keys.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "0",
+      "AT42_PANEL": "0",
+      "AT42_KEYS": "1"
+    },
+    "wait": 5,
+    "crop": [
+      0.839,
+      0.655,
+      0.145,
+      0.27
+    ],
+    "caption_en": "The DRONE KEYS with keys 1 and 4 pressed.",
+    "caption_es": "Las DRONE KEYS con las teclas 1 y 4 apretadas."
+  },
+  {
+    "file": "noise-voice.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "12",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.016,
+      0.374,
+      0.173,
+      0.206
+    ],
+    "caption_en": "DRONE 3 with the Siren Tower preset.",
+    "caption_es": "DRONE 3 con el preset Siren Tower."
+  },
+  {
+    "file": "vco.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "17",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.175,
+      0.374,
+      0.306,
+      0.203
+    ],
+    "caption_en": "VCO A and ENVELOPE A with the Berlin Five preset.",
+    "caption_es": "El VCO A y la ENVELOPE A con el preset Berlin Five."
+  },
+  {
+    "file": "mixer.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "4",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.332,
+      0.357,
+      0.338,
+      0.122
+    ],
+    "caption_en": "The VOICE MIXER with the Fifth Machine preset.",
+    "caption_es": "El VOICE MIXER con el preset Fifth Machine."
+  },
+  {
+    "file": "effector.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "7",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.332,
+      0.168,
+      0.338,
+      0.206
+    ],
+    "caption_en": "The DUAL EFFECTOR and the filters with the Shimmer Garden preset.",
+    "caption_es": "El DUAL EFFECTOR y los filtros con el preset Shimmer Garden."
+  },
+  {
+    "file": "cv-left.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "17",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.016,
+      0.528,
+      0.627,
+      0.135
+    ],
+    "caption_en": "LFO A, the joystick controls and the 5-step sequencer with the Berlin Five preset.",
+    "caption_es": "LFO A, los controles del joystick y el secuenciador de 5 pasos con el preset Berlin Five."
+  },
+  {
+    "file": "cv-right.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "25",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.627,
+      0.532,
+      0.358,
+      0.13
+    ],
+    "caption_en": "PREAMP, ENVELOPE FOLLOWER and LFO B with the Piezo Percussion preset.",
+    "caption_es": "PREAMP, ENVELOPE FOLLOWER y LFO B con el preset Piezo Percussion."
+  },
+  {
+    "file": "keyboard.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "21",
+      "AT42_PANEL": "0",
+      "AT42_KEYS": "1"
+    },
+    "wait": 5,
+    "crop": [
+      0.016,
+      0.658,
+      0.823,
+      0.273
+    ],
+    "caption_en": "The touch keyboard and the joystick with the Arp Constellation preset, one plate pressed.",
+    "caption_es": "El teclado táctil y el joystick con el preset Arp Constellation y una placa apretada."
+  },
+  {
+    "file": "patch.jpg",
+    "env": {
+      "AT42_TAB": "0",
+      "AT42_PRESET": "17",
+      "AT42_PANEL": "1"
+    },
+    "wait": 5,
+    "caption_en": "The full panel in black with the Berlin Five patch.",
+    "caption_es": "El panel completo en negro con el patch Berlin Five."
+  },
+  {
+    "file": "settings.jpg",
+    "env": {
+      "AT42_TAB": "1",
+      "AT42_PRESET": "0",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "caption_en": "The Settings page.",
+    "caption_es": "La página de ajustes."
+  },
+  {
+    "file": "settings-keys.jpg",
+    "env": {
+      "AT42_TAB": "1",
+      "AT42_PRESET": "21",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.0,
+      0.29,
+      0.727,
+      0.291
+    ],
+    "caption_en": "The TOUCH KEYBOARD box of the Settings page.",
+    "caption_es": "La caja TOUCH KEYBOARD de la página de ajustes."
+  },
+  {
+    "file": "settings-midi.jpg",
+    "env": {
+      "AT42_TAB": "1",
+      "AT42_PRESET": "0",
+      "AT42_PANEL": "0"
+    },
+    "wait": 5,
+    "crop": [
+      0.517,
+      0.586,
+      0.483,
+      0.3
+    ],
+    "caption_en": "The MIDI AND SYSTEM box of the Settings page.",
+    "caption_es": "La caja MIDI AND SYSTEM de la página de ajustes."
+  }
+]

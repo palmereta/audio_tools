@@ -1,0 +1,16 @@
+{
+ "name": "Slow Tide",
+ "category": "Ambient",
+ "description": "Long tape-coloured repeats that melt into a hall.",
+ "params": {
+  "space": 55,
+  "division": 11,
+  "length": 78,
+  "tone": 45,
+  "character": 1,
+  "wear": 20,
+  "mix": 40,
+  "mod_depth": 55
+ },
+ "order": 13
+}

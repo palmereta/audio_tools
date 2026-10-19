@@ -1,0 +1,49 @@
+{
+ "name": "Piezo Percussion",
+ "category": "Experimental",
+ "panel": {
+  "mix_vol1": 0.0,
+  "mix_vol2": 0.0,
+  "mix_vol3": 0.4,
+  "mix_vol4": 0.0,
+  "mix_vol5": 0.0,
+  "mix_vol6": 0.0,
+  "mix_vol7": 0.6,
+  "mix_vol8": 0.0,
+  "mix_vol9": 0.0,
+  "mix_vol10": 0.0,
+  "mix_pan7": 0.5,
+  "mix_pan3": 0.4,
+  "fx_cart_l": 4,
+  "fx_prog_l": 0,
+  "fx_cart_r": 4,
+  "fx_prog_r": 0,
+  "fx_x": 0.6,
+  "fx_y": 0.7,
+  "fx_z": 0.4,
+  "fx_blend": 0.5,
+  "pre_gain": 0.6,
+  "d3_noise": 0.8,
+  "d3_pitch": 0.2,
+  "d3_att": 0.0,
+  "d3_rls": 0.15,
+  "flt_mod_l": 0.3,
+  "master": 0.7
+ },
+ "settings": {},
+ "cables": [
+  {
+   "src": "ef_gate",
+   "dst": "d3_gate",
+   "color": "yellow"
+  },
+  {
+   "src": "ef_env",
+   "dst": "flt_cvl",
+   "color": "white"
+  }
+ ],
+ "keyseq": [],
+ "demoKeys": "",
+ "demoNotes": ""
+}

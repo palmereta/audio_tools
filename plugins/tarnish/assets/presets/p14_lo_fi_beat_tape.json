@@ -1,0 +1,18 @@
+{
+ "name": "Lo-Fi Beat Tape",
+ "category": "Cassette",
+ "description": "A soft, wobbly cassette for beats: saturated, hissy, never harsh.",
+ "params": {
+  "machine": 1,
+  "formulation": 0,
+  "noise": 55.0,
+  "drive": 6,
+  "saturation": 60,
+  "wow": 0.35,
+  "flutter": 0.12,
+  "wear": 20,
+  "highcut": 11000,
+  "scrape": 20
+ },
+ "order": 14
+}

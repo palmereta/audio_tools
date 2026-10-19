@@ -1,0 +1,183 @@
+{
+ "name": "Noise Wind",
+ "category": "Fx",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 92,
+    "bandwidth": 18,
+    "coarse": 16,
+    "fine": 110,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "freqMod": 6,
+    "resonance": 4
+   },
+   {
+    "level": 86,
+    "bandwidth": 22,
+    "coarse": 18,
+    "fine": 14,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "freqMod": 5
+   },
+   {
+    "level": 78,
+    "bandwidth": 30,
+    "coarse": 19,
+    "fine": 33,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "freqMod": 7
+   },
+   {
+    "level": 66,
+    "bandwidth": 40,
+    "coarse": 20,
+    "fine": 12,
+    "eg": {
+     "level": [
+      99,
+      96,
+      92,
+      0
+     ],
+     "time": [
+      52,
+      60,
+      60,
+      54
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "freqMod": 4
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "lfo1Wave": 5,
+  "lfo1Speed": 30,
+  "lfo1Fmd": 60,
+  "name": "Noise Wind"
+ },
+ "params": {
+  "var_type": 3,
+  "var_send": 0.35,
+  "var_depth": 0.6,
+  "rev_type": 7,
+  "rev_send": 0.5,
+  "rev_time": 0.85,
+  "volume": 0.802
+ },
+ "demoNotes": "60:5"
+}

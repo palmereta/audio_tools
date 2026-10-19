@@ -1,0 +1,13 @@
+{
+ "name": "Chipmunk",
+ "category": "Character",
+ "description": "Up a fifth with the formants following the pitch.",
+ "order": 22,
+ "params": {
+  "amount": 100,
+  "speed": 10,
+  "style": 50,
+  "transpose": 7,
+  "formants": 0
+ }
+}

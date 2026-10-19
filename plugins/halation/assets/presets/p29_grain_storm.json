@@ -1,0 +1,16 @@
+{
+ "name": "Grain Storm",
+ "category": "Experimental",
+ "description": "The repeats shatter into a swarm of grains.",
+ "params": {
+  "space": 50,
+  "division": 2,
+  "length": 75,
+  "mix": 50,
+  "on_grains": 1,
+  "grains": 90,
+  "grain_ms": 40,
+  "mod_depth": 60
+ },
+ "order": 29
+}

@@ -1,0 +1,17 @@
+{
+ "name": "Reverse Shimmer",
+ "category": "Experimental",
+ "description": "Reversed swells that climb an octave as they repeat.",
+ "params": {
+  "space": 85,
+  "size": 200,
+  "length": 72,
+  "mix": 50,
+  "on_reverse": 1,
+  "reverse": 70,
+  "reverse_div": 11,
+  "on_shimmer": 1,
+  "shimmer": 40
+ },
+ "order": 26
+}

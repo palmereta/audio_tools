@@ -1,0 +1,12 @@
+{
+ "name": "High Voice",
+ "category": "Voice",
+ "description": "Soprano and high tenor: the detector listens up to 1.4 kHz.",
+ "order": 15,
+ "params": {
+  "amount": 100,
+  "speed": 18,
+  "style": 25,
+  "voice": 2
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "name": "Stage Firm",
+ "category": "Live",
+ "description": "Live mode, firmer: for a loud stage.",
+ "order": 12,
+ "params": {
+  "amount": 100,
+  "speed": 12,
+  "style": 50,
+  "mode": 0
+ }
+}

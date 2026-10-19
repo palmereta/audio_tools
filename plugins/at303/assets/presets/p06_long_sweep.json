@@ -1,0 +1,20 @@
+{
+ "name": "Long Sweep",
+ "category": "Classic",
+ "description": "Decay at maximum and Env Mod up: slow, wide filter sweeps.",
+ "order": 6,
+ "params": {
+  "cutoff": 20,
+  "resonance": 70,
+  "envmod": 85,
+  "decay": 100,
+  "accent": 40,
+  "tempo": 118
+ },
+ "pattern": {
+  "pitch": "0a 3 7 10 12 10 7 3 0 0 0 0 0 0 0 0",
+  "time": "NTTTNTTTNTTTNTTT",
+  "length": 16,
+  "triplet": false
+ }
+}

@@ -1,0 +1,16 @@
+{
+ "name": "Pocket Player Jog",
+ "category": "Cassette",
+ "description": "A personal player on the move: strong wow from the reels, a closed top.",
+ "params": {
+  "machine": 1,
+  "formulation": 0,
+  "noise": 50.0,
+  "wow": 0.6,
+  "flutter": 0.2,
+  "wear": 30,
+  "highcut": 10000,
+  "wobble": 1
+ },
+ "order": 8
+}

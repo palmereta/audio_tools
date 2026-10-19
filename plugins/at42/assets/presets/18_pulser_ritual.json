@@ -1,0 +1,71 @@
+{
+ "name": "Pulser Ritual",
+ "category": "Sequence",
+ "panel": {
+  "mix_vol1": 0.0,
+  "mix_vol2": 0.0,
+  "mix_vol3": 0.4,
+  "mix_vol4": 0.0,
+  "mix_vol5": 0.65,
+  "mix_vol6": 0.0,
+  "mix_vol7": 0.0,
+  "mix_vol8": 0.0,
+  "mix_vol9": 0.0,
+  "mix_vol10": 0.4,
+  "mix_pan5": 0.5,
+  "mix_pan3": 0.3,
+  "mix_pan10": 0.7,
+  "fx_cart_l": 7,
+  "fx_prog_l": 1,
+  "fx_cart_r": 7,
+  "fx_prog_r": 1,
+  "fx_x": 0.45,
+  "fx_y": 0.5,
+  "fx_z": 0.5,
+  "fx_blend": 0.35,
+  "vcoa_wave": 5,
+  "vcoa_pw": 0.3,
+  "vcoa_oct": 4,
+  "ega_d": 0.25,
+  "ega_s": 0.0,
+  "seq_pulser": 0.5,
+  "seq_stages": 1,
+  "seq_step1": 0.0,
+  "seq_step2": 0.25,
+  "seq_step3": 0.5,
+  "seq_step4": 0.85,
+  "d3_noise": 0.7,
+  "d3_pitch": 0.1,
+  "d3_rls": 0.2,
+  "d6_noise": 0.5,
+  "d6_pitch": 0.3,
+  "d6_rls": 0.15,
+  "master": 0.947
+ },
+ "settings": {},
+ "cables": [
+  {
+   "src": "seq_cvout",
+   "dst": "vcoa_voct",
+   "color": "red"
+  },
+  {
+   "src": "seq_gateout",
+   "dst": "ega_gate",
+   "color": "yellow"
+  },
+  {
+   "src": "seq_gateout",
+   "dst": "d3_gate",
+   "color": "white"
+  },
+  {
+   "src": "seq_clkout",
+   "dst": "d6_gate",
+   "color": "green"
+  }
+ ],
+ "keyseq": [],
+ "demoKeys": "",
+ "demoNotes": ""
+}

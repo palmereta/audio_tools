@@ -1,0 +1,12 @@
+{
+ "name": "Stage Natural",
+ "category": "Live",
+ "description": "For in-ear monitoring: Live mode with a natural correction.",
+ "order": 11,
+ "params": {
+  "amount": 90,
+  "speed": 25,
+  "style": 20,
+  "mode": 0
+ }
+}

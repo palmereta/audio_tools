@@ -1,0 +1,153 @@
+{
+ "name": "Odd Sub Bass",
+ "category": "Bs",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 3,
+    "level": 99,
+    "skirt": 2,
+    "bwRes": 0,
+    "coarse": 0,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      95,
+      90,
+      0
+     ],
+     "time": [
+      0,
+      40,
+      50,
+      20
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 82,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      70,
+      50,
+      0
+     ],
+     "time": [
+      0,
+      40,
+      50,
+      20
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "filterType": 0,
+  "cutoff": 70,
+  "resonance": 30,
+  "fegLevel": [
+   40,
+   0,
+   -10,
+   -10
+  ],
+  "fegTime": [
+   0,
+   40,
+   50,
+   30
+  ],
+  "fegDepth": 50,
+  "name": "Odd Sub Ba"
+ },
+ "params": {
+  "filter": 1,
+  "mono": 1,
+  "var_type": 0,
+  "rev_send": 0.03,
+  "volume": 0.877
+ },
+ "demoNotes": "36:0.3,39:0.3,43:0.3,46:0.3,48:0.6"
+}

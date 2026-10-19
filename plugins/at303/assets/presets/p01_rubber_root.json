@@ -1,0 +1,20 @@
+{
+ "name": "Rubber Root",
+ "category": "Classic",
+ "description": "One note and its octave; all the movement is the filter and the accent capacitor.",
+ "order": 1,
+ "params": {
+  "cutoff": 30,
+  "resonance": 80,
+  "envmod": 65,
+  "decay": 55,
+  "accent": 75,
+  "tempo": 125
+ },
+ "pattern": {
+  "pitch": "0 0 12u 0 0a 0 12a 0 0 0a 12s 0 0a 0 12 0",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

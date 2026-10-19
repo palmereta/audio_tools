@@ -1,0 +1,13 @@
+{
+ "name": "Octave Shower",
+ "category": "Pitch",
+ "params": {
+  "pitch_rand": 24,
+  "quant": 2,
+  "density": 30,
+  "size": 150,
+  "spray": 0.8,
+  "rev_mix": 0.4,
+  "mix": 0.55
+ }
+}

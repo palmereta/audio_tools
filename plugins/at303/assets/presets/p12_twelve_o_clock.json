@@ -1,0 +1,20 @@
+{
+ "name": "Twelve O'Clock",
+ "category": "Acid",
+ "description": "Every knob at noon. A good place to start turning.",
+ "order": 12,
+ "params": {
+  "cutoff": 50,
+  "resonance": 50,
+  "envmod": 50,
+  "decay": 50,
+  "accent": 50,
+  "tempo": 125
+ },
+ "pattern": {
+  "pitch": "0 3 0 7a 0 12s 10 0 0 3 0 5a 0 12 7s 0",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

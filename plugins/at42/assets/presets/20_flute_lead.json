@@ -1,0 +1,42 @@
+{
+ "name": "Flute Lead",
+ "category": "Keys",
+ "panel": {
+  "mix_vol1": 0.0,
+  "mix_vol2": 0.0,
+  "mix_vol3": 0.0,
+  "mix_vol4": 0.0,
+  "mix_vol5": 0.7,
+  "mix_vol6": 0.0,
+  "mix_vol7": 0.0,
+  "mix_vol8": 0.0,
+  "mix_vol9": 0.0,
+  "mix_vol10": 0.0,
+  "mix_pan5": 0.5,
+  "fx_cart_l": 0,
+  "fx_prog_l": 2,
+  "fx_cart_r": 0,
+  "fx_prog_r": 2,
+  "fx_x": 0.4,
+  "fx_y": 0.3,
+  "fx_z": 0.6,
+  "fx_blend": 0.35,
+  "vcoa_wave": 5,
+  "vcoa_pw": 0.2,
+  "vcoa_oct": 5,
+  "ega_a": 0.25,
+  "ega_d": 0.4,
+  "ega_s": 0.7,
+  "ega_r": 0.45,
+  "master": 0.624
+ },
+ "settings": {
+  "kb_scale": 11,
+  "kb_porta": 0.25,
+  "kb_vib": 0.35
+ },
+ "cables": [],
+ "keyseq": [],
+ "demoKeys": "",
+ "demoNotes": "0:0.6,3:0.6,5:0.6,7:1.2,10:0.6,7:1.6"
+}

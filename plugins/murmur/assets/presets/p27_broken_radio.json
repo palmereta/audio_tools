@@ -1,0 +1,17 @@
+{
+ "name": "Broken Radio",
+ "category": "Glitch",
+ "params": {
+  "size": 25,
+  "density": 80,
+  "density_rand": 1.0,
+  "reverse": 0.5,
+  "high_cut": 4000,
+  "low_cut": 400,
+  "lfo1_target": 5,
+  "lfo1_shape": 4,
+  "lfo1_rate": 4.0,
+  "lfo1_amount": 0.5,
+  "mix": 0.55
+ }
+}

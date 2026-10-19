@@ -1,0 +1,12 @@
+{
+ "name": "Play the Cloud",
+ "category": "MIDI",
+ "params": {
+  "midi_mode": 1,
+  "size": 250,
+  "density": 30,
+  "spray": 0.6,
+  "rev_mix": 0.4,
+  "mix": 0.7
+ }
+}

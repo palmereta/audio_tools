@@ -1,0 +1,15 @@
+{
+ "name": "Clean Digital Quarter",
+ "category": "Classic",
+ "description": "A clean quarter-note delay, every repeat the same colour.",
+ "params": {
+  "space": 0,
+  "division": 8,
+  "length": 40,
+  "tone": 80,
+  "mix": 25,
+  "pingpong": 0,
+  "mod_depth": 0
+ },
+ "order": 2
+}

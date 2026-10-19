@@ -1,0 +1,23 @@
+{
+ "name": "Broken Speaker",
+ "category": "Driven",
+ "description": "Hard clip with the tone low: a small speaker pushed too far.",
+ "order": 23,
+ "params": {
+  "cutoff": 36,
+  "resonance": 78,
+  "envmod": 58,
+  "decay": 40,
+  "accent": 80,
+  "drive_type": 2,
+  "drive": 80,
+  "drive_tone": 30,
+  "tempo": 138
+ },
+ "pattern": {
+  "pitch": "0 0 0a 0 3 0 0 12s 0 0 7a 0 5 0 3 0",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

@@ -1,0 +1,223 @@
+{
+ "name": "Formant Lead",
+ "category": "Ld",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 40,
+    "fixed": true,
+    "coarse": 16,
+    "fine": 69,
+    "eg": {
+     "level": [
+      99,
+      95,
+      90,
+      0
+     ],
+     "time": [
+      2,
+      40,
+      50,
+      28
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 6
+   },
+   {
+    "form": 7,
+    "level": 94,
+    "skirt": 1,
+    "bwRes": 44,
+    "fixed": true,
+    "coarse": 17,
+    "fine": 56,
+    "eg": {
+     "level": [
+      99,
+      95,
+      90,
+      0
+     ],
+     "time": [
+      2,
+      40,
+      50,
+      28
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 6
+   },
+   {
+    "form": 7,
+    "level": 84,
+    "skirt": 1,
+    "bwRes": 48,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 57,
+    "eg": {
+     "level": [
+      99,
+      95,
+      90,
+      0
+     ],
+     "time": [
+      2,
+      40,
+      50,
+      28
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 6
+   },
+   {
+    "form": 0,
+    "level": 86,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      95,
+      90,
+      0
+     ],
+     "time": [
+      2,
+      40,
+      50,
+      28
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "pitchMod": 6
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "lfo1Wave": 4,
+  "lfo1Speed": 64,
+  "lfo1Delay": 45,
+  "lfo1Pmd": 16,
+  "formantKnob": [
+   [
+    2,
+    0,
+    0,
+    50
+   ],
+   [
+    2,
+    0,
+    1,
+    63
+   ],
+   [
+    2,
+    0,
+    2,
+    40
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "name": "Formant Le"
+ },
+ "params": {
+  "mono": 1,
+  "porta": 1,
+  "porta_time": 28,
+  "at_dest": 6,
+  "at_depth": 40,
+  "mw_dest": 6,
+  "mw_depth": 50,
+  "var_type": 9,
+  "var_send": 0.2,
+  "var_rate": 0.5,
+  "rev_send": 0.18,
+  "volume": 0.845
+ },
+ "demoNotes": "60:0.5,62:0.5,64:0.5,67:1.5"
+}

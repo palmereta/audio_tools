@@ -1,0 +1,14 @@
+{
+ "name": "Major Sparkle",
+ "category": "Pitch",
+ "params": {
+  "pitch_rand": 12,
+  "quant": 4,
+  "density": 25,
+  "size": 200,
+  "shimmer": 0.2,
+  "spray": 0.6,
+  "rev_mix": 0.4,
+  "mix": 0.55
+ }
+}

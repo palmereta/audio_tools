@@ -1,0 +1,17 @@
+{
+ "name": "Tape Echo 1974",
+ "category": "Classic",
+ "description": "A worn tape echo: wobble, warm saturation and repeats that darken.",
+ "params": {
+  "space": 8,
+  "division": 6,
+  "length": 48,
+  "tone": 45,
+  "character": 1,
+  "wear": 35,
+  "mod_depth": 40,
+  "mix": 30,
+  "pingpong": 0
+ },
+ "order": 0
+}

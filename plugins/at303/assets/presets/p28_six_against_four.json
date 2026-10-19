@@ -1,0 +1,20 @@
+{
+ "name": "Six Against Four",
+ "category": "Triplets",
+ "description": "Fifteen triplet steps over a four-beat bar: the line drifts across the beat.",
+ "order": 28,
+ "params": {
+  "cutoff": 42,
+  "resonance": 82,
+  "envmod": 56,
+  "decay": 40,
+  "accent": 72,
+  "tempo": 124
+ },
+ "pattern": {
+  "pitch": "0a 3 7 12s 7 3 0 5a 10 12s 10 5 0 7 3 0",
+  "time": "NNNNNNNNNNNNNNNR",
+  "length": 15,
+  "triplet": true
+ }
+}

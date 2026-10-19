@@ -1,0 +1,15 @@
+{
+ "name": "Eighth Notes",
+ "category": "Rhythm",
+ "params": {
+  "sync": 4,
+  "size": 90,
+  "shape": 0.2,
+  "skew": -0.6,
+  "spray": 0.5,
+  "delay_sync": 10,
+  "delay_mix": 0.25,
+  "delay_fb": 0.3,
+  "mix": 0.6
+ }
+}

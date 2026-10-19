@@ -1,0 +1,17 @@
+{
+ "name": "Underwater",
+ "category": "Texture",
+ "params": {
+  "low_cut": 60,
+  "high_cut": 1200,
+  "size": 300,
+  "density": 25,
+  "spray": 1.0,
+  "lfo1_target": 7,
+  "lfo1_shape": 3,
+  "lfo1_rate": 0.15,
+  "lfo1_amount": 0.6,
+  "rev_mix": 0.4,
+  "mix": 0.6
+ }
+}

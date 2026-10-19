@@ -1,0 +1,21 @@
+{
+ "name": "Sub Ladder",
+ "category": "Bass",
+ "description": "Full bass mod on: the ladder keeps its low end at high resonance.",
+ "order": 18,
+ "params": {
+  "cutoff": 26,
+  "resonance": 70,
+  "envmod": 40,
+  "decay": 40,
+  "accent": 40,
+  "bass_fix": 1,
+  "tempo": 124
+ },
+ "pattern": {
+  "pitch": "0d 0d 12d 0d 3d 0d 7d 5d 0 0 0 0 0 0 0 0",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

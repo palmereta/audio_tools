@@ -1,0 +1,15 @@
+{
+ "name": "Stretch Ten Times",
+ "category": "Stretch",
+ "params": {
+  "size": 400,
+  "density": 30,
+  "spray": 0.05,
+  "scan": 0.1,
+  "buffer": 8,
+  "position": 0.2,
+  "shape": 1.0,
+  "rev_mix": 0.3,
+  "mix": 0.8
+ }
+}

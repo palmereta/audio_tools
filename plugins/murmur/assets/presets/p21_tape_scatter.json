@@ -1,0 +1,18 @@
+{
+ "name": "Tape Scatter",
+ "category": "Texture",
+ "params": {
+  "size": 70,
+  "density": 50,
+  "density_rand": 1.0,
+  "spray": 4.0,
+  "buffer": 12,
+  "reverse": 0.5,
+  "high_cut": 9000,
+  "lfo1_target": 1,
+  "lfo1_shape": 3,
+  "lfo1_rate": 0.2,
+  "lfo1_amount": 0.4,
+  "mix": 0.55
+ }
+}

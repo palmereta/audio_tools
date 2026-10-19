@@ -1,0 +1,14 @@
+{
+ "name": "Granular Wash",
+ "category": "Texture",
+ "params": {
+  "size": 1500,
+  "density": 10,
+  "shape": 1.0,
+  "spray": 3.0,
+  "buffer": 12,
+  "rev_mix": 0.7,
+  "rev_size": 0.9,
+  "mix": 0.7
+ }
+}

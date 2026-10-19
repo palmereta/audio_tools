@@ -1,0 +1,23 @@
+{
+ "name": "Screamer",
+ "category": "Extended",
+ "description": "High resonance mod, cutoff top raised and FM from the oscillator: a much wilder filter.",
+ "order": 30,
+ "params": {
+  "cutoff": 45,
+  "resonance": 78,
+  "envmod": 55,
+  "decay": 40,
+  "accent": 70,
+  "high_res": 1,
+  "cutoff_top": 4200,
+  "filter_fm": 35,
+  "tempo": 134
+ },
+ "pattern": {
+  "pitch": "0 12a 0 7s 0 10 12a 3 0 12 5s 0 7a 0 12 10",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}

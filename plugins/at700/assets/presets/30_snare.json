@@ -1,0 +1,63 @@
+{
+ "name": "Snare",
+ "category": "Drums",
+ "panel": {
+  "vco1_wave": 1,
+  "vco1_range": 3,
+  "vco1_pitch": 0.2083,
+  "vco1_fine": 0.5,
+  "vco1_pw": 0.5,
+  "vco1_keycv": 1,
+  "vco1_pwm": 0.0,
+  "vcf2_cutoff": 0.6153,
+  "vcf2_res": 0.3,
+  "vcf2_mod1": 0.0,
+  "vcf2_mod2": 0.25,
+  "vcf2_mod3": 0.0,
+  "vcf2_mod4": 0.0,
+  "vcf2_adsr": 0,
+  "vcf2_lvl1": 0.5,
+  "vcf2_lvl2": 0,
+  "vcf2_lvl3": 0,
+  "vcf2_lvl4": 0,
+  "vcf2_lvl5": 0.85,
+  "vcf2_mode": 1,
+  "adsr1_a": 0.0,
+  "adsr1_d": 0.5145,
+  "adsr1_s": 0.0,
+  "adsr1_r": 0.4988,
+  "adsr1_mode": 0,
+  "adsr1_time": 0,
+  "vca1_gain": 0.0,
+  "vca1_mod1": 1.0,
+  "vca1_mod2": 0.0,
+  "vca1_adsr": 0,
+  "vca1_exp": 0,
+  "vca1_lvl1": 0,
+  "vca1_lvl2": 0.9,
+  "vca1_lvl3": 0,
+  "vcf1_lvl1": 0.0,
+  "pan_lvl1": 0.75,
+  "pan_lvl2": 0.0,
+  "pan_lvl3": 0.25,
+  "pan_pos1": 0.5,
+  "pan_pos2": 0.5,
+  "pan_pos3": 0.5,
+  "rev_lvl1": 0.3,
+  "rev_lvl2": 0,
+  "rev_lvl3": 0,
+  "monitor": 0.937
+ },
+ "settings": {
+  "voices": 1
+ },
+ "cables": [
+  {
+   "src": "noise_white",
+   "dst": "vcf2_in",
+   "color": "white"
+  }
+ ],
+ "demoNotes": "38:0.5,38:0.5,38:0.25,38:0.25,38:0.5",
+ "run": false
+}

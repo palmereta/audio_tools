@@ -1,0 +1,14 @@
+{
+ "name": "Reverse Glacier",
+ "category": "Stretch",
+ "params": {
+  "size": 800,
+  "density": 18,
+  "reverse": 1.0,
+  "scan": -0.05,
+  "spray": 0.1,
+  "shape": 1.0,
+  "rev_mix": 0.6,
+  "mix": 0.8
+ }
+}

@@ -1,0 +1,14 @@
+{
+ "name": "Shellac 78",
+ "category": "Vinyl",
+ "description": "A 78: mono, 5 kHz of top, the roar of shellac.",
+ "params": {
+  "machine": 3,
+  "rpm": 2,
+  "noise": 50.0,
+  "crackle": 70,
+  "saturation": 40,
+  "wow": 0.15
+ },
+ "order": 21
+}

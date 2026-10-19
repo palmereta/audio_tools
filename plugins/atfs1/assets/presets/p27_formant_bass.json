@@ -1,0 +1,191 @@
+{
+ "name": "Formant Bass",
+ "category": "Bs",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 0,
+    "level": 99,
+    "skirt": 0,
+    "bwRes": 0,
+    "coarse": 1,
+    "fine": 0,
+    "eg": {
+     "level": [
+      99,
+      92,
+      88,
+      0
+     ],
+     "time": [
+      0,
+      40,
+      50,
+      22
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 7,
+    "level": 90,
+    "skirt": 0,
+    "bwRes": 30,
+    "fixed": true,
+    "coarse": 15,
+    "fine": 119,
+    "eg": {
+     "level": [
+      99,
+      80,
+      60,
+      0
+     ],
+     "time": [
+      0,
+      40,
+      50,
+      20
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 7,
+    "level": 80,
+    "skirt": 0,
+    "bwRes": 34,
+    "fixed": true,
+    "coarse": 17,
+    "fine": 4,
+    "eg": {
+     "level": [
+      99,
+      60,
+      40,
+      0
+     ],
+     "time": [
+      0,
+      36,
+      50,
+      20
+     ],
+     "hold": 0,
+     "timeScale": 0
+    }
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   },
+   {
+    "form": 0,
+    "level": 0,
+    "skirt": 0,
+    "bwRes": 0
+   }
+  ],
+  "nops": [
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   },
+   {
+    "level": 0,
+    "bandwidth": 30
+   }
+  ],
+  "formantKnob": [
+   [
+    2,
+    0,
+    1,
+    50
+   ],
+   [
+    2,
+    0,
+    2,
+    50
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "name": "Formant Ba"
+ },
+ "params": {
+  "mono": 1,
+  "var_type": 0,
+  "rev_send": 0.03,
+  "ins_type": 2,
+  "ins_amount": 0.2,
+  "ins_mix": 0.5,
+  "volume": 0.673
+ },
+ "demoNotes": "33:0.4,33:0.2,40:0.4,43:0.6"
+}

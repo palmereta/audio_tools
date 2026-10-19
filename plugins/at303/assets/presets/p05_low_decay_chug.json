@@ -1,0 +1,20 @@
+{
+ "name": "Low Decay Chug",
+ "category": "Classic",
+ "description": "Decay at minimum: every note is a short pluck.",
+ "order": 5,
+ "params": {
+  "cutoff": 25,
+  "resonance": 55,
+  "envmod": 70,
+  "decay": 0,
+  "accent": 50,
+  "tempo": 125
+ },
+ "pattern": {
+  "pitch": "0 0 0 12 0 0 3 0 0 0 5 0 3 0 12d 0",
+  "time": "NNRNNRNNNRNNNRNN",
+  "length": 16,
+  "triplet": false
+ }
+}

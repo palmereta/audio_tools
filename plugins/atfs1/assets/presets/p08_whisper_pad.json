@@ -1,0 +1,440 @@
+{
+ "name": "Whisper Pad",
+ "category": "Vo",
+ "voice": {
+  "algorithm": 0,
+  "feedback": 0,
+  "ops": [
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 40,
+    "fixed": true,
+    "coarse": 16,
+    "fine": 24,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true,
+    "fseqTrack": 0,
+    "pitchMod": 4
+   },
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 44,
+    "fixed": true,
+    "coarse": 17,
+    "fine": 24,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true,
+    "fseqTrack": 1,
+    "pitchMod": 4
+   },
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 48,
+    "fixed": true,
+    "coarse": 17,
+    "fine": 98,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true,
+    "fseqTrack": 2,
+    "pitchMod": 4
+   },
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 52,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 24,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true,
+    "fseqTrack": 3,
+    "pitchMod": 4
+   },
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 56,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 65,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true,
+    "fseqTrack": 4,
+    "pitchMod": 4
+   },
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 60,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 98,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true,
+    "fseqTrack": 5,
+    "pitchMod": 4
+   },
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 64,
+    "fixed": true,
+    "coarse": 18,
+    "fine": 127,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true,
+    "fseqTrack": 6,
+    "pitchMod": 4
+   },
+   {
+    "form": 7,
+    "level": 99,
+    "skirt": 1,
+    "bwRes": 68,
+    "fixed": true,
+    "coarse": 19,
+    "fine": 24,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true,
+    "fseqTrack": 7,
+    "pitchMod": 4
+   }
+  ],
+  "nops": [
+   {
+    "level": 92,
+    "bandwidth": 44,
+    "coarse": 18,
+    "fine": 24,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true
+   },
+   {
+    "level": 92,
+    "bandwidth": 44,
+    "coarse": 18,
+    "fine": 92,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true
+   },
+   {
+    "level": 92,
+    "bandwidth": 44,
+    "coarse": 19,
+    "fine": 14,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true
+   },
+   {
+    "level": 92,
+    "bandwidth": 44,
+    "coarse": 19,
+    "fine": 53,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true
+   },
+   {
+    "level": 92,
+    "bandwidth": 44,
+    "coarse": 19,
+    "fine": 86,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true
+   },
+   {
+    "level": 92,
+    "bandwidth": 44,
+    "coarse": 19,
+    "fine": 113,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true
+   },
+   {
+    "level": 92,
+    "bandwidth": 44,
+    "coarse": 20,
+    "fine": 9,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true
+   },
+   {
+    "level": 92,
+    "bandwidth": 44,
+    "coarse": 20,
+    "fine": 30,
+    "eg": {
+     "level": [
+      99,
+      99,
+      99,
+      0
+     ],
+     "time": [
+      50,
+      30,
+      30,
+      52
+     ],
+     "hold": 0,
+     "timeScale": 0
+    },
+    "fseq": true
+   }
+  ],
+  "lfo1Wave": 4,
+  "lfo1Speed": 62,
+  "lfo1Delay": 40,
+  "lfo1Pmd": 14,
+  "name": "Whisper Pa"
+ },
+ "params": {
+  "fseq": 1,
+  "fseq_pitch": 1,
+  "vn_balance": 40,
+  "fseq_loop": 2,
+  "fseq_speed": 50,
+  "var_type": 1,
+  "var_send": 0.3,
+  "rev_type": 2,
+  "rev_send": 0.45,
+  "rev_time": 0.8,
+  "volume": 0.85
+ },
+ "fseq": "Whisper Hey",
+ "demoNotes": "48+55+60:4"
+}

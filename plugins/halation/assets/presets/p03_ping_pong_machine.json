@@ -1,0 +1,14 @@
+{
+ "name": "Ping-Pong Machine",
+ "category": "Classic",
+ "description": "Dotted eighths bouncing left and right.",
+ "params": {
+  "space": 6,
+  "division": 6,
+  "length": 55,
+  "tone": 65,
+  "mix": 32,
+  "pingpong": 1
+ },
+ "order": 3
+}

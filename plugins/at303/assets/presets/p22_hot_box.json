@@ -1,0 +1,22 @@
+{
+ "name": "Hot Box",
+ "category": "Driven",
+ "description": "Soft clip into the delay: thick, compressed and warm.",
+ "order": 22,
+ "params": {
+  "cutoff": 40,
+  "resonance": 82,
+  "envmod": 60,
+  "decay": 45,
+  "accent": 75,
+  "drive_type": 1,
+  "drive": 70,
+  "tempo": 134
+ },
+ "pattern": {
+  "pitch": "0 12a 0 3s 0 7 12 0 0a 10 0 5s 3 0 12 7",
+  "time": "NNNNNNNNNNNNNNNN",
+  "length": 16,
+  "triplet": false
+ }
+}
