@@ -6,6 +6,7 @@ con cámara ortográfica. Genera lo que la interfaz dibuja (docs/research.md §6
   out/knob_big.png, out/knob_small.png   tapas de perilla sin sombra ni índice (fondo transparente); la interfaz dibuja el índice rotado
   out/layout.json     posición en píxeles (de bg.png) de cada perilla, pad, tecla, botón y del display
 Fotos y film de la web: --mode photos [--shots hero,close,top] y --mode film --shot orbit|knobs|pads (144 cuadros).
+Film nuevo de la web (filmkit, seis tomas a 128 BPM): --mode film2, ver film2() más abajo.
 
 Sin marcas: la placa dice "AT303 / Audio Tools". Unidades: mm; el origen es la esquina superior izquierda de la placa,
 x a la derecha, y hacia abajo (en Blender, y se invierte). Escala: 6 px/mm (la interfaz trabaja a la mitad).
@@ -13,12 +14,17 @@ x a la derecha, y hacia abajo (en Blender, y se invierte). Escala: 6 px/mm (la i
   B=/Volumes/Docs/Applications/blender/Blender.app/Contents/MacOS/Blender      (o el de pc50-wsl, bajo el lock)
   $B -b --factory-startup -P scene303.py -- --out ../../assets/render/out --samples 256 [--body graphite|alu|olive]
 """
-import bpy, bmesh, math, os, sys, json
-from mathutils import Vector
+import math, os, sys, json
+try:
+    import bpy, bmesh
+    from mathutils import Vector
+except ImportError:                 # fuera de Blender sólo sirve --mode filmjson (escribe tools/film.json)
+    bpy = None
 
-argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
 def arg(n, d=None): return argv[argv.index(n) + 1] if n in argv else d
-OUT = os.path.abspath(arg("--out", "out")); os.makedirs(OUT, exist_ok=True)
+OUT = os.path.abspath(arg("--out", "out"))
+if bpy: os.makedirs(OUT, exist_ok=True)
 SAMPLES = int(arg("--samples", "192"))
 BODY = arg("--body", "graphite")
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -360,6 +366,274 @@ def film():
         sc.render.filepath = os.path.join(OUT, f"{shot}_{f:04d}.jpg")
         bpy.ops.render.render(write_still=True)
 
+# ── Film de la web (filmkit) ──
+# Guion (128 BPM: un tiempo = 0,469 s; 4 tiempos = 45 cuadros justos). El sonido es el AT303 tocando Squelch Line,
+# renderizado por at303render con la MISMA automatización que mueven las perillas (film_auto: --at cada 0,1 s en
+# tools/film.json, que escribe `python3 scene303.py --mode filmjson`). El cuadro f de una toma es el instante
+# (f0 + f − 1) / 24 del film y del audio, así los pads, las lámparas y las teclas caen con las notas.
+#
+#   1 open   8 t  3,75 s  Macro bajo entre la fila de perillas y la de pads, mirando a lo largo de los pads: la
+#                         secuencia corre hacia el fondo, los pasos con acento se encienden rojos. Arranca en
+#                         penumbra (los pads son la única luz) y el estudio sube; dolly lento hacia adelante.
+#                         El tercio inferior izquierdo es placa oscura: ahí entra el título.
+#   2 knob   8 t  3,75 s  La perilla Cutoff en macro (100 mm, f/2,2): foco en la escala y la serigrafía, rack al
+#                         índice de la tapa justo cuando la perilla gira grande (36 → 86) y el filtro abre.
+#                         Arco corto alrededor de la perilla, cámara en mano muy sutil.
+#   3 lamps  6 t  2,81 s  Las lámparas de Accent y Slide en los botones parpadean con los pasos marcados; rack
+#                         desde las lámparas al display del fondo, donde el punto del pulso late en cada tiempo.
+#   4 keys   6 t  2,81 s  Rasante sobre el teclado desde la derecha: cada nota de la línea baja su tecla (la del
+#                         slide se queda abajo hasta la nota siguiente); travelling lento a la izquierda.
+#   5 hero  12 t  5,63 s  El instrumento entero: grúa en arco desde adelante a la izquierda que sube a tres cuartos
+#                         de la derecha; un barrido de luz (tira rectangular, sólo reflejos) cruza la placa;
+#                         Cutoff y Env Mod giran con la automatización.
+#   6 end   10 t  4,69 s  Fundido de medio tiempo; tres cuartos de frente que se aleja despacio (el filtro se va
+#                         cerrando); film.py oscurece y pone el cierre encima.
+FILM_SHOTS = [("open", 8), ("knob", 8), ("lamps", 6), ("keys", 6), ("hero", 12), ("end", 10)]
+BEAT = 60.0 / FILM_BPM
+STEP16 = BEAT / 4
+NOTES = [0, 12, 0, 3, 5, 0, 12, 10, 0, 7, 0, 3, 12, 0, 5, 3]     # Squelch Line, semitonos de cada paso
+PRESET = {"cutoff": 42, "resonance": 88, "envmod": 62, "decay": 48, "accent": 78, "tuning": 50, "tempo": 55, "volume": 80}
+AUTO_DT = 0.1
+
+def shot_table():
+    """(nombre, primer cuadro del film, cuadros) con el mismo redondeo que scripts/film.py."""
+    res, f0 = [], 0
+    for name, beats in FILM_SHOTS:
+        n = int(round(beats * BEAT * FPS)); res.append((name, f0, n)); f0 += n
+    return res
+
+def _sm(a, b, t0, t1, t):
+    u = min(1.0, max(0.0, (t - t0) / (t1 - t0))); u = u * u * (3 - 2 * u)
+    return a + (b - a) * u
+
+def film_auto(t):
+    """Valores (0..100) de las perillas automatizadas en el instante t del film. Cutoff: casi cerrado en la
+    apertura, giro grande en la toma de la perilla, vuelve a la mitad, sube con el héroe y se cierra en el final.
+    Env Mod: sube durante el héroe y vuelve."""
+    if t < 4.2: c = 34 + 2 * t / 4.2
+    elif t < 7.6: c = _sm(36, 86, 4.2, 6.9, t)
+    elif t < 12.8: c = _sm(86, 60, 7.6, 12.8, t)
+    elif t < 19.2: c = _sm(60, 74, 12.8, 18.0, t)
+    else: c = _sm(74, 48, 19.2, 23.4, t)
+    e = _sm(62, 84, 13.0, 17.5, t) if t < 19.5 else _sm(84, 62, 19.5, 23.0, t)
+    return {"cutoff": round(c, 1), "envmod": round(e, 1)}
+
+def film_auto_points(total):
+    return [(round(k * AUTO_DT, 2), film_auto(k * AUTO_DT)) for k in range(int(total / AUTO_DT) + 20)]
+
+def knob_values(t):
+    """Valores 0..1 de todas las perillas en t, interpolando los mismos puntos que recibe at303render."""
+    v = {k: x / 100.0 for k, x in PRESET.items()}
+    k = t / AUTO_DT; i = int(k); fr = k - i
+    a, b = film_auto(i * AUTO_DT), film_auto((i + 1) * AUTO_DT)
+    for p in a: v[p] = (a[p] + (b[p] - a[p]) * fr) / 100.0
+    return v
+
+def write_film_json():
+    """tools/film.json: títulos, tomas en tiempos y el comando de audio con la automatización de film_auto (un --at
+    cada vez que un valor cambia, en pasos de 0,1 s). Se corre fuera de Blender: python3 scene303.py --mode filmjson"""
+    total = sum(n for _, _, n in shot_table()) / FPS
+    head = ["build/plugins/at303/at303render_artefacts/Release/at303render", "{out}", "--preset", "Squelch Line",
+            "--bpm", "%d" % FILM_BPM, "--seconds", "{seconds}"]
+    last = film_auto(0.0)
+    for p_, x in last.items(): head += ["--set", "%s=%g" % (p_, x)]
+    ats = []
+    for tt, vals in film_auto_points(total + 1.5):
+        for p_, x in vals.items():
+            if x != last[p_]: ats.append(["--at", "%.2f" % tt, "%s=%g" % (p_, x)]); last[p_] = x
+    J = lambda xs: ", ".join(json.dumps(x) for x in xs)
+    lines = ["{", '  "title": "AT303",', '  "tagline": "The squelch, from the circuit up.",',
+             '  "fps": %d,' % FPS, '  "bpm": %d,' % FILM_BPM, '  "shots": [']
+    sh = [json.dumps(dict({"name": n, "beats": b_}, **({"in": "dissolve"} if n == "end" else {}))) for n, b_ in FILM_SHOTS]
+    lines += ["    " + x + ("," if i < len(sh) - 1 else "") for i, x in enumerate(sh)]
+    lines += ["  ],", '  "poster": {"shot": "hero", "frame": 96},', '  "audio": {"cmd": [', "    " + J(head) + ","]
+    rows = [J(sum(ats[i:i + 6], [])) for i in range(0, len(ats), 6)]
+    lines += ["    " + r + ("," if i < len(rows) - 1 else "") for i, r in enumerate(rows)]
+    lines += ["  ]}", "}"]
+    p = os.path.join(HERE, "..", "film.json")
+    open(p, "w").write("\n".join(lines) + "\n"); json.load(open(p))
+    print(os.path.normpath(p), "%.2f s, %d cambios de perilla" % (total, len(ats)))
+
+def step_state(t):
+    """Paso que suena en t, cuánto hace que empezó, y el tiempo de inicio de cada paso la última vez que sonó."""
+    k = int(t / STEP16 + 1e-6)
+    return k % 16, t - k * STEP16, k
+
+def film_scene():
+    """La escena de las fotos con lo que el film anima: pads con brillo propio, lámparas de Accent y Slide en sus
+    botones, el punto del pulso en el display, las teclas sueltas y una tira de luz para el barrido."""
+    sc, caps, pad_mats, bar, bar_m = photo_scene()
+    # Estudio más oscuro: mesa casi negra y mate; el aire un poco más negro para que la placa se recorte.
+    sc.world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.004, 0.004, 0.0045, 1)
+    tb = bpy.data.materials["table"].node_tree.nodes["Principled BSDF"]
+    tb.inputs["Base Color"].default_value = (0.012, 0.012, 0.013, 1); tb.inputs["Roughness"].default_value = 0.42
+    # Pads: base esmerilada más oscura (apagados no deben parecer encendidos).
+    for i, m in enumerate(pad_mats):
+        b = m.node_tree.nodes["Principled BSDF"]
+        b.inputs["Base Color"].default_value = (0.11, 0.105, 0.10, 1); b.inputs["Roughness"].default_value = 0.3
+        b.inputs["Coat Weight"].default_value = 0.6
+        b.inputs["Emission Color"].default_value = (1.0, 0.2, 0.1, 1) if i in ACC_STEPS else (1.0, 0.55, 0.15, 1)
+    # Índice de las perillas un poco más largo y brillante: en macro tiene que leerse el giro.
+    for c in caps.values():
+        for ch in c.children:
+            if ch.data.materials and ch.data.materials[0].name.startswith("ind"):
+                r = ch.scale.y / 0.38
+                ch.scale.y = r * 0.46; ch.scale.x *= 1.25; ch.location.y = r * 0.39
+                ch.data.materials[0].node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = 3.0
+    # Lámparas: lente redonda con domo, embutida en el extremo izquierdo de los botones Accent y Slide.
+    lamps = {}
+    for bid, col in (("acc", (1.0, 0.16, 0.07)), ("slide", (1.0, 0.55, 0.12))):
+        bt = [b for b in LAYOUT["buttons"] if b["id"] == bid][0]
+        m = mat("lamp_" + bid, (0.25 * col[0], 0.25 * col[1], 0.25 * col[2]), 0.12, emit=col, strength=0.0, coat=1.0)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=0.0019, location=bl(bt["x"] + 5.0, bt["y"] + bt["h"] / 2, 3.0))
+        o = bpy.context.active_object; o.scale.z = 0.45; o.data.materials.append(m); bpy.ops.object.shade_smooth()
+        bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.0025, depth=0.0006, location=bl(bt["x"] + 5.0, bt["y"] + bt["h"] / 2, 2.85))
+        r = bpy.context.active_object; r.data.materials.append(bpy.data.materials["frame"])
+        lamps[bid] = m
+    # Punto del pulso en el display (abajo a la derecha del número).
+    d = LAYOUT["display"]
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.0011, depth=0.0002, location=bl(d["x"] + d["w"] - 6, d["y"] + d["h"] - 5, 0.9))
+    dot_m = emit_mat("dot", (1.0, 0.55, 0.12), 0.0); bpy.context.active_object.data.materials.append(dot_m)
+    # Teclas: cada objeto con su semitono, por el centro de su malla (rounded_box deja el objeto en el origen).
+    keys = {}
+    for o in sc.objects:
+        if o.type == "MESH" and o.name.startswith("key"):
+            m_ = sum((v.co for v in o.data.vertices), Vector()) / len(o.data.vertices)
+            for kk in LAYOUT["keys"]:
+                c = bl(kk["x"] + kk["w"] / 2, kk["y"] + kk["h"] / 2)
+                if abs(m_.x - c.x) < 0.002 and abs(m_.y - c.y) < 0.002: keys[kk["semi"]] = (o, o.location.z)
+    # Tira de luz del barrido: rectángulo largo y angosto que mira hacia abajo (apagada salvo en el héroe).
+    # Sólo reflejos: no ilumina en difuso (nada de charco en la mesa ni teclas quemadas), se ve como un brillo que
+    # corre por el aluminio de las tapas, el canto de las teclas y la placa.
+    l = bpy.data.lights.new("sweep", "AREA"); l.shape = "RECTANGLE"; l.size = 0.03; l.size_y = 0.20; l.energy = 0.0
+    l.spread = math.radians(40); l.color = (1.0, 0.95, 0.88)
+    sweep = bpy.data.objects.new("sweep", l); sc.collection.objects.link(sweep); sweep.location = (-0.2, -0.107, 0.12)
+    sweep.visible_diffuse = False; sweep.visible_transmission = False; sweep.visible_volume_scatter = False
+    # Enlace de luz: la tira alumbra el instrumento y no la mesa (su reflejo dejaba un brillo en el piso).
+    rx = bpy.data.collections.new("sweep_rx")
+    for o in sc.objects:
+        if o.type in ("MESH", "CURVE", "FONT") and not any(m and m.name == "table" for m in o.data.materials): rx.objects.link(o)
+    sweep.light_linking.receiver_collection = rx
+    return sc, caps, pad_mats, bar, lamps, dot_m, keys, sweep
+
+def film_state(t):
+    """Brillo de cada pad, de las lámparas y del punto, y la tecla apretada en el instante t."""
+    s, age, k = step_state(t)
+    pads = []
+    for i in range(16):
+        # Último arranque del paso i (hasta t): un destello que decae, con un brillo bajo de "programado".
+        back = (s - i) % 16; t_on = (k - back) * STEP16
+        a = t - t_on if t_on >= 0 else 99.0
+        pk = 16.0 if i in ACC_STEPS else 9.0
+        pads.append(0.06 + pk * math.exp(-a / 0.11))
+    acc = 30.0 * math.exp(-age / 0.09) if s in ACC_STEPS else 0.0
+    sl = 0.0
+    if s in SLIDE_STEPS: sl = 26.0
+    elif (s - 1) % 16 in SLIDE_STEPS: sl = 26.0 * math.exp(-age / 0.06)     # el slide se apaga al llegar a la nota
+    beat_age = t % BEAT
+    dot = 18.0 * math.exp(-beat_age / 0.12)
+    # Tecla: la nota del paso, apretada el 60 % del paso (o el paso entero si liga con slide).
+    gate = STEP16 * (1.0 if s in SLIDE_STEPS else 0.6)
+    down = {NOTES[s]: 1.0 if age < gate else max(0.0, 1 - (age - gate) / 0.03)}
+    if (s - 1) % 16 in SLIDE_STEPS and age < 0.02: down[NOTES[(s - 1) % 16]] = 1 - age / 0.02
+    return pads, acc, sl, dot, down
+
+def accent_charge(t):
+    charge = 0.0
+    for j in range(int(t / STEP16) + 1):
+        charge *= math.exp(-STEP16 / 0.45)
+        if j % 16 in ACC_STEPS: charge = charge + (1 - charge) * 0.55
+    # entre pasos decae
+    return charge * math.exp(-(t - int(t / STEP16) * STEP16) / 0.45)
+
+def film2():
+    """Seis tomas con filmkit (guion arriba de FILM_SHOTS).
+      blender -b --factory-startup -P scene303.py -- --mode film2 --audio <wav> --out <dir> [--shot a,b]
+            [--quality draft|final] [--every N]   (--every: un cuadro de cada N, para mirar encuadres)"""
+    sys.path.insert(0, os.path.join(HERE, "..", "..", "..", "..", "shared", "film"))
+    import filmkit as fk
+    only = arg("--shot"); quality = arg("--quality", "final"); every = int(arg("--every", "1"))
+    env = fk.envelope(arg("--audio")) if arg("--audio") else []
+    V = lambda x, y, z: Vector((x, y, z))
+    PAD = lambda i: V(0.12425 + 0.01675 * i, -0.1104, 0.003)
+    KNOB = {k["id"]: V(k["x"] * 0.001, -k["y"] * 0.001, 0.0) for k in LAYOUT["big"] + LAYOUT["small"]}
+    C = V(0.205, -0.107, 0.0)
+    lampc = V(0.0525, -0.196, 0.003); disp = V(0.053, -0.049, 0.001)
+    def arc(cx, a, r, z): return cx + V(math.cos(math.radians(a)) * r, math.sin(math.radians(a)) * r, z)
+    cut = KNOB["cutoff"]
+    paths = {
+        "open":  fk.Path([(0, V(0.098, -0.074, 0.052), V(0.300, -0.118, -0.012), 55, 2.8),
+                          (1, V(0.126, -0.077, 0.047), V(0.320, -0.118, -0.010), 58, 2.8)]),
+        "knob":  fk.Path([(0, arc(cut, -72, 0.150, 0.085), cut + V(0, -0.004, 0.006), 100, 2.4),
+                          (1, arc(cut, -50, 0.138, 0.074), cut + V(0, -0.003, 0.007), 100, 2.4)]),
+        "lamps": fk.Path([(0, V(0.076, -0.330, 0.110), V(0.054, -0.170, 0.000), 85, 2.4),
+                          (1, V(0.050, -0.324, 0.104), V(0.053, -0.110, 0.000), 85, 2.4)]),
+        "keys":  fk.Path([(0, V(0.400, -0.310, 0.100), V(0.262, -0.176, 0.000), 60, 5.0),
+                          (1, V(0.360, -0.322, 0.094), V(0.222, -0.172, 0.000), 60, 5.0)]),
+        "hero":  fk.Path([(0, arc(C, -122, 0.60, 0.13), C + V(0, 0, -0.008), 38, 5.6),
+                          (0.5, arc(C, -95, 0.60, 0.20), C + V(0, 0, -0.006), 39, 5.6),
+                          (1, arc(C, -68, 0.62, 0.29), C + V(0, 0, -0.004), 40, 5.6)]),
+        "end":   fk.Path([(0, C + V(0.20, -0.44, 0.25), C + V(0, 0, -0.004), 45, 5.6),
+                          (1, C + V(0.28, -0.64, 0.38), C + V(0, 0, -0.004), 45, 5.6)], easing="out"),
+    }
+    shake = {"open": 0.0006, "knob": 0.0008, "lamps": 0.0006, "keys": 0.0006, "hero": 0.0, "end": 0.0}
+    for (name, f0, frames) in shot_table():
+        if only and name not in only.split(","): continue
+        sc, caps, pad_mats, bar, lamps, dot_m, keys, sweep = film_scene()
+        fk.setup(sc, quality)
+        cam = fk.camera(sc); path = paths[name]
+        hero_fr = frames
+
+        def pose(f, t, u, name=name, path=path, f0=f0):
+            T = (f0 + f - 1) / FPS
+            vals = knob_values(T)
+            for k, c in caps.items(): c.rotation_euler = (0, 0, knob_angle(vals[k]))
+            ch = accent_charge(T); sw_ = LAYOUT["sweep"]
+            bar.scale.x = max(0.0005, sw_["w"] * ch * 0.001)
+            bar.location.x = bl(sw_["x"] + sw_["w"] * ch * 0.5, 0)[0]
+            _, _, _, _, down = film_state(T)
+            for semi, (o, z0) in keys.items(): o.location.z = z0 - 0.003 * down.get(semi, 0.0)
+            focus = None
+            if name == "open": focus = PAD(6)
+            elif name == "knob":   # de la escala (adelante) al índice de la tapa cuando empieza a girar
+                focus = (cut + V(0, -0.0185, 0.0)).lerp(cut + V(0, 0, 0.014), fk.rack(u, 0.08, 0.30, 0.0, 1.0))
+            elif name == "lamps":  # de las lámparas al display
+                focus = lampc.lerp(disp, fk.rack(u, 0.42, 0.78, 0.0, 1.0))
+            elif name == "keys": focus = path.at(u)[1] + V(0, -0.006, 0.004)
+            path.apply(cam, u, focus=focus, shake=shake[name], t=T)
+            moved = list(caps.values()) + [bar] + [o for o, _ in keys.values()]
+            if name == "hero":     # la tira cruza la placa de izquierda a derecha, con aceleración suave
+                sweep.location = (fk.rack(u, 0.10, 0.92, -0.10, 0.52), -0.107, 0.12)
+                moved.append(sweep)
+            return moved
+
+        studio = [(o.data, o.data.energy) for o in sc.objects if o.type == "LIGHT" and o.name in ("key", "fill", "rim")]
+
+        def keys_(f, name=name, f0=f0, frames=frames):
+            T = (f0 + f - 1) / FPS; u = (f - 1) / max(1, frames - 1)
+            if name == "open":     # se abre en penumbra, con los pads como única luz, y el estudio sube despacio
+                for ld, e0 in studio:
+                    ld.energy = e0 * fk.rack(u, 0.0, 0.9, 0.18, 1.0); ld.keyframe_insert("energy")
+            pads, acc, sl, dot, _ = film_state(T)
+            for m, e in zip(pad_mats, pads):
+                m.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = e
+                m.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].keyframe_insert("default_value")
+            for m, e in ((lamps["acc"], acc), (lamps["slide"], sl), (dot_m, dot)):
+                m.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = e
+                m.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].keyframe_insert("default_value")
+            if name == "hero":
+                sweep.data.energy = 6.0 * math.sin(math.pi * min(1.0, max(0.0, (u - 0.08) / 0.88))) ** 0.6
+                sweep.data.keyframe_insert("energy")
+
+        if every > 1:
+            sc.frame_step = every
+        fk.render_shot(sc, name, frames, pose, OUT, step=every, extra_keys=keys_)
+
+
+if __name__ == "__main__" and arg("--mode", "ui") == "filmjson":
+    write_film_json(); raise SystemExit
+if __name__ == "__main__" and arg("--mode", "ui") == "film2":
+    film2(); raise SystemExit
 if __name__ == "__main__" and arg("--mode", "ui") == "photos":
     photos(); raise SystemExit
 if __name__ == "__main__" and arg("--mode", "ui") == "film":

@@ -2260,7 +2260,7 @@ PRES = {
                     ("at303/hl-inspect", "The circuit, live.", "Inspect draws the ladder's capacitors, the envelopes and the accent capacitor while it plays."),
                     ("at303/hl-top", "A line in one click.", "The generator writes acid lines in the key and scale you choose; Mutate keeps the rhythm and redraws the notes.")],
         stats=[("4", "", "poles of diode ladder, solved sample by sample"), ("64", "", "patterns saved with your project"), ("34", "", "presets, each with its own pattern"), ("0.9", "%", "of one core on an Apple M4")],
-        film_cap="An original graphite instrument rendered in 3D, its pads following the pattern. The sound is AT303 playing Squelch Line."),
+        film_cap="An original graphite instrument rendered in 3D: the pads chase the pattern, the accent and slide lamps flash, and the cutoff knob turns exactly as the filter opens in the sound. The sound is AT303 playing Squelch Line at 128 BPM."),
     "es": dict(tag="El chillido, desde el circuito.",
         highlights=[("at303/hl-close", "Un filtro que chilla.", "Una escalera de diodos con los valores reales de sus capacitores: pierde graves al subir la resonancia y suena cerca de 500 Hz con el corte al medio."),
                     ("at303/hl-ui", "Acentos que suben.", "Cada acento carga un capacitor que se descarga despacio, así que una seguidilla suena cada vez más brillante y fuerte. La barra del panel muestra su tensión."),
@@ -2268,7 +2268,7 @@ PRES = {
                     ("at303/hl-inspect", "El circuito, en vivo.", "Inspect dibuja los capacitores de la escalera, las envolventes y el capacitor del acento mientras suena."),
                     ("at303/hl-top", "Una línea en un clic.", "El generador escribe líneas ácidas en la tonalidad y la escala que elijas; Mutate conserva el ritmo y vuelve a dibujar las notas.")],
         stats=[("4", "", "polos de escalera de diodos, resueltos muestra a muestra"), ("64", "", "patrones que se guardan con tu proyecto"), ("34", "", "presets, cada uno con su patrón"), ("0,9", "%", "de un núcleo en un Apple M4")],
-        film_cap="Un instrumento original de grafito renderizado en 3D, con los pads siguiendo el patrón. El sonido es AT303 tocando Squelch Line."),
+        film_cap="Un instrumento original de grafito renderizado en 3D: los pads siguen el patrón, las lámparas de acento y slide titilan, y la perilla de corte gira igual que se abre el filtro en el sonido. El sonido es AT303 tocando Squelch Line a 128 BPM."),
 },
 "plumb": {
     "en": dict(tag="Sing in tune. Feel no delay.",
