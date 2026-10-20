@@ -15,11 +15,15 @@ Corre en pc50-wsl (en ~/halation-render, siempre bajo el lock de GPU compartido)
   B=~/ai/blender/blender-5.2.2-linux-x64/blender; L=~/ai/prerendered/.gpu.lock
   flock $L $B -b -P maquette.py -- --mode stills --out out --samples 256
   for s in echo space freeze; do flock $L $B -b -P maquette.py -- --mode film --shot $s --out film --samples 96; done
+El film de la web (filmkit, seis tomas sincronizadas con film_audio.py; ver film2()):
+  flock $L $B -b --factory-startup -P maquette.py -- --mode film2 --quality draft|final --audio halation-audio.wav --out out
+  [--shot open,macro] [--test 1,48,96]   y después en la Mac: python3 scripts/film.py halation <cuadros>
 Cuadros en JPEG (C: de pc50 anda justo de espacio). Opciones: --pct 50 (pruebas), --shots hero,close,
 --first N --step N, --cpu (render por CPU, sin lock: para cuando el estudio de generación usa la GPU).
 Unidades: 1 = 1 m. La maqueta mide 0,9 x 0,6 m; el frente abierto mira hacia -y.
 """
 import bpy, bmesh, math, os, sys, random
+from array import array
 from mathutils import Vector
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
@@ -395,5 +399,502 @@ def film():
         sc.render.filepath = os.path.join(OUT, f"{shot}_{f:04d}.jpg")
         bpy.ops.render.render(write_still=True)
 
-if arg("--mode", "stills") == "film": film()
+# ---------------------------------------------------------------------------------------------------------------
+# Film de la web (filmkit): --mode film2 [--shot a,b] [--quality draft|final] --audio <wav> --out <dir> [--test 1,48,96]
+
+def film2():
+    """Film de la web de Halation, 24 s a 120 BPM (seis tomas de 8 tiempos, cortes en el compás). La partitura sale de
+    film_audio.py, la misma que armó el sonido: cada nota es una cuenta de luz que sale de la fuente y rebota de pared
+    en pared, y cada rebote cae justo en un eco del ping-pong (corchea con puntillo, izquierda / derecha, cada vez más
+    tenue). Desde los 10 s el control Delay / Space sube: los rebotes se deshacen en polvo de luz y la niebla de la
+    sala se enciende con la envolvente de la cola. A los 16 s un acorde abre la sala y la luz florece despacio.
+
+      open   0–4 s   Plano general bajo desde la derecha, empuje lento y un poco de grúa hacia abajo. Las cuentas
+                     cruzan la sala en el tiempo de los ecos; el tercio inferior izquierdo (la mesa oscura) queda
+                     quieto para el título.
+      macro  4–8 s   Macro sobre la pared derecha, 50 mm f/3.2, cámara en mano sutil y un travelling corto. Foco de
+                     la columna del frente a la pared, donde pegan los ecos: cada rebote la ilumina en el tiempo.
+      aisle  8–12 s  La cámara entra por la nave izquierda, entre la columnata y la pared, 24 mm; las columnas pasan
+                     en primer plano y los rebotes llegan a la pared de al lado. Space empieza a subir.
+      space  12–16 s Vista de héroe alta en órbita lenta; los ecos se funden en una nube y la niebla brilla. Una luz
+                     rasante barre la pared del fondo y saca la textura del yeso.
+      arch   16–20 s Desde atrás de la pared del fondo la cámara pasa por el arco central mientras el acorde florece:
+                     la nube de luz se abre desde la fuente y llena la sala.
+      end    20–24 s Se aleja despacio al plano general; la sala queda brillando con la cola (film.py la oscurece
+                     y pone el cierre).
+
+    Lo que se mueve: las cuentas (posición exacta por tiempo, con su luz puntual que ilumina el yeso y destella en
+    cada rebote), las chispas de cada impacto y el polvo de la cola (simulación propia, determinista), el núcleo de
+    la fuente (destello en cada nota), la niebla (densidad con Space, emisión con la envolvente del audio) y la luz
+    del acorde. Todo con claves por cuadro: la cámara tiene desenfoque de movimiento real; las cuentas dibujan su
+    propia estela (la malla cambia de topología en cada cuadro y no puede desenfocarse sola).
+    """
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "shared", "film"))
+    import filmkit as fk, film_audio as FA
+    only = arg("--shot"); quality = arg("--quality", "final")
+    test = [int(x) for x in arg("--test").split(",")] if arg("--test") else None
+    env = fk.envelope(arg("--audio"), release=0.35, start=FA.PRE)
+    glow = slow(env, 0.45)                                     # la cola, lenta: para la niebla y la luz del acorde
+    T = FILM_SHOTS[-1][1] + FILM_SHOTS[-1][2]
+    beads = bead_plan(FA)
+    snaps = film_sim_cached(FA, beads, int(round(T * FFPS)) + 2)
+    for (name, t0, dur) in FILM_SHOTS:
+        if only and name not in only.split(","): continue
+        sc, me, vm, pv = build()
+        fk.setup(sc, quality)
+        if quality == "final":                                  # con 192 muestras la sala tarda ~20 s por cuadro en la
+            sc.cycles.samples = 112; sc.cycles.adaptive_threshold = 0.03   # 3090; con el denoiser 112 alcanzan
+        sc.cycles.max_bounces = 8; sc.cycles.diffuse_bounces = 3; sc.cycles.volume_bounces = 1
+        sc.cycles.glossy_bounces = 2; sc.cycles.transmission_bounces = 2; sc.cycles.transparent_max_bounces = 4
+        sc.view_settings.exposure = EXPO
+        lo = sc.objects["lights"]
+        film_look(sc, lo)
+        rig = film_lights(sc, name)
+        cam = fk.camera(sc)
+        path = FILM_PATHS[name]
+        frames = int(round(dur * FFPS)); g0 = int(round(t0 * FFPS))
+        cnode = bpy.data.materials["core"].node_tree.nodes["Principled BSDF"]
+        pv.inputs["Emission Color"].default_value = (1.0, 0.84, 0.66, 1)
+        cnode.inputs["Emission Color"].default_value = (1.0, 0.86, 0.70, 1)
+
+        def pose(f, t, u, name=name, path=path, t0=t0):
+            tt = t0 + t
+            focus = None
+            if name == "macro":                                 # de la columna del frente a la pared donde pegan los ecos
+                focus = Vector((0.22, -0.112, 0.09)).lerp(Vector((0.335, -0.12, 0.10)), fk.rack(u, 0.30, 0.70, 0.0, 1.0))
+            elif name in ("open", "space", "end"): focus = Vector((0.0, -0.04, 0.08))
+            elif name == "arch": focus = SRC + Vector((0, 0, 0.02))
+            shake = {"macro": 0.0010, "aisle": 0.0006, "arch": 0.0005}.get(name, 0.0)
+            path.apply(cam, u, focus=focus, shake=shake, t=tt)
+            moved = []
+            for k, L in enumerate(rig["beads"]):                # luces de las cuentas: un lugar fijo por nota (i % 8)
+                b = bead_light(beads, k, tt, FA)
+                if b: L.location = b[0].lerp(Vector((0.0, b[0].y, b[0].z)), min(1.0, 0.018 / max(0.02, abs(b[0].x))))   # un poco hacia adentro: ilumina una mancha de pared, no un punto
+                moved.append(L)
+            sw = rig["sweep"]                                   # el barrido rasante sobre la pared del fondo
+            us = fk.ease((tt - 12.3) / 3.6, "smooth")
+            sw.location = Vector((-0.55 + 1.1 * us, -0.10, 0.34))
+            sw.rotation_euler = (Vector((-0.30 + 0.60 * us, 0.22, 0.10)) - sw.location).to_track_quat("-Z", "Y").to_euler()
+            moved.append(sw)
+            return moved
+
+        def keys(f, t0=t0):
+            tt = t0 + (f - 1) / FFPS
+            gi = min(len(env) - 1, int(round(tt * FFPS)))
+            for k, L in enumerate(rig["beads"]):
+                b = bead_light(beads, k, tt, FA)
+                if b:
+                    _, lvl, w, fl = b
+                    c = COLD.lerp(WARM, w)
+                    L.data.energy = BEAD_W * lvl * (1.0 + 4.0 * fl); L.data.color = (c.x, c.y, c.z)
+                else: L.data.energy = 0.0
+                L.data.keyframe_insert("energy"); L.data.keyframe_insert("color")
+            sp = FA.space_at(tt) / 100.0
+            gl = glow[gi] if gi < len(glow) else 0.0
+            bl = bloom_env(tt, FA)
+            rig["bloom"].data.energy = BLOOM_W * bl; rig["bloom"].data.keyframe_insert("energy")
+            rig["sweep"].data.energy = 1.6 * math.sin(math.pi * fk.ease((tt - 12.3) / 3.6, "linear")) ** 2 if 12.3 < tt < 15.9 else 0.0
+            rig["sweep"].data.keyframe_insert("energy")
+            pv.inputs["Density"].default_value = 0.05 + 0.32 * sp ** 1.6
+            pv.inputs["Emission Strength"].default_value = FOG_EM * gl * (0.1 + 0.9 * sp) + 0.3 * FOG_EM * bl
+            pv.inputs["Color"].default_value = (0.93, 0.92, 0.94, 1)
+            for s_ in ("Density", "Emission Strength"): pv.inputs[s_].keyframe_insert("default_value")
+            fl = note_flash(tt, FA)
+            cnode.inputs["Emission Strength"].default_value = 0.6 + CORE_FLASH * fl + 3.0 * bl
+            cnode.inputs["Emission Strength"].keyframe_insert("default_value")
+
+        def frame(f, t0=t0):
+            g = min(len(snaps) - 1, int(round(t0 * FFPS)) + f - 1)
+            draw_film(me, snaps[g], (t0 * FFPS + f - 1) / FFPS, beads, FA)
+
+        render_film(sc, name, frames, pose, keys, frame, OUT, test)
+
+
+EXPO = float(arg("--expo", "-0.35"))
+BEAD_W, BLOOM_W, FOG_EM, CORE_FLASH = 0.30, 0.6, 0.16, 4.0
+BR = 0.0055                                                # radio de una cuenta de luz
+LANES_Y = (-0.17, -0.075)                                  # carriles libres de columnas y de ventanas
+FILM_SHOTS = [("open", 0.0, 4.0), ("macro", 4.0, 4.0), ("aisle", 8.0, 4.0), ("space", 12.0, 4.0),
+              ("arch", 16.0, 4.0), ("end", 20.0, 4.0)]
+FFPS = 24
+NBEAD = 8                                                  # luces de cuentas a la vez (una cuenta vive < 4 s)
+
+
+def _paths():
+    import filmkit as fk
+    return {
+        "open":  fk.Path([(0, (0.48, -1.18, 0.27), (-0.03, 0.02, 0.040), 40, 6.3),
+                          (1, (0.37, -0.97, 0.22), (-0.03, 0.02, 0.050), 40, 6.3)]),
+        "macro": fk.Path([(0, (0.075, -0.330, 0.060), (0.34, -0.115, 0.100), 50, 3.2),
+                          (1, (0.105, -0.315, 0.066), (0.34, -0.100, 0.100), 50, 3.2)]),
+        "aisle": fk.Path([(0, (-0.290, -0.36, 0.080), (-0.02, -0.05, 0.085), 24, 5.6),
+                          (0.5, (-0.287, -0.17, 0.090), (0.08, 0.02, 0.090), 24, 5.6),
+                          (1, (-0.282, -0.055, 0.105), (0.25, 0.04, 0.085), 24, 5.6)]),
+        "space": fk.Path([(0, (-0.62, -0.78, 0.50), (0.0, 0.0, 0.06), 36, 8.0),
+                          (1, (-0.30, -0.95, 0.44), (0.02, 0.0, 0.07), 36, 8.0)]),
+        "arch":  fk.Path([(0, (0.0, 0.46, 0.112), (0.0, -0.09, 0.090), 30, 5.6),
+                          (0.55, (0.0, 0.215, 0.095), (0.0, -0.09, 0.088), 28, 5.6),
+                          (1, (0.0, 0.11, 0.090), (0.0, -0.09, 0.085), 26, 5.6)]),
+        "end":   fk.Path([(0, (0.0, -0.62, 0.30), (0.0, 0.0, 0.07), 38, 8.0),
+                          (1, (0.0, -1.08, 0.44), (0.0, 0.0, 0.06), 38, 8.0)], easing="out"),
+    }
+
+
+class _LazyPaths(dict):
+    def __missing__(self, k):
+        self.update(_paths()); return dict.__getitem__(self, k)
+FILM_PATHS = _LazyPaths()
+
+
+def slow(env, tau):
+    """Seguidor lento (ataque y caída de tau s) de una envolvente por cuadro."""
+    a = math.exp(-1.0 / (tau * FFPS)); y, out = 0.0, []
+    for x in env: y = a * y + (1 - a) * x; out.append(y)
+    m = max(out) if out else 1.0
+    return [v / m for v in out]
+
+
+def bloom_env(t, FA):
+    """La luz del acorde: florece en ~1,2 s y se apaga con la cola larga."""
+    d = t - FA.CHORD_T
+    if d < 0: return 0.0
+    return (1 - math.exp(-d / 0.55)) ** 2 * math.exp(-d / 5.5)
+
+
+def note_flash(t, FA):
+    """Destello del núcleo en cada nota (la seca, en la fuente)."""
+    v = 0.0
+    for (tn, c, k, chord) in FA.notes():
+        d = t - tn
+        if 0 <= d < 0.6: v = max(v, math.exp(-d / (0.25 if chord else 0.07)) * (1.6 if chord else 1.0))
+    return v
+
+
+def bead_plan(FA):
+    """Por nota (salvo el acorde): (t, lado, carril y, altura z, calidez). Graves tibios, agudos fríos."""
+    r = random.Random(11); plan = []
+    for i, (tn, c, k, chord) in enumerate(FA.notes()):
+        if chord: continue
+        y = LANES_Y[r.random() < 0.5] + r.uniform(-0.005, 0.005)
+        z = r.uniform(0.040, 0.165)
+        w = min(1.0, max(0.0, 0.88 - 0.08 * k + 0.05 * (c - 1.5)))
+        plan.append((tn, FA.side(i), y, z, w))
+    return plan
+
+
+NLEG = 6                                                   # una cuenta rebota seis veces (0,55^6 ≈ 3 %)
+
+def bead_at(b, t, FA):
+    """Estado de una cuenta en t: (posición, velocidad, nivel, calidez, destello) o None."""
+    tn, s, y, z, w = b
+    if t < tn: return None
+    x = (t - tn) / FA.ECHO; leg = int(x); u = x - leg
+    if leg >= NLEG: return None
+    def wall(j): return Vector((s * (1 if j % 2 else -1) * (X1 - BR), y, z))
+    a = SRC.copy() if leg == 0 else wall(leg); b_ = wall(leg + 1)
+    p = a.lerp(b_, u)
+    if leg: p.z += 0.008 * math.sin(math.pi * u)            # un arco apenas, como un rebote
+    v = (b_ - a) / FA.ECHO
+    sp = FA.space_at(t) / 100.0
+    lvl = FA.FB ** leg * max(0.0, 1.0 - sp) ** 1.4           # con Space alto la cuenta se deshace en polvo
+    if leg == NLEG - 1: lvl *= 1.0 - u
+    fl = math.exp(-u * FA.ECHO / 0.09)                      # destello al salir y en cada rebote
+    return p, v, lvl, w, fl
+
+
+def bead_light(beads, k, t, FA):
+    """La cuenta que ocupa la luz k en t: la nota i con i % NBEAD == k y viva."""
+    best = None
+    for i in range(k, len(beads), NBEAD):
+        st = bead_at(beads[i], t, FA)
+        if st: best = (st[0], st[2], st[3], st[4])
+    return best
+
+
+class Mote:
+    __slots__ = ("p", "v", "e", "w", "kind", "tau", "drag", "rise", "r")
+    def __init__(s, p, v, e, w, kind, tau, drag, rise, r):
+        s.p, s.v, s.e, s.w, s.kind, s.tau, s.drag, s.rise, s.r = p, v, e, w, kind, tau, drag, rise, r
+
+
+def _hemi(rng, n):
+    """Dirección al azar en la semiesfera de la normal n."""
+    while True:
+        d = Vector((rng.gauss(0, 1), rng.gauss(0, 1), rng.gauss(0, 1)))
+        if d.length > 1e-6: break
+    d.normalize()
+    if d.dot(n) < 0: d -= 2 * d.dot(n) * n
+    return (d + n * 0.4).normalized()
+
+
+def film_sim(FA, beads, nframes):
+    """Chispas de cada impacto y polvo de la cola, con paso de 1/48 s desde −PRE. Devuelve, por cuadro del film, la
+    lista de motas (p, dirección·velocidad, nivel, calidez, clase, radio)."""
+    rng = random.Random(23); dt = 1.0 / 48.0
+    ms, snaps = [], []
+    events = []                                             # (t, tipo, datos)
+    for b in beads:
+        events.append((b[0], "note", b))
+        for j in range(1, NLEG + 1):
+            te = b[0] + j * FA.ECHO; s = b[1] * (1 if j % 2 else -1)
+            events.append((te, "hit", (b, j, s)))
+    for k in range(20): events.append((FA.CHORD_T + 0.05 * k, "bloom", k / 19.0))
+    events.sort(key=lambda e: e[0]); ei = 0
+    t = -FA.PRE; g = 0
+    while g < nframes:
+        while ei < len(events) and events[ei][0] <= t:
+            te, kind, data = events[ei]; ei += 1
+            sp = FA.space_at(te) / 100.0
+            if kind == "note":
+                b = data
+                for _ in range(5):
+                    d = Vector((rng.gauss(0, 1), rng.gauss(0, 1), abs(rng.gauss(0, 1)))).normalized()
+                    ms.append(Mote(SRC + d * 0.009, d * rng.uniform(0.05, 0.12), 0.7, b[4], 1, 0.10, 3.0, 0.0, 0.0016))
+            elif kind == "hit":
+                b, j, s = data
+                lvl = FA.FB ** (j - 1)                          # el nivel con que llega a la pared
+                melt = max(0.0, 1.0 - sp) ** 1.4
+                pos = Vector((s * (X1 - 0.002), b[2], b[3]))
+                n = Vector((-s, 0, 0))
+                for _ in range(int(4 + 6 * sp)):                # chispas cortas
+                    d = _hemi(rng, n)
+                    ms.append(Mote(pos.copy(), d * rng.uniform(0.06, 0.16), lvl * (0.25 + 0.6 * melt) * rng.uniform(0.6, 1.0),
+                                   b[4], 1, 0.14 + 0.5 * sp, 2.5, 0.0, 0.0014))
+                nd = int(round((50 * sp + 4 * (1 - sp)) * min(1.0, lvl * 1.6)))   # polvo que queda: la cola
+                for _ in range(nd):
+                    d = _hemi(rng, n)
+                    ms.append(Mote(pos + d * rng.uniform(0.0, 0.02), d * rng.uniform(0.03, 0.11), (0.12 + 0.32 * sp) * min(1.0, lvl * 1.5) * rng.uniform(0.5, 1.0),
+                                   b[4], 2, 0.6 + 3.5 * sp, 0.55, 0.0035, rng.uniform(0.0008, 0.0016)))
+            elif kind == "bloom":
+                # El acorde: una flor de luz que sale de la fuente en oleadas durante ~1 s, cada vez más lenta.
+                for q in range(36):
+                    d = Vector((rng.gauss(0, 1), rng.gauss(0, 1), rng.gauss(0, 0.8) + 0.25)).normalized()
+                    spd = rng.uniform(0.03, 0.20) * (1.0 - 0.6 * data)
+                    ms.append(Mote(SRC + d * rng.uniform(0.005, 0.02), d * spd, rng.uniform(0.35, 1.0), rng.uniform(0.25, 0.95),
+                                   3, rng.uniform(3.0, 7.0), rng.uniform(0.5, 1.1), 0.006, rng.uniform(0.0010, 0.0022)))
+        for q in ms:
+            q.v *= math.exp(-q.drag * dt)
+            if q.kind >= 2:
+                q.v.z += q.rise * dt
+                q.v += Vector((rng.gauss(0, 1), rng.gauss(0, 1), rng.gauss(0, 1))) * 0.0025 * dt * 48 * 0.15
+            q.p += q.v * dt
+            for ax, lo_, hi in ((0, X0, X1), (1, Y0 - 0.02, Y1), (2, F, F + H + 0.03)):
+                if q.p[ax] < lo_ + q.r: q.p[ax] = lo_ + q.r; q.v[ax] = abs(q.v[ax]) * 0.5
+                elif q.p[ax] > hi - q.r: q.p[ax] = hi - q.r; q.v[ax] = -abs(q.v[ax]) * 0.5
+            for cx, cy in COLS:
+                dx, dy = q.p.x - cx, q.p.y - cy; d = math.hypot(dx, dy)
+                if 1e-6 < d < RC + q.r:
+                    q.p.x, q.p.y = cx + dx / d * (RC + q.r), cy + dy / d * (RC + q.r)
+            q.e *= math.exp(-dt / q.tau)
+            if q.kind >= 2: q.w += (0.90 - q.w) * dt * 0.12      # la cola se entibia
+        ms = [q for q in ms if q.e > 0.01][-3500:]
+        t += dt
+        while g < nframes and t >= g / FFPS - 1e-9:
+            a = array("f")                                    # plano y compacto: 10 números por mota
+            for q in ms: a.extend((q.p.x, q.p.y, q.p.z, q.v.x, q.v.y, q.v.z, q.e, q.w, q.kind, q.r))
+            snaps.append(a); g += 1
+    return snaps
+
+
+def film_sim_cached(FA, beads, nframes):
+    """film_sim tarda unos minutos en Python: se guarda junto a los cuadros, con la firma del código que la produce."""
+    import hashlib, inspect, pickle, time
+    src = inspect.getsource(film_sim) + inspect.getsource(Mote) + inspect.getsource(_hemi) + repr(beads) + repr(nframes)
+    src += open(FA.__file__).read()
+    h = hashlib.sha1(src.encode()).hexdigest()[:12]
+    path = os.path.join(OUT, f".sim-{h}.pkl")
+    if os.path.exists(path):
+        with open(path, "rb") as fh: return pickle.load(fh)
+    t0 = time.time(); print("[film2] simulando…", flush=True)
+    snaps = film_sim(FA, beads, nframes)
+    print(f"[film2] simulación: {time.time() - t0:.0f} s", flush=True)
+    with open(path, "wb") as fh: pickle.dump(snaps, fh)
+    return snaps
+
+
+_ICO = {}
+def _ico(sub):
+    if sub not in _ICO:
+        bm = bmesh.new(); bmesh.ops.create_icosphere(bm, subdivisions=sub, radius=1.0)
+        _ICO[sub] = ([v.co.copy() for v in bm.verts], [[v.index for v in f.verts] for f in bm.faces]); bm.free()
+    return _ICO[sub]
+
+
+GAIN_BEAD, GAIN_MOTE = float(arg("--gain", "7.0")), 3.4
+
+def draw_film(me, motes, t, beads, FA):
+    """Rearma la malla de luces: cuentas (cabeza brillante y estela que se apaga) y motas."""
+    verts, faces, cols = [], [], []
+    def put(p, v, r, c, k, sub, tail_k):
+        vs, fs = _ico(sub)
+        sp = v.length; d = v / sp if sp > 1e-6 else Vector((0, 0, 0))
+        tail = min(tail_k * r * 9, sp / FFPS * 0.55)         # lo que recorre en medio cuadro (obturador de 180°)
+        base = len(verts)
+        for vv in vs:
+            back = min(0.0, vv.dot(d))
+            verts.append(p + vv * r + d * (back * tail))
+            kk = k * (1.0 + 0.8 * back) if tail > r else k      # la estela se apaga hacia atrás
+            cols.extend((c.x * kk, c.y * kk, c.z * kk, 1.0))
+        faces.extend([[base + i for i in f] for f in fs])
+    for b in beads:
+        st = bead_at(b, t, FA)
+        if not st or st[2] < 0.01: continue
+        p, v, lvl, w, fl = st
+        c = COLD.lerp(WARM, w)
+        r = BR * (0.7 + 0.3 * lvl ** 0.5); k = min(GAIN_BEAD * (lvl ** 0.7) * (1 + 0.6 * fl), 11.0)
+        put(p, v, r, c, k, 2, 1.0)
+        put(p, v, r * 3.0, c, k * 0.07, 2, 0.4)                # halo tenue alrededor (la luz es aditiva)
+    for i in range(0, len(motes), 10):
+        px, py, pz, vx, vy, vz, e, w, kind, r = motes[i:i + 10]
+        p, v, kind = Vector((px, py, pz)), Vector((vx, vy, vz)), int(round(kind))
+        c = COLD.lerp(WARM, w)
+        k = GAIN_MOTE * e * (1.5 if kind == 1 else 1.0)
+        put(p, v, r, c, min(k, 6.0), 1, 0.5 if kind == 1 else 0.0)
+    me.clear_geometry(); me.from_pydata(verts, [], faces)
+    old = me.color_attributes.get("glow")
+    if old: me.color_attributes.remove(old)
+    a = me.color_attributes.new("glow", "FLOAT_COLOR", "POINT")
+    if cols: a.data.foreach_set("color", cols)
+    me.update()
+
+
+def plaster_film(m):
+    """El yeso de cerca: manchas suaves de color, grano fino, poros y una ondulación de espátula; los rincones apenas
+    más oscuros (oclusión). Sólo para el film: las fotos usan el material de build()."""
+    nt = m.node_tree; N, Lk = nt.nodes, nt.links
+    b = N["Principled BSDF"]
+    tc = N.new("ShaderNodeTexCoord")
+    def noise(scale, detail, rough=0.55):
+        n = N.new("ShaderNodeTexNoise"); n.inputs["Scale"].default_value = scale; n.inputs["Detail"].default_value = detail
+        n.inputs["Roughness"].default_value = rough; Lk.new(tc.outputs["Object"], n.inputs["Vector"]); return n
+    mott = noise(6.0, 3.0)
+    mix = N.new("ShaderNodeMix"); mix.data_type = "RGBA"
+    mix.inputs["A"].default_value = (0.74, 0.72, 0.685, 1); mix.inputs["B"].default_value = (0.83, 0.815, 0.78, 1)
+    Lk.new(mott.outputs["Fac"], mix.inputs["Factor"])
+    ao = N.new("ShaderNodeAmbientOcclusion"); ao.inputs["Distance"].default_value = 0.025; ao.samples = 4
+    Lk.new(mix.outputs["Result"], ao.inputs["Color"])
+    dirt = N.new("ShaderNodeMix"); dirt.data_type = "RGBA"; dirt.blend_type = "MULTIPLY"
+    dirt.inputs["Factor"].default_value = 1.0
+    mr = N.new("ShaderNodeMapRange"); mr.inputs["To Min"].default_value = 0.80; mr.inputs["To Max"].default_value = 1.0
+    Lk.new(ao.outputs["AO"], mr.inputs["Value"])
+    Lk.new(mix.outputs["Result"], dirt.inputs["A"]); Lk.new(mr.outputs["Result"], dirt.inputs["B"])
+    Lk.new(dirt.outputs["Result"], b.inputs["Base Color"])
+    # Relieve: grano fino + poros (Voronoi) + ondulación ancha, encadenados.
+    grain = noise(380.0, 8.0, 0.6)
+    vor = N.new("ShaderNodeTexVoronoi"); vor.inputs["Scale"].default_value = 240.0
+    Lk.new(tc.outputs["Object"], vor.inputs["Vector"])
+    pit = N.new("ShaderNodeMapRange"); pit.inputs["From Min"].default_value = 0.0; pit.inputs["From Max"].default_value = 0.12
+    pit.inputs["To Min"].default_value = 0.0; pit.inputs["To Max"].default_value = 1.0
+    Lk.new(vor.outputs["Distance"], pit.inputs["Value"])
+    wave_ = noise(22.0, 2.0, 0.5)
+    prev = None
+    for src, out, strength, dist in ((wave_, "Fac", 0.06, 0.0012), (grain, "Fac", 0.10, 0.00025), (pit, "Result", 0.20, 0.00035)):
+        bp = N.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = strength; bp.inputs["Distance"].default_value = dist
+        Lk.new(src.outputs[out], bp.inputs["Height"])
+        if prev: Lk.new(prev.outputs["Normal"], bp.inputs["Normal"])
+        prev = bp
+    for l in list(b.inputs["Normal"].links): Lk.remove(l)
+    Lk.new(prev.outputs["Normal"], b.inputs["Normal"])
+    rr = N.new("ShaderNodeMapRange"); rr.inputs["To Min"].default_value = 0.80; rr.inputs["To Max"].default_value = 0.92
+    Lk.new(grain.outputs["Fac"], rr.inputs["Value"]); Lk.new(rr.outputs["Result"], b.inputs["Roughness"])
+    b.inputs["Subsurface Weight"].default_value = 0.10; b.inputs["Subsurface Scale"].default_value = 0.003
+    b.inputs["Subsurface Radius"].default_value = (1.0, 0.8, 0.6)
+
+
+def film_look(sc, lo):
+    """Ajustes de la escena para el film: biseles en el yeso (los cantos toman luz), yeso con textura y las luces
+    de partículas sólo visibles para la cámara y los reflejos (lo que ilumina el yeso son las luces puntuales)."""
+    m = bpy.data.materials["plaster"]; plaster_film(m)
+    for o in sc.objects:
+        if o.type == "MESH" and o.data.materials and o.data.materials[0] == m:
+            bv = o.modifiers.new("bevel", "BEVEL"); bv.width = 0.0009; bv.segments = 2; bv.limit_method = "ANGLE"
+            bv.angle_limit = math.radians(40); bv.harden_normals = False
+    # Las luces suman luz y no tapan: emisión + transparencia (una mota tenue es un brillo tenue, no una mancha).
+    nt = bpy.data.materials["light"].node_tree
+    em = [n for n in nt.nodes if n.bl_idname == "ShaderNodeEmission"][0]
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent"); ad = nt.nodes.new("ShaderNodeAddShader")
+    # Borde suave: la emisión cae hacia el contorno de cada esfera (sin el polígono del halo).
+    lw = nt.nodes.new("ShaderNodeLayerWeight"); lw.inputs["Blend"].default_value = 0.5
+    inv = nt.nodes.new("ShaderNodeMath"); inv.operation = "SUBTRACT"; inv.inputs[0].default_value = 1.0
+    nt.links.new(lw.outputs["Facing"], inv.inputs[1])
+    pw = nt.nodes.new("ShaderNodeMath"); pw.operation = "POWER"; pw.inputs[1].default_value = 2.0
+    nt.links.new(inv.outputs[0], pw.inputs[0]); nt.links.new(pw.outputs[0], em.inputs["Strength"])
+    nt.links.new(em.outputs[0], ad.inputs[0]); nt.links.new(tr.outputs[0], ad.inputs[1])
+    nt.links.new(ad.outputs[0], nt.nodes["Material Output"].inputs["Surface"])
+    lo.visible_diffuse = False; lo.visible_shadow = False; lo.visible_volume_scatter = False; lo.visible_transmission = False
+    try: lo.cycles.use_motion_blur = False
+    except AttributeError: pass
+    # El halo: sólo lo que de verdad brilla (las luces), no el yeso iluminado.
+    for n in sc.compositing_node_group.nodes:
+        if n.bl_idname == "CompositorNodeGlare":
+            n.inputs["Threshold"].default_value = GLARE[0]; n.inputs["Strength"].default_value = GLARE[1]
+            n.inputs["Size"].default_value = GLARE[2]
+    # La mesa: negra, con un brillo satinado que refleja la maqueta.
+    t = bpy.data.materials["table"].node_tree.nodes["Principled BSDF"]
+    t.inputs["Base Color"].default_value = (0.010, 0.010, 0.011, 1); t.inputs["Roughness"].default_value = 0.36
+
+
+def film_lights(sc, shot=""):
+    """Estudio oscuro: rasante frío desde la izquierda (lee la textura), relleno grande y tenue, contraluz tibio por los
+    arcos, el barrido y una luz por cuenta. Reemplaza las dos luces de build()."""
+    for n in ("key", "behind"):
+        if n in sc.objects: bpy.data.objects.remove(sc.objects[n], do_unlink=True)
+    def area(name, loc, look, size, energy, color, sy=None):
+        l = bpy.data.lights.new(name, "AREA"); l.size = size; l.energy = energy; l.color = color
+        if sy: l.shape = "RECTANGLE"; l.size_y = sy
+        o = bpy.data.objects.new(name, l); o.location = loc; sc.collection.objects.link(o)
+        o.rotation_euler = (Vector(look) - Vector(loc)).to_track_quat("-Z", "Y").to_euler(); o.visible_camera = False
+        return o
+    area("key", (-0.95, -0.45, 0.62), (0.0, 0.02, 0.06), 0.45, KEY_W, (0.86, 0.91, 1.0))
+    area("fill", (0.9, -1.3, 0.55), (0.0, 0.0, 0.08), 1.6, FILL_W, (1.0, 0.95, 0.9))
+    # En "arch" la cámara mira la cara de afuera de la pared del fondo: el contraluz baja para no quemarla.
+    area("behind", (0.0, 0.42, 0.22), (0.0, 0.0, 0.07), 0.9, BEHIND_W * (0.04 if shot == "arch" else 1.0), (1.0, 0.80, 0.58), sy=0.12)
+    area("top", (0.0, -0.05, 0.9), (0.0, 0.0, 0.0), 0.7, TOP_W, (0.92, 0.94, 1.0))
+    sweep = area("sweep", (-0.55, -0.10, 0.34), (-0.3, 0.22, 0.10), 0.04, 0.0, (1.0, 0.86, 0.70), sy=0.30)
+    beads = []
+    for k in range(NBEAD):
+        l = bpy.data.lights.new(f"bead{k}", "POINT"); l.energy = 0.0; l.shadow_soft_size = 0.010
+        o = bpy.data.objects.new(f"bead{k}", l); o.location = SRC; sc.collection.objects.link(o); o.visible_camera = False
+        beads.append(o)
+    l = bpy.data.lights.new("bloom", "POINT"); l.energy = 0.0; l.shadow_soft_size = 0.05; l.color = (1.0, 0.82, 0.62)
+    bloom = bpy.data.objects.new("bloom", l); bloom.location = SRC + Vector((0, 0, 0.035)); sc.collection.objects.link(bloom)
+    bloom.visible_camera = False
+    return dict(beads=beads, sweep=sweep, bloom=bloom)
+
+
+KEY_W, FILL_W, BEHIND_W, TOP_W = 2.4, 0.9, 4.0, 0.5
+GLARE = (1.4, 0.5, 0.75)                                   # umbral, fuerza, tamaño
+
+
+def render_film(sc, name, frames, pose, keys, frame, out, test=None):
+    """Como fk.render_shot, pero cuadro por cuadro: graba las claves de toda la toma (cámara, luces, materiales: el
+    desenfoque de movimiento sale de ahí) y después rearma la malla de partículas antes de cada cuadro, porque su
+    geometría cambia de un cuadro al otro y no se puede grabar con claves."""
+    import filmkit as fk
+    os.makedirs(out, exist_ok=True)
+    for o in sc.objects: o.animation_data_clear()
+    for f in range(1, frames + 1):
+        sc.frame_set(f)
+        t, u = (f - 1) / FFPS, (f - 1) / max(1, frames - 1)
+        moved = pose(f, t, u) or []
+        for o in set([sc.camera] + list(moved)): fk._key(o)
+        keys(f)
+    for o in sc.objects:
+        ad = o.animation_data
+        if ad and ad.action:
+            for fc in fk._fcurves(ad.action):
+                for kp in fc.keyframe_points: kp.interpolation = "LINEAR"
+    sc.frame_start, sc.frame_end = 1, frames
+    sc.render.use_persistent_data = True
+    for f in (test or range(1, frames + 1)):
+        sc.frame_set(f); frame(f)
+        sc.render.filepath = os.path.join(out, f"{name}_{f:04d}.jpg")
+        bpy.ops.render.render(write_still=True)
+        print(f"[{name}] {f}/{frames}", flush=True)
+
+
+mode = arg("--mode", "stills")
+if mode == "film": film()
+elif mode == "film2": film2()
 else: stills()

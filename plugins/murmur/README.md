@@ -42,7 +42,10 @@ docs/manual/                the manual (en.md, es.md), its screenshots and shots
 tools/dsptest.cpp           engine tests without JUCE
 tools/render.cpp            murmurrender: a WAV through a preset, offline, with CPU figure
 tools/presetsmm.py          factory presets
-tools/blender/murmur.py     the 3D murmuration for the website (pc50-wsl, CUDA)
+tools/blender/murmur.py     the 3D murmuration for the website: photos (--mode hero) and film (--mode film2), pc50-wsl
+tools/blender/murmur_v1.py  the previous scene, unchanged (murmur.py --mode film / hero-v1 run it), kept to compare
+tools/web_images.py         the photos to web/assets/img/murmur/ (hero, og-image, hl-flock, menu thumbnail)
+tools/film.json             the film's shots and audio for scripts/film.py
 ```
 
 ## Tools

@@ -1,0 +1,15 @@
+{
+  "title": "Murmur",
+  "tagline": "Your sound, in flight.",
+  "fps": 24,
+  "audio": {"file": "web/assets/samples/murmur/shimmer-choir.m4a"},
+  "shots": [
+    {"name": "open", "seconds": 4.0},
+    {"name": "close", "seconds": 4.0},
+    {"name": "low", "seconds": 4.0},
+    {"name": "split", "seconds": 5.0},
+    {"name": "swell", "seconds": 4.0},
+    {"name": "end", "seconds": 4.0, "in": "dissolve"}
+  ],
+  "poster": {"shot": "low", "frame": 60}
+}

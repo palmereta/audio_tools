@@ -294,7 +294,89 @@ def film():
         sc.render.filepath = os.path.join(OUT, f"{shot}_{f:04d}.jpg")
         bpy.ops.render.render(write_still=True)
 
+# ── Film de la web (filmkit): cinco tomas sobre la frase de demostración, primero cantada y después corregida ──
+# La plomada es un péndulo amortiguado que cada nota empuja: en la mitad cantada oscila y tarda en calmarse; en la
+# corregida (desde CORR s) se calma enseguida. Las líneas de tiza se dibujan al ritmo de la frase.
+FILM_SHOTS = [("open", 0.0, 3.5), ("trace", 3.5, 4.0), ("settle", 7.5, 3.0), ("wide", 10.5, 3.5), ("end", 14.0, 4.0)]
+CORR = 9.2
+
+def bob_angles(env, fps=FPS):
+    """Ángulo de la plomada (rad) por cuadro de todo el film: péndulo de 0,9 Hz empujado en cada nota."""
+    import filmkit as fk
+    hits = set(fk.onsets(env, thresh=0.18, gap=6))
+    w = 2 * math.pi * 0.9; th, v, out = math.radians(2.0), 0.0, []
+    for i in range(len(env) + 4 * fps):
+        t = i / fps
+        if i in hits: v += (1 if (len(out) // 7) % 2 else -1) * math.radians(14.0 if t < CORR else 6.0)
+        z = 0.06 if t < CORR else 0.55
+        for _ in range(8):
+            h = 1.0 / (fps * 8); v += (-w * w * th - 2 * z * w * v) * h; th += v * h
+        th = max(-math.radians(20), min(math.radians(20), th)); out.append(th)
+    return out
+
+def film2():
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "shared", "film"))
+    import filmkit as fk
+    only = arg("--shot"); quality = arg("--quality", "final")
+    env = fk.envelope(arg("--audio"))
+    angles = bob_angles(env)
+    for (name, t0, dur) in FILM_SHOTS:
+        if only and name not in only.split(","): continue
+        sc, bob, pv, L = scene_photo()
+        fk.setup(sc, quality)
+        cordo = [o for o in sc.objects if o.name.startswith("cord")][0]
+        raw, fixed = bpy.data.objects["raw"], bpy.data.objects["fixed"]
+        # Luz de recorte cálida que barre el bronce durante el film.
+        sweep = area(sc, "sweep", (-0.6, 0.3, 0.35), (0, 0, 0), 0.25, 0.0, (1.0, 0.82, 0.6))
+        cam = fk.camera(sc)
+        bobp = lambda: bob.location.copy()
+        head = lambda u: Vector((-SW / 2 + 0.17 + (SW - 0.21) * u, -0.01, -0.02))
+        C = pv + Vector((0, 0, -0.162))                  # centro de la plomada en reposo
+        paths = {
+            "open":   fk.Path([(0, C + Vector((0.11, -0.32, 0.035)), C + Vector((0, 0, -0.012)), 70, 2.8),
+                               (1, C + Vector((0.05, -0.25, 0.015)), C + Vector((0, 0, -0.010)), 70, 2.8)]),
+            "trace":  fk.Path([(0, head(0.0) + Vector((0.02, -0.30, 0.05)), head(0.0), 50, 3.2),
+                               (1, head(1.0) + Vector((-0.02, -0.30, 0.04)), head(1.0), 50, 3.2)], easing="linear"),
+            "settle": fk.Path([(0, C + Vector((-0.15, -0.12, 0.012)), Vector((-0.11, -0.01, -0.015)), 55, 2.0),
+                               (1, C + Vector((-0.13, -0.14, 0.008)), Vector((-0.09, -0.01, -0.015)), 55, 2.0)]),
+            "wide":   fk.Path([(0, (0.95 * math.cos(math.radians(-118)), 0.95 * math.sin(math.radians(-118)), 0.10), (0.0, 0.0, -0.01), 40, 5.6),
+                               (1, (0.95 * math.cos(math.radians(-78)), 0.95 * math.sin(math.radians(-78)), 0.20), (0.02, 0.0, -0.01), 40, 5.6)]),
+            "end":    fk.Path([(0, (0.0, -0.55, 0.03), (0.0, 0.0, -0.005), 45, 4.0),
+                               (1, (0.0, -0.86, 0.07), (0.0, 0.0, -0.005), 45, 4.0)], easing="out"),
+        }
+        path = paths[name]
+        frames = int(round(dur * FPS))
+        f0 = int(round(t0 * FPS))
+
+        def pose(f, t, u, name=name, path=path, f0=f0):
+            g = min(len(angles) - 1, f0 + f - 1); ang = angles[g]
+            bob.location = pv + Vector((math.sin(ang) * L, 0.0, -math.cos(ang) * L)); bob.rotation_euler = (0, -ang, 0)
+            d = bob.location + Vector((0, 0, 0.004)) - pv
+            cordo.location = (pv + bob.location + Vector((0, 0, 0.004))) / 2
+            cordo.rotation_euler = d.to_track_quat("Z", "Y").to_euler(); cordo.scale = (1, 1, d.length / L)
+            focus = None
+            if name == "open": focus = bob.location + Vector((0, 0, -0.02))
+            if name == "trace": focus = head(u)
+            if name == "settle":                     # de la línea corregida (fondo) a la plomada cuando se calma
+                k = fk.rack(u, 0.25, 0.7, 0.0, 1.0)
+                focus = Vector((0.03, -0.005, -0.015)).lerp(bob.location + Vector((0, 0, -0.02)), k)
+            path.apply(cam, u, focus=focus, shake=0.0012 if name in ("open", "settle") else 0.0006, t=t0 + t)
+            return [bob, cordo]
+
+        def keys(f, name=name, f0=f0, frames=frames):
+            u = (f - 1) / max(1, frames - 1)
+            # Tiza: en "trace" se dibuja la frase; antes no hay nada; después está completa.
+            k = {"open": 0.0, "trace": fk.ease(u, "linear"), "settle": 1.0, "wide": 1.0, "end": 1.0}[name]
+            for o, lag in ((raw, 0.0), (fixed, 0.06)):
+                o.data.bevel_factor_end = max(0.0, min(1.0, k * (1 + lag) - lag)) if k < 1 else 1.0
+                o.data.keyframe_insert("bevel_factor_end")
+            sweep.data.energy = 6.0 * (0.5 - 0.5 * math.cos(2 * math.pi * ((f0 + f) / FPS) / 7.0))
+            sweep.data.keyframe_insert("energy")
+
+        fk.render_shot(sc, name, frames, pose, OUT, extra_keys=keys)
+
 mode = arg("--mode", "ui")
 if mode == "ui": ui()
 elif mode == "photos": photos()
+elif mode == "film2": film2()
 else: film()

@@ -23,10 +23,16 @@ from mathutils import Vector, Euler, Matrix
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 def arg(n, d=None): return argv[argv.index(n) + 1] if n in argv else d
 
-L = json.load(open(arg("--layout", "layoutmd.json")))
-SILK = os.path.abspath(arg("--silk", "silkscreenmd.png"))
-LHC_TEX = os.path.abspath(arg("--lhc", "lhcmd.png"))
-PLATE_TEX = os.path.abspath(arg("--plate", "nameplatemd.png"))
+HERE = os.path.dirname(os.path.abspath(__file__))
+ASSETS = os.path.normpath(os.path.join(HERE, "..", "..", "assets"))
+def asset(n):
+    """Archivo de entrada: el del directorio actual (como siempre) o, si no está, el de plugins/atmd/assets."""
+    return n if os.path.exists(n) or not os.path.exists(os.path.join(ASSETS, n)) else os.path.join(ASSETS, n)
+
+L = json.load(open(arg("--layout", asset("layoutmd.json"))))
+SILK = os.path.abspath(arg("--silk", asset("silkscreenmd.png")))
+LHC_TEX = os.path.abspath(arg("--lhc", asset("lhcmd.png")))
+PLATE_TEX = os.path.abspath(arg("--plate", asset("nameplatemd.png")))
 OUT = os.path.abspath(arg("--out", "out"))
 SAMPLES = int(arg("--samples", "512"))
 PXMM = float(arg("--pxmm", "4.0"))           # px por mm de las imágenes (2x de la UI)
@@ -1142,8 +1148,285 @@ def mode_film():
     bpy.ops.render.render(animation=True)
 
 
+# ───────── film de la web (filmkit, --mode film2) ─────────
+# Seis tomas sobre la demo "Fat Bass" (100 BPM, un tiempo = 0,6 s; cortes secos en tiempos del compás). El inicio
+# de cada toma en el film es el instante del audio (la envolvente y las notas del MIDI se leen desde ahí).
+FILM_SHOTS = [("open", 0.0, 4.2), ("keys", 4.2, 3.6), ("filter", 7.8, 3.6), ("wheels", 11.4, 3.0),
+              ("sweep", 14.4, 3.0), ("end", 17.4, 4.2)]
+NOTE_UP = 24          # la línea suena dos octavas abajo (pies 16'/32'): se toca en el centro del teclado
+
+
+def midi_notes(path):
+    """Notas (t_on, t_off, nota) de un MIDI de un canal (lector mínimo: tempo único, formato 0 o 1)."""
+    import struct
+    b = open(path, "rb").read()
+    ntr, div = struct.unpack(">H", b[10:12])[0], struct.unpack(">H", b[12:14])[0]
+    def vlq(i):
+        v = 0
+        while True:
+            c = b[i]; i += 1; v = (v << 7) | (c & 0x7F)
+            if c < 0x80: return v, i
+    i, ev, tempo = 14, [], 500000
+    for _ in range(ntr):
+        ln = struct.unpack(">I", b[i + 4:i + 8])[0]; j = i + 8; end = j + ln; t = 0; rs = 0
+        while j < end:
+            d, j = vlq(j); t += d; s = b[j]
+            if s == 0xFF:
+                ty = b[j + 1]; l, k = vlq(j + 2)
+                if ty == 0x51: tempo = int.from_bytes(b[k:k + l], "big")
+                j = k + l
+            elif s in (0xF0, 0xF7): l, k = vlq(j + 1); j = k + l
+            else:
+                if s & 0x80: rs = s; j += 1
+                n = 1 if rs & 0xF0 in (0xC0, 0xD0) else 2
+                ev.append((t, rs & 0xF0, b[j:j + n])); j += n
+        i = end
+    sec = lambda tk: tk / div * tempo / 1e6
+    out, on = [], {}
+    for tk, kind, d in sorted(ev, key=lambda e: e[0]):
+        if kind == 0x90 and d[1] > 0: on[d[0]] = sec(tk)
+        elif kind in (0x80, 0x90) and d[0] in on: out.append((on.pop(d[0]), sec(tk), d[0]))
+    return sorted(out)
+
+
+def smooth_seg(t, pts):
+    """Valor por tramos [(t, v), ...] con aceleración suave entre puntos (gesto de una mano sobre un control)."""
+    if t <= pts[0][0]: return pts[0][1]
+    for (t0, v0), (t1, v1) in zip(pts[:-1], pts[1:]):
+        if t <= t1:
+            u = (t - t0) / max(1e-6, t1 - t0); u = u * u * (3 - 2 * u)
+            return v0 + (v1 - v0) * u
+    return pts[-1][1]
+
+
+# Gestos del músico (tiempo del film en s). El corte sube en la toma "filter" y baja en "sweep"; la rueda de
+# modulación sube en "wheels" y la de altura hace un bend hacia arriba y vuelve antes del cambio a Do (14,4 s).
+CUTOFF = [(0.0, -1.5), (8.2, -1.5), (11.0, 2.2), (14.9, 2.2), (17.2, 0.4), (30.0, 0.4)]
+EMPH = [(0.0, 2.5), (14.6, 2.5), (16.9, 4.6), (30.0, 4.6)]
+CONTOUR = [(0.0, 6.5), (9.0, 6.5), (10.8, 5.2), (30.0, 5.2)]
+MODW = [(0.0, 0.0), (11.7, 0.0), (13.1, 0.62), (16.5, 0.62), (18.6, 0.25), (30.0, 0.25)]
+PITCHW = [(0.0, 0.0), (12.75, 0.0), (13.05, 0.55), (13.5, 0.55), (13.95, 0.0), (30.0, 0.0)]
+
+
+def populate_film(values):
+    """Como populate(), pero devuelve los objetos que el film anima: perillas por id, lámparas y ruedas."""
+    fr = next(Frame(HPY, o) for o in bpy.data.objects if o.name.startswith("PanelRoot"))
+    knobs, lamps, wheels = {}, {}, {}
+    for kn in L["knobs"]:
+        v = values.get(kn["id"], kn["default"])
+        o = knob_pointer() if kn["kind"] == "rotary-switch" else knob_standard(kn["kind"] == "big")
+        knobs[kn["id"]] = (place(fr, o, kn["x"], kn["y"], 0.0, -math.radians(knob_angle(kn, v))), kn)
+    for s in L["switches"]:
+        st = int(values.get(s["id"], s["default"]))
+        place(fr, rocker_cap(s["color"], max(s["w"], s["h"]), min(s["w"], s["h"]), s["orient"], st), s["x"], s["y"], 0.0)
+    for lp in L["lamps"]:
+        on = 1 if lp["id"] in ("power_led", "overload") else 0        # la de OVERLOAD se anima (emisión con claves)
+        lamps[lp["id"]] = place(fr, lamp(lp["id"], on), lp["x"], lp["y"], 0.0)
+    for s in LHC["switches"]:
+        place(DECK, rocker_cap("cream", s["w"], s["h"], "h", int(values.get(s["id"], s["default"]))), s["x"], s["y"], LHC_Z)
+    for w in LHC["wheels"]:
+        h = wheel_obj(w["id"], 0.0); h.location = D(w["x"], w["y"], LHC_Z); wheels[w["id"]] = (h.children[0], w)
+    return knobs, lamps, wheels
+
+
+def P(px, py, h=0.0):
+    """Punto del panel (mm del layout, h sobre la cara) en coordenadas del mundo."""
+    return D(*panel_to_case(px, py, h))
+
+
+def key_x(note):
+    k = next(k for k in KB["keys"] if k["note"] == note); return (k["x0"] + k["x1"]) / 20.0
+
+
+def film_scene(values):
+    """El instrumento con el estudio de las fotos, más oscuro, con piso infinito y la luz de barrido."""
+    build_static(False)
+    knobs, lamps, wheels = populate_film(values)
+    stage(world_strength=0.22)
+    fl = bpy.data.objects["Floor"]; fl.scale = (12.0, 12.0, 1.0)      # sin borde visible en las tomas bajas
+    # Teclas con el origen en su pivote: bajan girando como las de verdad (9 mm adelante).
+    keys = {}
+    for k in KB["keys"]:
+        o = bpy.data.objects["Key%d" % k["note"]]
+        piv = D((k["x0"] + k["x1"]) / 2, KEY_PIVOT_Y, BLACK_TOP if k["black"] else WHITE_TOP)
+        o.data.transform(Matrix.Translation(-piv)); o.location = piv
+        keys[k["note"]] = o
+    # Luz de barrido: tira alta y angosta que cruza delante del instrumento (reflejo que corre por la madera y
+    # por las perillas). Energía y posición por toma.
+    sw = bpy.data.lights.new("Sweep", "AREA"); sw.shape = "RECTANGLE"; sw.size = 3.0; sw.size_y = 160.0
+    sw.color = (1.0, 0.93, 0.84); sw.energy = 0.0
+    swo = bpy.data.objects.new("Sweep", sw); link(swo)
+    # Brillo de la lámpara OVERLOAD sobre el panel: una luz puntual dentro de la lente.
+    ov = next(l for l in L["lamps"] if l["id"] == "overload")
+    gl = bpy.data.lights.new("OvlGlow", "POINT"); gl.shadow_soft_size = 0.25; gl.color = (1.0, 0.45, 0.08); gl.energy = 0.0
+    glo = bpy.data.objects.new("OvlGlow", gl); link(glo); glo.location = P(ov["x"], ov["y"], 7.5)
+    lamp_mats = []
+    for ch in lamps["overload"].children:
+        for m in ch.data.materials:
+            b = m.node_tree.nodes.get("Principled BSDF")
+            if b and b.inputs["Emission Strength"].default_value > 0: lamp_mats.append((b, b.inputs["Emission Strength"].default_value))
+    return dict(knobs=knobs, lamps=lamps, wheels=wheels, keys=keys, sweep=swo, glow=glo, lamp_mats=lamp_mats)
+
+
+def film_paths():
+    """Recorridos de cámara por toma (unidades de Blender = 10 mm; f-stop dividido por 10 por la escala)."""
+    from mathutils import Vector as V
+    import filmkit as fk
+    cut, ovl = P(453.6, 44.3), P(383.8, 66.5)
+    whl = D(66.8, 372.0, LHC_Z)                      # entre las dos ruedas
+    return {
+        # Apertura: el instrumento arriba a la derecha, piso oscuro abajo a la izquierda (ahí va el título);
+        # avance lento con una grúa que baja apenas.
+        "open":   fk.Path([(0, V((-50.0, -266.0, 130.0)), V((27.0, -18.0, 6.0)), 86, 0.6),
+                           (1, V((-41.0, -246.0, 119.0)), V((29.5, -18.0, 7.0)), 86, 0.6)]),
+        # Teclado al ras: travelling lateral hacia la izquierda sobre las teclas que tocan la línea.
+        "keys":   fk.Path([(0, V((74.0, -70.0, 15.5)), V((44.0, -40.0, 6.8)), 85, 0.5),
+                           (1, V((60.0, -73.0, 14.5)), V((30.0, -40.0, 6.8)), 85, 0.5)]),
+        # Filtro: la perilla de corte gira en primer plano; el foco pasa a la lámpara OVERLOAD que destella.
+        "filter": fk.Path([(0, cut + V((10.5, -30.0, 17.0)), cut + V((-1.0, 0.0, 0.0)), 100, 0.55),
+                           (1, cut + V((6.5, -26.0, 14.5)), (cut + ovl) / 2 + V((0.0, 0.0, 0.0)), 100, 0.55)]),
+        # Ruedas: ángulo bajo desde adelante a la izquierda, arco suave hacia el teclado.
+        "wheels": fk.Path([(0, whl + V((-22.0, -36.0, 16.0)), whl + V((1.5, 0.0, -0.5)), 90, 0.5),
+                           (1, whl + V((-15.0, -40.0, 19.0)), whl + V((3.0, 0.0, -0.5)), 90, 0.5)]),
+        # Barrido: travelling a lo largo del panel (mezclador → filtro) con la luz que cruza en sentido contrario.
+        "sweep":  fk.Path([(0, V((22.0, -82.0, 58.0)), V((30.0, -14.0, 19.0)), 85, 0.6),
+                           (1, V((44.0, -84.0, 56.0)), V((50.0, -14.0, 19.0)), 85, 0.6)], easing="linear"),
+        # Cierre: de frente, se aleja despacio (film.py lo oscurece y pone el cierre al centro).
+        "end":    fk.Path([(0, V((30.0, -250.0, 140.0)), V((36.5, -20.0, 10.0)), 100, 0.7),
+                           (1, V((27.0, -320.0, 175.0)), V((36.5, -21.0, 9.0)), 100, 0.7)], easing="out"),
+    }
+
+
+# Luz de barrido por toma: (desde, hasta, mira, energía máxima); el centro de la tira va de un punto al otro.
+SWEEPS = {
+    "open":  ((-60.0, -130.0, 70.0), (120.0, -120.0, 80.0), (36.0, -20.0, 8.0), 4.0e4),
+    "sweep": ((110.0, -95.0, 70.0), (-20.0, -95.0, 70.0), (40.0, -14.0, 18.0), 3.0e4),
+    "end":   ((-40.0, -140.0, 90.0), (110.0, -140.0, 90.0), (36.0, -20.0, 8.0), 1.5e4),
+}
+
+
+def film2():
+    """Film de la web del ATMD: 21,6 s, seis tomas, sobre "Fat Bass" (web/assets/samples/atmd/fat-bass.m4a).
+
+    Storyboard (film.json: 100 BPM, cortes secos en tiempos; la línea suena en el teclado dos octavas arriba):
+      1. open    0,0–4,2 s (7 t)  Plano general 3/4 desde la izquierda, alto: el instrumento arriba a la derecha y
+                                  el piso oscuro abajo a la izquierda, donde entra el título. Avance lento; una luz
+                                  de barrido cruza la madera de nogal; las teclas ya tocan la línea de bajo.
+      2. keys    4,2–7,8 s (6 t)  Al ras del teclado, de la derecha: travelling lateral sobre las teclas que bajan
+                                  con cada nota (Mi, Sol, La, Si…); foco que sigue la última tecla tocada.
+      3. filter  7,8–11,4 s (6 t) Macro del filtro: la perilla CUTOFF gira de −1,5 a +2,2 y AMOUNT OF CONTOUR
+                                  baja; el foco pasa de la perilla a la lámpara OVERLOAD, que destella en los picos.
+      4. wheels 11,4–14,4 s (5 t) Ángulo bajo sobre el controlador izquierdo: la rueda MOD sube, la PITCH hace un
+                                  bend y vuelve al centro; detrás, el teclado que sigue tocando.
+      5. sweep  14,4–17,4 s (5 t) Travelling a lo largo del panel (mezclador → filtro) con una tira de luz que cruza
+                                  al revés: el reflejo corre por las perillas estriadas y el listón; EMPHASIS sube,
+                                  CUTOFF baja; la lámpara sigue los picos.
+      6. end    17,4–21,6 s (7 t) De frente, se aleja despacio; film.py lo oscurece y pone el cierre al centro.
+    """
+    sys.path.insert(0, os.path.join(HERE, "..", "..", "..", "..", "shared", "film"))
+    import filmkit as fk
+    only = arg("--shot"); quality = arg("--quality", "final"); step = int(arg("--step", "1"))
+    env = fk.envelope(arg("--audio"))
+    midi = arg("--midi", os.path.join(HERE, "..", "..", "..", "..", "web", "assets", "samples", "atmd", "fat-bass.mid"))
+    notes = [(a, b, n + NOTE_UP) for a, b, n in midi_notes(midi)]
+    preset = arg("--preset", os.path.join(ASSETS, "presets", "p01_fat_bass.json"))
+    values = dict(json.load(open(preset)).get("params", {}))
+    # Lámpara: se enciende cuando la envolvente pasa del 70 % (los golpes fuertes del compás) y se apaga en ~0,15 s.
+    lamp_k = []
+    g = 0.0
+    for e in env:
+        x = max(0.0, min(1.0, (e - 0.70) / 0.22)); g = x if x > g else g * 0.62; lamp_k.append(g)
+    def env_at(T, arr): return arr[min(len(arr) - 1, max(0, int(round(T * FPS_FILM))))]
+
+    def key_depth(note, T):
+        """Hundimiento 0..1 de una tecla en el instante T: baja en 25 ms, sube en 60 ms."""
+        d = 0.0
+        for a, b, n in notes:
+            if n != note or T < a - 0.03 or T > b + 0.1: continue
+            if T < a: d = max(d, 0.0)
+            elif T < a + 0.025: d = max(d, (T - a) / 0.025)
+            elif T < b: d = 1.0
+            else: d = max(d, 1.0 - (T - b) / 0.06)
+        return max(0.0, min(1.0, d))
+    played = sorted({n for _, _, n in notes})
+    key_ang = math.atan2(KEY_DIP, KB["y_white"] - KEY_PIVOT_Y)
+
+    for (name, t0, dur) in FILM_SHOTS:
+        if only and name not in only.split(","): continue
+        S = film_scene(values)
+        sc = bpy.context.scene
+        fk.setup(sc, quality)
+        sc.render.image_settings.color_mode = "RGB"
+        cam = fk.camera(sc); cam.data.clip_start = 0.5; cam.data.clip_end = 6000.0
+        path = film_paths()[name]
+        frames = int(round(dur * FPS_FILM))
+        knobs, wheels, keys = S["knobs"], S["wheels"], S["keys"]
+
+        def knob_set(kid, v):
+            o, kn = knobs[kid]; o.rotation_euler.z = -math.radians(knob_angle(kn, v)); return o
+
+        def wheel_set(wid, v):
+            o, wl = wheels[wid]
+            ang = -v * wl["travel_deg"] / 2.0 if wid == "pitch_wheel" else -(v - 0.5) * wl["travel_deg"]
+            o.rotation_euler.x = math.radians(ang); return o
+
+        def pose(f, t, u, name=name, t0=t0, path=path):
+            T = t0 + t
+            moved = []
+            for n in played:
+                o = keys[n]; o.rotation_euler.x = key_ang * key_depth(n, T); moved.append(o)
+            hand = 0.025 * fk.noise1(T, 7, rate=0.9)          # la mano no queda quieta del todo
+            moved.append(knob_set("filter_cutoff", smooth_seg(T, CUTOFF) + (hand if 8.2 < T < 17.2 else 0.0)))
+            moved.append(knob_set("filter_emphasis", smooth_seg(T, EMPH)))
+            moved.append(knob_set("filter_contour", smooth_seg(T, CONTOUR)))
+            moved.append(wheel_set("mod_wheel", smooth_seg(T, MODW)))
+            moved.append(wheel_set("pitch_wheel", smooth_seg(T, PITCHW)))
+            # Foco por toma.
+            focus = None
+            if name == "keys":                              # sigue (suavizado) la última tecla tocada
+                xs = [key_x(n) for a, b, n in notes if a <= T + 0.05]
+                recent = [key_x(n) for a, b, n in notes if T - 0.9 <= a <= T + 0.05] or xs[-1:] or [key_x(52)]
+                focus = Vector((sum(recent) / len(recent), -40.5, 7.0))
+            elif name == "filter":                          # de la perilla de corte a la lámpara OVERLOAD
+                k = fk.rack(u, 0.45, 0.75, 0.0, 1.0)
+                focus = P(453.6, 44.3, 14.0).lerp(P(383.8, 66.5, 4.0), k)
+            elif name == "wheels":
+                focus = D(46.4, 372.0, LHC_Z + 20.0).lerp(D(87.2, 372.0, LHC_Z + 20.0), fk.rack(u, 0.2, 0.6, 0.0, 1.0))
+            elif name == "sweep":
+                focus = path.at(u)[1]
+            shake = {"keys": 0.10, "filter": 0.08, "wheels": 0.10}.get(name, 0.0)
+            path.apply(cam, u, focus=focus, shake=shake, t=T)
+            sw = SWEEPS.get(name)
+            if sw:
+                a, b, look, _ = sw
+                p = Vector(a).lerp(Vector(b), fk.ease(u, "smooth"))
+                S["sweep"].location = p
+                S["sweep"].rotation_euler = (Vector(look) - p).to_track_quat("-Z", "Y").to_euler()
+                moved.append(S["sweep"])
+            return moved
+
+        def keys_fn(f, name=name, t0=t0, frames=frames):
+            u = (f - 1) / max(1, frames - 1); T = t0 + (f - 1) / FPS_FILM
+            sw = SWEEPS.get(name)
+            S["sweep"].data.energy = sw[3] * math.sin(math.pi * u) ** 0.7 if sw else 0.0
+            S["sweep"].data.keyframe_insert("energy")
+            k = env_at(T, lamp_k)
+            S["glow"].data.energy = 60.0 * k; S["glow"].data.keyframe_insert("energy")
+            for b, e0 in S["lamp_mats"]:
+                b.inputs["Emission Strength"].default_value = e0 * (0.04 + 1.6 * k)
+                b.inputs["Emission Strength"].keyframe_insert("default_value")
+
+        t_start = time.time()
+        fk.render_shot(sc, name, frames, pose, OUT, step=step, extra_keys=keys_fn)
+        print(f"toma {name}: {frames} cuadros, {time.time() - t_start:.0f} s", flush=True)
+
+
+FPS_FILM = 24
+
+
 if __name__ == "__main__":
-    modes = {"bg": mode_bg, "sprites": mode_sprites, "preview": mode_preview, "hero": mode_hero, "film": mode_film}
+    modes = {"bg": mode_bg, "sprites": mode_sprites, "preview": mode_preview, "hero": mode_hero, "film": mode_film,
+             "film2": film2}
     for m in arg("--mode", "bg,sprites").split(","):
         t0 = time.time()
         print("== modo", m, flush=True); modes[m]()

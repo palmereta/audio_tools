@@ -15,9 +15,15 @@ from mathutils import Vector, Euler, Matrix
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 def arg(n, d=None): return argv[argv.index(n) + 1] if n in argv else d
 
-L = json.load(open(arg("--layout", "layout700.json")))
-SILK = os.path.abspath(arg("--silk", "silkscreen700.png"))
-VUFACE = os.path.abspath(arg("--vu", "vu_face.png"))
+HERE = os.path.dirname(os.path.abspath(__file__))
+def asset(flag, name, sub=""):
+    """Ruta de un insumo: la del argumento; si no, la del directorio actual (pc50: ~/ai/at700); si no, la del repo."""
+    if arg(flag): return os.path.abspath(arg(flag))
+    if os.path.exists(name): return os.path.abspath(name)
+    return os.path.join(HERE, "..", "..", "assets", sub, name)
+L = json.load(open(asset("--layout", "layout700.json")))
+SILK = asset("--silk", "silkscreen700.png", "render")
+VUFACE = asset("--vu", "vu_face.png", "render")
 OUT = os.path.abspath(arg("--out", "out700"))
 SAMPLES = int(arg("--samples", "160"))
 os.makedirs(OUT, exist_ok=True)
@@ -235,6 +241,7 @@ def button_base(b):
 
 def led(l):
     o = mesh("Led", lathe([(1.6, 0.0), (1.6, 0.6), (1.3, 1.3), (0.0, 1.6)], 32), M["led_" + l["color"]]); at(o, l["x"], l["y"])
+    o["cid"] = l["id"]                                                  # el film enciende cada LED por su id
     r = mesh("LedRing", lathe([(2.2, 0.0), (2.2, 0.4), (1.7, 0.5), (0.0, 0.5)], 32), M["nut"]); at(r, l["x"], l["y"])
 
 def screw(x, y, z=0.0):
@@ -461,11 +468,13 @@ def populate(preset_path, pressed=()):
         t = (v / max(1, k["steps"] - 1)) if k["steps"] > 0 else v
         o.rotation_euler.z = -math.radians(k["a0"] + (k["a1"] - k["a0"]) * t)
         at(o, k["x"], k["y"], 7.2 if k["size"] == "KF" else 0.0)
+        o["cid"] = k["id"]
     for s in L["sliders"]:
         v = pv.get(s["id"], 0.5 if s.get("detent") else 0.0)
         c = fader_cap()
         if s["horiz"]: c.rotation_euler.z = math.radians(90); at(c, s["x0"] + (s["x1"] - s["x0"]) * v, s["y"])
         else: at(c, s["x"], s["y1"] - (s["y1"] - s["y0"]) * v)
+        c["cid"] = s["id"]
     for sw in L["switches"]:
         i = int(round(pv.get(sw["id"], 0))); n = sw["positions"]; l = sw["length"] - 4.0
         o = box("Nub", -1.1, -1.6, 1.1, 1.6, 0.0, 3.2, M["skirt"], 0.4) if sw["orient"] == "v" else box("Nub", -1.6, -1.1, 1.6, 1.1, 0.0, 3.2, M["skirt"], 0.4)
@@ -624,7 +633,256 @@ def mode_film():
     sc.render.use_persistent_data = True
     bpy.ops.render.render(animation=True)
 
+# ───────── film de la web (filmkit, --mode film2) ─────────
+FILM_BPM = 128.0                       # Berlin Twelve: CLOCK RATE 32 con DIVIDE 1/16 = semicorcheas a 128 BPM
+STEP = 60.0 / FILM_BPM / 4             # 117,2 ms por paso; el 717A arranca en el paso 1 en t = 0 (medido en el audio)
+FILM_SHOTS = [("open", 9), ("grid", 6), ("truck", 9), ("vu", 6), ("reveal", 9), ("end", 9)]   # en tiempos; 3 = una vuelta de 12 pasos
+FPS = 24
+
+def film2():
+    """Film de la web: la máquina tocando Berlin Twelve (el preset 17, el mismo audio que arma scripts/film.py con
+    at700render). Seis tomas cortadas al tiempo de 128 BPM y siempre en el paso 1 de la secuencia (cada 3 tiempos):
+
+      open    9 t  4,2 s  macro rasante a lo largo de la fila de lámparas del 717A: la luz roja corre por los 12 pasos
+                          (con su resplandor), la cámara avanza despacio y el foco va de la lámpara 1 a
+                          la 5; abajo a la izquierda queda panel desenfocado y oscuro para el título.
+      grid    6 t  2,8 s  la matriz de 3 × 12 perillas del 717A en tres cuartos, travelling lateral corto; una luz
+                          rasante barre las tapas de aluminio; el reloj (CLOCK) parpadea con cada paso.
+      truck   9 t  4,2 s  travelling a lo largo de la fila de arriba de la consola (702A → 703E) con los cables
+                          balanceándose delante; termina en el 703E, donde el fader de CUTOFF sube y baja con el
+                          brillo del sonido y el LED de señal del filtro late con cada nota; el foco pasa al fader.
+      vu      6 t  2,8 s  los dos VU del 711A de cerca, con las agujas siguiendo el nivel (balística de VU por canal),
+                          esferas apenas iluminadas; foco de la aguja izquierda a la derecha.
+      reveal  9 t  4,2 s  desde abajo, casi sobre el teclado, la grúa sube y retrocede hasta mostrar la pared entera
+                          con las lámparas corriendo arriba.
+      end     9 t  4,2 s  plano general en tres cuartos desde la derecha que se aleja despacio (film.py lo oscurece y pone el cierre);
+                          entra fundido.
+
+    Se mueven: lámparas de paso y reloj (con la grilla exacta de 117,2 ms), LED de señal del VCF1 y del VCA1 (con la
+    envolvente), fader de CUTOFF del VCF1, agujas de los VU, los cinco cables (balanceo lento) y la luz que barre.
+    El teclado no se toca: Berlin Twelve lo toca el secuenciador.
+
+        blender -b --factory-startup -P scene700.py -- --mode film2 [--shot open,vu] --quality draft|final
+                --audio berlin.wav --out <dir>
+    El WAV es el de at700render (16 bits): at700render presets/17_berlin_twelve.json x.wav --secs 24.
+    """
+    import re, tempfile
+    sys.path.insert(0, os.path.join(HERE, "..", "..", "..", "..", "shared", "film"))
+    import filmkit as fk
+    only = arg("--shot"); quality = arg("--quality", "final")
+    wav = arg("--audio")
+    env = fk.envelope(wav)
+    vul, vur = vu_needles(wav)
+    slow = smooth(env, 0.5)
+    m_ = sum(slow) / len(slow); sd = (sum((v - m_) ** 2 for v in slow) / len(slow)) ** 0.5 or 1.0
+    # Preset completo: los valores por defecto del panel y encima los del preset (populate necesita todos).
+    pr = json.load(open(os.path.join(HERE, "..", "..", "assets", "presets", "17_berlin_twelve.json")))
+    hdr = open(os.path.join(HERE, "..", "..", "Source", "dsp", "Params700.generated.h")).read()
+    panel = {m.group(1): float(m.group(2)) for m in re.finditer(r'\{\s*"(\w+)",\s*"[^"]*",\s*-?\d+,\s*(-?[\d.]+)f', hdr)}
+    panel.update(pr["panel"]); pr["panel"] = panel
+    ppath = os.path.join(tempfile.gettempdir(), "at700_film_preset.json"); json.dump(pr, open(ppath, "w"))
+    cut0 = pr["panel"]["vcf1_cutoff"]
+
+    f0 = 0
+    for name, beats in FILM_SHOTS:
+        n = int(round(beats * 60.0 / FILM_BPM * FPS))           # igual que scripts/film.py
+        start, f0 = f0, f0 + n
+        frames = n + (12 if name == "reveal" else 0)             # cola para el fundido hacia "end"
+        if only and name not in only.split(","): continue
+        sc, piv, ctl = film_scene(ppath)
+        fk.setup(sc, quality)
+        sc.render.image_settings.color_mode = "RGB"
+        bloom(sc)
+        Wc = lambda x, y, z=0.0: world_jack(piv, x, y, z)       # punto del lienzo (mm) parado, z = distancia al panel
+        cam = fk.camera(sc); cam.data.clip_start = 0.05; cam.data.clip_end = 5000.0
+        sweep = None
+        if name == "grid":                                       # luz rasante que barre las tapas de aluminio
+            l = bpy.data.lights.new("Sweep", "AREA"); l.shape = "RECTANGLE"; l.size = 2.0; l.size_y = 40.0
+            l.color = (1.0, 0.93, 0.85); l.energy = 2500.0
+            sweep = bpy.data.objects.new("Sweep", l); link(sweep)
+        lamp = lambda i: Wc(246.0 + 42.25 * i, 238.0)              # i fraccionario: entre lámparas
+        paths = {
+            "open":  fk.Path([(0, Wc(118, 240, 74), Wc(400, 246, 0), 50, 0.05),
+                              (1, Wc(150, 238, 62), Wc(440, 245, 0), 50, 0.05)]),
+            "grid":  fk.Path([(0, Wc(380, 330, 380), Wc(470, 172, 0), 40, 0.06),
+                              (1, Wc(470, 320, 360), Wc(508, 172, 0), 40, 0.06)]),
+            "truck": fk.Path([(0, Wc(70, 580, 170), Wc(110, 470, 0), 45, 0.08),
+                              (0.55, Wc(210, 575, 165), Wc(250, 470, 0), 45, 0.08),
+                              (1, Wc(320, 565, 150), Wc(360, 490, 0), 48, 0.07)], easing="smooth"),
+            "vu":    fk.Path([(0, Wc(640, 600, 175), Wc(735, 556, 0), 40, 0.035),
+                              (1, Wc(662, 592, 150), Wc(742, 556, 0), 42, 0.035)]),
+            "reveal": fk.Path([(0, Vector((30.0, -121.0, 3.5)), Vector((42.0, -86.0, 30.0)), 24, 0.06),
+                               (0.5, Vector((40.0, -170.0, 18.0)), Vector((44.0, -86.0, 38.0)), 27, 0.09),
+                               (1, Vector((50.0, -238.0, 32.0)), Vector((45.0, -86.0, 41.0)), 30, 0.12)]),
+            "end":   fk.Path([(0, Vector((92.0, -258.0, 32.0)), Vector((45.0, -86.0, 41.0)), 34, 0.14),
+                              (1, Vector((100.0, -296.0, 37.0)), Vector((45.0, -86.0, 40.0)), 34, 0.14)], easing="out"),
+        }
+        path = paths[name]
+        shake = {"open": 0.10, "vu": 0.10, "truck": 0.05}.get(name, 0.0)
+        fader = ctl["sl"]["vcf1_cutoff"]
+        fs = [s_ for s_ in L["sliders"] if s_["id"] == "vcf1_cutoff"][0]
+
+        def pose(f, t, u, name=name, path=path, start=start):
+            g = start + f - 1; ta = g / FPS
+            k = max(-2.0, min(2.0, (slow[min(g, len(slow) - 1)] - m_) / sd))
+            v = max(0.0, min(1.0, cut0 + 0.07 * k))               # la mano acompaña el brillo del sonido
+            fader.location = P(fs["x"], fs["y1"] - (fs["y1"] - fs["y0"]) * v)
+            for nd, ang in ((ctl["vu"][0], vul), (ctl["vu"][1], vur)):
+                nd.rotation_euler.z = -math.radians(ang[min(g, len(ang) - 1)])
+            focus = None
+            if name == "open": focus = lamp(fk.rack(u, 0.2, 0.85, 0.0, 4.0))             # de la lámpara 1 a la 5
+            if name == "truck": focus = path.at(u)[1].lerp(Wc(365.0, 495.0), fk.rack(u, 0.6, 0.9, 0.0, 1.0))
+            if name == "vu": focus = Wc(688.5, 556.0).lerp(Wc(794.0, 556.0), fk.rack(u, 0.35, 0.8, 0.0, 1.0))
+            path.apply(cam, u, focus=focus, shake=shake, t=ta)
+            moved = [fader] + list(ctl["vu"])
+            if sweep is not None:
+                x = 18.0 + 60.0 * fk.ease(u, "smooth")                # entra y sale del cuadro por los costados
+                sweep.location = Vector((x, -102.0, 104.0))
+                sweep.rotation_euler = (Wc(x * 10.0, 160.0) - sweep.location).to_track_quat("-Z", "Y").to_euler()
+                moved.append(sweep)
+            return moved
+
+        def keys(f, start=start, frames=frames):
+            # Lo que no es transformación se graba en propiedades del objeto (las lee el material con un nodo
+            # Attribute): las claves en el árbol de nodos de un material copiado no llegaban al render en Blender 5.2.
+            g = start + f - 1; ta = g / FPS
+            e = env[min(g, len(env) - 1)]
+            lv = {"step%d" % (i + 1): lamp_level(ta, i) for i in range(12)}
+            lv.update(seq_clock=clock_level(ta), vcf1_sig=e ** 1.5, vca1_sig=e ** 1.5)
+            for lid, val in lv.items():
+                o = ctl["leds"][lid]; o["glow"] = val; o.keyframe_insert('["glow"]')
+            for (bp, base, nrm, lat, i) in ctl["cables"]:            # balanceo lento, distinto en cada cable
+                bp.co = base + nrm * (0.35 * fk.noise1(ta, 11 + i, 0.32)) + lat * (0.5 * fk.noise1(ta, 23 + i, 0.27))
+                bp.keyframe_insert("co")
+
+        if arg("--dry"):                                         # --dry 1: arma la escena y prueba las poses sin renderizar
+            for f in (1, frames // 2, frames):
+                sc.frame_set(f); pose(f, (f - 1) / FPS, (f - 1) / max(1, frames - 1)); keys(f)
+                print("dry", name, f, tuple(round(c, 1) for c in cam.location), round(cam.data.lens), flush=True)
+            if arg("--dry") == "3":                              # un cuadro en la CPU, chico, para revisar luces y encuadre
+                fr = int(arg("--frame", "1")); sc.frame_set(fr)
+                pose(fr, (fr - 1) / FPS, (fr - 1) / max(1, frames - 1)); keys(fr); sc.frame_set(fr)
+                sc.cycles.device = "CPU"; sc.cycles.samples = 16; sc.render.resolution_percentage = 30
+                sc.render.filepath = os.path.join(OUT, f"cpu_{name}_{fr:04d}.jpg"); bpy.ops.render.render(write_still=True)
+            continue
+        fk.render_shot(sc, name, frames, pose, OUT, extra_keys=keys, step=int(arg("--step", "1")))   # --step: vistazo rápido
+
+def bloom(sc):
+    """Resplandor suave de lo que pasa del umbral (lámparas, LED y brillos del cromo), en el compositor del render."""
+    t = bpy.data.node_groups.new("FilmComp", "CompositorNodeTree")
+    t.interface.new_socket(name="Image", in_out="OUTPUT", socket_type="NodeSocketColor")
+    rl = t.nodes.new("CompositorNodeRLayers"); gl = t.nodes.new("CompositorNodeGlare"); out = t.nodes.new("NodeGroupOutput")
+    gl.inputs["Type"].default_value = "Bloom"; gl.inputs["Quality"].default_value = "High"
+    gl.inputs["Threshold"].default_value = 4.0; gl.inputs["Strength"].default_value = 0.5; gl.inputs["Size"].default_value = 0.45
+    t.links.new(rl.outputs["Image"], gl.inputs["Image"]); t.links.new(gl.outputs["Image"], out.inputs[0])
+    sc.compositing_node_group = t
+    try: sc.render.compositor_device = "CPU"                    # en WSL el compositor en la GPU (EGL) no arranca
+    except (AttributeError, TypeError): pass
+
+def lamp_level(t, i, glow=0.05):
+    """Lámpara del paso i (0..11): encendida mientras es el paso actual, con el resplandor que se apaga en ~50 ms;
+    promediada en el tiempo del obturador (medio cuadro) para que el parpadeo no dependa de dónde cae el cuadro."""
+    acc = 0.0
+    for j in range(8):
+        tt = t + (j / 7.0 - 0.5) * 0.5 / FPS
+        if tt < 0: continue
+        k = int(tt / STEP); d = (k - i) % 12
+        if d == 0: acc += 1.0
+        elif k - d >= 0: acc += math.exp(-(tt - (k - d + 1) * STEP) / glow)
+    return acc / 8
+
+def clock_level(t):
+    """LED del reloj: alto la primera mitad de cada paso (CLOCK PW 0,5)."""
+    acc = 0.0
+    for j in range(8):
+        tt = t + (j / 7.0 - 0.5) * 0.5 / FPS
+        acc += 1.0 if (tt / STEP) % 1.0 < 0.5 else 0.0
+    return acc / 8
+
+def smooth(x, tau):
+    """Suavizado de ida y vuelta (sin retraso) con constante tau (s)."""
+    a = math.exp(-1.0 / (tau * FPS)); y = list(x); s = y[0]
+    for i in range(len(y)): s = a * s + (1 - a) * y[i]; y[i] = s
+    s = y[-1]
+    for i in range(len(y) - 1, -1, -1): s = a * s + (1 - a) * y[i]; y[i] = s
+    return y
+
+def vu_needles(path):
+    """Ángulo de cada aguja (grados, −48 = reposo, +48 = +3 VU) por cuadro: RMS por canal y una aguja de masa y
+    resorte de 2,1 Hz con amortiguamiento 0,8 (unos 300 ms hasta la lectura, como un VU)."""
+    import wave, array
+    w = wave.open(path); sr = w.getframerate(); ch = w.getnchannels(); n = w.getnframes()
+    if w.getsampwidth() != 2: raise ValueError("WAV de 16 bits para los VU")
+    a = array.array("h"); a.frombytes(w.readframes(n)); w.close()
+    per = sr / FPS; nf = int(n / per)
+    rms = []
+    for c in range(min(2, ch)):
+        x = a[c::ch]; r = []
+        for i in range(nf):
+            seg = x[int(i * per):int((i + 1) * per)]
+            r.append(math.sqrt(sum(v * v for v in seg) / max(1, len(seg))) / 32768.0)
+        rms.append(r)
+    if len(rms) == 1: rms.append(rms[0])
+    ref = sorted(rms[0] + rms[1])[int(0.8 * 2 * nf)] or 1.0          # 0 VU ≈ el nivel de las notas fuertes
+    res = []
+    for r in rms:
+        w0 = 2 * math.pi * 2.1; z = 0.8; th, v, out = -48.0, 0.0, []
+        for lv in r:
+            tgt = -48.0 + 96.0 * min(1.05, (lv / ref) / 1.4125)
+            for _ in range(8):
+                h = 1.0 / (FPS * 8); v += (w0 * w0 * (tgt - th) - 2 * z * w0 * v) * h; th += v * h
+            th = max(-50.0, min(50.0, th)); out.append(th)
+        res.append(out)
+    return res
+
+def vu_needle(m):
+    """Aguja del VU: gira en el pivote de la esfera (abajo al centro, fuera de la ventana, como en vu_face.png) y
+    nace dentro del marco inferior, así el eje no se ve. Origen en el pivote; rotation z = −ángulo."""
+    y0 = m["y"] - m["h"] / 2; fh = m["h"] - 1.0
+    py = y0 + 0.5 + 1.18 * fh; R = 0.98 * fh
+    r0, r1 = 4.2, 0.86 * R
+    bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0)
+    for v in bm.verts:
+        v.co.x *= 0.05; v.co.y = (r0 + (r1 - r0) * (v.co.y + 0.5)) / 10; v.co.z = v.co.z * 0.015 + 0.10
+    o = mesh("VuNeedle", bm, M["pointer_k"], smooth=False); o.location = P(m["x"], py)
+    return o
+
+def film_scene(ppath):
+    """La escena de las vistas en perspectiva más lo que el film anima: agujas de los VU, LED con emisión propia y
+    su resplandor, y los cables preparados para balancearse."""
+    build_static(); cables_ = populate(ppath)
+    needles = [vu_needle(m) for m in L["meters"]]
+    piv = stand_up(float(arg("--angle", "84")))
+    add_cables(cables_, piv); stage()
+    sc = bpy.context.scene
+    bpy.data.objects["Key"].data.energy = 1.8                    # el sol de las fotos aclaraba el negro en los planos rasantes
+    M["vu"].node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = 0.12   # esferas apenas iluminadas
+    ctl = {"vu": needles, "sl": {}, "leds": {}, "cables": []}
+    glow = {}
+    for key, col, gain in (("red", (1.0, 0.045, 0.01), 40.0), ("green", (0.2, 1.0, 0.12), 12.0)):
+        mm = M["led_" + key].copy(); mm.name = "LedGlow_" + key; nt = mm.node_tree
+        at_ = nt.nodes.new("ShaderNodeAttribute"); at_.attribute_type = "OBJECT"; at_.attribute_name = "glow"
+        mu = nt.nodes.new("ShaderNodeMath"); mu.operation = "MULTIPLY"; mu.inputs[1].default_value = gain
+        b = nt.nodes["Principled BSDF"]; b.inputs["Emission Color"].default_value = (*col, 1)
+        nt.links.new(at_.outputs["Fac"], mu.inputs[0]); nt.links.new(mu.outputs["Value"], b.inputs["Emission Strength"])
+        glow[key] = mm
+    for o in bpy.data.objects:
+        cid = o.get("cid")
+        if cid is None: continue
+        if o.name.startswith("FaderCap"): ctl["sl"][cid] = o
+        if o.name.startswith("Led"):
+            o.data.materials[0] = glow["red" if "red" in o.data.materials[0].name.lower() else "green"]
+            o["glow"] = 0.8 if cid in ("power", "seq_start") else 0.0      # encendido y secuenciador en marcha
+            ctl["leds"][cid] = o
+    nrm = piv.matrix_world.to_3x3() @ Vector((0, 0, 1))
+    for o in bpy.data.objects:
+        if o.type == "CURVE" and o.name.startswith("Cable"):
+            sp = o.data.splines[0]; bp = sp.bezier_points[1]
+            chord = (sp.bezier_points[2].co - sp.bezier_points[0].co); lat = chord.cross(nrm).normalized()
+            ctl["cables"].append((bp, bp.co.copy(), nrm, lat, len(ctl["cables"])))
+    return sc, piv, ctl
+
 if __name__ == "__main__":
-    modes = {"bg": mode_bg, "sprites": mode_sprites, "preview": mode_preview, "hero": mode_hero, "film": mode_film}
+    modes = {"bg": mode_bg, "sprites": mode_sprites, "preview": mode_preview, "hero": mode_hero, "film": mode_film, "film2": film2}
     for m in arg("--mode", "bg,sprites").split(","):
         print("== modo", m, flush=True); modes[m]()

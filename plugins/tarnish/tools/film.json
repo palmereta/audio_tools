@@ -1,0 +1,17 @@
+{
+  "title": "Tarnish",
+  "tagline": "Every sound gets old. Choose how.",
+  "fps": 24,
+  "bpm": 92,
+  "audio": {"cmd": ["/bin/sh", "-c", "set -e; D=$(mktemp -d); ffmpeg -y -loglevel error -i web/assets/samples/atfs1/tine-piano.m4a -ar 48000 -ac 2 -c:a pcm_s24le $D/dry.wav; build/plugins/tarnish/tarnishrender_artefacts/Release/tarnishrender $D/dry.wav '{out}' --preset 'Warm Studio Tape' --bpm 92 --tail 3 --set stop_time=1.8 --at 18.913 stop=1 > /dev/null; rm -rf $D"]},
+  "shots": [
+    {"name": "open", "beats": 6},
+    {"name": "heads", "beats": 6},
+    {"name": "capstan", "beats": 4},
+    {"name": "vu", "beats": 4},
+    {"name": "hero", "beats": 7},
+    {"name": "stop", "beats": 5},
+    {"name": "end", "beats": 5, "in": "dissolve"}
+  ],
+  "poster": {"shot": "hero", "frame": 60}
+}

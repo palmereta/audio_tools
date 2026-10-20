@@ -1,0 +1,14 @@
+{
+  "title": "Plumb",
+  "tagline": "Sing in tune. Feel no delay.",
+  "fps": 24,
+  "audio": {"file": "web/assets/samples/plumb/natural-lead.m4a"},
+  "shots": [
+    {"name": "open", "seconds": 3.5},
+    {"name": "trace", "seconds": 4.0},
+    {"name": "settle", "seconds": 3.0},
+    {"name": "wide", "seconds": 3.5},
+    {"name": "end", "seconds": 4.0, "in": "dissolve"}
+  ],
+  "poster": {"shot": "wide", "frame": 40}
+}

@@ -1,0 +1,17 @@
+{
+  "title": "AT700",
+  "tagline": "The modular that filled a wall.",
+  "fps": 24,
+  "bpm": 128,
+  "audio": {"cmd": ["build/plugins/at700/at700render_artefacts/Release/at700render",
+                    "plugins/at700/assets/presets/17_berlin_twelve.json", "{out}", "--secs", "{seconds}"]},
+  "shots": [
+    {"name": "open", "beats": 9},
+    {"name": "grid", "beats": 6},
+    {"name": "truck", "beats": 9},
+    {"name": "vu", "beats": 6},
+    {"name": "reveal", "beats": 9},
+    {"name": "end", "beats": 9, "in": "dissolve"}
+  ],
+  "poster": {"shot": "reveal", "frame": 100}
+}

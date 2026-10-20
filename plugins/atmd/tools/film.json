@@ -1,0 +1,16 @@
+{
+  "title": "ATMD",
+  "tagline": "The fattest bass ever wired.",
+  "fps": 24,
+  "bpm": 100,
+  "audio": {"file": "web/assets/samples/atmd/fat-bass.m4a"},
+  "shots": [
+    {"name": "open", "beats": 7},
+    {"name": "keys", "beats": 6},
+    {"name": "filter", "beats": 6},
+    {"name": "wheels", "beats": 5},
+    {"name": "sweep", "beats": 5},
+    {"name": "end", "beats": 7}
+  ],
+  "poster": {"shot": "open", "frame": 2}
+}

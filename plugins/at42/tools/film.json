@@ -1,0 +1,16 @@
+{
+  "title": "AT42",
+  "tagline": "Twenty oscillators. One slow storm.",
+  "fps": 24,
+  "audio": {"file": "web/assets/samples/at42/cathedral-a.m4a"},
+  "shots": [
+    {"name": "open", "seconds": 4.7083},
+    {"name": "orbs", "seconds": 4.25},
+    {"name": "knobs", "seconds": 2.9583},
+    {"name": "touch", "seconds": 2.7083},
+    {"name": "joy", "seconds": 2.9167},
+    {"name": "wide", "seconds": 2.9167},
+    {"name": "end", "seconds": 3.5417, "in": "dissolve"}
+  ],
+  "poster": {"shot": "wide", "frame": 64}
+}

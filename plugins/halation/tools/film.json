@@ -1,0 +1,41 @@
+{
+  "title": "Halation",
+  "tagline": "The glow a sound leaves behind.",
+  "fps": 24,
+  "bpm": 120,
+  "audio": {
+    "file": "plugins/halation/tools/blender/film-audio.m4a",
+    "start": 2.0
+  },
+  "shots": [
+    {
+      "name": "open",
+      "beats": 8
+    },
+    {
+      "name": "macro",
+      "beats": 8
+    },
+    {
+      "name": "aisle",
+      "beats": 8
+    },
+    {
+      "name": "space",
+      "beats": 8
+    },
+    {
+      "name": "arch",
+      "beats": 8
+    },
+    {
+      "name": "end",
+      "beats": 8,
+      "in": "dissolve"
+    }
+  ],
+  "poster": {
+    "shot": "space",
+    "frame": 60
+  }
+}

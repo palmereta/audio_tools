@@ -1,0 +1,18 @@
+{
+  "title": "ATFS1",
+  "tagline": "The synthesizer that talks.",
+  "fps": 24,
+  "bpm": 60,
+  "audio": {"cmd": ["build/plugins/atfs1/atfs1render_artefacts/Release/atfs1render",
+                    "plugins/atfs1/assets/presets/p01_talking_formants.json", "{out}", "--secs", "{seconds}",
+                    "--notes", "-:2,48:1.9,-:0.1,51:1.9,-:0.1,55:1.9,-:0.1,53:1.9,-:0.1,44:1.9,-:0.1,46:1.9,-:0.1,48:1.9,-:0.1,51:1.9,-:0.1,50:1.9,-:0.1,48:3"]},
+  "shots": [
+    {"name": "open", "beats": 4},
+    {"name": "pixels", "beats": 4},
+    {"name": "buttons", "beats": 4},
+    {"name": "knobs", "beats": 4},
+    {"name": "hero", "beats": 4},
+    {"name": "end", "beats": 4}
+  ],
+  "poster": {"shot": "hero", "frame": 72}
+}
