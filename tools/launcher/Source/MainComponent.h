@@ -8,7 +8,7 @@ namespace atl
 {
 class MainComponent;
 
-/** The path with the home folder shortened to ~ (macOS). */
+/** The path with the home folder shortened to ~ (macOS, Linux). */
 String tildePath (const File&);
 
 /** One plugin in the list: thumbnail, name, tagline, versions, progress and the action button.
@@ -151,7 +151,7 @@ public:
 private:
     Settings& settings;
     const Paths& paths;
-    theme::Toggle vst3 { "VST3" }, au { "Audio Unit" }, standalone { "Standalone app" }, systemWide { "Install VST3 for all users" };
+    theme::Toggle vst3 { "VST3" }, au { "Audio Unit" }, lv2 { "LV2" }, standalone { "Standalone app" }, systemWide { "Install VST3 for all users" };
     theme::Pill done { "Done", theme::Pill::Style::primary };
     int placesTop = 0;
     juce::Rectangle<int> cardArea() const;

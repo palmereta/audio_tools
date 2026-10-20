@@ -1,7 +1,7 @@
 # AT42
 
 Ambient drone machine modeled on the Elta Music SOLAR 42 family (2023-2025), using the 42N as the
-superset, plus the extensions listed in the root README. VST3, AU and standalone, macOS and Windows.
+superset, plus the extensions listed in the root README. VST3, AU (macOS), LV2 (Linux) and standalone; macOS, Windows and Linux.
 The panel graphics are original: no Elta logos or artwork.
 
 | | |

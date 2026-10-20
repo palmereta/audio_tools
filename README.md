@@ -4,8 +4,8 @@
 > here names the development commit it comes from. The website folder and the reference photographs of the
 > original instruments (`plugins/*/docs/ref/`, credited in their `CREDITS.md`) are not included.
 
-Free, open-source recreations of legendary synthesizers, as VST3 / Audio Unit / standalone
-plugins for macOS and Windows, plus six tools of our own: Orrery, a MIDI generator that plays them,
+Free, open-source recreations of legendary synthesizers, as VST3 / Audio Unit / LV2 / standalone
+plugins for macOS, Windows and Linux, plus six tools of our own: Orrery, a MIDI generator that plays them,
 Murmur, a granular effect, Halation, a delay and reverb in one space, Tarnish, a tape and lo-fi machine,
 Plumb, real-time pitch correction with 0.67 ms of latency, and Lacquer, an automatic mastering processor.
 
@@ -260,7 +260,8 @@ standalone apps.
 |---|---|---|
 | macOS | macOS 11 Big Sur or later; Apple silicon (M1 or later) or Intel Core i5 quad-core from 2017 | Any Mac with Apple silicon |
 | Windows | Windows 10 or 11, 64-bit; Intel Core i5-6500 (2015) or AMD Ryzen 5 1600 | Intel Core i5-12400 or AMD Ryzen 5 5600 |
-| Both | 4 GB RAM, 1280 x 800 screen, a 64-bit VST3 or AU host (or the standalone app) | 8 GB RAM, 1920 x 1080 screen |
+| Linux | x86_64 with glibc 2.35 or later (Ubuntu 22.04, Debian 12, Fedora 36 or newer), X11 or XWayland; the same processors as Windows | the same as Windows |
+| All | 4 GB RAM, 1280 x 800 screen, a 64-bit VST3, AU or LV2 host (or the standalone app) | 8 GB RAM, 1920 x 1080 screen |
 
 Measured CPU load, percentage of one core at 48 kHz, sound engine only (the editor adds about 5-15 %
 on an M4). Hosts run each instrument on one core, so single-core speed is what counts.
@@ -307,8 +308,8 @@ processors are extrapolated from these two machines by single-core benchmark rat
 
 Prebuilt packages for every plugin are attached to the [releases](https://github.com/palmereta/audio_tools/releases) of this repository,
 one release per plugin version (tag `<plugin>-v<version>`), and on https://audiotools.com.ar. Each plugin comes as
-`<Name>-<version>-macOS.zip` (macOS 11+, universal arm64 + x86_64) and `<Name>-<version>-Windows.zip`
-(Windows 10/11 x64); each zip includes an `INSTALL.txt`. In hosts the plugins are named **Audio Tools <name>**
+`<Name>-<version>-macOS.zip` (macOS 11+, universal arm64 + x86_64), `<Name>-<version>-Windows.zip`
+(Windows 10/11 x64) and `<Name>-<version>-Linux.zip` (x86_64, glibc 2.35+, VST3 + LV2); each zip includes an `INSTALL.txt`. In hosts the plugins are named **Audio Tools <name>**
 (for example Audio Tools Tarnish), under the maker Audio Tools.
 
 ## Build from source
@@ -318,12 +319,14 @@ git clone --recurse-submodules https://github.com/palmereta/audio_tools.git
 cd audio_tools
 sh scripts/build-macos.sh                                          # macOS
 powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1 # Windows
+sh scripts/build-linux.sh                                          # Linux, in Docker on the docker host (ssh docker)
 ```
 
 | Platform | Requirements |
 |---|---|
 | macOS | Xcode Command Line Tools, CMake ≥ 3.22, Ninja |
 | Windows | Visual Studio 2022 Build Tools (C++), CMake ≥ 3.22, Ninja |
+| Linux | Docker on the build host (`scripts/linux/Dockerfile`, Ubuntu 22.04 for glibc 2.35); or locally g++ ≥ 9, CMake ≥ 3.22, Ninja and the packages in `external/JUCE/docs/Linux Dependencies.md` |
 
 JUCE 9.0.4 is a git submodule (`external/JUCE`). If it is missing, CMake downloads it. The scripts
 build every plugin and leave the packages in `dist/` and `web/downloads/`.
@@ -350,13 +353,13 @@ shared/manual/        the in-plugin manual viewer, its Markdown subset and the C
 shared/dsp/           DSP shared by the instruments (oversampling, BLEP, delay, reverb, vocoder)
 shared/ui/            UI shared by the instruments (patch cable rope physics)
 shared/tools/         code shared by the offline render tools (MIDI file reader)
-scripts/              build and packaging for macOS and Windows, website generator
+scripts/              build and packaging for macOS, Windows and Linux, website generator
 ```
 
 ## Testing
 
 `tools/hosttest` builds `athosttest`, a small plugin host that loads the compiled VST3 (or AU) the way a DAW
-does and checks what comes out. It runs on macOS and Windows.
+does and checks what comes out. It runs on macOS, Windows and Linux (`scripts/linux/qa.sh`, headless with xvfb).
 
 ```bash
 cmake --build build --target athosttest
@@ -411,7 +414,7 @@ instruments that inspired these recreations. Reference photographs are credited 
 ---
 
 **Español.** Audio Tools recrea sintetizadores legendarios como plugins libres y de código abierto
-para macOS y Windows: el AT20V (Korg MS-20), el AT101V (Roland SH-101), el AT42 (Elta Music SOLAR 42), el AT700 (Roland System-700), el ATFS1 (Yamaha FS1R) el ATMD (Moog Minimoog Model D) y el AT303 (un sintetizador de bajo clásico de 1981 con su secuenciador), y cinco herramientas propias: Orrery, un generador de MIDI para
+para macOS, Windows y Linux: el AT20V (Korg MS-20), el AT101V (Roland SH-101), el AT42 (Elta Music SOLAR 42), el AT700 (Roland System-700), el ATFS1 (Yamaha FS1R) el ATMD (Moog Minimoog Model D) y el AT303 (un sintetizador de bajo clásico de 1981 con su secuenciador), y cinco herramientas propias: Orrery, un generador de MIDI para
 ambient, dark ambient y drone que los toca (y toca sintes físicos), Murmur, un efecto granular en tiempo real, Halation, un delay y una reverb en un solo espacio, Tarnish, una máquina de cinta y lo-fi, y Lacquer, un masterizador automático (en vivo con Learn o desde un archivo). Cada plugin trae su manual completo con capturas, adentro (botón Manual) y en la web. La web está en `web/`, con
 el inglés en `/` y el español en `/es/`. Los builds están en `web/downloads/`, y el código se
 publica bajo la licencia GNU AGPL v3.

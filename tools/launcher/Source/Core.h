@@ -20,10 +20,11 @@ using juce::StringArray;
 /** Compares dotted versions number by number: 1.0.10 > 1.0.9, 1.2 == 1.2.0. Returns -1, 0 or 1. */
 int compareVersions (const String& a, const String& b);
 
-enum class Format { vst3, au, standalone, other };
+enum class Format { vst3, au, lv2, standalone, other };
 
-/** By the item's extension: .vst3, .component, .app (macOS) or .exe (Windows). Anything else
-    (INSTALL.txt, LICENSE.txt, the command-line renderers) is "other" and is not installed. */
+/** By the item's extension: .vst3, .component, .lv2, .app (macOS) or .exe (Windows). En Linux la standalone es
+    el ejecutable sin extensión (p. ej. "AT20V FX"). Anything else (INSTALL.txt, LICENSE.txt, the command-line
+    renderers, que terminan en "render") is "other" and is not installed. */
 Format formatOf (const String& itemName);
 
 //==============================================================================
@@ -32,7 +33,7 @@ struct Asset
     String url, sha256;
     juce::int64 size = 0;
     StringArray files;      // top-level items inside the zip's folder, e.g. "AT20V.vst3", "AT20V FX.app"
-    StringArray formats;    // "VST3", "AU", "Standalone"
+    StringArray formats;    // "VST3", "AU", "LV2", "Standalone"
     bool isValid() const    { return url.isNotEmpty() && sha256.length() == 64; }
 };
 
@@ -50,7 +51,7 @@ struct Product
     String imageThumb, imageCard, imageHero;   // site URLs with ?v=<hash>, fetched lazily and cached
     String pageUrl, manualUrl;
     juce::Array<Sample> samples;
-    Asset mac, windows;
+    Asset mac, windows, linuxAsset;     // no "linux" a secas: GCC lo define como macro (-std=gnu++20)
     const Asset& forThisOS() const;
 };
 
@@ -59,7 +60,7 @@ struct Manifest
     int schema = 0;
     String generated, donateUrl, siteUrl, homeTitle, homeLead;
     String launcherVersion;
-    Asset launcherMac, launcherWindows;
+    Asset launcherMac, launcherWindows, launcherLinux;
     juce::Array<Product> products;
 
     /** Where the manifest came from (an https URL or a local file). Relative zip URLs resolve
@@ -86,7 +87,7 @@ inline constexpr bool kSystemWideDefault = false;
 
 struct Settings
 {
-    bool vst3 = true, au = true, standalone = true;
+    bool vst3 = true, au = true, lv2 = true, standalone = true;
     bool systemWideVst3 = kSystemWideDefault;   // Windows only: C:\Program Files\Common Files\VST3, the folder every DAW scans
 
     bool wants (Format f) const;
@@ -95,12 +96,13 @@ struct Settings
 };
 
 /** Install and data locations. LAUNCHER_INSTALL_ROOT=<dir> sends every format under that folder
-    (VST3/, Components/, Applications/, VST3-System/) and LAUNCHER_DATA_DIR=<dir> moves the
+    (VST3/, Components/, LV2/, Applications/, VST3-System/, applications/) and LAUNCHER_DATA_DIR=<dir> moves the
     launcher's own files, so tests never touch the real plug-in folders. */
 struct Paths
 {
-    File vst3User, vst3System, au, apps, data;
-    juce::Array<File> vst3Extra, auExtra, appsExtra;   // only searched, for manual installs
+    File vst3User, vst3System, au, lv2, apps, data;
+    File desktopEntries;    // Linux: ~/.local/share/applications, un .desktop por standalone para el menú
+    juce::Array<File> vst3Extra, auExtra, lv2Extra, appsExtra;   // only searched, for manual installs
     bool overridden = false;
 
     static Paths current();

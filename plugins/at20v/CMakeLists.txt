@@ -4,6 +4,9 @@ set(AT20V_VERSION 1.0.6)
 if(APPLE)
     set(AT20V_FORMATS VST3 AU Standalone)
     set(AT20V_COPY TRUE)    # instala en ~/Library/Audio/Plug-Ins al compilar
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(AT20V_FORMATS VST3 LV2 Standalone)
+    set(AT20V_COPY FALSE)   # Linux: se instala aparte (~/.vst3, ~/.lv2)
 else()
     set(AT20V_FORMATS VST3 Standalone)
     set(AT20V_COPY FALSE)   # en Windows la carpeta de VST3 pide administrador: se instala aparte

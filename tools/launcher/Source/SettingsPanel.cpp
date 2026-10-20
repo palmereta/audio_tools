@@ -9,7 +9,7 @@ using juce::Rectangle;
 
 SettingsPanel::SettingsPanel (Settings& s, const Paths& p) : settings (s), paths (p)
 {
-    for (auto* t : { &vst3, &au, &standalone, &systemWide })
+    for (auto* t : { &vst3, &au, &lv2, &standalone, &systemWide })
     {
         addAndMakeVisible (*t);
         t->onClick = [this, t]
@@ -22,6 +22,7 @@ SettingsPanel::SettingsPanel (Settings& s, const Paths& p) : settings (s), paths
             }
             settings.vst3 = vst3.getToggleState();
             settings.au = au.getToggleState();
+            settings.lv2 = lv2.getToggleState();
             settings.standalone = standalone.getToggleState();
             if (onChanged) onChanged();
             repaint();
@@ -29,7 +30,12 @@ SettingsPanel::SettingsPanel (Settings& s, const Paths& p) : settings (s), paths
     }
    #if JUCE_WINDOWS
     au.setVisible (false);
+    lv2.setVisible (false);
+   #elif JUCE_LINUX
+    au.setVisible (false);
+    systemWide.setVisible (false);
    #else
+    lv2.setVisible (false);
     systemWide.setVisible (false);
    #endif
     addAndMakeVisible (done);
@@ -41,6 +47,7 @@ void SettingsPanel::sync()
 {
     vst3.setToggleState (settings.vst3, juce::dontSendNotification);
     au.setToggleState (settings.au, juce::dontSendNotification);
+    lv2.setToggleState (settings.lv2, juce::dontSendNotification);
     standalone.setToggleState (settings.standalone, juce::dontSendNotification);
     systemWide.setToggleState (settings.systemWideVst3, juce::dontSendNotification);
     repaint();
@@ -52,6 +59,9 @@ static StringArray installPlaces (const Paths& paths, const Settings& settings)
     where.add ("VST3:  " + tildePath (paths.vst3Target (settings)));
    #if JUCE_WINDOWS
     where.add ("Standalone:  " + tildePath (paths.apps) + "\\<plugin>");
+   #elif JUCE_LINUX
+    where.add ("LV2:  " + tildePath (paths.lv2));
+    where.add ("Standalone:  " + tildePath (paths.apps) + "/<plugin>");
    #else
     where.add ("Audio Unit:  " + tildePath (paths.au));
     where.add ("Standalone:  " + tildePath (paths.apps));
@@ -62,7 +72,7 @@ static StringArray installPlaces (const Paths& paths, const Settings& settings)
 Rectangle<int> SettingsPanel::cardArea() const
 {
     int toggles = 0;
-    for (auto* t : { &vst3, &au, &standalone, &systemWide }) toggles += t->isVisible() ? 1 : 0;
+    for (auto* t : { &vst3, &au, &lv2, &standalone, &systemWide }) toggles += t->isVisible() ? 1 : 0;
     const int h = 30 + 40 + 10 + 20 + 10 + toggles * 34 + 26 + 20 + installPlaces (paths, settings).size() * 19 + 28 + 38 + 30;
     return getLocalBounds().withSizeKeepingCentre (juce::jmin (540, getWidth() - 40), juce::jmin (h, getHeight() - 40));
 }
@@ -107,7 +117,7 @@ void SettingsPanel::resized()
 {
     auto r = cardArea().reduced (34, 30);
     r.removeFromTop (40 + 10 + 20 + 10);
-    for (auto* t : { &vst3, &au, &standalone, &systemWide })
+    for (auto* t : { &vst3, &au, &lv2, &standalone, &systemWide })
         if (t->isVisible()) t->setBounds (r.removeFromTop (34));
     placesTop = r.getY() + 26;
     done.setBounds (r.removeFromBottom (38).removeFromRight (110));

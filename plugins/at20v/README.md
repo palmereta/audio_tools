@@ -1,7 +1,7 @@
 # AT20V — Audio Tools
 
-Sintetizador semimodular basado en el Korg MS-20 (1978), como plugin **VST3 / AU / Standalone
-para macOS y Windows**. El circuito está modelado a partir del manual de servicio, del estudio de
+Sintetizador semimodular basado en el Korg MS-20 (1978), como plugin **VST3 / AU / LV2 / Standalone
+para macOS, Windows y Linux**. El circuito está modelado a partir del manual de servicio, del estudio de
 filtros de Tim Stinchcombe y de las cartas de ajuste de fábrica. La interfaz es fotorrealista, se
 renderiza en Blender con patchera interactiva y cables con física, y tiene un teclado con rueda y
 pulsador al estilo del Arturia KORG MS-20 V.

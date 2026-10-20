@@ -39,6 +39,17 @@ inline juce::String family()
 {
    #if JUCE_MAC
     return "Helvetica Neue";
+   #elif JUCE_LINUX
+    // Linux no suele traer Arial, y con una familia que no está instalada JUCE no dibuja el texto: la primera de
+    // estas que haya (Liberation Sans tiene las medidas de Arial) o, vacía, la sans que elige JUCE.
+    static const juce::String name = []
+    {
+        const auto all = juce::Font::findAllTypefaceNames();
+        for (auto* f : { "Liberation Sans", "Arial", "Noto Sans", "DejaVu Sans" })
+            if (all.contains (f)) return juce::String (f);
+        return juce::String();
+    }();
+    return name;
    #else
     return "Arial";
    #endif
@@ -54,6 +65,8 @@ inline juce::Font heading (float h)
 {
    #if JUCE_MAC
     return juce::Font (juce::FontOptions (family(), h, juce::Font::plain).withStyle ("Condensed Bold"));
+   #elif JUCE_LINUX
+    return juce::Font (juce::FontOptions (family(), h, juce::Font::bold));
    #else
     return juce::Font (juce::FontOptions ("Arial Narrow", h, juce::Font::bold));
    #endif

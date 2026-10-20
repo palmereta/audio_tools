@@ -4,6 +4,7 @@
 #include <chrono>
 #include <complex>
 #include <cstdio>
+#include <cstring>      // std::memcmp (en Linux no llega por los otros encabezados)
 #include <functional>
 
 using namespace dh::tn;

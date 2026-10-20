@@ -13,8 +13,8 @@ Cada corrida:
      hash ("Development commit: <sha>"): ese es el vínculo entre los dos repos. Lo empuja a `main`.
   3. Crea en GitHub el tag `<plugin>-v<versión>` (la versión de cada CMakeLists, más el launcher) que todavía no
      exista, sobre el commit publicado.
-  4. Crea la Release de cada tag que no la tenga y le sube los zips de macOS y Windows de `web/downloads/` que
-     falten. Si un zip es un puntero de LFS (clon sin `git lfs pull`), se avisa y se saltea.
+  4. Crea la Release de cada tag que no la tenga y le sube los zips de macOS, Windows y Linux de `web/downloads/`
+     que falten (el de Linux, cuando exista: las releases anteriores lo reciben en la corrida siguiente). Si un zip es un puntero de LFS (clon sin `git lfs pull`), se avisa y se saltea.
 
 El token sale de la variable GITHUB_TOKEN o, si no está, del `.env` de master-prompt (repo hermano). Nunca se
 escribe en disco ni en la configuración de git: va como encabezado en cada llamado.
@@ -27,7 +27,7 @@ import base64, json, os, re, subprocess, sys, tempfile, urllib.error, urllib.req
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OWNER, REPO = "palmereta", "audio_tools"
-DESCRIPTION = "Free, open-source synthesizers and effects (VST3, Audio Unit, standalone) for macOS and Windows: AT20V, AT101V, AT42, AT700, ATFS1, ATMD, AT303, Orrery, Murmur, Halation, Tarnish, Plumb, Lacquer."
+DESCRIPTION = "Free, open-source synthesizers and effects (VST3, Audio Unit, LV2, standalone) for macOS, Windows and Linux: AT20V, AT101V, AT42, AT700, ATFS1, ATMD, AT303, Orrery, Murmur, Halation, Tarnish, Plumb, Lacquer."
 HOMEPAGE = "https://audiotools.com.ar"
 WORK = os.path.join(ROOT, "build", "github-publish")          # clon de trabajo del repo público (build/ no se versiona)
 AUTHOR = ("Alejandro Duarte", "alejandro.s.duarte@gmail.com")
@@ -91,8 +91,8 @@ def public_readme(text):
     url = f"https://github.com/{OWNER}/{REPO}"
     dl = (f"## Download\n\nPrebuilt packages for every plugin are attached to the [releases]({url}/releases) of this repository,\n"
           "one release per plugin version (tag `<plugin>-v<version>`), and on " + HOMEPAGE + ". Each plugin comes as\n"
-          "`<Name>-<version>-macOS.zip` (macOS 11+, universal arm64 + x86_64) and `<Name>-<version>-Windows.zip`\n"
-          "(Windows 10/11 x64); each zip includes an `INSTALL.txt`. In hosts the plugins are named **Audio Tools <name>**\n"
+          "`<Name>-<version>-macOS.zip` (macOS 11+, universal arm64 + x86_64), `<Name>-<version>-Windows.zip`\n"
+          "(Windows 10/11 x64) and `<Name>-<version>-Linux.zip` (x86_64, glibc 2.35+, VST3 + LV2); each zip includes an `INSTALL.txt`. In hosts the plugins are named **Audio Tools <name>**\n"
           "(for example Audio Tools Tarnish), under the maker Audio Tools.\n\n")
     text = re.sub(r"## Download\n.*?(?=## Build from source)", lambda _: dl, text, flags=re.S)
     text = re.sub(r"## Website\n.*?(?=## Why open source)", lambda _: (
@@ -197,7 +197,10 @@ def main():
         status, rel = api("GET", f"/repos/{OWNER}/{REPO}/releases/tags/{tag}")
         if status == 404:
             title = f"{'Audio Tools Launcher' if product == 'AudioToolsLauncher' else product} {ver}"
-            notes = (f"{title} for macOS (11+, universal) and Windows (10/11 x64). Unzip and follow INSTALL.txt, or install it "
+            linux = os.path.exists(os.path.join(ROOT, "web", "downloads", f"{product}-{ver}-Linux.zip"))
+            systems = ("macOS (11+, universal), Windows (10/11 x64) and Linux (x86_64, glibc 2.35+)" if linux
+                       else "macOS (11+, universal) and Windows (10/11 x64)")
+            notes = (f"{title} for {systems}. Unzip and follow INSTALL.txt, or install it "
                      f"with the Audio Tools Launcher. More on {HOMEPAGE}.\n\nThe builds are not code-signed yet: macOS may need "
                      "`xattr -dr com.apple.quarantine` on the installed files and Windows SmartScreen may ask to confirm.")
             changes = RELEASE_NOTES.get(tag)
@@ -209,7 +212,7 @@ def main():
         elif status != 200: print(f"  release {tag}: GitHub respondió {status}"); continue
         assert isinstance(rel, dict)
         have = {a["name"] for a in rel.get("assets", [])}
-        for plat in ("macOS", "Windows"):
+        for plat in ("macOS", "Windows", "Linux"):
             name = f"{product}-{ver}-{plat}.zip"
             path = os.path.join(ROOT, "web", "downloads", name)
             if name in have: continue

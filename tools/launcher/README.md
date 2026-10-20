@@ -1,6 +1,6 @@
 # Audio Tools Launcher
 
-A small app for macOS and Windows that installs the Audio Tools plugins and keeps them up to date.
+A small app for macOS, Windows and Linux that installs the Audio Tools plugins and keeps them up to date.
 No account, no sign-up, no telemetry. The manual downloads on the website stay exactly as they are:
 the launcher is a second way in, not a replacement.
 
@@ -31,18 +31,22 @@ coloured placeholder or a disabled play button is shown and installing still wor
 
 ## Where things go
 
-| | macOS | Windows |
-|---|---|---|
-| VST3 | `~/Library/Audio/Plug-Ins/VST3` | `%LOCALAPPDATA%\Programs\Common\VST3` (per user, VST3 spec), or `C:\Program Files\Common Files\VST3` with "Install VST3 for all users" (asks to relaunch as administrator) |
-| Audio Unit | `~/Library/Audio/Plug-Ins/Components` | — |
-| Standalone | `~/Applications` | `%LOCALAPPDATA%\Programs\Audio Tools\<Plugin>\` |
-| Launcher data | `~/Library/Application Support/Audio Tools Launcher` | `%APPDATA%\Audio Tools\Launcher` |
+| | macOS | Windows | Linux |
+|---|---|---|---|
+| VST3 | `~/Library/Audio/Plug-Ins/VST3` | `%LOCALAPPDATA%\Programs\Common\VST3` (per user, VST3 spec), or `C:\Program Files\Common Files\VST3` with "Install VST3 for all users" (asks to relaunch as administrator) | `~/.vst3` |
+| Audio Unit | `~/Library/Audio/Plug-Ins/Components` | — | — |
+| LV2 | — | — | `~/.lv2` |
+| Standalone | `~/Applications` | `%LOCALAPPDATA%\Programs\Audio Tools\<Plugin>\` | `~/.local/opt/audio-tools/<Plugin>/`, plus `~/.local/share/applications/audiotools-<name>.desktop` for the menu |
+| Launcher data | `~/Library/Application Support/Audio Tools Launcher` | `%APPDATA%\Audio Tools\Launcher` | `~/.config/Audio Tools Launcher` |
 
 The data folder holds `installed.json` (what the launcher installed, with paths), `settings.json`
 (formats, all-users VST3), `manifest-cache.json` and `cache/`. On macOS the quarantine attribute is
 removed from every installed bundle. Manual installs in `/Library/...` and `/Applications` are
-found but not written to. `INSTALL.txt`, `LICENSE.txt` and the command-line renderers in the zips
-are not installed.
+found but not written to; on Linux the same for `/usr/lib/vst3`, `/usr/local/lib/vst3`, `/usr/lib/lv2`
+and `/usr/local/lib/lv2`. `INSTALL.txt`, `LICENSE.txt` and the command-line renderers in the zips
+are not installed. On Linux the standalone is the executable without extension (`AT20V`, `AT20V FX`); the renderers
+are the ones whose name ends in `render`. The `.desktop` entries are part of the record, so Remove deletes them.
+On Linux the launcher needs libcurl for HTTPS (`NEEDS_CURL`, loaded on first use).
 
 ## The manifest
 
@@ -73,7 +77,8 @@ python3 scripts/build-web.py                # manifest + pages
 ```
 
 On Windows `scripts/build-windows.ps1` builds everything and packages the launcher as
-`AudioToolsLauncher-<v>-Windows.zip`.
+`AudioToolsLauncher-<v>-Windows.zip`. For Linux, `sh scripts/build-linux.sh launcher` builds it in Docker on the
+docker host and copies `AudioToolsLauncher-<v>-Linux.zip` to `web/downloads/`.
 
 ## Test
 
@@ -94,7 +99,7 @@ cache against the live site.
 | Variable | Effect |
 |---|---|
 | `LAUNCHER_MANIFEST=<file>` | Read a local manifest. Zip, image and clip URLs of the site are read from the same `web/` tree when present (`web/downloads/manifest.json` works offline as is). |
-| `LAUNCHER_INSTALL_ROOT=<dir>` | Install under `<dir>/VST3`, `Components`, `Applications`, `VST3-System`; only that folder is searched. |
+| `LAUNCHER_INSTALL_ROOT=<dir>` | Install under `<dir>/VST3`, `Components`, `LV2`, `Applications`, `VST3-System` (and `applications` for the Linux menu entries); only that folder is searched. |
 | `LAUNCHER_DATA_DIR=<dir>` | The launcher's own files. |
 | `LAUNCHER_SNAPSHOT=<png>` `LAUNCHER_WAIT=<s>` `LAUNCHER_SIZE=WxH` | Save a 2x screenshot after the wait and quit. |
 | `LAUNCHER_SETTINGS=1`, `LAUNCHER_PAGE=<id>`, `LAUNCHER_PLAY=<n>`, `LAUNCHER_SCROLL=<px>` | Open settings, a plugin page, play its clip n, scroll. |

@@ -168,9 +168,9 @@ T = {
     h1_20="A semi-modular that screams, rebuilt in the open.",
     lead_20="AT20V is a free, open-source semi-modular synthesizer modeled circuit by circuit on the 1978 Korg MS-20, with its two filters, the full patch bay, a vocoder and polyphony.",
     title="Audio Tools — legendary synthesizers, rebuilt in the open",
-    description="Free, open-source recreations of classic synthesizers. AT20V, the first one, is a semi-modular synth modeled on the 1978 Korg MS-20, for macOS and Windows.",
+    description="Free, open-source recreations of classic synthesizers. AT20V, the first one, is a semi-modular synth modeled on the 1978 Korg MS-20, for macOS, Windows and Linux.",
     h1="Legendary synthesizers, rebuilt in the open.",
-    lead="Audio Tools recreates classic instruments as free, open-source plugins for macOS and Windows. The first one is AT20V, modeled circuit by circuit on the 1978 Korg MS-20.",
+    lead="Audio Tools recreates classic instruments as free, open-source plugins for macOS, Windows and Linux. The first one is AT20V, modeled circuit by circuit on the 1978 Korg MS-20.",
     dl_mac="Download for macOS", dl_win="Download for Windows",
     version_line=f"AT20V {VERSION}. VST3, Audio Unit and standalone app.",
     flow_label="Page contents",
@@ -249,9 +249,9 @@ T = {
     h1_20="Un semimodular que grita, reconstruido a la vista de todos.",
     lead_20="El AT20V es un sintetizador semimodular libre y de código abierto, modelado circuito por circuito sobre el Korg MS-20 de 1978, con sus dos filtros, la patchera completa, vocoder y polifonía.",
     title="Audio Tools — sintetizadores legendarios, reconstruidos a la vista de todos",
-    description="Recreaciones libres y de código abierto de sintetizadores clásicos. El primero, AT20V, es un semimodular basado en el Korg MS-20 de 1978, para macOS y Windows.",
+    description="Recreaciones libres y de código abierto de sintetizadores clásicos. El primero, AT20V, es un semimodular basado en el Korg MS-20 de 1978, para macOS, Windows y Linux.",
     h1="Sintetizadores legendarios, reconstruidos a la vista de todos.",
-    lead="Audio Tools recrea instrumentos clásicos como plugins libres y de código abierto para macOS y Windows. El primero es el AT20V, modelado circuito por circuito sobre el Korg MS-20 de 1978.",
+    lead="Audio Tools recrea instrumentos clásicos como plugins libres y de código abierto para macOS, Windows y Linux. El primero es el AT20V, modelado circuito por circuito sobre el Korg MS-20 de 1978.",
     dl_mac="Descargar para macOS", dl_win="Descargar para Windows",
     version_line=f"AT20V {VERSION}. VST3, Audio Unit y aplicación independiente.",
     flow_label="Contenido de la página",
@@ -331,9 +331,9 @@ T = {
 H = {
 "en": dict(
     title="Audio Tools — legendary synthesizers, rebuilt in the open",
-    description="Free, open-source recreations of classic synthesizers for macOS and Windows: AT20V (Korg MS-20), AT101V (Roland SH-101), AT42 (Elta Music SOLAR 42), AT700 (Roland System-700) and ATFS1 (Yamaha FS1R).",
+    description="Free, open-source recreations of classic synthesizers for macOS, Windows and Linux: AT20V (Korg MS-20), AT101V (Roland SH-101), AT42 (Elta Music SOLAR 42), AT700 (Roland System-700) and ATFS1 (Yamaha FS1R).",
     h1="Legendary synthesizers and new tools, built in the open.",
-    lead="Free, open-source plugins for macOS and Windows: classic instruments modeled from their original documentation and measurements, and tools of our own to play, process and master them. Anyone can read, check and improve the code.",
+    lead="Free, open-source plugins for macOS, Windows and Linux: classic instruments modeled from their original documentation and measurements, and tools of our own to play, process and master them. Anyone can read, check and improve the code.",
     see="See the instruments",
     inst_h="The instruments.",
     cards=[
@@ -397,9 +397,9 @@ H = {
 ),
 "es": dict(
     title="Audio Tools — sintetizadores legendarios, reconstruidos a la vista de todos",
-    description="Recreaciones libres y de código abierto de sintetizadores clásicos para macOS y Windows: el AT20V (Korg MS-20), el AT101V (Roland SH-101), el AT42 (Elta Music SOLAR 42), el AT700 (Roland System-700) y el ATFS1 (Yamaha FS1R).",
+    description="Recreaciones libres y de código abierto de sintetizadores clásicos para macOS, Windows y Linux: el AT20V (Korg MS-20), el AT101V (Roland SH-101), el AT42 (Elta Music SOLAR 42), el AT700 (Roland System-700) y el ATFS1 (Yamaha FS1R).",
     h1="Sintetizadores legendarios y herramientas nuevas, hechos a la vista de todos.",
-    lead="Plugins libres y de código abierto para macOS y Windows: instrumentos clásicos modelados a partir de su documentación original y de mediciones, y herramientas propias para tocarlos, procesarlos y masterizarlos. Cualquiera puede leer, verificar y mejorar el código.",
+    lead="Plugins libres y de código abierto para macOS, Windows y Linux: instrumentos clásicos modelados a partir de su documentación original y de mediciones, y herramientas propias para tocarlos, procesarlos y masterizarlos. Cualquiera puede leer, verificar y mejorar el código.",
     see="Ver los instrumentos",
     inst_h="Los instrumentos.",
     cards=[
@@ -467,7 +467,7 @@ H = {
 S = {
 "en": dict(
     title="AT101V — a free SH-101 recreation with a visual sequencer | Audio Tools",
-    description=f"AT101V is a free, open-source monophonic synthesizer modeled on the 1982 Roland SH-101, with the IR3109 filter, arpeggiator, a 100-step sequencer with a visual editor and {N101} presets. For macOS and Windows.",
+    description=f"AT101V is a free, open-source monophonic synthesizer modeled on the 1982 Roland SH-101, with the IR3109 filter, arpeggiator, a 100-step sequencer with a visual editor and {N101} presets. For macOS, Windows and Linux.",
     h1="The bass line machine, rebuilt in the open.",
     lead="AT101V is a free, open-source monophonic synthesizer modeled on the 1982 Roland SH-101: one oscillator with a sub-oscillator, a four-pole filter that sings, an arpeggiator and a 100-step sequencer.",
     dl_mac="Download for macOS", dl_win="Download for Windows",
@@ -543,7 +543,7 @@ S = {
 ),
 "es": dict(
     title="AT101V — una recreación libre del SH-101 con secuenciador visual | Audio Tools",
-    description=f"El AT101V es un sintetizador monofónico libre y de código abierto basado en el Roland SH-101 de 1982, con el filtro IR3109, arpegiador, un secuenciador de 100 pasos con editor visual y {N101} presets. Para macOS y Windows.",
+    description=f"El AT101V es un sintetizador monofónico libre y de código abierto basado en el Roland SH-101 de 1982, con el filtro IR3109, arpegiador, un secuenciador de 100 pasos con editor visual y {N101} presets. Para macOS, Windows y Linux.",
     h1="La máquina de líneas de bajo, reconstruida a la vista de todos.",
     lead="El AT101V es un sintetizador monofónico libre y de código abierto basado en el Roland SH-101 de 1982: un oscilador con sub-oscilador, un filtro de cuatro polos que canta, arpegiador y un secuenciador de 100 pasos.",
     dl_mac="Descargar para macOS", dl_win="Descargar para Windows",
@@ -624,7 +624,7 @@ S = {
 Q = {
 "en": dict(
     title="AT42 — a free drone machine inspired by the Elta SOLAR 42 | Audio Tools",
-    description=f"AT42 is a free, open-source drone synthesizer modeled on the Elta Music SOLAR 42: twenty drone oscillators, two noise voices, two VCOs, dual Polivoks filters, a 13-cartridge effector, a touch keyboard and a 62-jack patch bay. For macOS and Windows.",
+    description=f"AT42 is a free, open-source drone synthesizer modeled on the Elta Music SOLAR 42: twenty drone oscillators, two noise voices, two VCOs, dual Polivoks filters, a 13-cartridge effector, a touch keyboard and a 62-jack patch bay. For macOS, Windows and Linux.",
     h1="An ambient drone machine, rebuilt in the open.",
     lead="AT42 is a free, open-source recreation of the Elta Music SOLAR 42: four drone voices of five oscillators each, two noise voices, two VCOs, a dual Polivoks filter, a dual cartridge effector and a 62-jack patch bay.",
     dl_mac="Download for macOS", dl_win="Download for Windows",
@@ -694,7 +694,7 @@ Q = {
 ),
 "es": dict(
     title="AT42 — una máquina de drones libre inspirada en el Elta SOLAR 42 | Audio Tools",
-    description=f"El AT42 es un sintetizador de drones libre y de código abierto basado en el Elta Music SOLAR 42: veinte osciladores drone, dos voces de ruido, dos VCO, doble filtro Polivoks, un efector de 13 cartuchos, teclado táctil y una patchera de 62 jacks. Para macOS y Windows.",
+    description=f"El AT42 es un sintetizador de drones libre y de código abierto basado en el Elta Music SOLAR 42: veinte osciladores drone, dos voces de ruido, dos VCO, doble filtro Polivoks, un efector de 13 cartuchos, teclado táctil y una patchera de 62 jacks. Para macOS, Windows y Linux.",
     h1="Una máquina de drones ambient, reconstruida a la vista de todos.",
     lead="El AT42 es una recreación libre y de código abierto del Elta Music SOLAR 42: cuatro voces drone de cinco osciladores cada una, dos voces de ruido, dos VCO, doble filtro Polivoks, un efector doble de cartuchos y una patchera de 62 jacks.",
     dl_mac="Descargar para macOS", dl_win="Descargar para Windows",
@@ -768,7 +768,7 @@ Q = {
 Z = {
 "en": dict(
     title="AT700 — a free modular synthesizer inspired by the Roland System-700 | Audio Tools",
-    description="AT700 is a free, open-source modular synthesizer modeled on the 1976 Roland System-700: the 17-module Main Console, the duophonic 701A keyboard and the 717A analog sequencer, with 137 patch points. For macOS and Windows.",
+    description="AT700 is a free, open-source modular synthesizer modeled on the 1976 Roland System-700: the 17-module Main Console, the duophonic 701A keyboard and the 717A analog sequencer, with 137 patch points. For macOS, Windows and Linux.",
     sound_h="Three oscillators, two filters, 1976 levels.",
     sound_p1="The three 702 oscillators share one saw core for four simultaneous waveforms, with strong and weak sync. Two filter families sit side by side: the 703E, four OTA stages that lose bass as the resonance rises, just like the original, and the 703B state-variable with high-pass, band-pass and low-pass.",
     sound_p2="The output module has a two-spring reverb, an eight-stage phase shifter, two VU meters and a standard oscillator to tune by. Everything runs in volts, as the hardware did: 10 V audio, 1 V per octave, +15 V gates.",
@@ -826,7 +826,7 @@ Z = {
 ),
 "es": dict(
     title="AT700 — un sintetizador modular libre inspirado en el Roland System-700 | Audio Tools",
-    description="El AT700 es un sintetizador modular libre y de código abierto basado en el Roland System-700 de 1976: la consola principal de 17 módulos, el teclado duofónico 701A y el secuenciador analógico 717A, con 137 puntos de patcheo. Para macOS y Windows.",
+    description="El AT700 es un sintetizador modular libre y de código abierto basado en el Roland System-700 de 1976: la consola principal de 17 módulos, el teclado duofónico 701A y el secuenciador analógico 717A, con 137 puntos de patcheo. Para macOS, Windows y Linux.",
     sound_h="Tres osciladores, dos filtros, niveles de 1976.",
     sound_p1="Los tres osciladores 702 comparten un núcleo de sierra para cuatro formas de onda simultáneas, con sync fuerte y débil. Hay dos familias de filtro lado a lado: el 703E, cuatro etapas OTA que pierden graves al subir la resonancia, igual que el original, y el 703B de estado variable con pasa altos, pasa banda y pasa bajos.",
     sound_p2="El módulo de salida tiene una reverb de dos resortes, un phase shifter de ocho etapas, dos vúmetros y un oscilador patrón para afinar. Todo funciona en voltios, como el hardware: audio de 10 V, 1 V por octava, compuertas de +15 V.",
@@ -889,7 +889,7 @@ Z = {
 F = {
 "en": dict(
     title="ATFS1 — a free formant and FM synthesizer inspired by the Yamaha FS1R | Audio Tools",
-    description=f"ATFS1 is a free, open-source formant and FM synthesizer modeled on the 1998 Yamaha FS1R: 8 voiced and 8 noise operators, 88 algorithms, Formant Sequences you can make from any recording, and the full-screen editor the original never had. For macOS and Windows.",
+    description=f"ATFS1 is a free, open-source formant and FM synthesizer modeled on the 1998 Yamaha FS1R: 8 voiced and 8 noise operators, 88 algorithms, Formant Sequences you can make from any recording, and the full-screen editor the original never had. For macOS, Windows and Linux.",
     sound_h="Formants and FM in one operator.",
     sound_p1="Every voiced operator is a carrier inside a window that restarts at each period of the note. Change the window and the carrier and the same operator gives one partial, a group of harmonics, only the odd ones, a resonance or a vocal formant; give it FM and it does what a DX7 does. Next to each one, an unvoiced operator turns white noise into a band around a formant: the breath and the consonants.",
     sound_p2="The laws come from Yamaha's 1995 patent, the FS1R manuals and the measurements published by the FSVR project on real units; the code is our own and was checked against those numbers.",
@@ -947,7 +947,7 @@ F = {
 ),
 "es": dict(
     title="ATFS1 — un sintetizador de formantes y FM libre inspirado en el Yamaha FS1R | Audio Tools",
-    description=f"El ATFS1 es un sintetizador de formantes y FM libre y de código abierto basado en el Yamaha FS1R de 1998: 8 operadores con voz y 8 de ruido, 88 algoritmos, Formant Sequences que podés crear desde cualquier grabación y el editor de pantalla completa que el original nunca tuvo. Para macOS y Windows.",
+    description=f"El ATFS1 es un sintetizador de formantes y FM libre y de código abierto basado en el Yamaha FS1R de 1998: 8 operadores con voz y 8 de ruido, 88 algoritmos, Formant Sequences que podés crear desde cualquier grabación y el editor de pantalla completa que el original nunca tuvo. Para macOS, Windows y Linux.",
     sound_h="Formantes y FM en un mismo operador.",
     sound_p1="Cada operador con voz es una portadora dentro de una ventana que vuelve a empezar en cada período de la nota. Cambiando la ventana y la portadora, el mismo operador da una sola parcial, un grupo de armónicos, sólo los impares, una resonancia o un formante de voz; con FM hace lo mismo que un DX7. Al lado de cada uno, un operador sin voz convierte ruido blanco en una banda alrededor de un formante: el aliento y las consonantes.",
     sound_p2="Las leyes salen de la patente de Yamaha de 1995, de los manuales del FS1R y de las mediciones que publicó el proyecto FSVR sobre equipos reales; el código es propio y se verificó contra esos números.",
@@ -1011,11 +1011,11 @@ F = {
 O = {
 "en": dict(
     title="Orrery — a free generative MIDI instrument for ambient, drone and calm music | Audio Tools",
-    description=f"Orrery is a free, open-source generative MIDI instrument: eight lanes, each on its own MIDI channel, play drones, pads, melodies and clouds over a slow shared harmony, for ambient, dark ambient, drone, sleep and meditation. It plays any software or hardware synth. For macOS and Windows.",
+    description=f"Orrery is a free, open-source generative MIDI instrument: eight lanes, each on its own MIDI channel, play drones, pads, melodies and clouds over a slow shared harmony, for ambient, dark ambient, drone, sleep and meditation. It plays any software or hardware synth. For macOS, Windows and Linux.",
     listen_p="Every clip is Orrery generating live from a factory preset, with no edits. Each lane was then played by one of our instruments from the MIDI it generated, and the lanes were mixed at a matched level. Download the MIDI and send it to your own synths.",
     sound_h="Generative, not random.",
     sound_p1="All the lanes listen to one slow harmony. Chords change by fourths, fifths and thirds, pads move each voice to the nearest note of the next chord, melodies walk the scale in phrases with rests, and every note stays inside the key unless you raise the tension. Lanes can record what they play and repeat it as a loop of their own length, with small mutations each pass: loops of 17 and 23 beats only line up again after 391 beats.",
-    sound_p2="It was tested like the instruments: ten minutes of seven lanes with no note outside the scale and no hanging note at stop, the same variation number playing the same notes, note for note, on macOS and Windows and at any buffer size or sample rate, and at most 37 MIDI messages per second on a channel across all factory presets, where a 5-pin MIDI cable carries about a thousand.",
+    sound_p2="It was tested like the instruments: ten minutes of seven lanes with no note outside the scale and no hanging note at stop, the same variation number playing the same notes, note for note, on macOS, Windows and Linux and at any buffer size or sample rate, and at most 37 MIDI messages per second on a channel across all factory presets, where a 5-pin MIDI cable carries about a thousand.",
     spec=[("Lanes", "8, each with its own MIDI channel and role: drone, pad, melody, arpeggio, cloud, bass or pulse"),
           ("Harmony", "16 scales and modes, chord colour from triads to elevenths, tension from consonant to clusters and tritones, slow walk, drone or two-chord progressions"),
           ("Loops", "record and repeat per lane, any length from 2 to 128 beats, with mutation"),
@@ -1072,7 +1072,7 @@ O = {
 ),
 "es": dict(
     title="Orrery — un instrumento MIDI generativo libre para ambient, drone y música tranquila | Audio Tools",
-    description=f"Orrery es un instrumento MIDI generativo libre y de código abierto: ocho carriles, cada uno en su canal MIDI, tocan drones, pads, melodías y nubes sobre una armonía lenta compartida, para ambient, dark ambient, drone, dormir y meditar. Toca cualquier sinte virtual o físico. Para macOS y Windows.",
+    description=f"Orrery es un instrumento MIDI generativo libre y de código abierto: ocho carriles, cada uno en su canal MIDI, tocan drones, pads, melodías y nubes sobre una armonía lenta compartida, para ambient, dark ambient, drone, dormir y meditar. Toca cualquier sinte virtual o físico. Para macOS, Windows y Linux.",
     listen_p="Cada clip es Orrery generando en vivo desde un preset de fábrica, sin ediciones. Después, cada carril lo tocó uno de nuestros instrumentos con el MIDI que generó, y se mezclaron a un nivel parejo. Bajá el MIDI y mandalo a tus propios sintes.",
     sound_h="Generativo, no al azar.",
     sound_p1="Todos los carriles escuchan una misma armonía lenta. Los acordes cambian por cuartas, quintas y terceras, los pads llevan cada voz a la nota más cercana del acorde siguiente, las melodías caminan la escala en frases con silencios, y ninguna nota sale de la tonalidad salvo que subas la tensión. Cada carril puede grabar lo que toca y repetirlo como un lazo de su propio largo, con pequeñas mutaciones en cada vuelta: lazos de 17 y 23 pulsos recién vuelven a coincidir a los 391.",
@@ -1137,7 +1137,7 @@ O = {
 D = {
 "en": dict(
     title="ATMD — a free Minimoog Model D recreation with the transistor ladder filter | Audio Tools",
-    description="ATMD is a free, open-source recreation of the Moog Minimoog Model D: three oscillators, the mixer that drives the 24 dB transistor ladder filter, two contours, glide and the wheels, with polyphony, delay and reverb as extensions. VST3, Audio Unit and standalone, for macOS and Windows.",
+    description="ATMD is a free, open-source recreation of the Moog Minimoog Model D: three oscillators, the mixer that drives the 24 dB transistor ladder filter, two contours, glide and the wheels, with polyphony, delay and reverb as extensions. VST3, Audio Unit and standalone, for macOS, Windows and Linux.",
     listen_p="Every clip is the engine on its own, playing a factory preset from a MIDI file written for it. Nothing added afterwards, only the level matched across clips. Download the MIDI and play it through the preset yourself.",
     sound_h="The bass that defined the bass.",
     sound_p1="The Model D's sound comes from a short chain pushed hard: three oscillators into a passive mixer that feeds the transistor ladder directly. Turn two or three sources up and the ladder saturates before it filters. ATMD models that chain from the 1971 schematics and the service manual, and solves the ladder's feedback loop without delay, with a saturating stage in every pole.",
@@ -1192,7 +1192,7 @@ D = {
 ),
 "es": dict(
     title="ATMD — una recreación libre del Minimoog Model D con el filtro escalera | Audio Tools",
-    description="ATMD es una recreación libre y de código abierto del Moog Minimoog Model D: tres osciladores, el mezclador que satura el filtro escalera de transistores de 24 dB, dos contornos, glide y las ruedas, con polifonía, delay y reverb como extensiones. VST3, Audio Unit y aplicación independiente, para macOS y Windows.",
+    description="ATMD es una recreación libre y de código abierto del Moog Minimoog Model D: tres osciladores, el mezclador que satura el filtro escalera de transistores de 24 dB, dos contornos, glide y las ruedas, con polifonía, delay y reverb como extensiones. VST3, Audio Unit y aplicación independiente, para macOS, Windows y Linux.",
     listen_p="Cada clip es el motor solo, tocando un preset de fábrica desde un MIDI escrito para él. No se le agregó nada después; sólo se igualó el nivel entre clips. Bajá el MIDI y tocalo vos con el mismo preset.",
     sound_h="El bajo que definió al bajo.",
     sound_p1="El sonido del Model D sale de una cadena corta y exigida: tres osciladores a un mezclador pasivo que entra directo a la escalera de transistores. Subís dos o tres fuentes y la escalera satura antes de filtrar. ATMD modela esa cadena a partir de los esquemas de 1971 y el manual de servicio, y resuelve el lazo de realimentación de la escalera sin retardo, con una etapa que satura en cada polo.",
@@ -1251,7 +1251,7 @@ D = {
 M = {
 "en": dict(
     title="Murmur — a free real-time granular effect: clouds, shimmer, freeze and stretch | Audio Tools",
-    description="Murmur is a free, open-source granular effect for macOS and Windows. Up to 128 grains read the last 16 seconds of your sound and turn it into clouds, shimmering pads, frozen chords, rhythmic stutters and glitches. VST3, Audio Unit and standalone.",
+    description="Murmur is a free, open-source granular effect for macOS, Windows and Linux. Up to 128 grains read the last 16 seconds of your sound and turn it into clouds, shimmering pads, frozen chords, rhythmic stutters and glitches. VST3, Audio Unit and standalone.",
     listen_p="Every clip is a clip from our instruments played through a Murmur factory preset, offline, with no edits: the source is named in each line. Only the level was matched across clips.",
     sound_h="A flock made of your sound.",
     sound_p1="Everything that comes in is written into a memory of up to 16 seconds. Up to 128 grains, from 5 ms to 2 s long, read that memory at once, each with its own place, pitch, direction, fade and position in the stereo field. Short and many, they blur into a cloud. Long and few, they overlap like echoes of phrases. Detuned, they become a chord.",
@@ -1309,7 +1309,7 @@ M = {
 ),
 "es": dict(
     title="Murmur — un efecto granular libre en tiempo real: nubes, shimmer, freeze y estiramiento | Audio Tools",
-    description="Murmur es un efecto granular libre y de código abierto para macOS y Windows. Hasta 128 granos leen los últimos 16 segundos de tu sonido y lo convierten en nubes, pads brillantes, acordes congelados, tartamudeos rítmicos y glitches. VST3, Audio Unit y aplicación independiente.",
+    description="Murmur es un efecto granular libre y de código abierto para macOS, Windows y Linux. Hasta 128 granos leen los últimos 16 segundos de tu sonido y lo convierten en nubes, pads brillantes, acordes congelados, tartamudeos rítmicos y glitches. VST3, Audio Unit y aplicación independiente.",
     listen_p="Cada clip es un clip de nuestros instrumentos pasado por un preset de fábrica de Murmur, sin edición: cada línea dice de dónde sale el sonido. Sólo se igualó el nivel entre clips.",
     sound_h="Una bandada hecha de tu sonido.",
     sound_p1="Todo lo que entra se graba en una memoria de hasta 16 segundos. Hasta 128 granos, de 5 ms a 2 s, leen esa memoria a la vez, cada uno con su lugar, su altura, su sentido, su envolvente y su posición en el estéreo. Cortos y muchos, se funden en una nube. Largos y pocos, se superponen como ecos de frases. Desafinados, se vuelven un acorde.",
@@ -1371,7 +1371,7 @@ M = {
 LQ = {
 "en": dict(
     title="Lacquer — free automatic mastering: tone, dynamics and loudness for streaming, live or from a file | Audio Tools",
-    description="Lacquer is a free, open-source automatic mastering plugin and app for macOS and Windows. Press Learn or drop a mix: it balances the tone, controls the dynamics, makes the low end mono-safe and hits -14 LUFS for Spotify, -16 for Apple Music or louder targets, with a true-peak limiter. VST3, Audio Unit, standalone and a command-line renderer.",
+    description="Lacquer is a free, open-source automatic mastering plugin and app for macOS, Windows and Linux. Press Learn or drop a mix: it balances the tone, controls the dynamics, makes the low end mono-safe and hits -14 LUFS for Spotify, -16 for Apple Music or louder targets, with a true-peak limiter. VST3, Audio Unit, standalone and a command-line renderer.",
     listen_p="One demo mix made with our own instruments, unmastered, and the masters Lacquer made from it in five styles. Every clip was brought to the same loudness with a fixed gain, the way streaming services play them, so you compare the sound and not the level.",
     sound_h="A mastering engineer's checklist, run in seconds.",
     sound_p1="Lacquer measures your mix the way streaming services do, and then some: loudness and true peaks, how dynamic it is, the spectrum of the loud parts, the stereo width and whether the lows are mono, harsh resonances, sibilance, clipping and a cut-off in the highs. Then it sets every module only as much as the mix needs.",
@@ -1428,7 +1428,7 @@ LQ = {
 ),
 "es": dict(
     title="Lacquer — masterización automática gratis: tono, dinámica y sonoridad para streaming, en vivo o desde un archivo | Audio Tools",
-    description="Lacquer es un plugin y una app de masterización automática, libres y de código abierto, para macOS y Windows. Apretás Learn o soltás una mezcla: equilibra el tono, controla la dinámica, deja los graves en mono y llega a -14 LUFS para Spotify, -16 para Apple Music u objetivos más fuertes, con un limitador de pico verdadero. VST3, Audio Unit, aplicación independiente y render por línea de comandos.",
+    description="Lacquer es un plugin y una app de masterización automática, libres y de código abierto, para macOS, Windows y Linux. Apretás Learn o soltás una mezcla: equilibra el tono, controla la dinámica, deja los graves en mono y llega a -14 LUFS para Spotify, -16 para Apple Music u objetivos más fuertes, con un limitador de pico verdadero. VST3, Audio Unit, aplicación independiente y render por línea de comandos.",
     listen_p="Una mezcla de demostración hecha con nuestros propios instrumentos, sin masterizar, y los masters que hizo Lacquer en cinco estilos. Todos los clips se llevaron a la misma sonoridad con una ganancia fija, como los reproducen los servicios de streaming, así comparás el sonido y no el volumen.",
     sound_h="La lista de un ingeniero de mastering, en segundos.",
     sound_p1="Lacquer mide tu mezcla como lo hacen los servicios de streaming, y más: sonoridad y picos verdaderos, qué tan dinámica es, el espectro de las partes fuertes, el ancho estéreo y si los graves están en mono, resonancias ásperas, sibilancia, recortes y un corte en los agudos. Después ajusta cada módulo sólo lo que la mezcla necesita.",
@@ -1489,7 +1489,7 @@ LQ = {
 HA = {
 "en": dict(
     title="Halation — free delay and reverb in one space: shimmer, freeze, reverse, grains | Audio Tools",
-    description="Halation is a free, open-source delay and reverb plugin for macOS and Windows. One slider goes from tempo-synced echoes to a hall; tape, BBD and spring characters; freeze by bands, shimmer, reverse, grains, spectral smear, a MIDI-tuned resonator, breathing rooms, ducking and a gate. VST3, Audio Unit, standalone and a command-line renderer.",
+    description="Halation is a free, open-source delay and reverb plugin for macOS, Windows and Linux. One slider goes from tempo-synced echoes to a hall; tape, BBD and spring characters; freeze by bands, shimmer, reverse, grains, spectral smear, a MIDI-tuned resonator, breathing rooms, ducking and a gate. VST3, Audio Unit, standalone and a command-line renderer.",
     listen_p="Clips of our own instruments, each passed through one of Halation's presets with nothing else added. They were brought to the same loudness so you compare the spaces and not the level. Headphones help with the ping-pong.",
     sound_h="Echoes and rooms are the same thing.",
     sound_p1="A delay is a few reflections far apart; a room is thousands of them close together. Halation builds both from the same eight delay lines and moves between them with one control: on the left the lines are separate echoes on the beat, on the right they feed each other into a hall.",
@@ -1546,7 +1546,7 @@ HA = {
 ),
 "es": dict(
     title="Halation — delay y reverb gratis en un solo espacio: shimmer, freeze, reversa, granos | Audio Tools",
-    description="Halation es un plugin de delay y reverb libre y de código abierto para macOS y Windows. Una barra va de ecos sincronizados al tempo a una sala; caracteres de cinta, BBD y resorte; congelado por bandas, shimmer, reversa, granos, corrimiento espectral, un resonador afinado por MIDI, salas que respiran, ducking y gate. VST3, Audio Unit, aplicación independiente y render por línea de comandos.",
+    description="Halation es un plugin de delay y reverb libre y de código abierto para macOS, Windows y Linux. Una barra va de ecos sincronizados al tempo a una sala; caracteres de cinta, BBD y resorte; congelado por bandas, shimmer, reversa, granos, corrimiento espectral, un resonador afinado por MIDI, salas que respiran, ducking y gate. VST3, Audio Unit, aplicación independiente y render por línea de comandos.",
     listen_p="Clips de nuestros propios instrumentos, cada uno pasado por un preset de Halation sin nada más. Se llevaron a la misma sonoridad así comparás los espacios y no el volumen. Con auriculares se aprecia mejor el ping-pong.",
     sound_h="Ecos y salas son lo mismo.",
     sound_p1="Un delay son unas pocas reflexiones separadas; una sala son miles, muy juntas. Halation arma los dos con las mismas ocho líneas de retardo y pasa de uno a otro con un solo control: a la izquierda las líneas son ecos separados sobre el pulso, a la derecha se alimentan entre sí hasta ser una sala.",
@@ -1607,7 +1607,7 @@ HA = {
 TN = {
 "en": dict(
     title="Tarnish — free tape, cassette, vinyl, radio and lo-fi plugin with magnetic hysteresis | Audio Tools",
-    description="Tarnish is a free, open-source tape and lo-fi plugin for macOS and Windows: studio tape, cassette, video, vinyl, AM radio and telephone, with Jiles-Atherton magnetic hysteresis, wow and flutter from real transport lines, dropouts, hiss, crackle and scratches, noise reduction mistracking, tape stop, varispeed and bit crushing. VST3, Audio Unit, standalone and a command-line renderer.",
+    description="Tarnish is a free, open-source tape and lo-fi plugin for macOS, Windows and Linux: studio tape, cassette, video, vinyl, AM radio and telephone, with Jiles-Atherton magnetic hysteresis, wow and flutter from real transport lines, dropouts, hiss, crackle and scratches, noise reduction mistracking, tape stop, varispeed and bit crushing. VST3, Audio Unit, standalone and a command-line renderer.",
     listen_p="Clips of our own instruments, each passed through one of Tarnish's presets with nothing else added, brought to the same loudness so you compare the machines and not the level.",
     sound_h="Modelled, not sampled.",
     sound_p1="The tape is a magnetic hysteresis model with the record and playback curves of real tape standards, so a hot cassette closes its top end and an under-biased tape grits up on quiet notes. Dropouts are the head lifting off the tape: the highs go first, as on a real one. The wobble is made of the lines a transport really produces, from the reels to the capstan.",
@@ -1663,7 +1663,7 @@ TN = {
 ),
 "es": dict(
     title="Tarnish — plugin gratis de cinta, casete, vinilo, radio y lo-fi con histéresis magnética | Audio Tools",
-    description="Tarnish es un plugin de cinta y lo-fi libre y de código abierto para macOS y Windows: cinta de estudio, casete, video, vinilo, radio AM y teléfono, con histéresis magnética de Jiles-Atherton, wow y flutter a partir de las líneas reales del transporte, caídas, soplido, crujido y rayas, reducción de ruido desalineada, tape stop, varispeed y reducción de bits. VST3, Audio Unit, aplicación independiente y render por línea de comandos.",
+    description="Tarnish es un plugin de cinta y lo-fi libre y de código abierto para macOS, Windows y Linux: cinta de estudio, casete, video, vinilo, radio AM y teléfono, con histéresis magnética de Jiles-Atherton, wow y flutter a partir de las líneas reales del transporte, caídas, soplido, crujido y rayas, reducción de ruido desalineada, tape stop, varispeed y reducción de bits. VST3, Audio Unit, aplicación independiente y render por línea de comandos.",
     listen_p="Clips de nuestros propios instrumentos, cada uno pasado por un preset de Tarnish sin nada más, llevados a la misma sonoridad para comparar las máquinas y no el volumen.",
     sound_h="Modelado, no sampleado.",
     sound_p1="La cinta es un modelo de histéresis magnética con las curvas de grabación y reproducción de las normas reales, así que una casete grabada fuerte cierra sus agudos y una cinta con sub-bias se ensucia en las notas suaves. Las caídas son la cabeza que se separa de la cinta: se van primero los agudos, como en una de verdad. El vaivén está hecho de las líneas que produce un transporte real, de los carretes al cabrestante.",
@@ -1722,7 +1722,7 @@ TN = {
 PL = {
 "en": dict(
     title="Plumb — free real-time pitch correction with 0.67 ms latency | Audio Tools",
-    description="Plumb is a free, open-source real-time pitch correction plugin for voice and monophonic instruments, for macOS and Windows: three latency modes from 0.67 ms, natural to hard-tune correction with one knob, formant preservation and throat, fourteen scales including a custom one, key detection, and MIDI scales and note lock. VST3, Audio Unit, standalone and a command-line renderer.",
+    description="Plumb is a free, open-source real-time pitch correction plugin for voice and monophonic instruments, for macOS, Windows and Linux: three latency modes from 0.67 ms, natural to hard-tune correction with one knob, formant preservation and throat, fourteen scales including a custom one, key detection, and MIDI scales and note lock. VST3, Audio Unit, standalone and a command-line renderer.",
     listen_p="A synthetic voice of our own, singing off pitch on purpose: no singer was recorded. Each clip plays the phrase twice, first as sung and then through one of Plumb's presets, with nothing else added and every clip at the same loudness.",
     sound_h="Fast enough to sing through.",
     sound_p1="In Live mode Plumb adds 32 samples, 0.67 ms at 48 kHz: less than the converters of most audio interfaces. A singer hears the corrected voice in their in-ears with no delay to feel. The default mode, Tight, adds 2.7 ms; Studio, for the mix, 21 ms. Plumb reports the exact figure to the host.",
@@ -1778,7 +1778,7 @@ PL = {
 ),
 "es": dict(
     title="Plumb — corrección de afinación gratis en tiempo real con 0,67 ms de latencia | Audio Tools",
-    description="Plumb es un plugin de corrección de afinación en tiempo real libre y de código abierto, para voz e instrumentos monofónicos, en macOS y Windows: tres modos de latencia desde 0,67 ms, corrección de natural a afinación dura con una perilla, preservación de formantes y garganta, catorce escalas con una propia, detección de tonalidad, y escalas y nota fija por MIDI. VST3, Audio Unit, aplicación independiente y render por línea de comandos.",
+    description="Plumb es un plugin de corrección de afinación en tiempo real libre y de código abierto, para voz e instrumentos monofónicos, en macOS, Windows y Linux: tres modos de latencia desde 0,67 ms, corrección de natural a afinación dura con una perilla, preservación de formantes y garganta, catorce escalas con una propia, detección de tonalidad, y escalas y nota fija por MIDI. VST3, Audio Unit, aplicación independiente y render por línea de comandos.",
     listen_p="Una voz sintética propia, que canta desafinada a propósito: no se grabó a nadie. Cada clip pasa la frase dos veces, primero como se cantó y después por un preset de Plumb, sin nada más y con todos los clips a la misma sonoridad.",
     sound_h="Tan rápido que se puede cantar a través de él.",
     sound_p1="En modo Live Plumb agrega 32 muestras, 0,67 ms a 48 kHz: menos que los conversores de la mayoría de las interfaces de audio. Quien canta escucha la voz corregida en sus in-ears sin un retardo que se sienta. El modo por defecto, Tight, agrega 2,7 ms; Studio, para la mezcla, 21 ms. Plumb le informa la cifra exacta al host.",
@@ -1837,7 +1837,7 @@ PL = {
 A3 = {
 "en": dict(
     title="AT303 — free bass line synthesizer with a diode ladder filter and step sequencer | Audio Tools",
-    description="AT303 is a free, open-source bass line synthesizer for macOS and Windows, modelled from the circuit: a diode ladder filter, accent and slide, the original's two-list step sequencer with a visible pattern editor, an acid line generator, the classic circuit modifications, distortion and delay, and a live view of the circuit. VST3, Audio Unit, standalone and a command-line renderer.",
+    description="AT303 is a free, open-source bass line synthesizer for macOS, Windows and Linux, modelled from the circuit: a diode ladder filter, accent and slide, the original's two-list step sequencer with a visible pattern editor, an acid line generator, the classic circuit modifications, distortion and delay, and a live view of the circuit. VST3, Audio Unit, standalone and a command-line renderer.",
     listen_p="Each clip is one of AT303's presets playing its own pattern, with a knob ridden by hand in some of them. Nothing else added, all brought to the same loudness.",
     sound_h="From the circuit, not from samples.",
     sound_p1="The filter is a diode ladder with its real capacitor values, solved sample by sample: it loses bass as the resonance rises and rings near 500 Hz with the cutoff at half, as the factory calibrated it. The accent is the real sweep circuit, so a run of accents climbs. The slide is the original's RC glide.",
@@ -1893,7 +1893,7 @@ A3 = {
 ),
 "es": dict(
     title="AT303 — sintetizador de bajo gratis con filtro de escalera de diodos y secuenciador | Audio Tools",
-    description="AT303 es un sintetizador de bajo libre y de código abierto para macOS y Windows, modelado a partir del circuito: filtro de escalera de diodos, acento y slide, el secuenciador de dos listas del original con un editor de patrones visible, un generador de líneas ácidas, las modificaciones clásicas del circuito, distorsión y delay, y una vista del circuito en vivo. VST3, Audio Unit, aplicación independiente y render por línea de comandos.",
+    description="AT303 es un sintetizador de bajo libre y de código abierto para macOS, Windows y Linux, modelado a partir del circuito: filtro de escalera de diodos, acento y slide, el secuenciador de dos listas del original con un editor de patrones visible, un generador de líneas ácidas, las modificaciones clásicas del circuito, distorsión y delay, y una vista del circuito en vivo. VST3, Audio Unit, aplicación independiente y render por línea de comandos.",
     listen_p="Cada clip es un preset del AT303 tocando su propio patrón, con una perilla movida a mano en algunos. Sin nada más, todos llevados a la misma sonoridad.",
     sound_h="Desde el circuito, no desde samples.",
     sound_p1="El filtro es una escalera de diodos con los valores reales de sus capacitores, resuelta muestra a muestra: pierde graves a medida que sube la resonancia y suena cerca de 500 Hz con el corte al medio, como lo calibraba la fábrica. El acento es el circuito de barrido real, así que una seguidilla de acentos va subiendo. El slide es el deslizamiento RC del original.",
@@ -2055,12 +2055,39 @@ REQ = {
 ),
 }
 
+# Descarga para Linux: aparece en cada página (y en el launcher) sólo cuando su zip <Producto>-<versión>-Linux.zip está
+# en web/downloads. Un solo texto para todos los productos; el formato sale del de Windows con LV2 agregado, salvo que
+# el producto traiga su propio "linux_fmt".
+LINUX = {
+"en": dict(h="Linux", dl="Download for Linux",
+           req="Linux x86_64 with glibc 2.35 or later (Ubuntu 22.04, Debian 12, Fedora 36 or newer).",
+           steps=["Unzip the file.",
+                  "Copy the <code>.vst3</code> folders to <code>~/.vst3</code> and the <code>.lv2</code> folders to <code>~/.lv2</code>.",
+                  "Rescan plugins in your DAW. The standalone app is the file with the plugin's name: run it from the folder."],
+           la_req="Linux x86_64 with glibc 2.35 or later.",
+           la_steps=["Unzip the file and run <code>Audio Tools Launcher</code>.",
+                     "Pick the plugins and press Install. VST3 goes to <code>~/.vst3</code>, LV2 to <code>~/.lv2</code> and the standalone apps to your applications menu."]),
+"es": dict(h="Linux", dl="Descargar para Linux",
+           req="Linux x86_64 con glibc 2.35 o posterior (Ubuntu 22.04, Debian 12, Fedora 36 o más nuevo).",
+           steps=["Descomprimí el archivo.",
+                  "Copiá las carpetas <code>.vst3</code> a <code>~/.vst3</code> y las <code>.lv2</code> a <code>~/.lv2</code>.",
+                  "Reescaneá los plugins en tu DAW. La app independiente es el archivo con el nombre del plugin: se abre desde la carpeta."],
+           la_req="Linux x86_64 con glibc 2.35 o posterior.",
+           la_steps=["Descomprimí el archivo y abrí <code>Audio Tools Launcher</code>.",
+                     "Elegí los plugins y tocá Instalar. El VST3 va a <code>~/.vst3</code>, el LV2 a <code>~/.lv2</code> y las apps independientes al menú de aplicaciones."]),
+}
+
+def linux_zip(mac_zip):
+    """El zip de Linux que acompaña a uno de macOS, o None si todavía no está en web/downloads."""
+    z = mac_zip.replace("-macOS.zip", "-Linux.zip")
+    return z if os.path.exists(os.path.join(WEB, "downloads", z)) else None
+
 UI = {
 "en": dict(overview="Overview", film="Film", colours="Colours", specs="Tech specs", download="Download", watch="Watch the film",
            highlights="Get the highlights.", film_h="The film.", colours_h="Pick a colour.", specs_h="Tech specs.",
            prev="Previous", next="Next", close="Close", learn="Learn more", compare="Compare the instruments", why="Why open source",
            compare_h="Which one is yours?", dl_mac="Download for macOS", dl_win="Download for Windows", install="How to install",
-           free="Free", prices="Free and open source. For macOS and Windows.", go_to="Go to slide",
+           free="Free", prices="Free and open source. For macOS, Windows and Linux.", go_to="Go to slide",
            listen="Listen", listen_h="Hear it.", play="Play", pause="Pause", seek="Position in", midi_dl="Download the MIDI file of",
            manual="Manual", read_manual="Read the manual",
            listen_p="Every clip is the engine on its own, playing a factory preset from a MIDI file written for it. Nothing added afterwards, only the level matched across clips. Download the MIDI and play it through the preset yourself."),
@@ -2068,7 +2095,7 @@ UI = {
            highlights="Lo más destacado.", film_h="El film.", colours_h="Elegí un color.", specs_h="Especificaciones técnicas.",
            prev="Anterior", next="Siguiente", close="Cerrar", learn="Ver más", compare="Comparar los instrumentos", why="Por qué código abierto",
            compare_h="¿Cuál es el tuyo?", dl_mac="Descargar para macOS", dl_win="Descargar para Windows", install="Cómo instalar",
-           free="Gratis", prices="Libre y gratis. Para macOS y Windows.", go_to="Ir a la tarjeta",
+           free="Gratis", prices="Libre y gratis. Para macOS, Windows y Linux.", go_to="Ir a la tarjeta",
            listen="Escuchar", listen_h="Escuchalo.", play="Reproducir", pause="Pausa", seek="Posición en", midi_dl="Descargar el archivo MIDI de",
            manual="Manual", read_manual="Leer el manual",
            listen_p="Cada clip es el motor solo, tocando un preset de fábrica desde un MIDI escrito para él. No se le agregó nada después; sólo se igualó el nivel entre clips. Bajá el MIDI y tocalo vos con el mismo preset."),
@@ -2627,13 +2654,22 @@ SITE_URL = "https://audiotools.com.ar/"
 VLA = re.search(r"set\(LAUNCHER_VERSION (.+?)\)", open(os.path.join(ROOT, "tools", "launcher", "CMakeLists.txt")).read()).group(1)
 MACLA = f"AudioToolsLauncher-{VLA}-macOS.zip"
 WINLA = f"AudioToolsLauncher-{VLA}-Windows.zip"
+LINLA = f"AudioToolsLauncher-{VLA}-Linux.zip"     # opcional: la página y el manifest lo ofrecen si está
 LAUNCHER_RELEASED = all(os.path.exists(os.path.join(WEB, "downloads", z)) for z in (MACLA, WINLA))
 MANIFEST = os.path.join(WEB, "downloads", "manifest.json")
 LFS_HEAD = b"version https://git-lfs.github.com/spec/v1"
-FORMAT_OF = {".vst3": "VST3", ".component": "AU", ".app": "Standalone", ".exe": "Standalone"}
+FORMAT_OF = {".vst3": "VST3", ".component": "AU", ".lv2": "LV2", ".app": "Standalone", ".exe": "Standalone"}
 
-def zip_asset(name, product, mac, previous):
-    """url, sha256, tamaño y contenido de un zip de web/downloads; None si no está."""
+def format_of(f, system):
+    """El formato de un ítem del zip. En Linux la standalone es el ejecutable sin extensión; las herramientas de línea
+    de comandos (lacquerrender...) también lo son y no cuentan."""
+    ext = os.path.splitext(f)[1]
+    if system == "linux" and "." not in f and not f.endswith("render"):
+        return "Standalone"
+    return FORMAT_OF.get(ext)
+
+def zip_asset(name, product, system, previous):
+    """url, sha256, tamaño y contenido de un zip de web/downloads; None si no está. system: macos, windows o linux."""
     p = os.path.join(WEB, "downloads", name)
     if not os.path.exists(p):
         return None
@@ -2647,8 +2683,10 @@ def zip_asset(name, product, mac, previous):
         sha = re.search(r"oid sha256:([0-9a-f]{64})", ptr).group(1)
         size = int(re.search(r"^size (\d+)", ptr, re.M).group(1))
         old = previous.get(name)
-        files = old["files"] if old and old.get("sha256") == sha else (
-            [f"{product}.vst3", f"{product}.component", f"{product}.app"] if mac else [f"{product}.vst3", f"{product}.exe"])
+        files = old["files"] if old and old.get("sha256") == sha else {
+            "macos": [f"{product}.vst3", f"{product}.component", f"{product}.app"],
+            "windows": [f"{product}.vst3", f"{product}.exe"],
+            "linux": [f"{product}.vst3", f"{product}.lv2", product]}[system]
     else:
         h = hashlib.sha256()
         with open(p, "rb") as f:
@@ -2658,8 +2696,8 @@ def zip_asset(name, product, mac, previous):
         # Los zips guardan una carpeta <Producto>-<versión>-<SO>/ con los bundles adentro.
         with zipfile.ZipFile(p) as z:
             files = sorted({n.split("/")[1] for n in z.namelist() if n.count("/") >= 1 and n.split("/")[1]})
-    files = sorted(f for f in files if os.path.splitext(f)[1] in FORMAT_OF)
-    formats = [x for x in ("VST3", "AU", "Standalone") if any(FORMAT_OF[os.path.splitext(f)[1]] == x for f in files)]
+    files = sorted(f for f in files if format_of(f, system))
+    formats = [x for x in ("VST3", "AU", "LV2", "Standalone") if any(format_of(f, system) == x for f in files)]
     return {"url": SITE_URL + "downloads/" + name, "sha256": sha, "size": size, "files": files, "formats": formats}
 
 def asset_url(rel):
@@ -2706,7 +2744,7 @@ def write_manifest():
             old = json.load(open(MANIFEST))
             old_generated = old.get("generated")
             for pr in old.get("products", []) + [old.get("launcher") or {}]:
-                for k in ("macos", "windows"):
+                for k in ("macos", "windows", "linux"):
                     a = pr.get(k)
                     if a: previous[a["url"].rsplit("/", 1)[-1]] = a
                 for sm in pr.get("samples", []):
@@ -2733,15 +2771,17 @@ def write_manifest():
             "page": SITE_URL + sl + "/",
             "manual": SITE_URL + sl + "/manual/" if manual_web.has_manual(sl) else None,
             "samples": launcher_samples(sl, previous),
-            "macos": zip_asset(f"{n}-{v}-macOS.zip", n, True, previous),
-            "windows": zip_asset(f"{n}-{v}-Windows.zip", n, False, previous),
+            "macos": zip_asset(f"{n}-{v}-macOS.zip", n, "macos", previous),
+            "windows": zip_asset(f"{n}-{v}-Windows.zip", n, "windows", previous),
+            "linux": zip_asset(f"{n}-{v}-Linux.zip", n, "linux", previous),
         })
     data = {
         "schema": 1, "generated": None, "site": SITE_URL, "donate_url": SUPPORT_COFFEE_URL,
         "home": {"title": H["en"]["h1"], "lead": H["en"]["lead"]},
         "launcher": {"version": VLA, "page": SITE_URL + "launcher/",
-                     "macos": zip_asset(MACLA, "Audio Tools Launcher", True, previous),
-                     "windows": zip_asset(WINLA, "Audio Tools Launcher", False, previous)},
+                     "macos": zip_asset(MACLA, "Audio Tools Launcher", "macos", previous),
+                     "windows": zip_asset(WINLA, "Audio Tools Launcher", "windows", previous),
+                     "linux": zip_asset(LINLA, "Audio Tools Launcher", "linux", previous)},
         "products": products,
     }
     old_body = None
@@ -2760,9 +2800,9 @@ def write_manifest():
 LA = {
 "en": dict(
     title="Audio Tools Launcher — install and update every plugin | Audio Tools",
-    description="A small free app for macOS and Windows that downloads the Audio Tools plugins and keeps them up to date. No account, no sign-up.",
+    description="A small free app for macOS, Windows and Linux that downloads the Audio Tools plugins and keeps them up to date. No account, no sign-up.",
     name="Launcher", tag="Every plugin, always up to date.",
-    price="Free. No account. For macOS and Windows.",
+    price="Free. No account. For macOS, Windows and Linux.",
     dl_h="Get the launcher.",
     dl_p="Open it, pick the plugins you want and press Install. Next time you open it, it offers the updates.",
     mac_req="macOS 11 or later, Apple Silicon or Intel.", win_req="Windows 10 or 11, 64-bit.",
@@ -2780,15 +2820,15 @@ LA = {
          ("Your formats, the right folders.", "VST3, Audio Unit and the standalone app, each where your DAW and your system look for it. Turn off the ones you don't use."),
          ("Plays well with manual installs.", "Plugins you installed by hand are found and shown with their version, so you can update them from here too.")],
     manual_h="Prefer to install by hand?",
-    manual_p="Nothing changes: every plugin page still has its own macOS and Windows downloads with the install steps.",
+    manual_p="Nothing changes: every plugin page still has its own macOS, Windows and Linux downloads with the install steps.",
     manual_link="See all the plugins",
     note="Rescan plugins in your DAW after installing. Logic and GarageBand pick up new Audio Units after a restart.",
     nav="Launcher", promo="Or install and update every plugin with the", promo_link="Audio Tools Launcher"),
 "es": dict(
     title="Audio Tools Launcher — instalá y actualizá todos los plugins | Audio Tools",
-    description="Una app chica y gratis para macOS y Windows que descarga los plugins de Audio Tools y los mantiene al día. Sin cuenta ni registro.",
+    description="Una app chica y gratis para macOS, Windows y Linux que descarga los plugins de Audio Tools y los mantiene al día. Sin cuenta ni registro.",
     name="Launcher", tag="Todos los plugins, siempre al día.",
-    price="Gratis. Sin cuenta. Para macOS y Windows.",
+    price="Gratis. Sin cuenta. Para macOS, Windows y Linux.",
     dl_h="Bajá el launcher.",
     dl_p="Lo abrís, elegís los plugins que querés y tocás Instalar. La próxima vez que lo abras, te ofrece las actualizaciones.",
     mac_req="macOS 11 o posterior, Apple Silicon o Intel.", win_req="Windows 10 u 11, 64 bits.",
@@ -2806,7 +2846,7 @@ LA = {
          ("Tus formatos, en su lugar.", "VST3, Audio Unit y la app independiente, cada uno donde lo buscan tu DAW y tu sistema. Apagá los que no uses."),
          ("Convive con lo instalado a mano.", "Los plugins que instalaste a mano aparecen con su versión, así también los actualizás desde acá.")],
     manual_h="¿Preferís instalar a mano?",
-    manual_p="No cambia nada: cada página de plugin sigue teniendo sus descargas para macOS y Windows con los pasos de instalación.",
+    manual_p="No cambia nada: cada página de plugin sigue teniendo sus descargas para macOS, Windows y Linux con los pasos de instalación.",
     manual_link="Ver todos los plugins",
     note="Reescaneá los plugins en tu DAW después de instalar. Logic y GarageBand ven los Audio Units nuevos después de reiniciarlos.",
     nav="Launcher", promo="O instalá y actualizá todos los plugins con el", promo_link="Audio Tools Launcher"),
@@ -2819,6 +2859,16 @@ def page_launcher(lang):
     home = root + ("" if lang == "en" else "es/")
     steps = lambda lst: "".join(f"<li>{s}</li>" for s in lst)
     how = "\n".join(f'      <div class="reveal"><h3>{k}</h3><p>{v}</p></div>' for k, v in t["how"])
+    # Linux, si su zip está en web/downloads: un botón más y una tarjeta a todo el ancho.
+    L, has_lin = LINUX[lang], os.path.exists(os.path.join(WEB, "downloads", LINLA))
+    lin_cta = f'<a class="pill ghost" href="{root}downloads/{LINLA}" download data-support>{L["dl"]}</a>' if has_lin else ""
+    lin_card = (f"""
+      <article class="dl-card reveal">
+        <h3>{L['h']}</h3>
+        <p class="req">{L['la_req']} {size_mb(LINLA)}.</p>
+        <a class="pill primary" href="{root}downloads/{LINLA}" download data-support>{L['dl']}</a>
+        <details><summary>{ui['install']}</summary><ol>{steps(L['la_steps'])}</ol></details>
+      </article>""" if has_lin else "")
     shot = (f'\n    <div class="p-hero-img launcher-shot">{pic(a, "launcher/launcher", "Audio Tools Launcher", eager=True)}</div>'
             if os.path.exists(os.path.join(WEB, "assets", "img", "launcher", "launcher.jpg")) else "")
     body = f"""  <main>
@@ -2827,7 +2877,7 @@ def page_launcher(lang):
       <h1 class="p-name">{t['name']}</h1>
       <p class="p-tag">{t['tag']}</p>
       <p class="p-price">{t['price']}</p>
-      <div class="p-cta"><a class="pill primary" href="{root}downloads/{MACLA}" download data-support>{ui['dl_mac']}</a><a class="pill ghost" href="{root}downloads/{WINLA}" download data-support>{ui['dl_win']}</a></div>
+      <div class="p-cta"><a class="pill primary" href="{root}downloads/{MACLA}" download data-support>{ui['dl_mac']}</a><a class="pill ghost" href="{root}downloads/{WINLA}" download data-support>{ui['dl_win']}</a>{lin_cta}</div>
     </div>{shot}
   </section>
   <section class="sec" id="how">
@@ -2854,7 +2904,7 @@ def page_launcher(lang):
         <p class="req">{t['win_req']} {size_mb(WINLA)}.</p>
         <a class="pill primary" href="{root}downloads/{WINLA}" download data-support>{ui['dl_win']}</a>
         <details><summary>{ui['install']}</summary><ol>{steps(t['win_steps'])}</ol></details>
-      </article>
+      </article>{lin_card}
     </div>
     <p class="note">{t['note']} Launcher {VLA}.</p>
       <div class="license reveal"><h3>{t['manual_h']}</h3><p>{t['manual_p']}</p><p><a class="more" href="{home}">{t['manual_link']}</a></p></div>
@@ -3017,6 +3067,21 @@ def specs_rows(slug, lang):
     out.append(f'      <div class="spec-row reveal"><h3>{r["cpu_h"]}</h3><div>{table}<p class="note">{r["cpu_note"].format(ui=UI_CPU[slug])}</p></div></div>')
     return "\n".join(out)
 
+def linux_card(t, root, mac, lang):
+    """La tercera tarjeta, al lado de macOS y Windows; vacía si no hay zip de Linux."""
+    lin = linux_zip(mac)
+    if not lin: return ""
+    L = LINUX[lang]
+    fmt = t.get("linux_fmt") or t["win_fmt"].replace("VST3", "VST3, LV2", 1)
+    steps = "".join(f"<li>{s}</li>" for s in L["steps"])
+    return f"""
+      <article class="dl-card reveal">
+        <h3>{L['h']}</h3>
+        <p class="req">{L['req']} {fmt}. {size_mb(lin)}.</p>
+        <a class="pill primary" href="{root}downloads/{lin}" download data-support>{L['dl']}</a>
+        <details><summary>{UI[lang]['install']}</summary><ol>{steps}</ol></details>
+      </article>"""
+
 def download_html(t, ui, root, mac, win, slug, lang):
     steps = lambda lst: "".join(f"<li>{s}</li>" for s in lst)
     r = REQ[lang]
@@ -3032,7 +3097,7 @@ def download_html(t, ui, root, mac, win, slug, lang):
         <p class="req">{t['win_req']} {t['win_fmt']}. {size_mb(win)}.</p>
         <a class="pill primary" href="{root}downloads/{win}" download data-support>{ui['dl_win']}</a>
         <details><summary>{ui['install']}</summary><ol>{steps(t['win_steps'])}</ol></details>
-      </article>
+      </article>{linux_card(t, root, mac, lang)}
     </div>
     <p class="note">{t['dl_note']}</p>{f'<p class="dl-manual"><a class="more" href="manual/">{ui["read_manual"]}</a></p>' if manual_web.has_manual(slug) else ""}{launcher_promo(lang, root + ("" if lang == "en" else "es/"))}"""
 
@@ -3552,7 +3617,7 @@ def page_home(lang):
       <h2>{name}</h2>
       <p class="t-tag">{pr['tag']}</p>
       <p class="lede center">{c['what']} {c['body']}</p>
-      <div class="t-links"><a class="more" href="{home}{slug}/">{ui['learn']}</a><a class="more" href="{root}downloads/{mac}" download data-support>{ui['dl_mac']}</a><a class="more" href="{root}downloads/{win}" download data-support>{ui['dl_win']}</a></div>
+      <div class="t-links"><a class="more" href="{home}{slug}/">{ui['learn']}</a><a class="more" href="{root}downloads/{mac}" download data-support>{ui['dl_mac']}</a><a class="more" href="{root}downloads/{win}" download data-support>{ui['dl_win']}</a>{f'<a class="more" href="{root}downloads/{linux_zip(mac)}" download data-support>{LINUX[lang]["dl"]}</a>' if linux_zip(mac) else ""}</div>
     </div>
     <a class="t-img" href="{home}{slug}/">{pic(a, c['imgdir'] + c['img'], c['alt'])}</a>
   </section>""")

@@ -255,13 +255,17 @@ void HomeHero::paint (Graphics& g)
         g.fillRect (b.removeFromBottom (3.0f));
         if (i == open)
         {
+            // La frase en una línea si entra; si no (ventana angosta), en dos, y el nombre sube.
             auto tb = bounds[i].reduced (18, 14);
+            const auto tagFont = uiFont (14.0f);
+            const bool twoLines = juce::GlyphArrangement::getStringWidth (tagFont, p.tag) > (float) tb.getWidth();
+            auto tagArea = tb.removeFromBottom (twoLines ? 38 : 20);
             g.setColour (ink);
             g.setFont (heading (30.0f));
-            g.drawText (p.name, tb.removeFromBottom (54).removeFromTop (34), Justification::bottomLeft, true);
+            g.drawText (p.name, tb.removeFromBottom (34 + 4).removeFromTop (34), Justification::bottomLeft, true);
             g.setColour (ink.withAlpha (0.85f));
-            g.setFont (uiFont (14.0f));
-            g.drawText (p.tag, bounds[i].reduced (18, 14).removeFromBottom (20), Justification::bottomLeft, true);
+            g.setFont (tagFont);
+            g.drawFittedText (p.tag, tagArea, Justification::bottomLeft, twoLines ? 2 : 1, 1.0f);
         }
     }
 
@@ -998,6 +1002,8 @@ void MainComponent::showMoreMenu (ProductRow& row)
     menu.addItem (2, "Remove", present);
    #if JUCE_MAC
     menu.addItem (3, "Show in Finder", present);
+   #elif JUCE_LINUX
+    menu.addItem (3, "Show in file manager", present);
    #else
     menu.addItem (3, "Show in Explorer", present);
    #endif
@@ -1083,6 +1089,8 @@ String MainComponent::installHint() const
 {
    #if JUCE_WINDOWS
     return "Plugins go to " + paths.vst3Target (settings).getFullPathName() + ". No account, nothing to sign up for.";
+   #elif JUCE_LINUX
+    return "Plugins go to " + tildePath (paths.vst3User) + " and " + tildePath (paths.lv2) + ". No account, nothing to sign up for.";
    #else
     return "Plugins go to " + tildePath (paths.vst3User.getParentDirectory()) + ". No account, nothing to sign up for.";
    #endif

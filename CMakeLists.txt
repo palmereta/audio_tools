@@ -26,6 +26,13 @@ else()
     FetchContent_MakeAvailable(JUCE)
 endif()
 
+# Linux: JUCE arma la URI de cada LV2 con el sitio (https://audiotools.com.ar/plugins/Audio_Tools_<nombre>), y las
+# standalone y el launcher ofrecen JACK además de ALSA (libjack se carga al abrir, no es dependencia del binario).
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set_property(GLOBAL PROPERTY JUCE_COMPANY_WEBSITE "https://audiotools.com.ar")
+    add_compile_definitions(JUCE_JACK=1)
+endif()
+
 # El manual dentro de cada plugin (shared/manual).
 include(shared/manual/manual.cmake)
 

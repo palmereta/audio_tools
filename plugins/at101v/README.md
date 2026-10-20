@@ -1,7 +1,7 @@
 # AT101V
 
 Monophonic synthesizer modeled on the Roland SH-101 (1982), with arpeggiator and 100-step
-sequencer, plus the extensions listed in the root README. VST3, AU and standalone, macOS and Windows.
+sequencer, plus the extensions listed in the root README. VST3, AU (macOS), LV2 (Linux) and standalone; macOS, Windows and Linux.
 
 | | |
 |---|---|

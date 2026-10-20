@@ -33,6 +33,8 @@ static void setEnv (const char* k, const String& v)
 
 #if JUCE_WINDOWS
 static const char* kOS = "Windows";
+#elif JUCE_LINUX
+static const char* kOS = "Linux";
 #else
 static const char* kOS = "macOS";
 #endif
@@ -53,6 +55,17 @@ static File makeProductZip (const File& dir, const String& name, const String& v
     top.getChildFile (name + ".vst3/Contents/x86_64-win/" + name + ".vst3").create();
     top.getChildFile (name + ".vst3/Contents/x86_64-win/" + name + ".vst3").replaceWithText ("binary " + version);
     top.getChildFile (name + ".exe").replaceWithText ("exe " + version);
+   #elif JUCE_LINUX
+    // Como los de scripts/package-linux.sh: VST3 con moduleinfo.json, LV2 y la standalone sin extensión.
+    top.getChildFile (name + ".vst3/Contents/Resources/moduleinfo.json").create();
+    top.getChildFile (name + ".vst3/Contents/Resources/moduleinfo.json").replaceWithText ("{\n  \"Name\": \"" + name + "\",\n  \"Version\": \"" + version + "\",\n}\n");
+    top.getChildFile (name + ".vst3/Contents/x86_64-linux/" + name + ".so").create();
+    top.getChildFile (name + ".vst3/Contents/x86_64-linux/" + name + ".so").replaceWithText ("binary " + version);
+    top.getChildFile (name + ".lv2/manifest.ttl").create();
+    top.getChildFile (name + ".lv2/manifest.ttl").replaceWithText ("@prefix lv2: <http://lv2plug.in/ns/lv2core#> .\n");
+    top.getChildFile (name + ".lv2/dsp.ttl").replaceWithText ("\tdoap:release [\n\t\ta doap:Version ;\n\t\tdoap:revision \"" + version + "\" ;\n\t] .\n");
+    top.getChildFile (name + ".lv2/" + name + ".so").replaceWithText ("binary " + version);
+    top.getChildFile (name).replaceWithText ("exe " + version);
    #else
     for (auto ext : { ".vst3", ".component", ".app" })
     {
@@ -81,7 +94,7 @@ static File makeProductZip (const File& dir, const String& name, const String& v
 
 static String assetJson (const File& zip, const String& sha, const String& name)
 {
-    const String files = "[\"" + name + ".vst3\", \"" + name + ".component\", \"" + name + ".app\", \"" + name + ".exe\"]";
+    const String files = "[\"" + name + ".vst3\", \"" + name + ".component\", \"" + name + ".lv2\", \"" + name + ".app\", \"" + name + ".exe\", \"" + name + "\"]";
     return "{\"url\": \"" + zip.getFileName() + "\", \"sha256\": \"" + sha + "\", \"size\": " + String (zip.getSize())
          + ", \"files\": " + files + ", \"formats\": [\"VST3\", \"AU\", \"Standalone\"]}";
 }
@@ -93,7 +106,7 @@ static File writeManifest (const File& dir, const String& fileName, const String
     const String json = "{\"schema\": 1, \"generated\": \"2026-10-19\", \"site\": \"https://audiotools.com.ar/\", \"donate_url\": \"\",\n"
                         " \"launcher\": {\"version\": \"1.0.0\", \"macos\": null, \"windows\": null},\n"
                         " \"products\": [{\"id\": \"" + id + "\", \"name\": \"" + name + "\", \"version\": \"" + version
-                      + "\", \"category\": \"tools\", \"tagline\": \"A test.\", \"accent\": \"#3e8c84\", \"macos\": " + a + ", \"windows\": " + a + "}]}";
+                      + "\", \"category\": \"tools\", \"tagline\": \"A test.\", \"accent\": \"#3e8c84\", \"macos\": " + a + ", \"windows\": " + a + ", \"linux\": " + a + "}]}";
     const auto f = dir.getChildFile (fileName);
     f.replaceWithText (json);
     return f;
@@ -123,6 +136,10 @@ int main()
     check (compareVersions ("1.2", "1.2.0") == 0, "1.2 equals 1.2.0");
     check (compareVersions ("2.0.0", "1.99.99") > 0, "2.0.0 is newer than 1.99.99");
     check (formatOf ("AT20V FX.vst3") == Format::vst3 && formatOf ("INSTALL.txt") == Format::other, "formats by extension");
+   #if JUCE_LINUX
+    check (formatOf ("AT20V FX.lv2") == Format::lv2 && formatOf ("AT20V FX") == Format::standalone && formatOf ("lacquerrender") == Format::other,
+           "Linux: .lv2, the standalone without extension, the renderers are not installed");
+   #endif
 
     // ── install roots come from the environment
     check (paths.overridden && paths.vst3User.isAChildOf (root) && paths.data.isAChildOf (tmp), "install roots overridden by LAUNCHER_INSTALL_ROOT");
@@ -160,6 +177,7 @@ int main()
         Manifest ms = m;
         ms.products.getReference (0).mac.size += 1;
         ms.products.getReference (0).windows.size += 1;
+        ms.products.getReference (0).linuxAsset.size += 1;
         const auto r = downloadAndInstall (ms.products[0], ms, paths, settings, db, progress, notes);
         check (r.failed(), "size mismatch rejected: " + r.getErrorMessage());
     }
@@ -172,6 +190,14 @@ int main()
         check (paths.vst3User.getChildFile ("Fake.vst3/Contents").isDirectory(), "VST3 in " + paths.vst3User.getFullPathName());
        #if JUCE_WINDOWS
         check (paths.apps.getChildFile ("Fake/Fake.exe").existsAsFile(), "standalone in Applications/Fake/");
+       #elif JUCE_LINUX
+        check (paths.lv2.getChildFile ("Fake.lv2/manifest.ttl").existsAsFile() && bundleVersion (paths.lv2.getChildFile ("Fake.lv2")) == "1.0.9",
+               "LV2 in " + paths.lv2.getFullPathName() + ", version from dsp.ttl");
+        check (paths.apps.getChildFile ("Fake/Fake").existsAsFile(), "standalone in Applications/Fake/");
+        const auto entry = paths.desktopEntries.getChildFile ("audiotools-fake.desktop");
+        check (entry.loadFileAsString().contains ("Exec=\"" + paths.apps.getChildFile ("Fake/Fake").getFullPathName() + "\"\n")
+                 && ! entry.loadFileAsString().containsChar ('\r'),
+               "menu entry " + entry.getFileName() + " runs the standalone");
        #else
         check (paths.au.getChildFile ("Fake.component/Contents/Info.plist").existsAsFile(), "AU in " + paths.au.getFullPathName());
         check (paths.apps.getChildFile ("Fake.app/Contents/MacOS/Fake").existsAsFile(), "standalone in " + paths.apps.getFullPathName());
@@ -187,6 +213,8 @@ int main()
         check (paths.recordFile().existsAsFile() && rec != nullptr && rec->version == "1.0.9", "record written: " + paths.recordFile().getFullPathName());
        #if JUCE_WINDOWS
         const int expected = 2;     // VST3 + standalone
+       #elif JUCE_LINUX
+        const int expected = 4;     // VST3 + LV2 + standalone + su .desktop
        #else
         const int expected = 3;     // VST3 + AU + standalone
        #endif
@@ -239,7 +267,11 @@ int main()
         const auto dest = paths.vst3User.getChildFile ("Fake.vst3");
         const auto before = bundleVersion (dest);
         // The staging item cannot be moved where it goes: a plain file with the name of the AU destination's parent.
+       #if JUCE_LINUX
+        const auto auDir = paths.lv2;     // en Linux no hay AU: la carpeta del LV2
+       #else
         const auto auDir = paths.au;
+       #endif
        #if ! JUCE_WINDOWS
         auDir.deleteRecursively(); auDir.getParentDirectory().createDirectory(); auDir.replaceWithText ("not a folder");
        #endif
@@ -259,10 +291,11 @@ int main()
         auto mo = load (writeManifest (tmp, "manifest-solo.json", "solo", "Solo", "2.0.0", zipOnly, sha256Of (zipOnly)));
         Settings vst3Only;
         vst3Only.systemWideVst3 = false;
-        vst3Only.au = vst3Only.standalone = false;
+        vst3Only.au = vst3Only.lv2 = vst3Only.standalone = false;
         const auto r = downloadAndInstall (mo.products[0], mo, paths, vst3Only, db, progress, notes);
         check (r.wasOk() && paths.vst3User.getChildFile ("Solo.vst3").exists()
-                 && ! paths.au.getChildFile ("Solo.component").exists() && ! paths.apps.getChildFile ("Solo.app").exists()
+                 && ! paths.au.getChildFile ("Solo.component").exists() && ! paths.lv2.getChildFile ("Solo.lv2").exists()
+                 && ! paths.apps.getChildFile ("Solo.app").exists()
                  && ! paths.apps.getChildFile ("Solo").exists(),
                "with only VST3 selected, only the VST3 is installed");
         remove (mo.products[0], paths, db);
@@ -369,6 +402,13 @@ int main()
             check (rc == rcRef, "codesign verdict on the installed " + b.getFileName() + " matches ditto's ("
                                 + (rc == 0 ? String ("valid") : String ("not valid, as in the zip")) + ")");
         }
+        check (bundleVersion (paths.vst3User.getChildFile (name + ".vst3")) == ver, "installed VST3 reports version " + ver);
+       #elif JUCE_LINUX
+        const auto so = paths.vst3User.getChildFile (name + ".vst3/Contents/x86_64-linux/" + name + ".so");
+        const auto exe = paths.apps.getChildFile (name + "/" + name);
+        check (so.existsAsFile() && paths.lv2.getChildFile (name + ".lv2/manifest.ttl").existsAsFile(), "VST3 and LV2 binaries in place");
+        check (exe.existsAsFile() && std::system (("test -x \"" + exe.getFullPathName() + "\"").toRawUTF8()) == 0,
+               "the standalone is executable (permissions from the zip)");
         check (bundleVersion (paths.vst3User.getChildFile (name + ".vst3")) == ver, "installed VST3 reports version " + ver);
        #endif
         remove (mr.products[0], paths, db);

@@ -14,6 +14,29 @@ static int fails = 0;
 static void check (bool ok, const char* what) { std::printf ("  [%s] %s\n", ok ? "ok" : "FALLA", what); if (! ok) ++fails; }
 static double midiToHz (double m) { return 440.0 * std::exp2 ((m - 69.0) / 12.0); }
 
+// Gaussiana portable: la misma secuencia que std::normal_distribution de libc++ (macOS), con la que se ajustaron
+// los umbrales. libstdc++ (Linux) y MSVC implementan la distribución distinto y la voz de prueba cambiaba: con su
+// secuencia, 82,4 Hz con jitter daba errores de octava y una nota de T5 no quedaba enganchada.
+struct Gauss
+{
+    std::mt19937& rng;
+    bool hot = false; double saved = 0;
+    double uniform()    // generate_canonical<double, 53> con un motor de 32 bits, como libc++: dos salidas
+    {
+        const double lo = rng(), hi = rng();
+        return (lo + hi * 4294967296.0) / 18446744073709551616.0;
+    }
+    double operator() (std::mt19937&)
+    {
+        if (hot) { hot = false; return saved; }
+        double u, v, q;     // método polar de Marsaglia
+        do { u = 2 * uniform() - 1; v = 2 * uniform() - 1; q = u * u + v * v; } while (q > 1 || q == 0);
+        const double f = std::sqrt (-2 * std::log (q) / q);
+        saved = v * f; hot = true;
+        return u * f;
+    }
+};
+
 // ── Voz sintética: f0(t) en Hz → muestras ──
 struct Vowel { double f[4], bw[4]; };
 static const Vowel kA { { 730, 1090, 2440, 3400 }, { 80, 90, 120, 150 } };
@@ -23,7 +46,7 @@ static std::vector<float> voice (double fs, double secs, std::function<double (d
 {
     const int N = (int) (secs * fs);
     std::vector<float> out ((size_t) N);
-    std::mt19937 rng (seed); std::normal_distribution<double> g (0, 1);
+    std::mt19937 rng (seed); Gauss g { rng };
     // Resonadores de dos polos en cascada.
     struct Res { double a1, a2, g, y1 = 0, y2 = 0; };
     std::vector<Res> rs;

@@ -30,8 +30,12 @@ Format formatOf (const String& itemName)
     const auto n = itemName.toLowerCase();
     if (n.endsWith (".vst3"))      return Format::vst3;
     if (n.endsWith (".component")) return Format::au;
+    if (n.endsWith (".lv2"))       return Format::lv2;
    #if JUCE_WINDOWS
     if (n.endsWith (".exe"))       return Format::standalone;
+   #elif JUCE_LINUX
+    // El ejecutable standalone no lleva extensión; las herramientas de línea de comandos (lacquerrender...) no se instalan.
+    if (! n.containsChar ('.') && ! n.endsWith ("render")) return Format::standalone;
    #else
     if (n.endsWith (".app"))       return Format::standalone;
    #endif
@@ -43,6 +47,8 @@ const Asset& Product::forThisOS() const
 {
    #if JUCE_WINDOWS
     return windows;
+   #elif JUCE_LINUX
+    return linuxAsset;
    #else
     return mac;
    #endif
@@ -52,6 +58,8 @@ const Asset& Manifest::launcherForThisOS() const
 {
    #if JUCE_WINDOWS
     return launcherWindows;
+   #elif JUCE_LINUX
+    return launcherLinux;
    #else
     return launcherMac;
    #endif
@@ -106,6 +114,7 @@ Result Manifest::parse (const String& json, const String& loc, Manifest& out)
     m.launcherVersion = l["version"].toString();
     m.launcherMac = parseAsset (l["macos"]);
     m.launcherWindows = parseAsset (l["windows"]);
+    m.launcherLinux = parseAsset (l["linux"]);
 
     if (auto* arr = root["products"].getArray())
         for (auto& p : *arr)
@@ -138,6 +147,7 @@ Result Manifest::parse (const String& json, const String& loc, Manifest& out)
                 }
             pr.mac = parseAsset (p["macos"]);
             pr.windows = parseAsset (p["windows"]);
+            pr.linuxAsset = parseAsset (p["linux"]);
             if (pr.id.isNotEmpty() && pr.name.isNotEmpty() && pr.version.isNotEmpty())
                 m.products.add (pr);
         }
@@ -186,6 +196,7 @@ bool Settings::wants (Format f) const
     {
         case Format::vst3:       return vst3;
         case Format::au:         return au;
+        case Format::lv2:        return lv2;
         case Format::standalone: return standalone;
         case Format::other:      break;
     }
@@ -199,6 +210,7 @@ void Settings::load (const File& f)
     auto get = [&] (const char* k, bool def) { return v.hasProperty (k) ? (bool) v[k] : def; };
     vst3 = get ("vst3", true);
     au = get ("au", true);
+    lv2 = get ("lv2", true);
     standalone = get ("standalone", true);
     systemWideVst3 = get ("system_wide_vst3", kSystemWideDefault);
 }
@@ -208,6 +220,7 @@ bool Settings::save (const File& f) const
     auto* o = new juce::DynamicObject();
     o->setProperty ("vst3", vst3);
     o->setProperty ("au", au);
+    o->setProperty ("lv2", lv2);
     o->setProperty ("standalone", standalone);
     o->setProperty ("system_wide_vst3", systemWideVst3);
     f.getParentDirectory().createDirectory();
@@ -228,7 +241,11 @@ Paths Paths::current()
         p.vst3User = r.getChildFile ("VST3");
         p.vst3System = r.getChildFile ("VST3-System");
         p.au = r.getChildFile ("Components");
+        p.lv2 = r.getChildFile ("LV2");
         p.apps = r.getChildFile ("Applications");
+       #if JUCE_LINUX
+        p.desktopEntries = r.getChildFile ("applications");
+       #endif
         p.data = data.isNotEmpty() ? File (data) : r.getChildFile (".launcher-data");
         p.vst3Extra.add (p.vst3System);
         return p;
@@ -242,6 +259,18 @@ Paths Paths::current()
     p.apps = local.getChildFile ("Programs\\Audio Tools");
     p.data = File::getSpecialLocation (File::userApplicationDataDirectory).getChildFile ("Audio Tools\\Launcher");
     p.vst3Extra.add (p.vst3System);
+   #elif JUCE_LINUX
+    const auto home = File::getSpecialLocation (File::userHomeDirectory);
+    // Las carpetas por usuario que escanean los hosts (especificaciones de VST3 y LV2). Como en macOS, se instala
+    // sólo para este usuario; las carpetas del sistema se revisan para encontrar instalaciones a mano.
+    p.vst3User = home.getChildFile (".vst3");
+    p.vst3System = p.vst3User;
+    p.lv2 = home.getChildFile (".lv2");
+    p.apps = home.getChildFile (".local/opt/audio-tools");
+    p.desktopEntries = home.getChildFile (".local/share/applications");
+    p.data = File::getSpecialLocation (File::userApplicationDataDirectory).getChildFile ("Audio Tools Launcher");   // ~/.config
+    for (auto* d : { "/usr/lib/vst3", "/usr/local/lib/vst3" }) p.vst3Extra.add (File (d));
+    for (auto* d : { "/usr/lib/lv2", "/usr/local/lib/lv2" })   p.lv2Extra.add (File (d));
    #else
     const auto home = File::getSpecialLocation (File::userHomeDirectory);
     p.vst3User = home.getChildFile ("Library/Audio/Plug-Ins/VST3");
@@ -263,7 +292,8 @@ File Paths::destinationFor (const String& item, const String& productName, const
     switch (formatOf (item))
     {
         case Format::vst3: return vst3Target (s).getChildFile (item);
-       #if JUCE_WINDOWS
+        case Format::lv2:  return lv2 == File() ? File() : lv2.getChildFile (item);
+       #if JUCE_WINDOWS || JUCE_LINUX
         case Format::au:   return {};
         case Format::standalone: return apps.getChildFile (productName).getChildFile (item);
        #else
@@ -284,7 +314,8 @@ static juce::Array<File> searchDirs (const Paths& p, Format f, const String& pro
     {
         case Format::vst3:       d.add (p.vst3User); d.add (p.vst3System); d.addArray (p.vst3Extra); break;
         case Format::au:         if (p.au != File()) d.add (p.au); d.addArray (p.auExtra); break;
-       #if JUCE_WINDOWS
+        case Format::lv2:        if (p.lv2 != File()) d.add (p.lv2); d.addArray (p.lv2Extra); break;
+       #if JUCE_WINDOWS || JUCE_LINUX
         case Format::standalone: d.add (p.apps.getChildFile (productName)); break;
        #else
         case Format::standalone: d.add (p.apps); d.addArray (p.appsExtra); break;
@@ -363,6 +394,10 @@ String bundleVersion (const File& bundle)
     const auto mi = bundle.getChildFile ("Contents/Resources/moduleinfo.json");
     if (mi.existsAsFile())
         return firstMatch (mi.loadFileAsString(), "\"Version\"\\s*:\\s*\"([^\"]*)\"");
+    // LV2 (Linux): JUCE escribe la versión completa en dsp.ttl como doap:revision "1.0.6".
+    const auto ttl = bundle.getChildFile ("dsp.ttl");
+    if (ttl.existsAsFile())
+        return firstMatch (ttl.loadFileAsString(), "doap:revision\\s*\"([^\"]*)\"");
     return {};
 }
 
@@ -510,6 +545,29 @@ static bool moveInto (const File& item, const File& dest)
     return ok;
 }
 
+#if JUCE_LINUX
+/** Linux: la entrada del menú de aplicaciones de una standalone instalada (~/.local/share/applications), para
+    abrirla sin terminal. Devuelve el .desktop escrito, o File() si no se pudo. */
+static File writeDesktopEntry (const Paths& paths, const File& exe, const String& productName)
+{
+    if (paths.desktopEntries == File() || ! paths.desktopEntries.createDirectory()) return {};
+    // Exec entre comillas: se escapan " ` $ \ y, como todo valor del .desktop, otra vez la barra; % es %%.
+    auto path = exe.getFullPathName().replace ("\\", "\\\\").replace ("\"", "\\\"").replace ("`", "\\`").replace ("$", "\\$");
+    path = path.replace ("\\", "\\\\").replace ("%", "%%");
+    const auto name = exe.getFileName();
+    const auto file = paths.desktopEntries.getChildFile ("audiotools-" + name.toLowerCase().replaceCharacter (' ', '-') + ".desktop");
+    const String text = "[Desktop Entry]\n"
+                        "Type=Application\n"
+                        "Name=" + name + "\n"
+                        "Comment=Audio Tools " + productName + " (standalone)\n"
+                        "Exec=\"" + path + "\"\n"
+                        "Icon=audio-x-generic\n"
+                        "Terminal=false\n"
+                        "Categories=AudioVideo;Audio;Music;\n";
+    return file.replaceWithText (text, false, false, "\n") ? file : File();    // sin \r: lo leería como parte del valor
+}
+#endif
+
 static String writeHint (const File& dir)
 {
    #if JUCE_WINDOWS
@@ -601,6 +659,12 @@ Result install (const Product& p, const File& zip, const Paths& paths, const Set
         installed.add (s.dest.getFullPathName());
         gotAU = gotAU || s.f == Format::au;
     }
+   #if JUCE_LINUX
+    for (auto& s : steps)
+        if (s.f == Format::standalone)
+            if (const auto entry = writeDesktopEntry (paths, s.dest, p.name); entry != File())
+                installed.add (entry.getFullPathName());
+   #endif
     for (auto& s : steps)
         if (s.aside.exists() && ! s.aside.deleteRecursively())
             notes.add ("Could not delete the old copy " + s.aside.getFullPathName() + "; it is safe to delete it by hand.");
