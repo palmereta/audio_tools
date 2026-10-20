@@ -1,5 +1,5 @@
 # Halation — delay y reverb en un solo espacio (red de realimentación que va de ecos a sala; docs/research.md).
-set(HALATION_VERSION 1.0.1)
+set(HALATION_VERSION 1.0.2)
 
 if(APPLE)
     set(HALATION_FORMATS VST3 AU Standalone)

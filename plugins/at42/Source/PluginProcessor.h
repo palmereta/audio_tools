@@ -2,6 +2,9 @@
 
 #include <JuceHeader.h>
 #include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/LatencyReporter.h"
+#include "../../../shared/tools/PresetTracker.h"
+#include "../../../shared/tools/AutoGesture.h"
 #include "ExtParams42.h"
 #include "Preset42.h"
 
@@ -81,6 +84,10 @@ public:
     void rescanUserPresets();
     void randomizePanel();
     dh::SafeString currentPresetName { "Init" };     // lo escribe el host desde cualquier hilo
+    dh::PresetTracker tracker;                         // preset "modificado": la foto de los parámetros al cargarlo
+    dh::LatencyReporter latency { *this };
+    dh::AutoGesture gesture;                           // gestos de automatización de botones, llaves y joystick
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
     static juce::File userPresetDir();
 
     // MIDI learn.

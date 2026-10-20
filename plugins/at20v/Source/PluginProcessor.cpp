@@ -99,6 +99,7 @@ void AT20VProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     currentSr = sampleRate;
     currentBlock = std::max (samplesPerBlock, 64);
     engine.prepare (sampleRate, 64, (int) pQuality->load() == 1 ? 8 : 4);
+    latency.setNow ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * (AT20V_IS_FX ? 2.0 : 1.0)));      // el retardo de los filtros del sobremuestreo, para que el host lo compense
     if (patchNote >= 0) pendingPatchOff = patchNote;     // su note-off sale en el próximo bloque
     patchNote = -1;
     for (int i = 0; i < kNumKnobs; ++i) smoothed[(size_t) i] = knobParams[(size_t) i]->load();
@@ -123,9 +124,9 @@ void AT20VProcessor::handleMidi (const juce::MidiMessage& m)
     else if (m.isController())
     {
         const int c = m.getControllerNumber();
-        if (c == 64) momentary.store (m.getControllerValue() >= 64);
+        if (c == 64) momentaryPedal.store (m.getControllerValue() >= 64);
         else if (c == 1) { modWheel = m.getControllerValue() / 127.0f; wheel.store (juce::jlimit (-1.0f, 1.0f, bendWheel + modWheel)); }
-        else if (c == 121) { modWheel = bendWheel = 0.0f; wheel.store (0.0f); engine.pitchBend (0.0f); momentary.store (false); }
+        else if (c == 121) { modWheel = bendWheel = 0.0f; wheel.store (0.0f); engine.pitchBend (0.0f); momentaryPedal.store (false); }
         else if (c == 123 || c == 120) engine.allNotesOff();
     }
     else if (m.isAllNotesOff() || m.isAllSoundOff()) engine.allNotesOff();
@@ -141,7 +142,7 @@ void AT20VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     auto out = getBusBuffer (buffer, false, 0);
 
     const int wantOs = (int) pQuality->load() == 1 ? 8 : 4;
-    if (wantOs != engine.oversampling()) engine.prepare (currentSr, 64, wantOs, true);
+    { if (wantOs != engine.oversampling()) engine.prepare (currentSr, 64, wantOs, true); latency.request ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * (AT20V_IS_FX ? 2.0 : 1.0))); }
     if ((int) monoOut.size() < n) { monoOut.resize ((size_t) n); espMono.resize ((size_t) n); rightOut.resize ((size_t) n); }
 
     // Teclado en pantalla → MIDI (queda mezclado en el buffer de entrada).
@@ -157,7 +158,7 @@ void AT20VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     applyExtParams (get, engine.settings, engine.fx);
     auto& st = engine.settings;
     st.wheel = wheel.load();
-    st.momentary = momentary.load();
+    st.momentary = momentary.load() || momentaryPedal.load();
     for (int j = 0; j < kNumJacks; ++j) engine.patch.src[(size_t) j] = patchAtomic[(size_t) j].load (std::memory_order_relaxed);
 
     // Tempo y posición del host (MG sincronizado y delay).
@@ -262,7 +263,26 @@ void AT20VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
 // la nota del modo Patch se cierra, y el MIDI de entrada sólo pasa si la salida está en Thru.
 void AT20VProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
 {
+   #if AT20V_IS_FX
+    // El efecto en bypass deja pasar la entrada, retrasada la latencia que el host compensa.
+    {
+        const int n = buffer.getNumSamples(), L = getLatencySamples();
+        if ((int) bypassL.size() != L) { bypassL.assign ((size_t) std::max (1, L), 0.0f); bypassR = bypassL; bypassPos = 0; }
+        if (L > 0 && n > 0)
+        {
+            if (buffer.getNumChannels() > 1 && getTotalNumInputChannels() == 1) buffer.copyFrom (1, 0, buffer, 0, 0, n);
+            float* d[2] = { bypassL.data(), bypassR.data() };
+            for (int c = 0; c < std::min (2, buffer.getNumChannels()); ++c)
+            {
+                auto* x = buffer.getWritePointer (c); int p = bypassPos;
+                for (int i = 0; i < n; ++i) { const float y = d[c][p]; d[c][p] = x[i]; x[i] = y; if (++p >= L) p = 0; }
+            }
+            bypassPos = (bypassPos + n) % L;
+        }
+    }
+   #else
     buffer.clear();
+   #endif
     juce::MidiBuffer outMidi;
     if (! wasBypassed)
     {
@@ -400,6 +420,7 @@ void AT20VProcessor::loadPresetData (const Preset& p)
         prm->setValueNotifyingHost (prm->convertTo0to1 (v));
     }
     currentPresetName = p.name;
+    tracker.capture (*this);
     setCables (p.cables);
     notifyUi (onPresetChanged);
 }
@@ -425,6 +446,7 @@ bool AT20VProcessor::saveUserPreset (const juce::String& name)
     const bool ok = file.replaceWithText (juce::JSON::toString (presetToJson (currentAsPreset (name, "User"))));
     rescanUserPresets();
     currentPresetName = name;
+    tracker.capture (*this);
     for (int i = 0; i < (int) presets.size(); ++i) if (! presets[(size_t) i].factory && presets[(size_t) i].file == file) currentProgram = i;
     notifyUi (onPresetChanged);
     return ok;
@@ -435,6 +457,9 @@ void AT20VProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     state.setProperty ("presetName", currentPresetName.get(), nullptr);
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
+    state.setProperty ("program", currentProgram, nullptr);
+    state.setProperty ("wheel", wheel.load(), nullptr);       // la rueda fijada con Alt (un drone por VCA INITIAL GAIN) vuelve al reabrir
     state.setProperty ("cables", juce::JSON::toString (presetToJson (currentAsPreset (currentPresetName, "")).getProperty ("cables", {}), true), nullptr);
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
@@ -446,6 +471,7 @@ void AT20VProcessor::setStateInformation (const void* data, int sizeInBytes)
         auto state = juce::ValueTree::fromXml (*xml);
         if (! state.isValid()) return;
         currentPresetName = state.getProperty ("presetName", "Init").toString();
+        wheel.store (juce::jlimit (-1.0f, 1.0f, (float) state.getProperty ("wheel", 0.0)));
         const auto cablesJson = juce::JSON::parse (state.getProperty ("cables", "[]").toString());
         state.removeProperty ("cables", nullptr);
         std::set<juce::String> present;
@@ -458,6 +484,9 @@ void AT20VProcessor::setStateInformation (const void* data, int sizeInBytes)
         auto* o = new juce::DynamicObject();
         o->setProperty ("cables", cablesJson);
         setCables (presetFromJson (juce::var (o)).cables);
+        currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
+        if (state.hasProperty ("presetSnapshot")) tracker.fromString (*this, state.getProperty ("presetSnapshot").toString());
+        else tracker.capture (*this);           // sesión anterior a la marca: el nombre sin "*"
         notifyUi (onPresetChanged);
     }
 }

@@ -5,8 +5,12 @@
 
 #include <JuceHeader.h>
 #include "ParamsTn.h"
+#include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/PresetTracker.h"
+#include <bitset>
+#include <map>
 
-class TarnishProcessor : public juce::AudioProcessor
+class TarnishProcessor : public juce::AudioProcessor, private juce::AsyncUpdater
 {
 public:
     TarnishProcessor();
@@ -16,13 +20,14 @@ public:
     void releaseResources() override {}
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
     const juce::String getName() const override { return JucePlugin_Name; }
     bool acceptsMidi() const override { return true; }
     bool producesMidi() const override { return false; }
-    double getTailLengthSeconds() const override { return 0.2; }
+    double getTailLengthSeconds() const override { return 4.0; }      // la copia (print-through) llega a 3,6 s
     int getNumPrograms() override;
     int getCurrentProgram() override { return currentProgram; }
     void setCurrentProgram (int index) override;
@@ -40,7 +45,11 @@ public:
     const std::vector<PresetEntry>& getPresets() const { return presets; }
     void loadPreset (int index);
     std::function<void()> onPresetChanged;
-    juce::String currentPresetName { "Init" };
+    dh::SafeString currentPresetName { "Init" };
+    // Ajustes de sesión que puso el último preset (con su valor): si el siguiente no los nombra y nadie los movió,
+    // vuelven a su valor por defecto (si no, el Mix 70 de un preset quedaba en todos los que siguen).
+    std::map<juce::String, float> presetSessionValues;
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
 
     // ── Para la vista (escritos por el hilo de audio) ──
     struct ViewState
@@ -69,7 +78,11 @@ private:
     std::vector<PresetEntry> presets;
     std::vector<float> lastValues;
     int64_t counter = 0;
-    int heldNotes = 0;
+    std::bitset<128> heldNotes;
+    dh::PresetTracker tracker { { "mix", "stop", "stop_midi", "stop_transport", "timeline", "quality", "out", "auto_gain" } };   // lo de la sesión no "modifica"
+    juce::AudioBuffer<float> bypassDelay; int bypassPos = 0;   // el seco del bypass, retrasado la latencia
+    double lastBpm = 0.0;
+    void handleAsyncUpdate() override { if (onPresetChanged) onPresetChanged(); }
     bool midiStop = false, transportStop = false, lastStop = false;
     std::atomic<double> bpmNow { 120.0 };
     juce::AudioBuffer<float> demo; int demoPos = 0;        // TARNISH_DEMO_INPUT: entrada de prueba en loop (capturas)

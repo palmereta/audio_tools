@@ -162,16 +162,18 @@ bool AtmdEditor::keyPressed (const juce::KeyPress& k)
     const int i = qwertyNote (c);
     if (i < 0) return false;
     const int note = 12 * octave + i;
-    if (qwertyDown.insert (k.getKeyCode()).second) proc.keyboardState.noteOn (1, note, 0.8f);
+    if (qwertyDown.emplace (k.getKeyCode(), note).second) proc.keyboardState.noteOn (1, note, 0.8f);
     return true;
 }
 
 bool AtmdEditor::keyStateChanged (bool)
 {
     for (auto it = qwertyDown.begin(); it != qwertyDown.end();)
-        if (! juce::KeyPress::isKeyCurrentlyDown (*it))
+        if (! juce::KeyPress::isKeyCurrentlyDown (it->first))
         {
-            for (int o = 1; o <= 7; ++o) { const int i = qwertyNote (*it); if (i >= 0) proc.keyboardState.noteOff (1, 12 * o + i, 0.0f); }
+            // Sólo la nota que disparó esta tecla (antes se soltaba esa nota en todas las octavas, y cortaba notas del
+            // teclado MIDI o de otras teclas).
+            proc.keyboardState.noteOff (1, it->second, 0.0f);
             it = qwertyDown.erase (it);
         }
         else ++it;
@@ -205,7 +207,9 @@ void AtmdEditor::savePreset()
     w->addTextEditor ("name", proc.currentPresetName.get());
     w->addButton ("Save", 1, juce::KeyPress (juce::KeyPress::returnKey));
     w->addButton ("Cancel", 0, juce::KeyPress (juce::KeyPress::escapeKey));
-    w->enterModalState (true, juce::ModalCallbackFunction::create ([this, w] (int r) {
-        if (r == 1 && w->getTextEditorContents ("name").trim().isNotEmpty()) proc.saveUserPreset (w->getTextEditorContents ("name").trim());
+    // La ventana es otra ventana del escritorio: puede seguir abierta después de cerrar el editor.
+    w->enterModalState (true, juce::ModalCallbackFunction::create ([safe = juce::Component::SafePointer<juce::Component> (this), p = &proc, w] (int r) {
+        if (safe == nullptr) return;
+        if (r == 1 && w->getTextEditorContents ("name").trim().isNotEmpty()) p->saveUserPreset (w->getTextEditorContents ("name").trim());
     }), true);
 }

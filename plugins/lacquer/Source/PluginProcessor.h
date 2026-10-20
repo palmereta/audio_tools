@@ -20,6 +20,7 @@ public:
     void releaseResources() override {}
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
@@ -114,6 +115,17 @@ private:
     dh::lq::json::InputSummary input;
     std::vector<float> outGroove;
     dh::lq::BandCurve outMid {}; bool haveOutMid = false;
+    // El modo en vivo mientras hay un archivo abierto: el archivo usa plan/input/... para la interfaz, y al cerrarlo
+    // (o al guardar el estado) vale lo del bus master.
+    struct LiveSnapshot { dh::lq::Plan plan; bool planValid = false; dh::lq::json::InputSummary input; std::vector<float> outGroove;
+                          dh::lq::BandCurve outMid {}; bool haveOutMid = false; float abGainDb = 0; bool valid = false; } live;
+    void saveLive(); void restoreLive();
+    std::atomic<bool> audioInFile { false };
+    juce::CriticalSection fileLock;
+    void waitForAudioOutOfFile() const;
+    juce::AudioBuffer<float> bypassDelay; int bypassPos = 0;
+    struct Cancelled {};
+    std::function<void (double)> cancelCheck() { return [this] (double) { if (worker->threadShouldExit()) throw Cancelled(); }; }
     juce::String status { "Press LEARN and play the loudest part of the song, or master a file." };
 
     // Hilo de trabajo

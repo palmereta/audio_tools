@@ -146,6 +146,8 @@ struct Detected
     bool present = false;
     bool viaLauncher = false;
     StringArray paths;       // what is on disk now
+    StringArray strays;      // copies in the plugin folders that the launcher's record does not list (a manual install,
+                             // the other scope): the DAW may load them instead of the launcher's copy
 };
 
 /** Finds the product on disk: the launcher's record when its files are still there; otherwise

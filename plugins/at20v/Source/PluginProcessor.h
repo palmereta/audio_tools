@@ -3,6 +3,8 @@
 
 #include <JuceHeader.h>
 #include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/LatencyReporter.h"
+#include "../../../shared/tools/PresetTracker.h"
 #include "Preset.h"
 #include "ParamInfo.h"
 #include "ExtParams.h"
@@ -56,6 +58,10 @@ public:
     bool saveUserPreset (const juce::String& name);
     void rescanUserPresets();
     dh::SafeString currentPresetName { "Init" };     // lo escribe el host desde cualquier hilo
+    dh::PresetTracker tracker { { "quality", "output", "midi_out", "bend_range" } };   // los ajustes de sesión no "modifican"                         // preset "modificado": la foto de los parámetros al cargarlo
+    dh::LatencyReporter latency { *this };
+    std::vector<float> bypassL, bypassR; int bypassPos = 0;   // AT20V FX: el seco del bypass
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
     std::function<void()> onPresetChanged;
 
     // Estado en vivo para LEDs (escrito por el audio, leído por la UI).
@@ -69,7 +75,8 @@ public:
 
     // Rueda de control y pulsador (los mueve la UI o el MIDI).
     std::atomic<float> wheel { 0.0f };
-    std::atomic<bool> momentary { false };
+    std::atomic<bool> momentary { false };          // el pulsador apretado con el mouse
+    std::atomic<bool> momentaryPedal { false };     // el pedal de sustain (CC64): el mouse no lo suelta ni lo pisa
 
     static juce::File userPresetDir();
 

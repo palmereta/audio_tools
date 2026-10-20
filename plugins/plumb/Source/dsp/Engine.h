@@ -91,6 +91,8 @@ public:
         rpOld = rp; rp = std::max (0.0, (double) n - De); xf = Nx;
     }
     int latencySamples() const { return De; }
+    // La latencia que tendrá un modo (para informarla antes de que el audio cambie de modo, p. ej. al restaurar).
+    int latencyForMode (Mode m) const { return D0 + (m == Mode::live ? 0 : (m == Mode::tight ? 96 : 992)) * mult; }
     Mode currentMode() const { return mode; }
 
     // MIDI al corrector.
@@ -107,6 +109,9 @@ public:
         PitchEstimate est;
         if (det.push (x, est))
         {
+            // La readquisición (cada 16 saltos) analiza una ventana más larga y su centro cae ~11 ms antes que el de
+            // la estimación anterior: el tiempo se mantiene creciente para el corrector, el historial y la vista.
+            if (histW > 0) est.time = std::max (est.time, hist[(size_t) ((histW - 1) & (kHist - 1))].time);
             const CorrectOut o = cor.update (est);
             HistEntry& h = hist[(size_t) (histW & (kHist - 1))];
             h.time = o.time; h.f0 = o.voiced ? o.hz : 0.0f; h.delta = o.delta; ++histW;
@@ -314,9 +319,11 @@ private:
                         const Snap& prev = snaps[(size_t) ((j + kSnaps - 1) % kSnaps)];
                         if (prev.index == j - 1 && (int) prev.roots.size() == order) { s.roots = prev.roots; s.warm = true; }
                     }
-                    scaleFormants (s.k, order, factor, s.km, s.roots, s.warm); s.warm = true;
+                    scaleFormants (s.k, order, factor, s.km, s.roots, s.warm, std::exp (-3.14159265358979 * 150.0 / fs)); s.warm = true;
                     for (int i = 0; i < kMaxOrder; ++i) s.cm[(size_t) i] = (float) std::sqrt (1.0 - (double) s.km[(size_t) i] * s.km[(size_t) i]);
-                    s.gm = 1.0f;                                              // la celosía normalizada ya conserva la potencia
+                    // La potencia para ruido blanco se conserva, pero la voz es armónica: se iguala la energía en los
+                    // armónicos de la nota que suena (si no, mover los formantes bajaba la voz ~5 dB).
+                    s.gm = harmonicMatchGain (s.k, s.km, order, lastOut.voiced ? (double) lastOut.hz : 200.0, fs, 0.9);
                 }
                 s.factor = factor;
             }

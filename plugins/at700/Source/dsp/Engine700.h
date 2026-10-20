@@ -57,6 +57,7 @@ public:
     Seq717 seq;
     bool manualGate = false;
     float bender = 0.0f;               // −1..1 (palanca + pitch bend MIDI)
+    float leverNow = 0.0f;                       // la palanca que suena (parámetro + pitch bend): la dibuja la interfaz
 
     struct View
     {
@@ -132,7 +133,10 @@ public:
             if ((hostWasPlaying && expectedPpq > -1.0e8 && std::abs (st.ppq - expectedPpq) > 0.05) || ! prevSeqHost) seq.start();
         }
         prevSeqHost = st.seqHost;
-        expectedPpq = st.hostPlaying ? st.ppq + n * ppqPerSample : -1.0e9;
+        // El procesador fija la posición del host una vez por bloque y renderiza en trozos: la posición avanza acá
+        // con cada trozo, así el trozo siguiente (y el bloque siguiente) no parece un salto del host.
+        if (st.hostPlaying) st.ppq += n * ppqPerSample;
+        expectedPpq = st.hostPlaying ? st.ppq : -1.0e9;
         for (int i = 0; i < n; ++i)
         {
             baseTick (dtBase, st.seqHost ? ppqPerSample : -1.0);
@@ -406,7 +410,7 @@ private:
         seq.serMode = I (P700::ser_mode); seq.repeat = I (P700::ser_repeat) == 1; seq.steps = 1 + I (P700::ser_steps);
         if (seq.step >= seq.steps) seq.step = 0;
     }
-    float leverNow = 0.0f;
+
 
     // Una vez por muestra base: teclado, secuenciador, pulsos de compuerta.
     void baseTick (float dt, double ppqPerSample)

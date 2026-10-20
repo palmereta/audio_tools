@@ -61,7 +61,7 @@ public:
             g.drawImage (A.wheelSheet, dst.getX(), dst.getY(), dst.getWidth(), dst.getHeight(),
                          (f % A.wheelCols) * A.wheelFw, (f / A.wheelCols) * A.wheelFh, A.wheelFw, A.wheelFh);
         }
-        if (proc.momentary.load() && A.switchDown.isValid() && ! A.switchCrop.isEmpty())
+        if ((proc.momentary.load() || proc.momentaryPedal.load()) && A.switchDown.isValid() && ! A.switchCrop.isEmpty())
         {
             const auto dst = A.switchCrop.toFloat() * 0.5f;
             g.drawImage (A.switchDown, dst);
@@ -167,7 +167,7 @@ private:
         }
         uint64_t h = 0;
         for (int k = 0; k < 37; ++k) if (isDown (k)) h |= (uint64_t) 1 << k;
-        const float w = proc.wheel.load(); const bool m = proc.momentary.load();
+        const float w = proc.wheel.load(); const bool m = proc.momentary.load() || proc.momentaryPedal.load();
         if (h != shownKeys || w != shownWheel || m != shownMom) { shownKeys = h; shownWheel = w; shownMom = m; repaint(); }
     }
 

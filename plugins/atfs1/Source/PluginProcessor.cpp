@@ -117,6 +117,9 @@ void ATFS1Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
             const auto m = (*it).getMessage();
             if (m.isNoteOn()) midiNote[(size_t) m.getNoteNumber()] = true;
             else if (m.isNoteOff()) midiNote[(size_t) m.getNoteNumber()] = false;
+            // All Notes Off / All Sound Off: también se olvidan las teclas MIDI (si no, esa tecla quedaba encendida en
+            // pantalla y un clic en ella dejaba una nota colgada).
+            if ((m.isController() && (m.getControllerNumber() == 120 || m.getControllerNumber() == 123)) || m.isAllNotesOff() || m.isAllSoundOff()) midiNote.fill (false);
             if (m.isController() && Synth::ccToParam (m.getControllerNumber()) != nullptr) handleCc (m.getControllerNumber(), m.getControllerValue());
             else synth.handleMidi (m, v);
             ++it;
@@ -182,9 +185,12 @@ void ATFS1Processor::notifyUi (std::function<void()>& cb)
 // ───────────── Fseq ─────────────
 void ATFS1Processor::setFseq (const FseqData& f, const juce::String& ref)
 {
-    editFseq = f;
-    currentFseqRef = ref;
-    fseqSlot.publish (editFseq);
+    {
+        const juce::ScopedLock l (editLock);
+        editFseq = f;
+        currentFseqRef = ref;
+        fseqSlot.publish (editFseq);
+    }
     const int n = (int) f.frames.size();
     if (n > 0 && ref.isEmpty())
     {
@@ -429,9 +435,12 @@ void ATFS1Processor::getStateInformation (juce::MemoryBlock& destData)
     auto state = apvts.copyState();
     state.setProperty ("presetName", currentPresetName.get(), nullptr);
     state.setProperty ("program", currentProgram, nullptr);
-    state.setProperty ("voice", juce::JSON::toString (voiceToJson (editVoice), true), nullptr);
-    if (currentFseqRef.isNotEmpty()) state.setProperty ("fseqRef", currentFseqRef, nullptr);
-    else if (! editFseq.empty()) state.setProperty ("fseqData", fseqToBase64 (editFseq), nullptr);
+    {
+        const juce::ScopedLock l (editLock);
+        state.setProperty ("voice", juce::JSON::toString (voiceToJson (editVoice), true), nullptr);
+        if (currentFseqRef.isNotEmpty()) state.setProperty ("fseqRef", currentFseqRef, nullptr);
+        else if (! editFseq.empty()) state.setProperty ("fseqData", fseqToBase64 (editFseq), nullptr);
+    }
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
 
@@ -449,9 +458,12 @@ void ATFS1Processor::setStateInformation (const void* data, int sizeInBytes)
     for (auto id : { "presetName", "program", "voice", "fseqRef", "fseqData" }) state.removeProperty (id, nullptr);
     apvts.replaceState (state);
     if (voiceJson.isNotEmpty()) setVoice (voiceFromJson (juce::JSON::parse (voiceJson)));
-    if (ref.isNotEmpty() && libraryIndexOf (ref) >= 0) { editFseq = library[(size_t) libraryIndexOf (ref)]; currentFseqRef = ref; fseqSlot.publish (editFseq); }
-    else if (fdata.isNotEmpty()) { editFseq = fseqFromBase64 (fdata); currentFseqRef = {}; fseqSlot.publish (editFseq); }
-    else { editFseq = {}; currentFseqRef = {}; fseqSlot.publish (editFseq); }
+    {
+        const juce::ScopedLock l (editLock);
+        if (ref.isNotEmpty() && libraryIndexOf (ref) >= 0) { editFseq = library[(size_t) libraryIndexOf (ref)]; currentFseqRef = ref; fseqSlot.publish (editFseq); }
+        else if (fdata.isNotEmpty()) { editFseq = fseqFromBase64 (fdata); currentFseqRef = {}; fseqSlot.publish (editFseq); }
+        else { editFseq = {}; currentFseqRef = {}; fseqSlot.publish (editFseq); }
+    }
     notifyUi (onFseqChanged);
     notifyUi (onPresetChanged);
 }

@@ -67,6 +67,7 @@ public:
         fs = sampleRate; D = 0;
         ring.assign (kRing, 0.0f); full.assign (kFull, 0.0f);
         configure();
+        n = 0;
     }
     // La tasa del detector: ~12 kHz, o ~24 kHz si el rango sube de 1 kHz (a 12 kHz una voz de 880 Hz tiene un
     // período de 13,6 muestras y ningún retardo entero baja del umbral: el detector se enganchaba al triple).
@@ -79,7 +80,12 @@ public:
         winPeakDecay = std::exp (-1.0 / (0.4 * fsD / hop));          // lo mismo a la tasa de las estimaciones
         hp.highpass (50.0, fs); lp1.lowpass (0.42 * fsD, fs, 0.54); lp2.lowpass (0.42 * fsD, fs, 1.31);
         sib.highpass (4000.0, fs);
+        // Un cambio de rango en marcha (Voice) cambia la decimación, pero el reloj de entrada sigue: las estimaciones
+        // llevan la muestra de entrada de su ventana y el motor las busca por ese tiempo. Si volviera a 0, el motor
+        // tomaría siempre la última y la vista de notas no podría descartar las viejas.
+        const auto keepN = n;
         reset();
+        n = keepN;
     }
     void reset()
     {

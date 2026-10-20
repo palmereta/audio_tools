@@ -2,7 +2,7 @@
 
 Tape, cassette, video, vinyl, AM radio and telephone: an original design, not a recreation of any product. VST3,
 Audio Unit (macOS, a music effect with MIDI input), standalone app, and `tarnishrender`, a command-line renderer.
-Version 1.0.0.
+Version 1.0.2.
 
 The research behind it (what the tape and lo-fi plugins on the market do and what users ask of them, the physics of
 magnetic recording, transports, vinyl, AM radio and the phone network, the visual direction, the test plan) is in

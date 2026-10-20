@@ -3,6 +3,8 @@
 #include <JuceHeader.h>
 #include "ParamsOr.h"
 #include "gen/Preview.h"
+#include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/PresetTracker.h"
 
 // Salidas MIDI directas (sintes físicos, IAC en macOS, loopMIDI en Windows): cada carril elige un puerto.
 // El hilo de audio deja los mensajes con su hora en una cola sin bloqueo; un hilo propio los manda a tiempo.
@@ -15,6 +17,8 @@ public:
 
     // Hilo de mensajes: asigna un puerto (identificador del dispositivo) a un carril; vacío = ninguno.
     void setLanePort (int lane, const juce::String& identifier);
+    void reopenMissing();
+    bool laneConnected (int lane) const { return lanePorts[(size_t) lane].isEmpty() || laneSlot[(size_t) lane].load() >= 0; }
     void setLaneChannel (int lane, int channel) { laneChannel[(size_t) lane].store (channel, std::memory_order_relaxed); }
     juce::String lanePort (int lane) const { return lanePorts[(size_t) lane]; }
     bool anyOpen() const { for (auto& s : laneSlot) if (s.load() >= 0) return true; return false; }
@@ -116,7 +120,9 @@ public:
     void loadPreset (int index);
     bool saveUserPreset (const juce::String& name);
     void rescanUserPresets();
-    juce::String currentPresetName { "Init" };
+    dh::SafeString currentPresetName { "Init" };
+    dh::PresetTracker tracker;
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
     static juce::File userPresetDir();
     std::function<void()> onPresetChanged;
 
@@ -127,6 +133,7 @@ private:
     dh::orr::Preview preview;
     std::vector<std::atomic<float>*> raw;
     std::vector<float> vals;
+    std::vector<float> monoR;                     // la vista previa en una pista mono
     std::vector<dh::orr::OutEvent> events;
     double sr = 48000.0;
     std::atomic<bool> panicRequest { false };

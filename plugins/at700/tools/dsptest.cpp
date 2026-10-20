@@ -123,6 +123,42 @@ int main()
         for (int k = 0; k < 8; ++k) { g.play (0.125f); steps[k] = g.e.view.step; t += 0.125f; }
         std::printf ("Secuenciador (paso cada 1/8 s):"); for (int k : steps) std::printf (" %d", k); std::printf ("\n");
     }
+    // 4b) Secuenciador con el reloj del host y buffers grandes: el host da la posición una vez por bloque y el
+    //     procesador renderiza en trozos de 32; no debe confundir cada bloque con un salto (volvía al paso 1).
+    for (int block : { 64, 2048 })
+    {
+        Run g;
+        g.set (P700::ser_steps, 3);
+        for (int s = 0; s < 4; ++s) g.e.p[(size_t) ((int) P700::step1_div + s * 5)] = 3;
+        g.e.st.seqHost = true; g.e.st.seqFollowTransport = true; g.e.st.hostPlaying = true; g.e.st.bpm = 120.0;
+        std::vector<float> L (2048), R (2048);
+        double ppq = 0; int maxStep = 0, changes = 0, last = -1;
+        for (int b = 0; b < (int) (4.0 * 48000 / block); ++b)
+        {
+            g.e.st.ppq = ppq;
+            for (int pos = 0; pos < block; pos += 32) g.e.render (L.data(), R.data(), std::min (32, block - pos));
+            ppq += block * 120.0 / 60.0 / 48000.0;
+            if (g.e.view.step != last) { ++changes; last = g.e.view.step; }
+            maxStep = std::max (maxStep, g.e.view.step);
+        }
+        std::printf ("Secuenciador con el host, bloques de %d: %d cambios de paso, paso máximo %d %s\n", block, changes, maxStep,
+                     maxStep >= 3 && changes >= 8 ? "OK" : "FALLA");
+    }
+    // 4c) Reloj externo con un pulso por paso: CLOCK OUT tiene que bajar entre pulsos (quedaba siempre alto).
+    {
+        Seq717 q; q.steps = 4; q.pw = 0.5f; q.start();
+        for (int s = 0; s < 12; ++s) { q.divide[(size_t) s] = 1.0f / 32.0f; q.fine[(size_t) s] = 1.0f; }
+        int rises = 0; bool last = false;
+        for (int i = 0; i < 48000; ++i)
+        {
+            const float ext = (i % 4800) < 2400 ? 10.0f : 0.0f;             // 10 Hz, 50 %
+            q.process (ext, true, 0.0f, { 0, 0, 0, 0 }, -1.0, false, 1.0f / 48000.0f);
+            const bool h = q.clockOut > 1.0f;
+            if (h && ! last) ++rises;
+            last = h;
+        }
+        std::printf ("Reloj externo 1/32: CLOCK OUT subió %d veces en 1 s (10 esperadas) %s\n", rises, rises >= 9 ? "OK" : "FALLA");
+    }
     // 5) Duofónico: dos teclas → CV1 la grave, CV2 la aguda.
     {
         Run g; g.e.kb.noteOn (60, 0.8f); g.e.kb.noteOn (67, 0.8f); g.play (0.05f);

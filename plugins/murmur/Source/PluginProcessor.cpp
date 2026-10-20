@@ -25,6 +25,7 @@ MurmurProcessor::MurmurProcessor()
             rd->read (&demoIn, 0, (int) rd->lengthInSamples, 0, true, true);
         }
     }
+    { juce::StringArray g; for (auto& e : params()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout MurmurProcessor::createLayout()
@@ -108,6 +109,8 @@ void MurmurProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     float* L = buffer.getWritePointer (0);
     float* R = outs > 1 && buffer.getNumChannels() > 1 ? buffer.getWritePointer (1) : tmpR.data();
     if (ins < 2) juce::FloatVectorOperations::copy (R, L, n);
+    else if (R == tmpR.data()) juce::FloatVectorOperations::copy (R, buffer.getReadPointer (1), n);   // estéreo → mono: la R real
+    if (memPending.exchange (false)) eng.setMemory (memData.data(), memCount, memRate);   // memoria de la sesión
     if (demoIn.getNumSamples() > 0)
         for (int i = 0; i < n; ++i, demoPos = (demoPos + 1) % demoIn.getNumSamples())
         { L[i] = demoIn.getSample (0, demoPos); R[i] = demoIn.getSample (1, demoPos); }
@@ -163,6 +166,7 @@ void MurmurProcessor::loadPreset (int index)
         setValue (e.id, obj != nullptr && obj->hasProperty (e.id) ? (float) obj->getProperty (e.id) : e.def);
     }
     currentPresetName = presets[(size_t) index].name;
+    tracker.capture (*this);
     notifyUi (onPresetChanged);
 }
 
@@ -223,6 +227,7 @@ bool MurmurProcessor::saveUserPreset (const juce::String& name)
     const bool ok = file.replaceWithText (juce::JSON::toString (juce::var (o)));
     rescanUserPresets();
     currentPresetName = name;
+    tracker.capture (*this);
     for (int i = 0; i < (int) presets.size(); ++i) if (! presets[(size_t) i].factory && presets[(size_t) i].file == file) currentProgram = i;
     notifyUi (onPresetChanged);
     return ok;
@@ -240,6 +245,24 @@ void MurmurProcessor::getStateInformation (juce::MemoryBlock& destData)
     auto state = apvts.copyState();
     state.setProperty ("presetName", currentPresetName.get(), nullptr);
     state.setProperty ("program", currentProgram, nullptr);
+    // Con Freeze, lo congelado viaja con la sesión (16 bits; hasta 16 s, unos 4 MB): al reabrir suena lo mismo.
+    if (eng.frozenNow() && eng.memorySamples() > 0)
+    {
+        const int cnt = eng.memorySamples();
+        std::vector<float> l ((size_t) cnt), r ((size_t) cnt);
+        eng.copyMemory (l.data(), r.data(), cnt);
+        juce::MemoryBlock mb ((size_t) cnt * 4);
+        auto* d = static_cast<int16_t*> (mb.getData());
+        for (int i = 0; i < cnt; ++i)
+        {
+            d[2 * i] = (int16_t) juce::jlimit (-32767, 32767, (int) std::lround (l[(size_t) i] * 32767.0f));
+            d[2 * i + 1] = (int16_t) juce::jlimit (-32767, 32767, (int) std::lround (r[(size_t) i] * 32767.0f));
+        }
+        state.setProperty ("frozenAudio", mb.toBase64Encoding(), nullptr);
+        state.setProperty ("frozenRate", sr, nullptr);
+        state.setProperty ("frozenCount", cnt, nullptr);
+    }
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
 
@@ -251,7 +274,19 @@ void MurmurProcessor::setStateInformation (const void* data, int sizeInBytes)
     if (! state.isValid() || ! state.hasType (apvts.state.getType())) return;
     currentPresetName = state.getProperty ("presetName", "Init").toString();
     currentProgram = state.getProperty ("program", 0);
-    for (auto id : { "presetName", "program" }) state.removeProperty (id, nullptr);
+    if (state.hasProperty ("frozenAudio"))
+    {
+        juce::MemoryBlock mb; mb.fromBase64Encoding (state.getProperty ("frozenAudio").toString());
+        const int cnt = std::min ((int) state.getProperty ("frozenCount", 0), (int) (mb.getSize() / 4));
+        if (cnt > 0 && ! memPending.load())
+        {
+            memData.assign (static_cast<const int16_t*> (mb.getData()), static_cast<const int16_t*> (mb.getData()) + 2 * cnt);
+            memCount = cnt; memRate = (double) state.getProperty ("frozenRate", 48000.0);
+            memPending.store (true);                       // el hilo de audio la carga al principio del bloque
+        }
+    }
+    for (auto id : { "presetName", "program", "frozenAudio", "frozenRate", "frozenCount" }) state.removeProperty (id, nullptr);
+    const auto snapshot = state.getProperty ("presetSnapshot").toString(); state.removeProperty ("presetSnapshot", nullptr);
     std::set<juce::String> present;
     for (const auto& c : state) if (c.hasProperty ("id")) present.insert (c.getProperty ("id").toString());
     apvts.replaceState (state);
@@ -259,6 +294,8 @@ void MurmurProcessor::setStateInformation (const void* data, int sizeInBytes)
     for (auto* p : getParameters())
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (p))
             if (! dh::isFiniteF (rp->getValue()) || present.count (rp->paramID) == 0) rp->setValueNotifyingHost (rp->getDefaultValue());
+    if (snapshot.isNotEmpty()) tracker.fromString (*this, snapshot);
+    else tracker.capture (*this);
     notifyUi (onPresetChanged);
 }
 

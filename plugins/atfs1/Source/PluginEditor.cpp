@@ -40,7 +40,7 @@ ATFS1Editor::ATFS1Editor (ATFS1Processor& p)
     rack.line1 = [this] { return lcdLine1(); };
     rack.line2 = [this] { return lcdLine2(); };
     voicePg.onOpenOp = [this] (int k, bool n) { opPg.selectOp (k); opPg.setUnvoiced (n); showPage (POperator); };
-    Bus::get().help = [this] (const juce::String& s) { help = s; content.repaint (0, statusY, baseW, 24); };
+    dh::HelpRouter::add (this);
 
     proc.onPresetChanged = [this] { refreshAll(); };
     proc.onVoiceChanged = [this] { for (auto* pg : pages) if (pg->isVisible()) pg->refresh(); rack.repaint(); };
@@ -91,7 +91,7 @@ ATFS1Editor::ATFS1Editor (ATFS1Processor& p)
 ATFS1Editor::~ATFS1Editor()
 {
     proc.onPresetChanged = nullptr; proc.onVoiceChanged = nullptr; proc.onFseqChanged = nullptr; proc.onMessage = nullptr;
-    Bus::get().help = nullptr;
+    dh::HelpRouter::remove (this);
     setLookAndFeel (nullptr);
 }
 

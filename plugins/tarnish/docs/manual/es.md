@@ -81,7 +81,7 @@ La lectura de la ventana de servicio se mide de la velocidad del transporte, no 
 ## Noise y Mix
 
 - **Noise** es el ruido propio de la máquina: soplido de cinta, superficie del disco, ruido de línea. En 50 % está donde suele estar esa máquina (unos -68 dB bajo la referencia en una de estudio a 15 ips, -52 dB en una casete ferric); 0 es apagado, 100 % son 20 dB más. El soplido pasa por la cadena de reproducción, así que su color cambia con la máquina y la velocidad.
-- **Mix** mezcla la máquina con el sonido seco. El seco se atrasa para quedar exactamente en tiempo.
+- **Mix** mezcla la máquina con el sonido seco. El seco se atrasa para quedar exactamente en tiempo, pero el wow y el flutter mueven la copia de la cinta unos milisegundos alrededor, así que una mezcla en el medio hace fase como un flanger, igual que dos máquinas reales. Para saturación en paralelo limpia, bajá Wow y Flutter; para el flanging, dejalos arriba.
 
 ## Damage
 

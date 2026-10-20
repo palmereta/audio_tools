@@ -5,8 +5,10 @@
 #include "ui/Pages.h"
 #include "ManualView.h"
 
-class MurmurEditor : public juce::AudioProcessorEditor, private juce::Timer
+class MurmurEditor : public juce::AudioProcessorEditor, public dh::HelpSink, private juce::Timer
 {
+public:
+    void routeHelp (const juce::String& s) override { help = s; content.repaint (statusR); }
 public:
     explicit MurmurEditor (MurmurProcessor&);
     ~MurmurEditor() override;

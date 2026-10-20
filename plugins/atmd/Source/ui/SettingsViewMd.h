@@ -97,7 +97,7 @@ public:
     void mouseDoubleClick (const juce::MouseEvent& e) override
     {
         if (const auto* it = itemAt (e.position); it != nullptr && it->kind == Knob)
-            if (auto* prm = proc.apvts.getParameter (it->id)) { prm->beginChangeGesture(); prm->setValueNotifyingHost (prm->getDefaultValue()); prm->endChangeGesture(); }
+            if (auto* prm = proc.apvts.getParameter (it->id)) { prm->setValueNotifyingHost (prm->getDefaultValue()); startNorm = prm->getDefaultValue(); dragY = e.position.y; }   // dentro del gesto del segundo clic
     }
 
 private:
@@ -184,17 +184,27 @@ private:
         else
         {
             const auto opts = options (it.id);
-            const int sel = it.id == "bend_range" ? opts.indexOf (juce::String ((int) std::lround (v))) : juce::roundToInt (v - paramDef (it.id).lo);
+            int sel = it.id == "bend_range" ? opts.indexOf (juce::String ((int) std::lround (v))) : juce::roundToInt (v - paramDef (it.id).lo);
+            // UNISON: con muchas voces el motor limita el unísono a 16 voces en total; se marca lo que suena y las
+            // opciones que no entran quedan apagadas.
+            int maxOpt = opts.size() - 1;
+            if (it.id == "unison")
+            {
+                const int vox = std::max (1, (int) std::lround (proc.value ("voices")));
+                const int maxUni = std::max (1, 16 / vox);
+                maxOpt = juce::jlimit (0, opts.size() - 1, maxUni - 1);
+                sel = std::min (sel, maxOpt);
+            }
             g.setFont (font (24.0f, true));
             const auto first = cell (it, 0, opts.size()), lastC = cell (it, opts.size() - 1, opts.size());
             g.drawText (it.label, juce::Rectangle<float> (first.getX(), first.getY() - 44.0f, lastC.getRight() - first.getX(), 34.0f), juce::Justification::centred);
             for (int i = 0; i < opts.size(); ++i)
             {
                 const auto r = cell (it, i, opts.size());
-                const bool on = i == sel;
+                const bool on = i == sel, off = i > maxOpt;
                 g.setColour (on ? juce::Colour (0xff3d8fd1) : juce::Colour (0xff26282b));
                 g.fillRoundedRectangle (r, 5.0f);
-                g.setColour (juce::Colours::white.withAlpha (on ? 1.0f : 0.55f));
+                g.setColour (juce::Colours::white.withAlpha (on ? 1.0f : (off ? 0.2f : 0.55f)));
                 g.drawRoundedRectangle (r, 5.0f, 1.5f);
                 g.setFont (font (opts.size() > 6 ? 22.0f : 24.0f, true));
                 g.drawFittedText (opts[i].toUpperCase(), r.toNearestInt(), juce::Justification::centred, 1, 0.7f);

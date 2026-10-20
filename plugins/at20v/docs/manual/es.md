@@ -257,7 +257,7 @@ Los 35 jacks funcionan, incluidas las conexiones por defecto. Las líneas blanca
 ### Cómo se usan los cables
 
 - **Conectar**: arrastrá desde un jack libre hasta uno compatible, siempre de salida a entrada. Mientras arrastrás, se resaltan los jacks a los que podés llegar.
-- **Apilar**: una salida acepta varias fichas, así una fuente alimenta muchas entradas. Una entrada acepta una sola ficha; un cable nuevo reemplaza al anterior.
+- **Apilar**: una salida acepta varias fichas, así una fuente alimenta muchas entradas. Con Shift, arrastrar desde una salida que ya tiene cable agrega otro. Una entrada acepta una sola ficha; un cable nuevo reemplaza al anterior.
 - **Mover**: hacé clic en un jack con cable para levantar el extremo del último cable enchufado ahí, y soltalo en otro jack.
 - **Desenchufar**: levantá un extremo y soltalo lejos de cualquier jack. Alt-clic (Option-clic en Mac) sobre un jack saca todos sus cables.
 - **Menú**: clic derecho sobre un jack para Cable color (rojo, azul, amarillo, verde, blanco o negro) y Unplug.

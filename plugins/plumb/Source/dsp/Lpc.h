@@ -111,7 +111,10 @@ inline void polyRoots (const double* a, int p, std::vector<std::complex<double>>
 }
 
 // Escala los ángulos de los polos por `factor` (formantes arriba si > 1) y limita el radio; vuelve a armar k.
-inline void scaleFormants (const KVec& kIn, int p, double factor, KVec& kOut, std::vector<std::complex<double>>& roots, bool warm)
+// rMax limita el radio (el ancho de banda mínimo de cada polo): con orden 48 sobre una voz aguda, varios polos se
+// ajustan a armónicos sueltos con picos muy angostos; corridos, caen entre armónicos y la voz se vacía. Con un ancho
+// mínimo de formante (~150 Hz) el modelo corrido sigue la envolvente y no los armónicos.
+inline void scaleFormants (const KVec& kIn, int p, double factor, KVec& kOut, std::vector<std::complex<double>>& roots, bool warm, double rMax = 0.99)
 {
     double a[kMaxOrder + 1];
     stepUp (kIn, p, a);
@@ -120,11 +123,27 @@ inline void scaleFormants (const KVec& kIn, int p, double factor, KVec& kOut, st
     std::vector<C> zs (roots.size());
     for (size_t i = 0; i < roots.size(); ++i)
     {
-        const double r = std::min (0.99, std::abs (roots[i])), th = std::arg (roots[i]);
-        double t2 = th * factor;
-        const double lim = 3.14159265358979 * 0.97;
-        if (std::abs (th) > 1e-6) t2 = std::copysign (std::min (std::abs (t2), lim), th);   // los reales quedan reales
-        zs[i] = std::polar (r, t2);
+        const double r = std::min (rMax, std::abs (roots[i])), th = std::arg (roots[i]);
+        // Los polos reales (ángulo 0 o π, como el que modela la inclinación del preénfasis) quedan reales: girar uno en
+        // π dejaba un polo complejo sin su conjugado, el polinomio reconstruido ya no era el modelo y la voz perdía
+        // de 4 a 40 dB con cualquier Throat distinto de 0.
+        const bool isReal = std::abs (roots[i].imag()) <= 1e-9 * std::max (1e-12, std::abs (roots[i]));
+        double t2 = th, r2 = r;
+        if (! isReal)
+        {
+            // Los polos que el corrimiento lleva por encima de 0,85π no se apilan en el límite: se amortiguan. Apilados
+            // en el mismo ángulo formaban una resonancia enorme cerca de Nyquist que se llevaba la energía (la síntesis
+            // normalizada conserva la potencia total) y la voz quedaba 20 a 60 dB más baja.
+            const double knee = 3.14159265358979 * 0.85, lim = 3.14159265358979 * 0.97;
+            double t = std::abs (th) * factor;
+            if (t > knee)
+            {
+                r2 = r * std::exp (-6.0 * (t - knee));
+                t = knee + (lim - knee) * std::tanh ((t - knee) / (lim - knee));
+            }
+            t2 = std::copysign (t, th);
+        }
+        zs[i] = std::polar (r2, t2);
     }
     // Reconstrucción del polinomio (coeficientes reales: se toma la parte real).
     std::vector<C> c ((size_t) p + 1, C (0));
@@ -143,6 +162,31 @@ inline void scaleFormants (const KVec& kIn, int p, double factor, KVec& kOut, st
         }
         kOut = kIn;
     }
+}
+
+// Ganancia que iguala la energía de dos modelos (celosía normalizada, Πc/A) en los armónicos de f0: corridos, los
+// polos que el análisis afinó sobre los armónicos dejan de realzarlos y la voz baja unos 5 dB aunque la potencia para
+// ruido blanco sea la misma. Cada armónico pesa con el desénfasis (1/|1 − pre·z⁻¹|²): la energía de la voz está
+// abajo. Se limita a ±12 dB.
+inline float harmonicMatchGain (const KVec& kOrig, const KVec& kMod, int p, double f0, double fs, double pre)
+{
+    if (f0 < 40.0 || f0 > 2000.0) return 1.0f;
+    auto energy = [&] (const KVec& kk) {
+        double a[kMaxOrder + 1]; stepUp (kk, p, a);
+        double c = 1; for (int i = 0; i < p; ++i) c *= std::sqrt (std::max (1e-12, 1.0 - (double) kk[(size_t) i] * kk[(size_t) i]));
+        double e = 0;
+        for (double fh = f0; fh < 0.45 * fs; fh += f0)
+        {
+            const std::complex<double> w = std::polar (1.0, -2.0 * 3.14159265358979 * fh / fs);
+            std::complex<double> A = 0, zi = 1;
+            for (int j = 0; j <= p; ++j) { A += a[j] * zi; zi *= w; }
+            e += c * c / std::max (1e-30, std::norm (A)) / std::max (1e-6, std::norm (1.0 - pre * w));
+        }
+        return e;
+    };
+    const double eo = energy (kOrig), em = energy (kMod);
+    if (em <= 0.0 || eo <= 0.0) return 1.0f;
+    return (float) std::clamp (std::sqrt (eo / em), 0.25, 4.0);
 }
 
 // Celosías normalizadas. La síntesis es una cadena de rotaciones ortogonales (c = √(1 − k²)):

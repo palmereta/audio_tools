@@ -4,21 +4,16 @@
 // Todo control avisa al pasar el mouse (línea de ayuda) y al cambiar (renglón 2 del LCD del frente).
 
 #include <JuceHeader.h>
+#include "../../../../shared/ui/Wheel.h"
+#include "../../../../shared/ui/HelpRouter.h"
 #include "LookFs.h"
 #include "../PluginProcessor.h"
 
 namespace dh::fs::ui {
 
 // Avisos globales del editor (un solo editor abierto por instancia; se reenganchan al abrir otro).
-struct Bus
-{
-    std::function<void (const juce::String&)> help;                       // línea de ayuda
-    std::function<void (const juce::String&, const juce::String&)> lcd;   // nombre, valor → LCD del frente
-    static Bus& get() { static Bus b; return b; }
-};
-
-inline void showHelp (const juce::String& s) { if (Bus::get().help) Bus::get().help (s); }
-inline void showLcd (const juce::String& n, const juce::String& v) { if (Bus::get().lcd) Bus::get().lcd (n, v); }
+inline void showHelp (const juce::String& s) { dh::HelpRouter::help (s); }
+inline void showLcd (const juce::String& n, const juce::String& v) { dh::HelpRouter::lcd (n, v); }
 
 // ───────── perilla de un parámetro del host ─────────
 class ParamKnob : public juce::Component, private juce::Timer
@@ -83,8 +78,11 @@ public:
     {
         if (param == nullptr) return;
         const int steps = param->getNumSteps();
-        const float step = steps > 1 && steps < 400 ? 1.0f / (float) (steps - 1) : 0.01f;
-        const float nv = juce::jlimit (0.0f, 1.0f, param->getValue() + (w.deltaY > 0 ? step : -step) * (w.isReversed ? -1.0f : 1.0f));
+        if (dh::wheelDelta (w) == 0.0f) return;
+        const bool stepped = steps > 1 && steps < 400;
+        const int k = stepped ? wheelSteps.take (w) : 0;
+        if (stepped && k == 0) return;
+        const float nv = juce::jlimit (0.0f, 1.0f, param->getValue() + (stepped ? (float) k / (float) (steps - 1) : dh::wheelAmount (w)));
         attach->setValueAsCompleteGesture (param->convertFrom0to1 (nv));
         showLcd (text, param->getCurrentValueAsText());
     }
@@ -92,6 +90,7 @@ public:
     void mouseExit (const juce::MouseEvent&) override { showHelp ({}); }
 
 private:
+    dh::WheelSteps wheelSteps;
     ATFS1Processor& proc;
     juce::String paramId, text, help;
     juce::RangedAudioParameter* param = nullptr;
@@ -174,7 +173,9 @@ public:
     {
         if (param == nullptr) return;
         const int steps = std::max (2, param->getNumSteps());
-        const float nv = juce::jlimit (0.0f, 1.0f, param->getValue() + (w.deltaY > 0 ? 1.0f : -1.0f) / (float) (steps - 1));
+        const int k = wheelSteps.take (w);
+        if (k == 0) return;
+        const float nv = juce::jlimit (0.0f, 1.0f, param->getValue() + (float) k / (float) (steps - 1));
         attach->setValueAsCompleteGesture (param->convertFrom0to1 (nv));
         showLcd (text, param->getCurrentValueAsText());
     }
@@ -182,6 +183,7 @@ public:
     void mouseExit (const juce::MouseEvent&) override { showHelp ({}); }
 
 private:
+    dh::WheelSteps wheelSteps;
     juce::String text, help;
     juce::RangedAudioParameter* param = nullptr;
     std::unique_ptr<juce::ParameterAttachment> attach;
@@ -268,13 +270,24 @@ public:
     void mouseDoubleClick (const juce::MouseEvent&) override
     {
         if (! isActive() || ! field.names.isEmpty()) return;
+        // Lo que se escribe es lo que se ve: si el campo muestra el valor corrido (Algorithm 1..88 guardado 0..87,
+        // "Tr1", "h1"…), el número escrito se corre igual al aplicarlo.
+        const auto& vd = proc.voice();
+        const int x = field.get (vd);
+        int offset = 0; juce::String shown (x);
+        if (field.fmt)
+        {
+            const auto a = field.fmt (x, vd).trim(), b = field.fmt (x < field.hi ? x + 1 : x - 1, vd).trim();
+            if (a.isNotEmpty() && juce::CharacterFunctions::isDigit (a.getLastCharacter()) && std::abs (b.getTrailingIntValue() - a.getTrailingIntValue()) == 1)
+            { offset = a.getTrailingIntValue() - x; shown = juce::String (a.getTrailingIntValue()); }
+        }
         auto* ed = new juce::TextEditor();
-        ed->setText (juce::String (field.get (proc.voice())), false);
+        ed->setText (shown, false);
         ed->setJustification (juce::Justification::centred);
         ed->setBounds (getLocalBounds().removeFromBottom (compact ? getHeight() : getHeight() - 15));
-        ed->onReturnKey = [this, ed] { apply (ed->getText().getIntValue()); removeEditor(); };
+        ed->onReturnKey = [this, ed, offset] { apply (ed->getText().getIntValue() - offset); removeEditor(); };
         ed->onEscapeKey = [this] { removeEditor(); };
-        ed->onFocusLost = [this, ed] { apply (ed->getText().getIntValue()); removeEditor(); };
+        ed->onFocusLost = [this, ed, offset] { apply (ed->getText().getIntValue() - offset); removeEditor(); };
         editor.reset (ed);
         addAndMakeVisible (ed);
         ed->grabKeyboardFocus(); ed->selectAll();

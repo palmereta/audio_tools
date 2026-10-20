@@ -638,7 +638,8 @@ public:
         const int fr = frameAt (e.position.x);
         const int ls = (int) proc.value ("fseq_lp_start"), le = (int) proc.value ("fseq_lp_end");
         const float px = area().getWidth() / (float) std::max (1, (int) f.frames.size() - 1);
-        if ((int) proc.value ("fseq_loop") == 0) { proc.setValue ("fseq_loop", 2.0f); proc.setValue ("fseq_lp_start", (float) f.loopStart); proc.setValue ("fseq_lp_end", (float) f.loopEnd); }
+        // Tocar el gráfico pasa a puntos propios conservando el modo del Fseq (antes forzaba Round, ida y vuelta).
+        if ((int) proc.value ("fseq_loop") == 0) { proc.setValue ("fseq_loop", f.loopMode == 1 ? 2.0f : 1.0f); proc.setValue ("fseq_lp_start", (float) f.loopStart); proc.setValue ("fseq_lp_end", (float) f.loopEnd); }
         dragEdge = std::abs ((float) (fr - ls)) * px < 8.0f ? 0 : (std::abs ((float) (fr - le)) * px < 8.0f ? 1 : 2);
         anchor = fr;
     }
@@ -667,7 +668,8 @@ private:
     {
         const auto& f = proc.fseq();
         const int mode = (int) proc.value ("fseq_loop");
-        return mode != 0 ? std::array<int, 3> { mode, (int) proc.value ("fseq_lp_start"), (int) proc.value ("fseq_lp_end") } : std::array<int, 3> { 0, f.loopStart, f.loopEnd };
+        const int ls = (int) proc.value ("fseq_lp_start"), le = (int) proc.value ("fseq_lp_end");
+        return mode != 0 && le > ls ? std::array<int, 3> { mode, ls, le } : std::array<int, 3> { mode, f.loopStart, f.loopEnd };   // sin puntos propios: los del Fseq
     }
     void paintTracks (juce::Graphics& g)
     {

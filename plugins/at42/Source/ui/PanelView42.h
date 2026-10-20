@@ -100,7 +100,7 @@ public:
             if (c->kind == Kind::Knob)
             {
                 if (c->id == "kb_enc") { encDrag = 0.0f; encMoved = false; return; }
-                if (auto* prm = c->prm()) prm->beginChangeGesture();
+                if (auto* prm = c->prm()) { prm->beginChangeGesture(); explicitGesture = true; }
                 stepAccum = 0.0f;
             }
             else if (c->kind == Kind::Button) pressButton (*c);
@@ -164,7 +164,7 @@ public:
         if (active != nullptr && active->kind == Kind::Knob)
         {
             if (active->id == "kb_enc" && ! encMoved) menuPage = (menuPage + 1) % kPages;
-            else if (auto* prm = active->prm()) prm->endChangeGesture();
+            else if (auto* prm = active->prm()) { prm->endChangeGesture(); explicitGesture = false; }
         }
         if (active != nullptr && active->kind == Kind::Button && active->momentary) pressedMomentary = nullptr;
         active = nullptr; showBubble = false; draggingJoy = false;
@@ -189,6 +189,9 @@ public:
     }
 
     void mouseExit (const juce::MouseEvent&) override { for (auto& s : proc.orbShade) s.store (0.0f); hover = nullptr; repaint(); }
+    // La sombra de la mano sobre una fotocelda baja la luz del orbe y desafina el oscilador: al cerrar la ventana no
+    // puede quedar puesta (el drone seguía torcido y un render sonaba distinto).
+    ~PanelView42() override { for (auto& s : proc.orbShade) s.store (0.0f); }
 
     void mouseDoubleClick (const juce::MouseEvent& e) override
     {
@@ -349,7 +352,15 @@ private:
         return 0.8f;
     }
 
-    void setParam (Ctl& c, float v) { if (auto* prm = c.prm()) prm->setValueNotifyingHost (prm->convertTo0to1 (v)); }
+    // Botones, llaves, joystick, rueda y doble clic no abrían gesto: el host no los grababa en Touch/Latch.
+    void setParam (Ctl& c, float v)
+    {
+        auto* prm = c.prm();
+        if (prm == nullptr) return;
+        if (! explicitGesture) proc.gesture.touch (prm);
+        prm->setValueNotifyingHost (prm->convertTo0to1 (v));
+    }
+    bool explicitGesture = false;
 
     void pressButton (Ctl& c)
     {
@@ -685,7 +696,19 @@ private:
         const Ctl* c = active != nullptr && showBubble ? active : (bubbleTimer > 0 ? hover : nullptr);
         if (c == nullptr || c->param < 0 || c->kind != Kind::Knob) return;
         const auto title = juce::String (panelParam42 (c->param).name);
-        const auto value = formatPanel42 (c->param, c->value());
+        auto value = formatPanel42 (c->param, c->value());
+        // Afinación cromática: la burbuja muestra la nota a la que se cuantiza, como suena.
+        if (juce::String (panelParam42 (c->param).id).contains ("_tune") && proc.apvts.getRawParameterValue ("chromatic") != nullptr
+            && proc.apvts.getRawParameterValue ("chromatic")->load() > 0.5f && value.endsWith (" Hz"))
+        {
+            const float hz = value.getFloatValue();
+            if (hz > 0.0f)
+            {
+                const int midi = (int) std::lround (69.0 + 12.0 * std::log2 (hz / 440.0));
+                static const char* nm[] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+                value = juce::String (nm[((midi % 12) + 12) % 12]) + juce::String (midi / 12 - 1) + "  " + juce::String (440.0 * std::exp2 ((midi - 69) / 12.0), 1) + " Hz";
+            }
+        }
         const auto f1 = col42::font (11.0f), f2 = col42::font (13.0f);
         const float w = std::max (juce::GlyphArrangement::getStringWidth (f1, title), juce::GlyphArrangement::getStringWidth (f2, value)) + 22.0f;
         auto r = juce::Rectangle<float> (w, 40.0f).withCentre ({ c->box.getCentreX(), c->box.getY() - 24.0f }).constrainedWithin (getLocalBounds().toFloat().reduced (4.0f));

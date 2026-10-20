@@ -2,6 +2,8 @@
 
 #include <JuceHeader.h>
 #include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/LatencyReporter.h"
+#include "../../../shared/tools/PresetTracker.h"
 #include "ExtParams700.h"
 #include "Preset700.h"
 
@@ -70,12 +72,15 @@ public:
     struct PresetEntry { juce::String name, category; juce::var data; bool factory = true; juce::File file; };
     const std::vector<PresetEntry>& getPresets() const { return presets; }
     void loadPreset (int index);
-    void loadPresetData (const dh::Preset700& p);
+    void loadPresetData (const dh::Preset700& p, bool sequencerCommands = true);
     dh::Preset700 currentAsPreset (const juce::String& name, const juce::String& category) const;
     bool saveUserPreset (const juce::String& name);
     void rescanUserPresets();
     void randomizePanel();
     dh::SafeString currentPresetName { "Init" };     // lo escribe el host desde cualquier hilo
+    dh::PresetTracker tracker;                         // preset "modificado": la foto de los parámetros al cargarlo
+    dh::LatencyReporter latency { *this };
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
     static juce::File userPresetDir();
 
     // MIDI learn.
@@ -104,7 +109,8 @@ private:
     int currentBlock = 512;
     std::vector<float> outL, outR;
     float midiBend = 0.0f;
-    std::array<bool, 128> uiNote {}, midiNote {};
+    std::array<bool, 128> uiNote {}, midiNote {}, sustained {};
+    bool sustainPedal = false;
 
     juce::AbstractFifo cmdFifo { 256 };
     std::array<std::pair<int, int>, 256> cmdBuf {};

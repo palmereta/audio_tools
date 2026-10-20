@@ -37,6 +37,10 @@ public:
     void prepare (float sampleRate, int maxBlock)
     {
         fs = sampleRate;
+        // Las constantes del auto-wah, el crossover del rotativo y el compresor se afinaron por muestra a 48 kHz:
+        // se pasan a esta frecuencia para que suenen igual a 44,1, 96 o 192 kHz.
+        auto at48 = [this] (float c) { return 1.0f - std::pow (1.0f - c, 48000.0f / fs); };
+        kWahAtk = at48 (0.01f); kWahRel = at48 (0.0006f); kRotLp = at48 (0.06f); kCompAtk = at48 (0.02f); kCompRel = at48 (0.0004f);
         for (auto* m : { &mdL, &mdR }) m->prepare (fs, 0.06f);
         for (auto* m : { &rotL, &rotR }) m->prepare (fs, 0.02f);
         dlyL.prepare ((int) (fs * 2.1f)); dlyR.prepare ((int) (fs * 2.1f));
@@ -89,6 +93,7 @@ public:
 
 private:
     float fs = 48000.0f;
+    float kWahAtk = 0.01f, kWahRel = 0.0006f, kRotLp = 0.06f, kCompAtk = 0.02f, kCompRel = 0.0004f;
     ModDelay mdL, mdR, rotL, rotR;
     DelayLine dlyL, dlyR;
     PlateReverb reverb;
@@ -137,7 +142,7 @@ private:
                 {
                     const float x = 0.5f * (L[i] + R[i]);
                     const float ax = std::fabs (x);
-                    env += (ax - env) * (ax > env ? 0.01f : 0.0006f);
+                    env += (ax - env) * (ax > env ? kWahAtk : kWahRel);
                     const float fc = 300.0f * fastExp2 (clampf (env * 6.0f * (0.3f + a), 0.0f, 4.5f));
                     const float f = 2.0f * std::sin (kPi * std::min (fc, 0.2f * fs) / fs), q = 0.25f;
                     const float hp = x - wahA - q * wahB; wahB += f * hp; wahA += f * wahB;
@@ -172,7 +177,7 @@ private:
                 {
                     const float ph = lfoStep (rotPhase, speed);
                     const float x = 0.5f * (L[i] + R[i]);
-                    rotLow += (x - rotLow) * 0.06f;
+                    rotLow += (x - rotLow) * kRotLp;
                     const float hi = x - rotLow;
                     rotL.d.push (hi); rotR.d.push (hi);
                     const float s = Tables::get().sin2pi (ph), c = Tables::get().sin2pi (ph + 0.25f);
@@ -199,7 +204,7 @@ private:
                 for (int i = 0; i < n; ++i)
                 {
                     const float lv = std::max (std::fabs (L[i]), std::fabs (R[i]));
-                    compEnv += (lv - compEnv) * (lv > compEnv ? 0.02f : 0.0004f);
+                    compEnv += (lv - compEnv) * (lv > compEnv ? kCompAtk : kCompRel);
                     const float g = compEnv > thr ? std::pow (compEnv / thr, 1.0f / ratio - 1.0f) : 1.0f;
                     const float makeup = 1.0f + a * 1.5f;
                     L[i] += (L[i] * g * makeup - L[i]) * mix; R[i] += (R[i] * g * makeup - R[i]) * mix;

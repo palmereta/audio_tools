@@ -329,7 +329,7 @@ private:
         }
         else if (id == "up") { nextUp = ! nextUp; nextDown = false; }
         else if (id == "down") { nextDown = ! nextDown; nextUp = false; }
-        else if (id == "acc" || id == "slide")
+        else if (mode == 1 && (id == "acc" || id == "slide"))          // acento y slide sólo al escribir alturas
         {
             const int c = (cursor + 15) % 16; const bool acc = id == "acc";
             ed.editPattern ([c, acc] (Pattern& pt) { auto& s = pt.pitch[(size_t) c]; if (acc) s.accent = ! s.accent; else s.slide = ! s.slide; });
@@ -464,6 +464,7 @@ public:
     void mouseDown (const juce::MouseEvent& e) override
     {
         const float lab = 60, cw = ((float) getWidth() - lab) / 16.0f;
+        if (e.position.x < lab) return;                                  // las etiquetas de los renglones no editan
         const int i = (int) ((e.position.x - lab) / cw);
         if (i < 0 || i > 15) return;
         const float y = e.position.y;
@@ -540,8 +541,8 @@ At303Editor::At303Editor (At303Processor& p) : AudioProcessorEditor (&p), proc (
     stockBtn.setTooltip ("Stock 303: every extension back to the original circuit.");
 
     proc.onPatternsChanged = [this] { grid->repaint(); inst->repaint(); content.repaint (panelR.withWidth (330)); };
-    proc.onPresetChanged = [this] { presetBtn.setButtonText (proc.currentPresetName); grid->repaint(); content.repaint(); };
-    presetBtn.setButtonText (proc.currentPresetName);
+    proc.onPresetChanged = [this] { presetBtn.setButtonText (proc.presetDisplayName()); grid->repaint(); content.repaint(); };
+    presetBtn.setButtonText (proc.presetDisplayName());
     buildDetail();
     setResizable (true, true);
     setResizeLimits (baseW / 2, baseH / 2, (int) (baseW * 1.4), (int) (baseH * 1.4));
@@ -683,6 +684,7 @@ void At303Editor::showManual (bool on)
 
 void At303Editor::timerCallback()
 {
+    if (const auto name = proc.presetDisplayName(); name != presetBtn.getButtonText()) presetBtn.setButtonText (name);
     const int pi = proc.patternIndex();
     for (int i = 0; i < 4; ++i) groupBtns[i]->setToggleState (pi / 16 == i, juce::dontSendNotification);
     for (int i = 0; i < 2; ++i) abBtns[i]->setToggleState ((pi / 8) % 2 == i, juce::dontSendNotification);

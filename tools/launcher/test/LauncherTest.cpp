@@ -214,6 +214,45 @@ int main()
         check (d2.version == "1.0.10" && statusOf (m2.products[0], d2) == Status::upToDate, "after the update: up to date");
     }
 
+    // ── a copy the launcher did not install, in the other VST3 folder: it counts for the version (the DAW could load
+    //    it) and the update removes it
+    {
+        const auto stray = paths.vst3System.getChildFile ("Fake.vst3");
+        paths.vst3System.createDirectory();
+        paths.vst3User.getChildFile ("Fake.vst3").copyDirectoryTo (stray);
+        // A manual 1.0.8 in the system folder.
+        auto plist = stray.getChildFile ("Contents/Info.plist");
+        auto mi = stray.getChildFile ("Contents/Resources/moduleinfo.json");
+        if (plist.existsAsFile()) plist.replaceWithText (plist.loadFileAsString().replace ("1.0.10", "1.0.8"));
+        if (mi.existsAsFile()) mi.replaceWithText (mi.loadFileAsString().replace ("1.0.10", "1.0.8"));
+        const auto d = detect (m2.products[0], db, paths);
+        check (d.strays.contains (stray.getFullPathName()) && d.version == "1.0.8" && statusOf (m2.products[0], d) == Status::updateAvailable,
+               "a manual 1.0.8 in the other VST3 folder is found: update available (" + d.version + ")");
+        const auto r = downloadAndInstall (m2.products[0], m2, paths, settings, db, progress, notes);
+        const auto d2 = detect (m2.products[0], db, paths);
+        check (r.wasOk() && ! stray.exists() && d2.strays.isEmpty() && statusOf (m2.products[0], d2) == Status::upToDate,
+               "the update removes the stray copy");
+    }
+
+    // ── a failed replacement leaves the installed copy as it was (two phases, roll back)
+    {
+        const auto dest = paths.vst3User.getChildFile ("Fake.vst3");
+        const auto before = bundleVersion (dest);
+        // The staging item cannot be moved where it goes: a plain file with the name of the AU destination's parent.
+        const auto auDir = paths.au;
+       #if ! JUCE_WINDOWS
+        auDir.deleteRecursively(); auDir.getParentDirectory().createDirectory(); auDir.replaceWithText ("not a folder");
+       #endif
+        const auto r = downloadAndInstall (m2.products[0], m2, paths, settings, db, progress, notes);
+       #if ! JUCE_WINDOWS
+        check (r.failed() && bundleVersion (dest) == before && dest.getChildFile ("Contents").isDirectory(),
+               "a failure in the middle leaves the VST3 that was installed (" + r.getErrorMessage() + ")");
+        auDir.deleteFile(); auDir.createDirectory();
+       #else
+        juce::ignoreUnused (r, before);
+       #endif
+    }
+
     // ── formats from the settings
     {
         const auto zipOnly = makeProductZip (tmp, "Solo", "2.0.0");

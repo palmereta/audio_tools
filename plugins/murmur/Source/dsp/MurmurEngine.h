@@ -80,10 +80,12 @@ public:
 
     void prepare (double sampleRate, int maxBlock)
     {
+        // La memoria (16 s) se conserva si la frecuencia no cambió: muchos hosts vuelven a llamar a prepareToPlay
+        // (otro tamaño de bloque, un render) y una textura congelada se perdía.
+        const bool keep = std::abs ((float) sampleRate - sr) < 0.5f && (int) recL.size() == (int) (kMaxBufferSec * (float) sampleRate) + 8;
         sr = (float) sampleRate;
         bufN = (int) (kMaxBufferSec * sr) + 8;
-        recL.assign ((size_t) bufN, 0.0f); recR.assign ((size_t) bufN, 0.0f);
-        w = 0; written = 0;
+        if (! keep) { recL.assign ((size_t) bufN, 0.0f); recR.assign ((size_t) bufN, 0.0f); w = 0; written = 0; }
         for (auto& g : grains) g.active = false;
         wetL.assign ((size_t) std::max (kSub, maxBlock) + kSub, 0.0f); wetR = wetL; dryL = wetL; dryR = wetL;
         duckAtt = 1.0f - std::exp (-1.0f / (0.005f * sr)); duckRel = 1.0f - std::exp (-1.0f / (0.3f * sr));
@@ -204,6 +206,9 @@ public:
 
         // Delay y reverb sobre los granos.
         const double dSec = p.delaySync > 0 ? divisionBeats (p.delaySync) * 60.0 / std::max (1.0, host.bpm) : (double) p.delaySec;
+        // Con la mezcla en 0 el efecto no corre; al volver a subirla arranca limpio (si no, sonaba la cola vieja).
+        if (p.delayMix <= 0.001f) dlyIdle = true; else if (dlyIdle) { dly.reset(); dlyIdle = false; }
+        if (p.revMix <= 0.001f) revIdle = true; else if (revIdle) { rev.reset(); revIdle = false; }
         if (p.delayMix > 0.001f) dly.process (wetL.data(), wetR.data(), n, (float) std::min (4.0, dSec), clampf (p.delayFb, 0.0f, 0.95f), 0.5f, p.delayMix);
         if (p.revMix > 0.001f) rev.process (wetL.data(), wetR.data(), n, p.revSize, p.revDamp, p.revMix);
 
@@ -241,6 +246,35 @@ public:
     float bufferFraction() const { return clampf (p.bufferSec, 0.5f, kMaxBufferSec) / kMaxBufferSec; }
     int heldNotes() const { return heldCount; }
     bool frozenNow() const { return p.freeze || freezeHold; }      // también con el pedal
+
+    // La memoria en orden (de la muestra más vieja a la más nueva), para guardarla con la sesión.
+    int memorySamples() const { return (int) std::min<long long> (written, (long long) bufN); }
+    void copyMemory (float* l, float* r, int count) const
+    {
+        int s = w - count; while (s < 0) s += bufN;
+        for (int i = 0; i < count; ++i) { l[i] = recL[(size_t) s]; r[i] = recR[(size_t) s]; if (++s >= bufN) s = 0; }
+    }
+    // Carga una memoria guardada (16 bits intercalados a la frecuencia `rate`), remuestreada a la actual.
+    void setMemory (const int16_t* lr, int count, double rate)
+    {
+        const double step = rate / (double) sr;
+        const int n = std::min (bufN, (int) ((double) count / step));
+        for (int i = 0; i < n; ++i)
+        {
+            const double x = i * step; const int a = std::min (count - 1, (int) x), b = std::min (count - 1, a + 1); const float f = (float) (x - a);
+            recL[(size_t) i] = ((float) lr[2 * a] + f * (float) (lr[2 * b] - lr[2 * a])) / 32767.0f;
+            recR[(size_t) i] = ((float) lr[2 * a + 1] + f * (float) (lr[2 * b + 1] - lr[2 * a + 1])) / 32767.0f;
+        }
+        for (int i = n; i < bufN; ++i) { recL[(size_t) i] = 0.0f; recR[(size_t) i] = 0.0f; }
+        w = n % bufN; written = n;
+        const int bin = std::max (1, bufN / kPeakBins);
+        for (int k = 0; k < kPeakBins; ++k)
+        {
+            float pk = 0.0f;
+            for (int i = k * bin; i < std::min (bufN, (k + 1) * bin); ++i) pk = std::max (pk, std::max (std::fabs (recL[(size_t) i]), std::fabs (recR[(size_t) i])));
+            peaks[(size_t) k].store (pk, std::memory_order_relaxed);
+        }
+    }
 
 private:
     struct Grain
@@ -439,7 +473,7 @@ private:
     struct Held { int note; float vel; };
     std::array<Held, 16> held {};
     int heldCount = 0;
-    bool freezeHold = false;
+    bool freezeHold = false, dlyIdle = true, revIdle = true;
     double nextGrain = 0.0, scanSec = 0.0, freePpq = 0.0;
     long long lastDiv = -1;
     float mixNow = 0.5f, duckEnv = 0.0f, duckAtt = 0.01f, duckRel = 0.0005f, peakAcc = 0.0f;

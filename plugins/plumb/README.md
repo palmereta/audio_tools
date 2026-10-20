@@ -2,7 +2,7 @@
 
 Real-time pitch correction for voice and monophonic instruments, built for latency first: an original design, not a
 recreation of any product. VST3, Audio Unit (macOS, a music effect with MIDI input), standalone app, and
-`plumbrender`, a command-line renderer. Version 1.0.0.
+`plumbrender`, a command-line renderer. Version 1.0.1.
 
 The research behind it (what the note editors and the real-time correctors on the market do and what users ask of
 them, pitch detection at low latency, pitch shifting with near-zero added delay, the correction logic, the visual
@@ -33,8 +33,9 @@ Everything is in `Source/dsp/`, without JUCE, per sample:
    1.0001 noise floor, 10 Hz bandwidth expansion and a 60 dB cap on the prediction gain. Analysis and synthesis are
    normalised lattices with the reflection coefficients interpolated sample by sample, so with no shift the output
    is the delayed input, exactly. Throat and Formant amount scale the angles of the model's poles (roots by Aberth,
-   warm-started from the previous snapshot) and rebuild the filter; a level guard keeps the output under four times
-   the aligned dry envelope.
+   warm-started from the previous snapshot) and rebuild the filter, with a gain that matches the model's energy on the
+   harmonics of the note being sung (weighted by the de-emphasis), so moving the formants does not change the level;
+   a level guard keeps the output under four times the aligned dry envelope.
 4. **Shifter** (`Engine.h`). The excitation (the residual) is read by a head that moves at 2^(Δ/12) samples per
    sample. When the content delay nears its minimum the head jumps back one period (a cycle repeated); when it
    passes the minimum plus a period it jumps forward (a cycle dropped). Each jump is tuned ±4 samples by

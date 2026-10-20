@@ -69,8 +69,10 @@ public:
 
     // ── voz y Fseq (hilo de mensajes) ──
     const dh::fs::VoiceData& voice() const { return editVoice; }
-    template <typename Fn> void editVoiceWith (Fn&& fn) { fn (editVoice); voiceSlot.publish (editVoice); voiceDirty = true; notifyUi (onVoiceChanged); }
-    void setVoice (const dh::fs::VoiceData& v) { editVoice = v; voiceSlot.publish (editVoice); notifyUi (onVoiceChanged); }
+    // La voz y el Fseq en edición los escribe la interfaz y los lee getStateInformation, que el host puede llamar
+    // desde otro hilo (autoguardado): todo bajo editLock (y así hay un solo publicador por vez en las ranuras).
+    template <typename Fn> void editVoiceWith (Fn&& fn) { { const juce::ScopedLock l (editLock); fn (editVoice); voiceSlot.publish (editVoice); } voiceDirty = true; notifyUi (onVoiceChanged); }
+    void setVoice (const dh::fs::VoiceData& v) { { const juce::ScopedLock l (editLock); editVoice = v; voiceSlot.publish (editVoice); } notifyUi (onVoiceChanged); }
     const dh::fs::FseqData& fseq() const { return editFseq; }
     juce::String fseqRef() const { return currentFseqRef; }
     void setFseq (const dh::fs::FseqData& f, const juce::String& ref = {});
@@ -131,6 +133,7 @@ private:
     std::vector<std::atomic<float>*> raw;
     TripleSlot<dh::fs::VoiceData> voiceSlot;
     TripleSlot<dh::fs::FseqData> fseqSlot;
+    juce::CriticalSection editLock;
     dh::fs::VoiceData editVoice;
     dh::fs::FseqData editFseq;
     juce::String currentFseqRef;

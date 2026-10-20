@@ -395,7 +395,8 @@ private:
             proc.editSequence ([&] (Sequence& s) {
                 if (step >= s.length) setLength (s, step + 1);
                 auto& st = s.steps[(size_t) step];
-                if (mods.isShiftDown() && first) { st.accent = ! st.accent; return; }
+                if (mods.isShiftDown() && first) { st.accent = ! st.accent; paintMode = 2; return; }   // Shift: sólo el acento
+                if (! first && paintMode == 2) return;                                                 // (el arrastre no pinta notas)
                 if (first) paintMode = (! st.rest && st.note == note) ? 0 : 1;     // 0 = borrar, 1 = pintar
                 if (paintMode == 0) { if (st.note == note) st.rest = true; }
                 else { st.note = (int8_t) note; st.rest = false; }
@@ -426,6 +427,9 @@ private:
     void audition (int note)
     {
         if (proc.panelValue (P::seq_play) > 0.5f) return;
+        // Con LOAD (grabando pasos) o KEY TRANSPOSE armado, la nota de prueba entraría al motor como una tecla: agregaría
+        // un paso o cambiaría la transposición. Ahí no se escucha.
+        if (proc.loadingLed.load() || proc.keyTrArmed.load()) return;
         proc.keyboardState.noteOn (1, note, 0.7f);
         juce::Timer::callAfterDelay (160, [safe = juce::Component::SafePointer<SeqView101> (this), note] {
             if (safe != nullptr) safe->proc.keyboardState.noteOff (1, note, 0.0f);

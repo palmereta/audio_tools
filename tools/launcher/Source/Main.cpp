@@ -49,12 +49,17 @@ class LauncherApp : public juce::JUCEApplication
 public:
     const juce::String getApplicationName() override       { return "Audio Tools Launcher"; }
     const juce::String getApplicationVersion() override    { return LAUNCHER_VERSION; }
-    bool moreThanOneInstanceAllowed() override             { return false; }
+    // El launcher relanzado como administrador puede arrancar mientras el anterior todavía se está cerrando.
+    bool moreThanOneInstanceAllowed() override             { return getCommandLineParameters().contains ("--install"); }
 
-    void initialise (const juce::String&) override
+    void initialise (const juce::String& commandLine) override
     {
         juce::LookAndFeel::setDefaultLookAndFeel (&laf);
         window = std::make_unique<MainWindow>();
+        // --install id,id: lo que estaba en cola cuando se pidió relanzar como administrador.
+        if (const auto args = juce::StringArray::fromTokens (commandLine, " ", "\""); args.contains ("--install"))
+            if (auto* mc = dynamic_cast<MainComponent*> (window->getContentComponent()))
+                mc->pendingInstalls = juce::StringArray::fromTokens (args[args.indexOf ("--install") + 1], ",", "");
 
         // Screenshots without capturing the screen: LAUNCHER_SNAPSHOT=/path.png, LAUNCHER_WAIT=seconds,
         // LAUNCHER_SETTINGS=1 (with the settings open), LAUNCHER_SIZE=WxH.

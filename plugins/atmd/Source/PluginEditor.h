@@ -67,7 +67,7 @@ private:
     juce::String help;
     juce::Rectangle<int> statusR;
     int page = 0;
-    std::set<int> qwertyDown;
+    std::map<int, int> qwertyDown;          // tecla → la nota que disparó (para soltar sólo esa)
     int octave = 4;                 // octava del teclado de la computadora (Z / X)
 
     void showPage (int p);

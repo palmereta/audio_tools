@@ -1,6 +1,6 @@
 # Audio Tools Launcher: installs and updates the plugins from web/downloads/manifest.json.
 # scripts/build-web.py reads LAUNCHER_VERSION from here for the manifest and the website.
-set(LAUNCHER_VERSION 1.0.1)
+set(LAUNCHER_VERSION 1.0.2)
 
 juce_add_gui_app(AudioToolsLauncher
     VERSION ${LAUNCHER_VERSION}

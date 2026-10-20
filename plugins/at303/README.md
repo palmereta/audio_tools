@@ -2,7 +2,7 @@
 
 A bass line synthesizer with its own step sequencer, modelled on the published circuit of a classic 1981 bass
 line synthesizer. VST3 instrument, Audio Unit (macOS), standalone app, and `at303render`, a command-line renderer.
-Version 1.0.0.
+Version 1.0.2.
 
 The research behind it (the circuit, block by block, from the service notes and the open reproductions; the
 sequencer's memory and write modes; what users ask of the software versions; the test plan) is in

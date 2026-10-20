@@ -11,6 +11,7 @@ SpaceProcessor::SpaceProcessor()
     for (auto& a : view.lineMs) a.store (0.0f);
     for (auto& a : view.lineEnergy) a.store (0.0f);
     loadFactory();
+    tracker.capture (*this);
 }
 
 bool SpaceProcessor::isBusesLayoutSupported (const BusesLayout& l) const
@@ -71,7 +72,7 @@ EngineParams SpaceProcessor::buildParams (double bpm) const
     auto withEnv = [&] (float x, float lo, float hi, int target) { return target == envT ? juce::jlimit (lo, hi, x + env * (hi - lo)) : x; };
 
     p.net.space = withEnv (v ("space") / 100.0f, 0.0f, 1.0f, 0);
-    p.net.timeMs = juce::jlimit (1.0f, 4000.0f, value ("sync") > 0.5f ? beatsMs ((int) value ("division")) : v ("time_ms"));
+    p.net.timeMs = juce::jlimit (1.0f, 8000.0f, value ("sync") > 0.5f ? beatsMs ((int) value ("division")) : v ("time_ms"));
     p.net.size = withEnv (v ("size") / 100.0f, 0.25f, 4.0f, 1);
     // Length → T60 (de 0.2 s a 60 s; al 100 % infinito). Tone → caída de los agudos; Bass → la de los graves.
     const float L = v ("length") / 100.0f;
@@ -118,7 +119,7 @@ EngineParams SpaceProcessor::buildParams (double bpm) const
             for (int k = 0; k < p.nNotes; ++k) p.notes[k] = std::round (value ("res_root")) + (float) chordSteps[c][k];
         }
     }
-    if (on ("stutter")) { p.stutter = v ("stutter") / 100.0f; p.stutterMs = std::min (500.0f, beatsMs ((int) value ("stutter_div"))); p.stutterRepeats = 4; }
+    if (on ("stutter")) { p.stutter = v ("stutter") / 100.0f; p.stutterMs = std::min (4000.0f, beatsMs ((int) value ("stutter_div"))); p.stutterRepeats = 4; }
     if (on ("breathe")) { p.impossible = (int) value ("breathe_mode") + 1; p.impDepth = v ("breathe_depth") / 100.0f; p.impRate = v ("breathe_rate"); }
     if (on ("duck")) p.duck = v ("duck") / 100.0f;
     if (on ("gate")) { p.gate = v ("gate") / 100.0f; p.gateHoldMs = v ("gate_hold"); }
@@ -154,6 +155,9 @@ void SpaceProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
         const auto msg = m.getMessage();
         if (msg.isNoteOn())
         {
+            bool already = false;                    // la misma nota dos veces: una sola entrada (si no, quedaba sonando)
+            for (int k = 0; k < nHeld; ++k) already = already || heldNotes[(size_t) k] == msg.getNoteNumber();
+            if (already) continue;
             if (nHeld == 8) { std::move (heldNotes.begin() + 1, heldNotes.end(), heldNotes.begin()); --nHeld; }
             heldNotes[(size_t) nHeld++] = msg.getNoteNumber();
         }
@@ -177,7 +181,13 @@ void SpaceProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     float pk = 0.0f;
     for (int c = 0; c < buffer.getNumChannels(); ++c) pk = std::max (pk, buffer.getMagnitude (c, 0, n));
     const float target = juce::jlimit (0.0f, 1.0f, (juce::Decibels::gainToDecibels (pk, -60.0f) + 48.0f) / 42.0f);
-    envFollow += (target - envFollow) * (target > envFollow ? 0.5f : 0.08f);
+    // Seguidor por bloque con constantes de tiempo (15 ms de ataque, 130 ms de caída): igual con bloques de 64 o de
+    // 1024 muestras (antes los coeficientes eran por bloque y una exportación sonaba distinta que la reproducción).
+    {
+        const float secs = (float) n / (float) sr;
+        const float a = 1.0f - std::exp (-secs / (target > envFollow ? 0.015f : 0.13f));
+        envFollow += (target - envFollow) * a;
+    }
     view.inLevel.store (pk);
 
     const auto p = buildParams (bpm);
@@ -259,13 +269,16 @@ void SpaceProcessor::loadPreset (int index)
         for (auto& kv : b->getProperties()) sceneB[kv.name.toString()] = (float) kv.value;
     }
     currentProgram = index; currentPresetName = pr.name;
-    if (onPresetChanged) juce::MessageManager::callAsync ([this] { if (onPresetChanged) onPresetChanged(); });
+    tracker.capture (*this);
+    triggerAsyncUpdate();
 }
 
 void SpaceProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
-    state.setProperty ("preset", currentPresetName, nullptr);
+    state.setProperty ("preset", currentPresetName.get(), nullptr);
+    state.setProperty ("program", currentProgram, nullptr);
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
     juce::ValueTree b ("SCENE_B");
     {
         const juce::ScopedLock sl (sceneLock);
@@ -290,6 +303,10 @@ void SpaceProcessor::setStateInformation (const void* data, int sizeInBytes)
     for (auto* prm : getParameters())
         if (auto* pb = dynamic_cast<juce::AudioParameterBool*> (prm)) pb->setValueNotifyingHost (pb->get() ? 1.0f : 0.0f);
     currentPresetName = state.getProperty ("preset", "Init").toString();
+    currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
+    if (state.hasProperty ("presetSnapshot")) tracker.fromString (*this, state.getProperty ("presetSnapshot").toString());
+    else tracker.capture (*this);
+    triggerAsyncUpdate();
     if (b.isValid())
     {
         const juce::ScopedLock sl (sceneLock);

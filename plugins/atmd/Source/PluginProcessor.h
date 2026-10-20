@@ -3,6 +3,8 @@
 #include <JuceHeader.h>
 #include "ParamsMd.h"
 #include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/LatencyReporter.h"
+#include "../../../shared/tools/PresetTracker.h"
 
 class AtmdProcessor : public juce::AudioProcessor
 {
@@ -50,6 +52,9 @@ public:
     bool saveUserPreset (const juce::String& name);
     void rescanUserPresets();
     dh::SafeString currentPresetName { "Init" };
+    dh::PresetTracker tracker;
+    dh::LatencyReporter latency { *this };
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
     static juce::File userPresetDir();
     std::function<void()> onPresetChanged;
 

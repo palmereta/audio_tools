@@ -100,7 +100,8 @@ public:
 
             // Pre-delay.
             float inL = dryL, inR = dryR;
-            if (pd > 0) { pre[0].push (dryL); pre[1].push (dryR); inL = pre[0].at (pd); inR = pre[1].at (pd); }
+            pre[0].push (dryL); pre[1].push (dryR);       // siempre: al subir el pre-delay desde 0 no suena audio viejo
+            if (pd > 0) { inL = pre[0].at (pd); inR = pre[1].at (pd); }
             // Inyección en el lazo: shimmer (transpone lo que sale) y granos.
             float injL = 0.0f, injR = 0.0f;
             if (P.shimmer > 0.0f) { const float s = shim.process (0.5f * (lastWetL + lastWetR)) * P.shimmer * 0.7f; injL += s; injR += s; }

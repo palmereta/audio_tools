@@ -145,7 +145,10 @@ inline void applyHost (Get&& get, PartParams& pp, FxParams& fx, float& outputGai
     pp.fseqPitchMode = i ("fseq_pitch");
     const int loop = i ("fseq_loop");
     pp.fseqLoopMode = loop == 2 ? 1 : 0;
-    pp.fseqLoopStart = i ("fseq_lp_start"); pp.fseqLoopEnd = loop == 0 ? 0 : std::max (1, i ("fseq_lp_end"));
+    // Con One-way o Round elegidos pero sin puntos propios (0/0, los de fábrica) se usan los del Fseq: antes el
+    // lazo quedaba en los cuadros 0-1 (un aleteo de 16 ms).
+    pp.fseqLoopOverride = loop != 0;
+    pp.fseqLoopStart = i ("fseq_lp_start"); pp.fseqLoopEnd = loop == 0 ? 0 : i ("fseq_lp_end");
     pp.fseqStart = i ("fseq_start"); pp.fseqSpeedVel = i ("fseq_vel_speed"); pp.fseqLevelVel = i ("fseq_vel_level"); pp.fseqDelay = i ("fseq_delay");
     pp.authenticPoly = i ("authentic") != 0;
     fx.insType = i ("ins_type"); fx.insAmount = get ("ins_amount"); fx.insMix = get ("ins_mix");

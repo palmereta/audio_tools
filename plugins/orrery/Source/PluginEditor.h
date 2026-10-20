@@ -5,8 +5,10 @@
 #include "ManualView.h"
 #include "ui/Pages.h"
 
-class OrreryEditor : public juce::AudioProcessorEditor, public juce::DragAndDropContainer, private juce::Timer
+class OrreryEditor : public juce::AudioProcessorEditor, public juce::DragAndDropContainer, public dh::HelpSink, private juce::Timer
 {
+public:
+    void routeHelp (const juce::String& s) override { help = s; content.repaint (statusR); }
 public:
     explicit OrreryEditor (OrreryProcessor&);
     ~OrreryEditor() override;

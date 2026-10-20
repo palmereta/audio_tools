@@ -142,6 +142,7 @@ public:
         delay = look - 1 + kDetectorDelay;
         delayL.assign ((size_t) delay, 0.0); delayR.assign ((size_t) delay, 0.0);
         box1.assign ((size_t) half, 1.0); box2.assign ((size_t) half, 1.0);
+        minq.reserve ((size_t) look + 4);
         reset();
     }
     void reset()
@@ -209,7 +210,20 @@ private:
     long long n = 0;
     double ceiling = 0.89, kFast = 0.001, kSlow = 0.0001, kSustUp = 0.0001, rel = 1.0, sum1 = 0, sum2 = 0, lastGr = 0, grSust = 0.0;
     std::vector<double> delayL, delayR, box1, box2;
-    std::deque<std::pair<long long, double>> minq;
+    // Mínimo deslizante (cola monótona) en un anillo de capacidad fija: std::deque reservaba y liberaba bloques en el
+    // hilo de audio. Nunca tiene más de look + 2 elementos.
+    struct MinQueue
+    {
+        std::vector<std::pair<long long, double>> b; size_t head = 0, count = 0;
+        void reserve (size_t n) { b.assign (std::max<size_t> (n, 4), {}); head = count = 0; }
+        void clear() { head = count = 0; }
+        bool empty() const { return count == 0; }
+        const std::pair<long long, double>& front() const { return b[head]; }
+        const std::pair<long long, double>& back() const { return b[(head + count - 1) % b.size()]; }
+        void pop_front() { head = (head + 1) % b.size(); --count; }
+        void pop_back() { --count; }
+        void push_back (std::pair<long long, double> v) { if (count == b.size()) pop_front(); b[(head + count) % b.size()] = v; ++count; }
+    } minq;
     PeakDetector8 detL, detR;
     Biquad lfL, lfR;
     double grMax = 0.0, grSum = 0.0; long long grN = 0;

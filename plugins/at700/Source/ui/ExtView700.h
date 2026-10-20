@@ -91,7 +91,9 @@ public:
     {
         for (auto& c : items)
         {
-            if (! c.r.expanded (8.0f, 20.0f).contains (e.position)) continue;
+            // Las listas sólo responden sobre sus renglones: con el margen de 20 px, un clic en el título o en la
+            // ayuda de abajo elegía la primera o la última opción.
+            if (! c.r.expanded (8.0f, c.list ? 0.0f : 20.0f).contains (e.position)) continue;
             if (e.mods.isPopupMenu())
             {
                 juce::PopupMenu m; const auto id = c.id; const int cc = proc.ccForParam (id);

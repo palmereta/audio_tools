@@ -305,8 +305,10 @@ void PanelView::timerCallback()
     // cada parpadeo de un LED costaba ~20 % de un núcleo con la ventana abierta.
     juce::RectangleList<int> dirty;
 
-    for (auto& k : knobs)
+    const int bubbleKnob = dragKnob >= 0 ? dragKnob : hoverKnob;
+    for (size_t i = 0; i < knobs.size(); ++i)
     {
+        auto& k = knobs[i];
         const float v = knobValue (k);
         if (v != k.shown)
         {
@@ -314,6 +316,9 @@ void PanelView::timerCallback()
             const auto& sheet = k.big ? A.knobBig : A.knobSmall;
             const float s = (float) sheet.size * 0.5f;
             dirty.add (juce::Rectangle<float> (k.base.x - sheet.anchorX * 0.5f, k.base.y - sheet.anchorY * 0.5f, s, s).expanded (4.0f).toNearestInt());
+            // El globo con el valor está encima de la perilla (o debajo, cerca del borde): también se redibuja, si no
+            // el número quedaba congelado y cortado mientras se arrastra o automatiza.
+            if ((int) i == bubbleKnob) dirty.add (juce::Rectangle<float> (k.base.x - 140.0f, k.base.y - k.radius * 2.0f - 56.0f, 280.0f, k.radius * 4.0f + 120.0f).toNearestInt());
         }
     }
     const float ledVals[4] = { proc.ledMg.load() ? 1.0f : 0.0f, juce::jlimit (0.0f, 1.0f, proc.ledEg.load()),
@@ -411,8 +416,9 @@ void PanelView::mouseDown (const juce::MouseEvent& e)
         commitCables (cs);
         return;
     }
-    // Si hay un cable enchufado, se levanta su extremo (el último que se enchufó).
-    for (int i = (int) cs.size() - 1; i >= 0; --i)
+    // Si hay un cable enchufado, se levanta su extremo (el último que se enchufó). Con Shift, en cambio, sale un
+    // cable más (una salida puede alimentar varias entradas, como en el AT42).
+    for (int i = (int) cs.size() - 1; i >= 0 && ! e.mods.isShiftDown(); --i)
     {
         auto c = cs[(size_t) i];
         if (c.src != j && c.dst != j) continue;
@@ -432,7 +438,8 @@ void PanelView::mouseDown (const juce::MouseEvent& e)
         commitCables (cs);
         return;
     }
-    // Jack libre: sale un cable nuevo.
+    // Jack libre: sale un cable nuevo (los anillos de los jacks donde puede ir aparecen todos de una vez).
+    repaint();
     drag.active = true;
     drag.fixedJack = j;
     drag.color = nextColor();

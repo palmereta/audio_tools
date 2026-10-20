@@ -16,6 +16,7 @@ AT700Processor::AT700Processor()
     loadFactoryPresets();
     rescanUserPresets();
     if (! presets.empty()) loadPreset (0);
+    { juce::StringArray g; for (auto& e : extParams700()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout AT700Processor::createLayout()
@@ -69,6 +70,7 @@ void AT700Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
     currentSr = sampleRate;
     currentBlock = std::max (64, samplesPerBlock);
     engine.prepare (sampleRate, currentBlock, kOversampling700[juce::jlimit (0, 2, (int) apvts.getRawParameterValue ("quality")->load())]);
+    latency.setNow ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0));      // el retardo de los filtros del sobremuestreo, para que el host lo compense
     for (int i = 0; i < kNumP700; ++i) smoothed[(size_t) i] = panelRaw[(size_t) i]->load();
     outL.assign ((size_t) currentBlock + 64, 0.0f);
     outR.assign ((size_t) currentBlock + 64, 0.0f);
@@ -77,8 +79,13 @@ void AT700Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
 
 void AT700Processor::handleMidi (const juce::MidiMessage& m)
 {
-    if (m.isNoteOn()) { const int n = m.getNoteNumber(); midiNote[(size_t) n] = true; engine.kb.noteOn (n, m.getFloatVelocity()); }
-    else if (m.isNoteOff()) { const int n = m.getNoteNumber(); midiNote[(size_t) n] = false; if (! uiNote[(size_t) n]) engine.kb.noteOff (n); }
+    if (m.isNoteOn()) { const int n = m.getNoteNumber(); midiNote[(size_t) n] = true; sustained[(size_t) n] = false; engine.kb.noteOn (n, m.getFloatVelocity()); }
+    else if (m.isNoteOff())
+    {
+        const int n = m.getNoteNumber(); midiNote[(size_t) n] = false;
+        if (sustainPedal) sustained[(size_t) n] = true;                   // el pedal la sostiene hasta soltarlo
+        else if (! uiNote[(size_t) n]) engine.kb.noteOff (n);
+    }
     else if (m.isPitchWheel())
     {
         midiBend = (float) (m.getPitchWheelValue() - 8192) / 8192.0f;     // si MIDI Bend está apagado no actúa (ver processBlock)
@@ -88,7 +95,15 @@ void AT700Processor::handleMidi (const juce::MidiMessage& m)
     else if (m.isController())
     {
         const int cc = m.getControllerNumber(), val = m.getControllerValue();
-        if (cc == 120 || cc == 123) { engine.kb.allOff(); midiNote.fill (false); return; }     // antes que un CC aprendido
+        if (cc == 120 || cc == 123) { engine.kb.allOff(); midiNote.fill (false); sustained.fill (false); return; }     // antes que un CC aprendido
+        if (cc == 64)                                                      // pedal de sustain
+        {
+            sustainPedal = val >= 64;
+            if (! sustainPedal)
+                for (int n = 0; n < 128; ++n)
+                    if (sustained[(size_t) n]) { sustained[(size_t) n] = false; if (! midiNote[(size_t) n] && ! uiNote[(size_t) n]) engine.kb.noteOff (n); }
+            return;
+        }
         if (cc == 121) { midiBend = 0.0f; engine.kb.modWheel = 0.0f; engine.kb.aftertouch = 0.0f; return; }
         // El aprendizaje no toma el pedal ni los mensajes de modo de canal (los hosts los mandan al parar).
         if (learning.load() && cc != 64 && cc < 120) { pendingLearnCc.store (cc); learning.store (false); return; }
@@ -100,7 +115,7 @@ void AT700Processor::handleMidi (const juce::MidiMessage& m)
         }
         if (cc == 1) engine.kb.modWheel = (float) val / 127.0f;
     }
-    else if (m.isAllNotesOff() || m.isAllSoundOff()) { engine.kb.allOff(); midiNote.fill (false); }
+    else if (m.isAllNotesOff() || m.isAllSoundOff()) { engine.kb.allOff(); midiNote.fill (false); sustained.fill (false); }
 }
 
 void AT700Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
@@ -111,7 +126,7 @@ void AT700Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     if (n <= 0) return;
     wasBypassed = false;
     const int wantOs = kOversampling700[juce::jlimit (0, 2, (int) apvts.getRawParameterValue ("quality")->load())];
-    if (wantOs != engine.oversampling()) engine.prepare (currentSr, currentBlock, wantOs);
+    { if (wantOs != engine.oversampling()) engine.prepare (currentSr, currentBlock, wantOs); latency.request ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0)); }
     if ((int) outL.size() < n) { outL.resize ((size_t) n); outR.resize ((size_t) n); }
     if (! midi.isEmpty()) midiInFlash.store (true);
 
@@ -208,7 +223,7 @@ void AT700Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     live.rmSig.store (v.rmSig); live.ef.store (v.ef); live.lfo1.store (v.lfo1); live.lfo2.store (v.lfo2);
     live.vuL.store (v.vuL); live.vuR.store (v.vuR); live.pshaper.store (v.pshaper); live.clock.store (v.clock);
     live.step.store (v.step); live.chan.store (v.chan); live.running.store (v.running); live.power.store (v.power);
-    live.bender.store (engine.bender);
+    live.bender.store (engine.leverNow);          // la palanca dibujada: el parámetro (arrastre, automatización) más el pitch bend MIDI
     for (int k = 0; k < 128; ++k) live.keyDown[(size_t) k].store (uiNote[(size_t) k] || midiNote[(size_t) k]);
 
     const double used = (juce::Time::getMillisecondCounterHiRes() - t0) * 0.001;
@@ -312,7 +327,7 @@ void AT700Processor::loadPreset (int index)
     loadPresetData (presetFromJson700 (presets[(size_t) index].data));
 }
 
-void AT700Processor::loadPresetData (const Preset700& p)
+void AT700Processor::loadPresetData (const Preset700& p, bool sequencerCommands)
 {
     for (int i = 0; i < kNumP700; ++i) setValue (i, p.panel[(size_t) i]);
     for (auto& e : extParams700())
@@ -321,9 +336,13 @@ void AT700Processor::loadPresetData (const Preset700& p)
         setExtValue (e.id, p.settings.contains (e.id) ? (float) p.settings[e.id] : e.def);
     }
     currentPresetName = p.name;
+    tracker.capture (*this);
     setCables (p.cables);
-    sendCommand (CmdSeqEnd);
-    if (p.run) sendCommand (CmdSeqStart);
+    if (sequencerCommands)                       // RANDOM cambia el panel sin parar ni reiniciar el secuenciador
+    {
+        sendCommand (CmdSeqEnd);
+        if (p.run) sendCommand (CmdSeqStart);
+    }
     notifyUi (onPresetChanged);
 }
 
@@ -335,7 +354,7 @@ Preset700 AT700Processor::currentAsPreset (const juce::String& name, const juce:
     const auto& ps = extParams700();
     for (size_t k = 0; k < ps.size(); ++k)
         if (! ps[k].global && std::abs (extRaw[k]->load() - ps[k].def) > 1e-4f) p.settings.set (ps[k].id, extRaw[k]->load());
-    p.cables = cables;
+    p.cables = getCables();                      // copia bajo el candado: el host puede guardar mientras se patchea
     return p;
 }
 
@@ -347,6 +366,7 @@ bool AT700Processor::saveUserPreset (const juce::String& name)
     const bool ok = file.replaceWithText (juce::JSON::toString (presetToJson700 (currentAsPreset (name, "User"))));
     rescanUserPresets();
     currentPresetName = name;
+    tracker.capture (*this);
     for (int i = 0; i < (int) presets.size(); ++i) if (! presets[(size_t) i].factory && presets[(size_t) i].file == file) currentProgram = i;
     notifyUi (onPresetChanged);
     return ok;
@@ -380,7 +400,7 @@ void AT700Processor::randomizePanel()
             set (("adsr" + juce::String (a) + s).toRawUTF8(), r.nextFloat() * (juce::String (s) == "_a" ? 0.6f : 1.0f));
     set ("lfo1_freq", r.nextFloat()); set ("lfo2_freq", r.nextFloat());
     set ("lfo1_wave", (float) r.nextInt (4)); set ("lfo2_wave", (float) r.nextInt (4));
-    loadPresetData (p);
+    loadPresetData (p, false);
 }
 
 // ───────────── Estado ─────────────
@@ -389,6 +409,8 @@ void AT700Processor::getStateInformation (juce::MemoryBlock& destData)
     auto state = apvts.copyState();
     const auto pr = presetToJson700 (currentAsPreset (currentPresetName, ""));
     state.setProperty ("presetName", currentPresetName.get(), nullptr);
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
+    state.setProperty ("program", currentProgram, nullptr);
     state.setProperty ("cables", juce::JSON::toString (pr.getProperty ("cables", {}), true), nullptr);
     juce::StringArray map;
     for (int c = 0; c < 128; ++c) if (const int t = ccMap[(size_t) c].load(); t >= 0) map.add (juce::String (c) + "=" + allParamIds[t]);
@@ -422,6 +444,9 @@ void AT700Processor::setStateInformation (const void* data, int sizeInBytes)
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (p))
             if (! dh::isFiniteF (rp->getValue()) || present.count (rp->paramID) == 0) rp->setValueNotifyingHost (rp->getDefaultValue());
     setCables (extra.cables);
+    currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
+    if (state.hasProperty ("presetSnapshot")) tracker.fromString (*this, state.getProperty ("presetSnapshot").toString());
+    else tracker.capture (*this);           // sesión anterior a la marca: el nombre sin "*"
     notifyUi (onPresetChanged);
 }
 

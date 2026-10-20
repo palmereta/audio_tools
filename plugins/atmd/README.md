@@ -2,7 +2,7 @@
 
 A recreation of the Moog Minimoog Model D, modelled on a mid-1970s unit with the Rev 2 oscillator board
 (the one Moog itself measured for the 2016 reissue). VST3, Audio Unit (macOS) and standalone.
-Version 1.0.0.
+Version 1.0.2.
 
 The panel, the left-hand controller and the 44-key keyboard are a 3D model built to the panel's published
 measurements (`assets/layoutmd.json`, `docs/hardware-spec.md` §6-7), rendered in Blender; every control of

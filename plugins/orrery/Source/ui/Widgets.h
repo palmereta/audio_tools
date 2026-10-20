@@ -1,4 +1,6 @@
 #pragma once
+#include "../../../../shared/ui/Wheel.h"
+#include "../../../../shared/ui/HelpRouter.h"
 // Controles de Orrery atados a parámetros del host: la perilla-órbita, la caja (elección o entero que se
 // arrastra) y la llave. Todos muestran ayuda al pasar el mouse.
 
@@ -7,12 +9,7 @@
 
 namespace dh::orr::ui {
 
-struct Help
-{
-    std::function<void (const juce::String&)> show;
-    static Help& get() { static Help h; return h; }
-};
-inline void showHelp (const juce::String& s) { if (Help::get().show) Help::get().show (s); }
+inline void showHelp (const juce::String& s) { dh::HelpRouter::help (s); }
 
 class Bound : public juce::Component, private juce::Timer
 {
@@ -74,7 +71,7 @@ public:
     }
     void mouseUp (const juce::MouseEvent&) override { if (param != nullptr) attach->endGesture(); }
     void mouseDoubleClick (const juce::MouseEvent&) override { if (param != nullptr) setNorm (param->getDefaultValue(), false); }
-    void mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails& w) override { if (param != nullptr) setNorm (param->getValue() + (w.deltaY > 0 ? 0.02f : -0.02f), false); }
+    void mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails& w) override { if (param != nullptr && dh::wheelDelta (w) != 0.0f) setNorm (param->getValue() + dh::wheelAmount (w), false); }
 private:
     bool large; float start = 0.0f;
 };
@@ -134,9 +131,10 @@ public:
         if (param == nullptr) return;
         const int steps = std::max (2, param->getNumSteps());
         const float stp = steps < 400 ? 1.0f / (float) (steps - 1) : 0.01f;
-        setNorm (param->getValue() + (w.deltaY > 0 ? stp : -stp), false);
+        if (const int k = wheelSteps.take (w); k != 0) setNorm (param->getValue() + (float) k * stp, false);
     }
 private:
+    dh::WheelSteps wheelSteps;
     juce::AudioParameterChoice* choice = nullptr;
     bool labelled;
     float start = 0.0f;

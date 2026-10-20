@@ -138,7 +138,7 @@ public:
         note = std::clamp (note, 0, 127);
         if (sustain) { sustainedKey[(size_t) note] = true; return; }
         removeHeld (note);
-        if (isPoly()) { polyOff (note); return; }
+        if (isPoly()) { polyOff (note); if (monoNote == note) monoNote = -1; return; }
         monoUpdate (false);
     }
 
@@ -171,6 +171,22 @@ public:
     // extIn: entrada externa (mono, puede ser nullptr). Escribe L y R (reemplaza).
     void process (const float* extIn, float* L, float* R, int n)
     {
+        // Cambio de VOICES o UNISON (o un preset que los cambia) con teclas apretadas: las voces que quedan fuera de
+        // la cuenta nueva dejarían de procesarse con la compuerta abierta y volverían a sonar solas; se sueltan todas
+        // y las teclas que siguen apretadas vuelven a sonar con la configuración nueva.
+        if (st.voices != layoutVoices || unisonCount() != layoutUnison)
+        {
+            layoutVoices = st.voices; layoutUnison = unisonCount();
+            for (auto& v : voices) { v.fEnv.gateOff(); v.lEnv.gateOff(); v.note = -1; }
+            monoNote = -1;
+            const auto keys = held;
+            if (! keys.empty())
+            {
+                if (isPoly()) for (int k : keys) polyOn (k, heldVel[(size_t) k]);
+                else monoUpdate (true);
+            }
+        }
+        overload = false;                              // se acumula en los trozos (la lámpara ve todo el bloque)
         for (int done = 0; done < n; done += kSub)
         {
             const int len = std::min (kSub, n - done);
@@ -205,6 +221,8 @@ private:
     std::vector<float> osL, osR, extOs;
     std::array<Voice, kMaxVoices> voices;
     std::vector<int> held;
+    int layoutVoices = -1, layoutUnison = -1;
+    bool dlyWasOn = false, revWasOn = false;
     std::array<float, 128> heldVel {};
     std::array<bool, 128> sustainedKey {};
     bool sustain = false;
@@ -453,7 +471,7 @@ private:
         decL.process (osL.data(), L, n, kSqrt2);
         decR.process (osR.data(), R, n, kSqrt2);
         // A-440: referencia de afinación sumada a la salida.
-        overload = over;
+        overload = overload || over;
         const float vol = p.mainOn ? audioTaper (p.volume) * 12.0f * st.outputGain : 0.0f;
         for (int i = 0; i < n; ++i)
         {
@@ -471,6 +489,9 @@ private:
 
     void effects (float* L, float* R, int n)
     {
+        if (fx.dlyOn && ! dlyWasOn) delay.reset();         // al prenderse, sin la cola vieja de antes de apagarlo
+        if (fx.revOn && ! revWasOn) reverb.reset();
+        dlyWasOn = fx.dlyOn; revWasOn = fx.revOn;
         if (fx.dlyOn) delay.process (L, R, n, (float) (fx.dlyBeats * 60.0 / std::max (20.0, bpm)), fx.dlyFeedback, fx.dlyTone, fx.dlyMix);
         if (fx.revOn) reverb.process (L, R, n, fx.revSize, fx.revDamp, fx.revMix);
         for (int i = 0; i < n; ++i)

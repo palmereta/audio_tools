@@ -260,16 +260,18 @@ struct Envelope
 class Stutter
 {
 public:
-    void prepare (float sampleRate, uint32_t seed) { fs = sampleRate; bufL.prepare ((int) (4.2f * fs)); bufR.prepare ((int) (4.2f * fs)); seed0 = seed; reset(); }
+    // Trozos de hasta 4 s con 4 repeticiones: el búfer guarda 16 s.
+    void prepare (float sampleRate, uint32_t seed) { fs = sampleRate; bufL.prepare ((int) (16.5f * fs)); bufR.prepare ((int) (16.5f * fs)); seed0 = seed; reset(); }
     void reset() { bufL.clear(); bufR.clear(); active = false; pos = 0; rep = 0; beatPos = 0; rng = Rand (seed0); }
     // slice: largo del trozo (muestras); prob: chance de repetir en cada trozo; repeats: cuántas veces suena.
     // beatStart: true en la muestra donde empieza un trozo de la grilla del host (si no hay grilla, se cuenta solo).
     inline void process (float& l, float& r, int slice, float prob, int repeats, bool beatStart)
     {
         bufL.push (l); bufR.push (r);
-        slice = std::clamp (slice, 64, (int) (0.5f * fs));
-        repeats = std::clamp (repeats, 2, 8);
+        slice = std::clamp (slice, 64, (int) (4.0f * fs));
+        repeats = std::clamp (repeats, 2, std::max (2, (int) (16.0f * fs) / slice));
         bool start = beatStart;
+        if (beatStart) beatPos = 0;                  // la grilla del host manda: el contador propio se realinea
         if (! start && ++beatPos >= slice) { beatPos = 0; start = true; }
         if (start && ! active && rng.uni() < prob) { active = true; len = slice; reps = repeats; rep = 0; pos = 0; }
         if (! active) return;

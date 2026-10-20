@@ -1,6 +1,6 @@
 # AT101V — monofónico basado en el Roland SH-101 (1982), con arpegiador y secuenciador.
 # Un solo plugin (instrumento): el 101 no tiene entrada de audio.
-set(AT101V_VERSION 1.0.4)
+set(AT101V_VERSION 1.0.5)
 
 if(APPLE)
     set(AT101V_FORMATS VST3 AU Standalone)

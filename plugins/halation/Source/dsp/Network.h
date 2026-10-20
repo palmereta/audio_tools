@@ -75,7 +75,7 @@ class Network
 {
 public:
     static constexpr int N = 8;
-    static constexpr float kMaxMs = 4000.0f;
+    static constexpr float kMaxMs = 12000.0f;      // 8 s de retardo sincronizado (2 compases a 60 BPM) por 1,5 del patrón
     static constexpr float kF1 = 250.0f, kF2 = 2500.0f;     // cortes de las tres bandas de absorción
 
     void prepare (float sampleRate, uint32_t seed = 1)

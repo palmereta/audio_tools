@@ -1,5 +1,5 @@
 # AT700 — consola modular basada en el Roland System-700 (1976), teclado 701A y secuenciador 717A.
-set(AT700_VERSION 1.0.3)
+set(AT700_VERSION 1.0.4)
 
 if(APPLE)
     set(AT700_FORMATS VST3 AU Standalone)

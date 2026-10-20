@@ -32,7 +32,7 @@ class Transport
 {
 public:
     static constexpr double kBaseDelayS = 0.025;          // retardo fijo: de acá salen el wow y el tape stop
-    static constexpr double kMaxStopS = 4.5, kMaxPrintS = 3.6;
+    static constexpr double kMaxStopS = 10.5, kMaxPrintS = 3.6;     // stop sincronizado: hasta 10 s (4 compases a 96 BPM)
 
     void prepare (double sampleRate)
     {

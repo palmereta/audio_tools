@@ -292,6 +292,7 @@ public:
         {
             auto* cb = make<juce::ComboBox>();
             cb->onChange = [this, l, cb] {
+                if (cb->getSelectedId() == 1000) return;          // "Not connected": se conserva el puerto elegido
                 const int i = cb->getSelectedItemIndex();
                 proc.direct.setLanePort (l, i <= 0 || i - 1 >= devices.size() ? juce::String() : devices[i - 1].identifier);
             };
@@ -361,6 +362,7 @@ private:
     void fillPorts()
     {
         devices = juce::MidiOutput::getAvailableDevices();
+        proc.direct.reopenMissing();                 // un puerto que apareció después de cargar el proyecto se abre ahora
         for (int l = 0; l < kLanes; ++l)
         {
             auto* cb = ports[(size_t) l];
@@ -369,6 +371,8 @@ private:
             for (int i = 0; i < devices.size(); ++i) cb->addItem (devices[i].name, i + 2);
             int sel = 0;
             for (int i = 0; i < devices.size(); ++i) if (devices[i].identifier == proc.direct.lanePort (l)) sel = i + 1;
+            // Elegido pero sin conectar: se muestra como tal, no como si saliera por ahí.
+            if (! proc.direct.laneConnected (l)) { cb->addItem ("Not connected (" + proc.direct.lanePort (l) + ")", 1000); cb->setSelectedId (1000, juce::dontSendNotification); continue; }
             cb->setSelectedItemIndex (sel, juce::dontSendNotification);
         }
     }

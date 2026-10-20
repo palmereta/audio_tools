@@ -9,5 +9,5 @@ bool canWrite (const juce::File& dir);
 
 /** Windows: starts this executable again through the UAC prompt ("runas"). False elsewhere or
     if the user declined. */
-bool relaunchElevated();
+bool relaunchElevated (const juce::String& arguments = {});
 }

@@ -131,8 +131,8 @@ SpaceEditor::SpaceEditor (SpaceProcessor& p) : AudioProcessorEditor (&p), proc (
     morphAtt = std::make_unique<SA> (proc.apvts, "morph", morph);
     morph.setTooltip ("Morph: from A (the knobs) to scene B. Automate it for slow changes of space.");
     content.addAndMakeVisible (morph);
-    proc.onPresetChanged = [this] { presetBtn.setButtonText (proc.currentPresetName); buildDetail(); content.repaint(); };
-    presetBtn.setButtonText (proc.currentPresetName);
+    proc.onPresetChanged = [this] { presetBtn.setButtonText (proc.presetDisplayName()); buildDetail(); content.repaint(); };
+    presetBtn.setButtonText (proc.presetDisplayName());
 
     buildDetail();
     setResizable (true, true);
@@ -300,6 +300,7 @@ void SpaceEditor::showManual (bool on)
 
 void SpaceEditor::timerCallback()
 {
+    if (const auto name = proc.presetDisplayName(); name != presetBtn.getButtonText()) presetBtn.setButtonText (name);
     const bool sync = proc.value ("sync") > 0.5f;
     time.s.setVisible (! sync); division.s.setVisible (sync);
     const int ch = (int) proc.value ("character"), rm = (int) proc.value ("room");

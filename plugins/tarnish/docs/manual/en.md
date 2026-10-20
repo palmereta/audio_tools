@@ -81,7 +81,7 @@ The reading in the service window is measured from the speed of the transport, n
 ## Noise and Mix
 
 - **Noise** is the machine's own noise: tape hiss, record surface, line noise. At 50 % it sits where that machine usually does (about -68 dB below the reference on a studio machine at 15 ips, -52 dB on a ferric cassette); 0 is off, 100 % is 20 dB more. The hiss goes through the playback chain, so its colour changes with the machine and the speed.
-- **Mix** blends the machine with the dry sound. The dry sound is delayed to line up exactly.
+- **Mix** blends the machine with the dry sound. The dry sound is delayed to line up exactly, but wow and flutter keep moving the tape copy a few milliseconds around it, so a blend in the middle phases like a flanger, as two real machines would. For clean parallel saturation turn Wow and Flutter down; for the flanging, leave them up.
 
 ## Damage
 

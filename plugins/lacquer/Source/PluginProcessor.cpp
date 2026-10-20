@@ -43,7 +43,9 @@ LacquerProcessor::LacquerProcessor()
 LacquerProcessor::~LacquerProcessor()
 {
     for (auto* id : { &params::style, &params::intensity, &params::target, &params::ceiling }) apvts.removeParameterListener (*id, this);
-    worker->signalThreadShouldExit(); jobEvent.signal(); worker->stopThread (4000);
+    // El análisis y el render miran threadShouldExit y salen enseguida; se espera sin plazo (con plazo, JUCE mata
+    // el hilo por la fuerza y deja candados y memoria en cualquier estado).
+    worker->signalThreadShouldExit(); jobEvent.signal(); worker->stopThread (-1);
     delete pending.exchange (nullptr);
     delete retired.exchange (nullptr);
 }
@@ -84,6 +86,7 @@ void LacquerProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     setLatencySamples (latency);
     work.setSize (2, maxBlock, false, false, true); work2.setSize (2, maxBlock, false, false, true); dry.setSize (2, maxBlock, false, false, true);
     dryDelayL.assign ((size_t) std::max (1, latency), 0.0f); dryDelayR.assign ((size_t) std::max (1, latency), 0.0f); dryPos = 0;
+    bypassDelay.setSize (2, std::max (1, latency)); bypassDelay.clear(); bypassPos = 0;
     inMeter.prepare (sr); outMeter.prepare (sr);
     fadeLen = (int) (0.05 * sr); fadePos = 0;
     specRing.assign (8192, 0.0f); specPos.store (0);
@@ -118,16 +121,19 @@ void LacquerProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
         const double seek = seekRequest.exchange (-1.0);
         if (seek >= 0.0) { fileReadPos = juce::jlimit (0.0, (double) fileLen, seek * fileRate); for (auto& i : interpO) i.reset(); for (auto& i : interpM) i.reset(); }
         buffer.clear();
+        audioInFile.store (true);                // el trabajador no toca los buffers del archivo mientras tanto
         if (filePlaying.load())
         {
             const double ratio = fileRate / sr;
-            const auto avail = (int) std::max<int64_t> (0, fileLen - (int64_t) fileReadPos);
-            int used = 0;
-            if (avail > 0)
+            // De a trozos del tamaño preparado: un host puede mandar un bloque mayor que el anunciado.
+            for (int done = 0; done < n && filePlaying.load();)
             {
+                const auto avail = (int) std::max<int64_t> (0, fileLen - (int64_t) fileReadPos);
+                if (avail <= 0) break;
                 float* tmpO[2] = { work.getWritePointer (0), work.getWritePointer (1) };
                 float* tmpM[2] = { work2.getWritePointer (0), work2.getWritePointer (1) };
-                const int m = std::min (n, work.getNumSamples());
+                const int m = std::min (n - done, work.getNumSamples());
+                int used = 0;
                 for (int c = 0; c < 2; ++c)
                 {
                     used = interpO[c].process (ratio, fileOrig.getReadPointer (c, (int) fileReadPos), tmpO[c], m, avail, 0);
@@ -143,16 +149,17 @@ void LacquerProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
                     abGainNow += (target - abGainNow) * 0.002f;
                     const float l = (tmpO[0][i] * ab * abGainNow + tmpM[0][i] * (1.0f - abGainNow)) * pv;
                     const float r = (tmpO[1][i] * ab * abGainNow + tmpM[1][i] * (1.0f - abGainNow)) * pv;
-                    outL[i] = outR ? l : 0.5f * (l + r);
-                    if (outR) outR[i] = r;
+                    outL[done + i] = outR ? l : 0.5f * (l + r);
+                    if (outR) outR[done + i] = r;
                 }
                 inMeter.process (tmpO[0], tmpO[1], m);
+                done += m;
             }
             if (fileReadPos >= (double) fileLen) { filePlaying.store (false); fileReadPos = 0.0; }
             filePos.store (fileReadPos / fileRate);
         }
+        audioInFile.store (false);
         outMeter.process (outL, outR ? outR : outL, n);
-        abGainDb.store ((float) fileAbGainDb);
         return;
     }
 
@@ -287,6 +294,7 @@ void LacquerProcessor::learnFromFile (const juce::File& f)
 
 void LacquerProcessor::openFile (const juce::File& f)
 {
+    saveLive();
     learnState.store (hasPlan() ? LearnState::ready : LearnState::idle);
     filePlaying.store (false);
     fileState.store (FileState::loading);
@@ -298,6 +306,7 @@ void LacquerProcessor::closeFile()
 {
     filePlaying.store (false);
     fileState.store (FileState::none);
+    restoreLive();                               // el plan, la entrada y el A/B del modo en vivo, como estaban
     setStatus ("Back to live mode: Lacquer processes what comes into the plugin.");
 }
 
@@ -334,6 +343,9 @@ void LacquerProcessor::runWorker()
         Job j; { const juce::ScopedLock sl (jobLock); j = nextJob; nextJob = Job(); }
         if (j.kind == Job::loadFile) { doLoadFile (j.file); continue; }
         if (learnState.load() == LearnState::analysing) { doLearn (true); continue; }
+        // Mientras LEARN escucha, un cambio de control no re-planifica (leería el audio mientras el hilo de audio lo
+        // escribe y cortaría la escucha); se aplica cuando la escucha termina y analiza con las opciones nuevas.
+        if (learnState.load() == LearnState::listening) continue;
         const double dirty = paramsDirtyAt.load();
         if (dirty > 0.0 && juce::Time::getMillisecondCounterHiRes() - dirty > 300.0)
         {
@@ -381,7 +393,9 @@ void LacquerProcessor::doLearn (bool fromLive)
     if (fromLive) setStatus ("Analysing what Lacquer heard…");
     Report rep;
     std::vector<float> oL, oR;
-    const Plan p = Learner::learn (learnBuf.getReadPointer (0), learnBuf.getReadPointer (1), (size_t) n, sr, currentOptions(), &rep, &oL, &oR);
+    Plan p;
+    try { p = Learner::learn (learnBuf.getReadPointer (0), learnBuf.getReadPointer (1), (size_t) n, sr, currentOptions(), &rep, &oL, &oR, cancelCheck()); }
+    catch (const Cancelled&) { return; }
     json::InputSummary s;
     s.valid = true; s.lufs = rep.lufsI; s.tp = rep.truePeakDb; s.lra = rep.lra; s.plr = rep.plr; s.seconds = rep.seconds; s.correlation = rep.correlation; s.mid = rep.mid;
     s.groove = grooveOf (learnBuf.getReadPointer (0), learnBuf.getReadPointer (1), (size_t) n, sr);
@@ -409,6 +423,7 @@ void LacquerProcessor::doLoadFile (const juce::File& f)
         return;
     }
     setStatus ("Reading " + f.getFileName() + "…");
+    waitForAudioOutOfFile();
     const int len = (int) r->lengthInSamples;
     fileOrig.setSize (2, len + 4, false, true, false);
     r->read (&fileOrig, 0, len, 0, true, r->numChannels > 1);
@@ -426,8 +441,13 @@ void LacquerProcessor::doRenderFile()
     Options o = currentOptions(); o.constantLatency = false;
     const size_t n = (size_t) fileLen;
     Report rep;
-    const Plan p = Learner::learn (fileOrig.getReadPointer (0), fileOrig.getReadPointer (1), n, fileRate, o, &rep, nullptr, nullptr,
-                                   [this] (double v) { fileProgress.store ((float) (0.9 * v)); });
+    Plan p;
+    try
+    {
+        p = Learner::learn (fileOrig.getReadPointer (0), fileOrig.getReadPointer (1), n, fileRate, o, &rep, nullptr, nullptr,
+                            [this] (double v) { if (worker->threadShouldExit()) throw Cancelled(); fileProgress.store ((float) (0.9 * v)); });
+    }
+    catch (const Cancelled&) { return; }
     // Render canónico (el mismo que lacquerrender): cadena completa por bloques, latencia compensada.
     juce::AudioBuffer<float> out (2, (int) n + 4);
     out.clear();
@@ -437,6 +457,7 @@ void LacquerProcessor::doRenderFile()
         std::vector<float> bl (4096), br (4096);
         for (size_t pos = 0; pos < n + (size_t) lat; pos += 4096)
         {
+            if (worker->threadShouldExit()) return;
             const size_t k = std::min ((size_t) 4096, n + (size_t) lat - pos);
             for (size_t i = 0; i < k; ++i) { const size_t s = pos + i; bl[i] = s < n ? fileOrig.getSample (0, (int) s) : 0.0f; br[i] = s < n ? fileOrig.getSample (1, (int) s) : 0.0f; }
             c.process (bl.data(), br.data(), (int) k);
@@ -444,7 +465,11 @@ void LacquerProcessor::doRenderFile()
             fileProgress.store ((float) (0.9 + 0.1 * (double) pos / (double) (n + (size_t) lat)));
         }
     }
-    fileMaster = std::move (out);
+    {
+        const juce::ScopedLock fl (fileLock);     // la exportación lee fileMaster
+        waitForAudioOutOfFile();
+        fileMaster = std::move (out);
+    }
     fileReport = rep;
     fileAbGainDb = p.outLufs - rep.lufsI;
     fileOutLufs.store (p.outLufs);
@@ -467,6 +492,7 @@ void LacquerProcessor::doRenderFile()
 bool LacquerProcessor::exportMaster (const juce::File& dest, int bits, juce::String& error)
 {
     if (fileState.load() != FileState::ready) { error = "No master to export yet."; return false; }
+    const juce::ScopedLock fl (fileLock);         // un re-render no reemplaza el master mientras se exporta
     dest.deleteFile();
     std::unique_ptr<juce::OutputStream> os (dest.createOutputStream());
     if (os == nullptr) { error = "Cannot write " + dest.getFullPathName(); return false; }
@@ -498,20 +524,59 @@ bool LacquerProcessor::exportMaster (const juce::File& dest, int bits, juce::Str
     return true;
 }
 
+// Bypass: el seco sale retrasado la latencia informada (el host la sigue compensando).
+void LacquerProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
+{
+    const int n = buffer.getNumSamples(), L = bypassDelay.getNumSamples();
+    if (n == 0 || L < 1) return;
+    for (int c = 0; c < std::min (2, buffer.getNumChannels()); ++c)
+    {
+        auto* x = buffer.getWritePointer (c); auto* d = bypassDelay.getWritePointer (c);
+        int p = bypassPos;
+        for (int i = 0; i < n; ++i) { const float y = d[p]; d[p] = x[i]; x[i] = y; if (++p >= L) p = 0; }
+    }
+    bypassPos = (bypassPos + n) % L;
+}
+
+void LacquerProcessor::saveLive()
+{
+    const juce::ScopedLock sl (uiLock);
+    if (live.valid) return;                      // ya hay un archivo abierto: lo guardado es lo en vivo
+    live = { plan, planValid, input, outGroove, outMid, haveOutMid, abGainDb.load(), true };
+}
+
+void LacquerProcessor::restoreLive()
+{
+    const juce::ScopedLock sl (uiLock);
+    if (! live.valid) return;
+    plan = live.plan; planValid = live.planValid; input = live.input; outGroove = live.outGroove; outMid = live.outMid; haveOutMid = live.haveOutMid;
+    abGainDb.store (live.abGainDb);
+    live.valid = false;
+}
+
+void LacquerProcessor::waitForAudioOutOfFile() const
+{
+    for (int i = 0; i < 2000 && audioInFile.load(); ++i) juce::Thread::sleep (1);
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 void LacquerProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     juce::ValueTree xtra ("LACQUER_PLAN");
     {
+        // Con un archivo abierto, lo que se guarda es el modo en vivo (el plan del bus master), no el del archivo.
         const juce::ScopedLock sl (uiLock);
-        if (planValid)
+        const bool inFile = live.valid;
+        const auto& P = inFile ? live.plan : plan; const bool pv = inFile ? live.planValid : planValid;
+        if (pv)
         {
-            xtra.setProperty ("plan", juce::JSON::toString (json::toVar (plan), true), nullptr);
-            xtra.setProperty ("input", juce::JSON::toString (json::toVar (input), true), nullptr);
-            juce::MemoryBlock mb (outGroove.data(), outGroove.size() * sizeof (float));
+            xtra.setProperty ("plan", juce::JSON::toString (json::toVar (P), true), nullptr);
+            xtra.setProperty ("input", juce::JSON::toString (json::toVar (inFile ? live.input : input), true), nullptr);
+            const auto& G = inFile ? live.outGroove : outGroove;
+            juce::MemoryBlock mb (G.data(), G.size() * sizeof (float));
             xtra.setProperty ("outGroove", mb.toBase64Encoding(), nullptr);
-            if (haveOutMid) xtra.setProperty ("outMid", juce::JSON::toString (json::arr (outMid), true), nullptr);
+            if (inFile ? live.haveOutMid : haveOutMid) xtra.setProperty ("outMid", juce::JSON::toString (json::arr (inFile ? live.outMid : outMid), true), nullptr);
         }
     }
     state.removeChild (state.getChildWithName ("LACQUER_PLAN"), nullptr);

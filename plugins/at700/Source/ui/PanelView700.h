@@ -106,7 +106,7 @@ public:
             switch (c->kind)
             {
                 case Kind::Knob: case Kind::Fader:
-                    if (auto* prm = c->prm()) prm->beginChangeGesture();
+                    if (auto* prm = c->prm()) { prm->beginChangeGesture(); gestureOpen = true; }
                     stepAccum = 0.0f;
                     if (c->kind == Kind::Fader && ! capBox (*c).expanded (A.mm (1.5f)).contains (e.position)) setParam (*c, faderValueAt (*c, e.position));
                     break;
@@ -118,7 +118,7 @@ public:
             return;
         }
         if (const int k = keyAt (e.position); k >= 0) { mouseKey = k; proc.sendCommand (AT700Processor::CmdNoteOn, 36 + k); return; }
-        draggingCanvas = true;
+        draggingCanvas = true; lastScreen = e.getScreenPosition().toFloat();
     }
 
     void mouseDrag (const juce::MouseEvent& e) override
@@ -138,7 +138,15 @@ public:
             if (k != mouseKey) { proc.sendCommand (AT700Processor::CmdNoteOff, 36 + mouseKey); mouseKey = k; if (k >= 0) proc.sendCommand (AT700Processor::CmdNoteOn, 36 + k); }
             return;
         }
-        if (draggingCanvas) { if (onScrollRequest) onScrollRequest (-d.y); return; }
+        // Arrastrar el panel lo mueve con la mano. La cuenta va en coordenadas de pantalla: las locales cambian
+        // justamente porque el panel se mueve, y la diferencia se agrandaba en cada paso.
+        if (draggingCanvas)
+        {
+            const auto sp = e.getScreenPosition().toFloat();
+            if (onScrollRequest) onScrollRequest (sp.y - lastScreen.y);
+            lastScreen = sp;
+            return;
+        }
         if (active == nullptr) return;
         auto& c = *active;
         const float fine = e.mods.isShiftDown() ? 0.15f : 1.0f;
@@ -172,9 +180,10 @@ public:
         if (drag.active) { finishCable (lastMouse); return; }
         if (active != nullptr)
         {
+            if (active->id == "kb_bender") setParam (*active, 0.5f);          // la palanca vuelve al centro, dentro del gesto
             if (active->kind == Kind::Knob || active->kind == Kind::Fader) if (auto* prm = active->prm()) prm->endChangeGesture();
+            gestureOpen = false;
             if (active->kind == Kind::Button) pressButton (*active, false);
-            if (active->id == "kb_bender") setParam (*active, 0.5f);          // la palanca vuelve al centro
         }
         if (mouseKey >= 0) { proc.sendCommand (AT700Processor::CmdNoteOff, 36 + mouseKey); mouseKey = -1; }
         active = nullptr; showBubble = false; draggingCanvas = false;
@@ -206,7 +215,16 @@ public:
             if (onScrollRequest) onScrollRequest (-d * 160.0f);
             return;
         }
-        if (c->steps > 0) { if (std::abs (d) > 0.01f) setParam (*c, (float) juce::jlimit (0, c->steps - 1, (int) std::lround (c->value()) + (d > 0 ? 1 : -1))); }
+        if (c->steps > 0)
+        {
+            // Las perillas con posiciones avanzan un paso por muesca: el trackpad manda muchos deltas chicos.
+            wheelAcc += d;
+            if (std::abs (wheelAcc) >= 0.1f)
+            {
+                setParam (*c, (float) juce::jlimit (0, c->steps - 1, (int) std::lround (c->value()) + (wheelAcc > 0 ? 1 : -1)));
+                wheelAcc = 0.0f;
+            }
+        }
         else setParam (*c, juce::jlimit (0.0f, 1.0f, c->value() + d * 0.05f));
         hover = c; bubbleTimer = 25;
         repaint();
@@ -274,10 +292,12 @@ private:
     std::vector<CableView> cables;
     DragCable drag;
     Ctl* active = nullptr; Ctl* hover = nullptr;
-    juce::Point<float> lastMouse;
+    juce::Point<float> lastMouse, lastScreen;
     float stepAccum = 0.0f;
     bool showBubble = false, draggingCanvas = false;
     int bubbleTimer = 0, mouseKey = -1, hoverJack = -1, colorCycle = 0;
+    float wheelAcc = 0.0f;
+    bool gestureOpen = false;
     double lastTime = 0.0;
 
     static int pidx (const juce::String& id) { for (int i = 0; i < kNumP700; ++i) if (id == panelParam700 (i).id) return i; return -1; }
@@ -399,7 +419,17 @@ private:
         return -1;
     }
 
-    void setParam (Ctl& c, float v) { if (auto* prm = c.prm()) prm->setValueNotifyingHost (prm->convertTo0to1 (v)); }
+    // Un cambio suelto (rueda, doble clic, llaves, la palanca al volver) va envuelto en su propio gesto para que el
+    // host lo grabe en automatización Touch/Latch; durante un arrastre el gesto ya está abierto desde mouseDown.
+    void setParam (Ctl& c, float v)
+    {
+        auto* prm = c.prm();
+        if (prm == nullptr) return;
+        const bool inDrag = gestureOpen && active == &c;
+        if (! inDrag) prm->beginChangeGesture();
+        prm->setValueNotifyingHost (prm->convertTo0to1 (v));
+        if (! inDrag) prm->endChangeGesture();
+    }
 
     // Posición del fader (mm) para un valor, y su recuadro en pantalla.
     juce::Point<float> faderPos (const Ctl& c, float v) const
@@ -480,7 +510,8 @@ private:
         if (a < 0 || b < 0 || a == b) return false;
         const auto ia = jk700::jacks[a].io, ib = jk700::jacks[b].io;
         if ((ia == jk700::Out && ib == jk700::Out) || (ia == jk700::In && ib == jk700::In)) return false;
-        if (ia == jk700::Out || (ia == jk700::Mult && ib == jk700::In)) { src = a; dst = b; }
+        // Entre dos múltiples manda el arrastre: el jack de donde sale el cable es la fuente.
+        if (ia == jk700::Out || (ia == jk700::Mult && (ib == jk700::In || ib == jk700::Mult))) { src = a; dst = b; }
         else { src = b; dst = a; }
         if (multColumn (src) >= 0 && multColumn (src) == multColumn (dst)) return false;   // una columna no se alimenta a sí misma
         if (multColumn (src) >= 0 && multColumn (dst) >= 0)
@@ -695,12 +726,34 @@ private:
         }
     }
 
+    // El valor como suena: el texto del host (formatPanel700) no puede ver los selectores que lo modifican (CLOCK
+    // RANGE x10, TIME x1/10 de los ADSR, RANGE LO del VCO), así que la burbuja los tiene en cuenta acá.
+    juce::String panelText (int param, float v) const
+    {
+        const juce::String id (panelParam700 (param).id);
+        auto sel = [this] (const char* sid) { auto* r = proc.apvts.getRawParameterValue (sid); return r != nullptr ? (int) std::lround (r->load()) : 0; };
+        if (id == "clk_rate")
+            return juce::String (2.0f * std::pow (10.0f, v) * (sel ("clk_range") == 0 ? 10.0f : 1.0f), 1) + " steps/min";
+        if (id.startsWith ("adsr") && ! id.endsWith ("_s") && ! id.endsWith ("_mode") && ! id.endsWith ("_time"))
+        {
+            const bool tenth = sel (("adsr" + id.substring (4, 5) + "_time").toRawUTF8()) == 1;
+            return secText700 (0.002f * std::pow (5000.0f, v) * (tenth ? 0.1f : 1.0f));
+        }
+        if (id.startsWith ("vco") && id.endsWith ("_pitch"))
+        {
+            const float span = sel (("vco" + id.substring (3, 4) + "_range").toRawUTF8()) == 0 ? 24.0f : 12.0f;
+            const float st = (v - 0.5f) * 2.0f * span;
+            return (st >= 0 ? "+" : "") + juce::String (st, 1) + " st";
+        }
+        return formatPanel700 (param, v);
+    }
+
     void drawBubble (juce::Graphics& g) const
     {
         const Ctl* c = active != nullptr && showBubble ? active : (bubbleTimer > 0 ? hover : nullptr);
         if (c == nullptr || c->param < 0 || ! (c->kind == Kind::Knob || c->kind == Kind::Fader)) return;
         const auto title = juce::String (panelParam700 (c->param).name);
-        const auto value = formatPanel700 (c->param, c->value());
+        const auto value = panelText (c->param, c->value());
         const auto f1 = col700::font (11.0f), f2 = col700::font (13.0f);
         const float w = std::max (juce::GlyphArrangement::getStringWidth (f1, title), juce::GlyphArrangement::getStringWidth (f2, value)) + 22.0f;
         auto r = juce::Rectangle<float> (w, 40.0f).withCentre ({ c->box.getCentreX(), c->box.getY() - 24.0f }).constrainedWithin (getLocalBounds().toFloat().reduced (4.0f));

@@ -68,7 +68,9 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout layout()
     AudioProcessorValueTreeState::ParameterLayout l;
     for (auto& d : floats())
     {
-        NormalisableRange<float> r (d.min, d.max, 0.0f, d.skew);
+        // Transpose y Accent velocity son enteros en el motor: con paso 1 la perilla muestra lo que suena.
+        const bool whole = juce::String (d.id) == "transpose" || juce::String (d.id) == "accent_vel";
+        NormalisableRange<float> r (d.min, d.max, whole ? 1.0f : 0.0f, d.skew);
         l.add (std::make_unique<AudioParameterFloat> (ParameterID { d.id, 1 }, d.name, r, d.def, AudioParameterFloatAttributes().withLabel (d.label)));
     }
     l.add (std::make_unique<AudioParameterChoice> (ParameterID { "waveform", 1 }, "Waveform", waveforms(), 0));

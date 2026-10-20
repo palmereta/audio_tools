@@ -74,7 +74,10 @@ public:
         const auto& ps = proc.getPresets();
         const int i = proc.getCurrentProgram();
         const juce::String cat = juce::isPositiveAndBelow (i, (int) ps.size()) && ps[(size_t) i].name == proc.currentPresetName ? ps[(size_t) i].category : juce::String();
-        presetBtn.setButtonText (cat.isNotEmpty() ? cat.toUpperCase() + "   " + proc.currentPresetName : proc.currentPresetName);
+        shownName = proc.presetDisplayName();
+        presetBtn.setButtonText (cat.isNotEmpty() ? cat.toUpperCase() + "   " + shownName : shownName);
+        // El nombre lleva " *" en cuanto algo cambia (un clic, la automatización): se mira 4 veces por segundo.
+        if (! nameWatch.isTimerRunning()) { nameWatch.tick = [this] { if (proc.presetDisplayName() != shownName) refresh(); }; nameWatch.startTimerHz (4); }
         repaint();
     }
 
@@ -147,6 +150,10 @@ private:
                 proc.saveUserPreset (w->getTextEditorContents ("name").trim());
         }), true);
     }
+
+    struct NameWatch : juce::Timer { std::function<void()> tick; void timerCallback() override { if (tick) tick(); } } nameWatch;
+
+    juce::String shownName;
 
     AT700Processor& proc;
     BarLookAndFeel700 lnf;

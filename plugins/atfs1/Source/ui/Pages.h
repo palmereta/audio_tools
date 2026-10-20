@@ -677,11 +677,12 @@ private:
 };
 
 // ───────── EFFECT ─────────
-class EffectsPage : public Page
+class EffectsPage : public Page, private juce::Timer
 {
 public:
     explicit EffectsPage (ATFS1Processor& p) : Page (p)
     {
+        startTimerHz (8);                  // el diagrama sigue a los tipos aunque cambien por automatización o preset
         auto knob = [this, &p] (const char* id, const char* lab, const char* help = "") { return make<ParamKnob> (p, id, lab, help); };
         auto box = [this, &p] (const char* id, const char* lab) { return make<ParamBox> (p, id, lab); };
         cols.push_back ({ "Insertion", box ("ins_type", "Type"), { knob ("ins_amount", "Amount", "drive, depth or rate, by type"), knob ("ins_mix", "Mix") }, {} });
@@ -690,6 +691,12 @@ public:
         cols.push_back ({ "Reverb", box ("rev_type", "Type"), { knob ("rev_time", "Time"), knob ("rev_send", "Send") }, {} });
         cols.push_back ({ "EQ and output", nullptr, { knob ("eq_low", "Low"), knob ("eq_high", "High"), knob ("volume", "Volume") }, {} });
     }
+    void timerCallback() override
+    {
+        const int sig = (int) proc.value ("ins_type") * 10000 + (int) proc.value ("var_type") * 100 + (int) proc.value ("rev_type");
+        if (sig != shownTypes) { shownTypes = sig; repaint (flow); }
+    }
+    int shownTypes = -1;
     void paint (juce::Graphics& g) override
     {
         for (auto& c : cols) section (g, c.r, c.title);

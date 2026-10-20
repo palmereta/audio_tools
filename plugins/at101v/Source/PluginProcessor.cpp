@@ -21,6 +21,7 @@ AT101VProcessor::AT101VProcessor()
     loadFactoryPresets();
     rescanUserPresets();
     if (! presets.empty()) loadPreset (0);
+    { juce::StringArray g; for (auto& e : extParams()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout AT101VProcessor::createLayout()
@@ -57,12 +58,15 @@ bool AT101VProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 void AT101VProcessor::setPanelValue (P p, float v)
 {
     if (auto* prm = apvts.getParameter (panelParam ((int) p).id))
+    {
+        gesture.touch (prm);
         prm->setValueNotifyingHost (prm->convertTo0to1 (v));
+    }
 }
 
 void AT101VProcessor::setExtValue (const juce::String& id, float v)
 {
-    if (auto* prm = apvts.getParameter (id)) prm->setValueNotifyingHost (prm->convertTo0to1 (v));
+    if (auto* prm = apvts.getParameter (id)) { gesture.touch (prm); prm->setValueNotifyingHost (prm->convertTo0to1 (v)); }
 }
 
 void AT101VProcessor::sendCommand (Command c)
@@ -93,6 +97,7 @@ void AT101VProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     currentSr = sampleRate;
     currentBlock = std::max (samplesPerBlock, 64);
     engine.prepare (sampleRate, currentBlock, kOversampling[juce::jlimit (0, 2, (int) pQuality->load())]);
+    latency.setNow ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0));      // el retardo de los filtros del sobremuestreo, para que el host lo compense
     for (int i = 0; i < kNumP; ++i) smoothed[(size_t) i] = panelRaw[(size_t) i]->load();
     outL.assign ((size_t) currentBlock + 64, 0.0f);
     outR.assign ((size_t) currentBlock + 64, 0.0f);
@@ -108,7 +113,10 @@ void AT101VProcessor::handleMidi (const juce::MidiMessage& m)
     else if (m.isController())
     {
         const int cc = m.getControllerNumber(), val = m.getControllerValue();
-        if (learning.load()) { pendingLearnCc.store (cc); learning.store (false); return; }
+        // El pánico va antes que un CC aprendido, y el aprendizaje no toma el pedal ni los mensajes de modo de canal
+        // (los hosts mandan CC121/123 al parar: aprendidos, cada Stop movía el parámetro y dejaba notas colgadas).
+        if (cc == 120 || cc == 123) { engine.allNotesOff(); return; }
+        if (learning.load() && cc != 64 && cc < 120) { pendingLearnCc.store (cc); learning.store (false); return; }
         const int target = ccMap[(size_t) cc].load();
         if (target >= 0 && target < allParamIds.size())
         {
@@ -133,7 +141,7 @@ void AT101VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     engine.curSample = 0;
 
     const int wantOs = kOversampling[juce::jlimit (0, 2, (int) pQuality->load())];
-    if (wantOs != engine.oversampling()) engine.prepare (currentSr, currentBlock, wantOs);
+    { if (wantOs != engine.oversampling()) engine.prepare (currentSr, currentBlock, wantOs); latency.request ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0)); }
     engine.flushMidiIfPending();      // notas del MIDI out que quedaron abiertas al re-preparar
     if (const int kt = pendingKeyTranspose.exchange (1000); kt != 1000) engine.keyTranspose = kt;
     if ((int) outL.size() < n) { outL.resize ((size_t) n); outR.resize ((size_t) n); }
@@ -412,6 +420,7 @@ void AT101VProcessor::loadPresetData (const Preset& p, bool keepSequence)
     }
     if (! keepSequence) editSequence ([&] (Sequence& s) { s = p.hasSeq ? p.seq : Sequence(); });
     currentPresetName = p.name;
+    tracker.capture (*this);
     notifyUi (onPresetChanged);
 }
 
@@ -437,6 +446,7 @@ bool AT101VProcessor::saveUserPreset (const juce::String& name)
     const bool ok = file.replaceWithText (juce::JSON::toString (presetToJson (currentAsPreset (name, "User"))));
     rescanUserPresets();
     currentPresetName = name;
+    tracker.capture (*this);
     for (int i = 0; i < (int) presets.size(); ++i) if (! presets[(size_t) i].factory && presets[(size_t) i].file == file) currentProgram = i;
     notifyUi (onPresetChanged);
     return ok;
@@ -469,6 +479,8 @@ void AT101VProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     state.setProperty ("presetName", currentPresetName.get(), nullptr);
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
+    state.setProperty ("program", currentProgram, nullptr);
     state.setProperty ("sequence", juce::JSON::toString (sequenceToVar (getSequence()), true), nullptr);
     state.setProperty ("keyTranspose", keyTranspose.load(), nullptr);
     juce::StringArray map;
@@ -504,6 +516,9 @@ void AT101VProcessor::setStateInformation (const void* data, int sizeInBytes)
     editSequence ([&] (Sequence& s) { s = seq; });
     keyTranspose.store (kt);
     pendingKeyTranspose.store (juce::jlimit (-12, 24, kt));     // el motor lo toma en el hilo de audio
+    currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
+    if (state.hasProperty ("presetSnapshot")) tracker.fromString (*this, state.getProperty ("presetSnapshot").toString());
+    else tracker.capture (*this);           // sesión anterior a la marca: el nombre sin "*"
     notifyUi (onPresetChanged);
 }
 

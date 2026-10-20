@@ -1,5 +1,5 @@
 # AT303 — bajo de un oscilador con escalera de diodos, secuenciador de dos listas y generador ácido (docs/research.md).
-set(AT303_VERSION 1.0.1)
+set(AT303_VERSION 1.0.2)
 
 if(APPLE)
     set(AT303_FORMATS VST3 AU Standalone)

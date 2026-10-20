@@ -438,9 +438,12 @@ public:
         const float bendSemis = bend * settings.bendRange;
         const bool selfTrig = patch.src[(size_t) JackId::kbd_trig_in] >= 0;
         numMidiEvents = 0;
-        for (int v = 0; v < nv; ++v)
+        for (int v = 0; v < kMaxVoices; ++v)
         {
             Voice& voice = voices[(size_t) v];
+            // Las voces que quedaron fuera al bajar Voices terminan su release (antes se congelaban activas y volvían
+            // a sonar como notas fantasma al subirlo otra vez).
+            if (v >= nv && ! voice.isActive()) continue;
             // En poli/unísono las voces calladas no se procesan (salvo que la patchera las dispare sola).
             if (v > 0 && ! voice.isActive() && ! (selfTrig && v < unisonCount())) continue;
             voice.process (osL.data(), osR.data(), espPtr, nOs, knobs, patch, settings, bendSemis);

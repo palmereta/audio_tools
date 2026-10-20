@@ -7,7 +7,11 @@ At303Processor::At303Processor()
     : AudioProcessor (BusesProperties().withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
       apvts (*this, nullptr, "AT303", params::layout())
 {
+    for (auto* prm : getParameters())
+        if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (prm)) rawIdStore.push_back (rp->getParameterID());
+    for (auto& id : rawIdStore) rawIds.push_back ({ id.toRawUTF8(), apvts.getRawParameterValue (id) });
     loadFactory();
+    tracker.capture (*this);
     // Banco inicial: el patrón 1 con una línea simple; el resto vacío (una nota por paso en C).
     for (auto& p : bank) p = Pattern();
 }
@@ -25,6 +29,7 @@ void At303Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
     engine.prepare (sr, samplesPerBlock);
     engine.set (buildParams());
     patDirty = true; lastPatIdx = -1; freeClock = 0;
+    { static const int osf[] = { 2, 4, 8 }; latency.setNow ((int) std::lround (dh::halfbandChainDelay (osf[juce::jlimit (0, 2, (int) value ("quality"))]))); }
 }
 
 EngineParams At303Processor::buildParams() const
@@ -70,7 +75,7 @@ void At303Processor::setPattern (int i, const Pattern& p)
 {
     { const juce::SpinLock::ScopedLockType l (patLock); bank[(size_t) juce::jlimit (0, 63, i)] = p; }
     patDirty = true;
-    if (onPatternsChanged) juce::MessageManager::callAsync ([this] { if (onPatternsChanged) onPatternsChanged(); });
+    patternsDirty = true; triggerAsyncUpdate();
 }
 
 void At303Processor::generate (bool mutate)
@@ -78,7 +83,7 @@ void At303Processor::generate (bool mutate)
     GenParams g;
     g.root = (int) value ("gen_root"); g.scale = (int) value ("gen_scale"); g.octaves = (int) value ("gen_octaves");
     g.density = value ("gen_density") / 100.0f; g.accent = value ("gen_accent") / 100.0f; g.slide = value ("gen_slide") / 100.0f; g.ties = value ("gen_ties") / 100.0f;
-    if (! mutate) genSeed = genSeed * 1103515245u + 12345u;
+    genSeed = genSeed * 1103515245u + 12345u;            // también Mutate: cada vez otro resultado
     g.seed = genSeed;
     Pattern base = getPattern (patternIndex());
     if (mutate) { g.seed ^= 0x5bd1e995u; g.lockRhythm = true; }     // mutar: mismo ritmo, alturas y banderas nuevas
@@ -93,7 +98,9 @@ void At303Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     const int n = buffer.getNumSamples();
     buffer.clear();
     if (n == 0) return;
-    engine.set (buildParams());
+    const auto bp = buildParams();
+    engine.set (bp);
+    latency.request ((int) std::lround (dh::halfbandChainDelay (bp.oversample)));   // el retardo del diezmador, según Quality
     // Patrón: si cambió (edición o selección), se pasa la copia al motor; entra en el compás siguiente.
     const int pi = patternIndex();
     if (pi != lastPatIdx || patDirty.load())
@@ -106,9 +113,10 @@ void At303Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     if (auto* ph = getPlayHead())
         if (auto pos = ph->getPosition())
         {
-            if (value ("sync") > 0.5f) { if (auto b = pos->getBpm()) bpm = *b; }
             if (auto q = pos->getPpqPosition()) ppq = *q;
             hostPlaying = pos->getIsPlaying();
+            // Con el host parado, RUN usa la perilla Tempo (la que se ve), no el tempo del host.
+            if (value ("sync") > 0.5f && hostPlaying) { if (auto b = pos->getBpm()) bpm = *b; }
         }
     const bool useHost = value ("sync") > 0.5f && hostPlaying;
     const bool running = useHost || value ("run") > 0.5f;
@@ -195,7 +203,9 @@ void At303Processor::patternsFromTree (const juce::ValueTree& t)
 void At303Processor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
-    state.setProperty ("preset", currentPresetName, nullptr);
+    state.setProperty ("preset", currentPresetName.get(), nullptr);
+    state.setProperty ("program", currentProgram, nullptr);
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
     state.removeChild (state.getChildWithName ("PATTERNS"), nullptr);
     state.appendChild (patternsToTree(), nullptr);
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
@@ -212,8 +222,11 @@ void At303Processor::setStateInformation (const void* data, int sizeInBytes)
     for (auto* prm : getParameters())
         if (auto* pb = dynamic_cast<juce::AudioParameterBool*> (prm)) pb->setValueNotifyingHost (pb->get() ? 1.0f : 0.0f);
     currentPresetName = state.getProperty ("preset", "Init").toString();
+    currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
+    if (state.hasProperty ("presetSnapshot")) tracker.fromString (*this, state.getProperty ("presetSnapshot").toString());
+    else tracker.capture (*this);
     patternsFromTree (pats);
-    if (onPatternsChanged) juce::MessageManager::callAsync ([this] { if (onPatternsChanged) onPatternsChanged(); });
+    patternsDirty = true; presetDirty = true; triggerAsyncUpdate();
 }
 
 // ── Presets: sonido y patrón (se escribe en el patrón elegido por el preset) ──
@@ -256,7 +269,8 @@ void At303Processor::loadPreset (int index)
     if (pt.isObject())
         setPattern (patternIndex(), patternFromStrings (pt.getProperty ("pitch", "").toString(), pt.getProperty ("time", "").toString(), pt.getProperty ("length", 16), pt.getProperty ("triplet", false)));
     currentProgram = index; currentPresetName = pr.name;
-    if (onPresetChanged) juce::MessageManager::callAsync ([this] { if (onPresetChanged) onPresetChanged(); });
+    tracker.capture (*this);
+    presetDirty = true; triggerAsyncUpdate();
 }
 
 juce::AudioProcessorEditor* At303Processor::createEditor() { return new At303Editor (*this); }

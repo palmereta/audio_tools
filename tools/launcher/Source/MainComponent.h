@@ -168,6 +168,7 @@ public:
     void resized() override;
 
     void showSettings (bool);
+    juce::StringArray pendingInstalls;                 // ids que llegan por --install al relanzar como administrador
     void openProduct (const String& id);
     void showHome();
 

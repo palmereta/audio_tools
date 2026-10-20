@@ -1,5 +1,5 @@
 # Tarnish — cinta, casete, video, vinilo, radio AM y teléfono, con histéresis magnética (docs/research.md).
-set(TARNISH_VERSION 1.0.1)
+set(TARNISH_VERSION 1.0.2)
 
 if(APPLE)
     set(TARNISH_FORMATS VST3 AU Standalone)

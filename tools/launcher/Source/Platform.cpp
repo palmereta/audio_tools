@@ -20,13 +20,14 @@ bool canWrite (const juce::File& dir)
     return ok;
 }
 
-bool relaunchElevated()
+bool relaunchElevated (const juce::String& arguments)
 {
    #if JUCE_WINDOWS
     const auto exe = juce::File::getSpecialLocation (juce::File::currentExecutableFile).getFullPathName();
-    const auto r = (INT_PTR) ShellExecuteW (nullptr, L"runas", exe.toWideCharPointer(), nullptr, nullptr, SW_SHOWNORMAL);
+    const auto r = (INT_PTR) ShellExecuteW (nullptr, L"runas", exe.toWideCharPointer(), arguments.isEmpty() ? nullptr : arguments.toWideCharPointer(), nullptr, SW_SHOWNORMAL);
     return r > 32;
    #else
+    juce::ignoreUnused (arguments);
     return false;
    #endif
 }

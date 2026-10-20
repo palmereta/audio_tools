@@ -129,8 +129,8 @@ TarnishEditor::TarnishEditor (TarnishProcessor& p) : AudioProcessorEditor (&p), 
    #if ! DH_HAS_MANUAL
     manualBtn.setVisible (false);
    #endif
-    proc.onPresetChanged = [this] { presetBtn.setButtonText (proc.currentPresetName); buildDetail(); content.repaint(); };
-    presetBtn.setButtonText (proc.currentPresetName);
+    proc.onPresetChanged = [this] { presetBtn.setButtonText (proc.presetDisplayName()); buildDetail(); content.repaint(); };
+    presetBtn.setButtonText (proc.presetDisplayName());
 
     bindVariant();
     buildDetail();
@@ -322,6 +322,8 @@ void TarnishEditor::timerCallback()
     if (m != lastMachine) { lastMachine = m; bindVariant(); if (tab == "machine") buildDetail(); content.repaint (machineR); }
     deck.tick();
     content.repaint (knobsR); content.repaint (detailR);
+    // El nombre del preset lleva " *" en cuanto algo difiere de lo que cargó el preset.
+    if (const auto name = proc.presetDisplayName(); name != presetBtn.getButtonText()) presetBtn.setButtonText (name);
 }
 
 void TarnishEditor::mouseMove (const juce::MouseEvent& e)

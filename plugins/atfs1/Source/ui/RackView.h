@@ -34,11 +34,10 @@ public:
             for (auto& l : *ll) lcdMarks.push_back ({ l["text"].toString(), (float) l["x"] });
         const auto pw = A.layout.getProperty ("power", {});
         power = juce::Rectangle<float>::leftTopRightBottom ((float) pw["x0"], (float) pw["y0"], (float) pw["x1"], (float) pw["y1"]);
-        Bus::get().lcd = [this] (const juce::String& n, const juce::String& v) { flash (n, v); };
         startTimerHz (30);
         setRepaintsOnMouseActivity (false);
     }
-    ~RackView() override { Bus::get().lcd = nullptr; }
+    ~RackView() override = default;
 
     void flash (const juce::String& name, const juce::String& value)
     {
@@ -46,7 +45,6 @@ public:
         flashUntil = juce::Time::getMillisecondCounter() + 1600;
         repaint (lcdBounds().toNearestInt().expanded (4));
     }
-    bool powerOn = true;
 
     void paint (juce::Graphics& g) override
     {
@@ -103,7 +101,8 @@ public:
                 pressed = b.id; repaint();
                 return;
             }
-        if (power.contains (p)) { powerOn = ! powerOn; if (onButton) onButton (powerOn ? "power_on" : "power_off"); repaint(); }
+        // El estado vive en el procesador: al reabrir el editor el botón muestra lo que suena.
+        if (power.contains (p)) { const bool on = ! proc.power.load(); if (onButton) onButton (on ? "power_on" : "power_off"); repaint(); }
     }
     void mouseDrag (const juce::MouseEvent& e) override
     {
@@ -171,6 +170,7 @@ private:
     std::array<int, 4> dataAngle {};
     juce::String pressed, flashText, lastHelp, shown1, shown2;
     juce::uint32 flashUntil = 0;
+    int shownInd = -1;
     bool midiLit = false;
 
     float scale() const { return (float) getWidth() / Assets::get().viewWidth(); }
@@ -208,7 +208,7 @@ private:
         const auto& A = Assets::get();
         const auto a = A.toView (glass.getX(), glass.getY(), -1.4f), b = A.toView (glass.getRight(), glass.getBottom(), -1.4f);
         const juce::Rectangle<float> r (a, b);
-        if (! powerOn) { g.setColour (juce::Colour (0xff1a2208).withAlpha (0.85f)); g.fillRect (r); return; }
+        if (! proc.power.load()) { g.setColour (juce::Colour (0xff1a2208).withAlpha (0.85f)); g.fillRect (r); return; }
         const float dot = (r.getWidth() - 10.0f) / (24.0f * 6.0f);
         const float x = r.getX() + 6.0f, y1 = r.getY() + r.getHeight() * 0.16f, y2 = y1 + dot * 10.0f;
         const juce::String l1 = (line1 ? line1() : juce::String()).paddedRight (' ', 24);
@@ -243,6 +243,10 @@ private:
         const auto l1 = line1 ? line1() : juce::String(), l2 = line2 ? line2() : juce::String();
         if (l1 != shown1 || l2 != shown2) { shown1 = l1; shown2 = l2; need = true; }
         if (flashUntil != 0 && juce::Time::getMillisecondCounter() > flashUntil) { flashUntil = 0; need = true; }
+        // Los indicadores del LCD (FLT, REV, VAR, INS, KEY, VOL, PAN) siguen a la automatización.
+        const int ind = (proc.value ("filter") > 0.5f) | (proc.value ("rev_type") > 0.5f) << 1 | (proc.value ("var_type") > 0.5f) << 2 | (proc.value ("ins_type") > 0.5f) << 3
+                      | (proc.value ("mono") > 0.5f) << 4 | (proc.value ("volume") > 0.01f) << 5 | (std::abs (proc.value ("pan")) > 0.01f) << 6;
+        if (ind != shownInd) { shownInd = ind; need = true; }
         if (need) repaint (lcdBounds().toNearestInt().expanded (6));
         // Perillas movidas por el host o el editor: se repinta sólo la que cambió.
         for (size_t i = 0; i < knobs.size(); ++i)

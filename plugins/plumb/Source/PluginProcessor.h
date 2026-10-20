@@ -7,6 +7,7 @@
 #include <JuceHeader.h>
 #include "ParamsPl.h"
 #include "SafeString.h"
+#include "PresetTracker.h"
 
 class PlumbProcessor : public juce::AudioProcessor, private juce::AsyncUpdater
 {
@@ -44,6 +45,7 @@ public:
     void loadPreset (int index);
     std::function<void()> onPresetChanged;
     dh::SafeString currentPresetName { "Init" };
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
 
     // ── Para la vista ──
     const dh::pl::Engine& getEngine() const { return engine; }
@@ -75,6 +77,9 @@ private:
     void loadFactory();
     dh::pl::EngineParams buildParams() const;
     void handleAsyncUpdate() override;
+    dh::PresetTracker tracker { { "key", "scale", "mode", "ref_a", "gate", "midi_mode", "voice", "mix", "output",
+                                  "deg0", "deg1", "deg2", "deg3", "deg4", "deg5", "deg6", "deg7", "deg8", "deg9", "deg10", "deg11" } };   // la canción y la sesión no "modifican" el preset
+    std::atomic<bool> presetDirty { false };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlumbProcessor)
 };

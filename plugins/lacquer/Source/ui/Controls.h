@@ -1,4 +1,5 @@
 #pragma once
+#include "../../../../shared/ui/Wheel.h"
 // Controles propios: el selector rotativo del objetivo de sonoridad (una llave de posiciones como la de un torno) y
 // la fila de estilos.
 
@@ -61,11 +62,12 @@ public:
         choose (juce::jlimit (0, items.size() - 1, dragStart + (int) std::round ((dragY - e.position.y) / 22.0f)));
     }
     void mouseUp (const juce::MouseEvent&) override { dragStart = -1; }
-    void mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails& w) override { choose (juce::jlimit (0, items.size() - 1, index + (w.deltaY > 0 ? 1 : -1))); }
+    void mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails& w) override { if (const int k = wheelSteps.take (w); k != 0) choose (juce::jlimit (0, items.size() - 1, index + k)); }
 
 private:
     juce::StringArray items, subs;
     int index = 0, dragStart = -1; float dragY = 0;
+    dh::WheelSteps wheelSteps;            // un paso por muesca: un roce del trackpad no recorre todos los objetivos
     juce::Point<float> centre() const { return { getWidth() * 0.5f, getHeight() * 0.56f }; }
     float knobR() const { return std::min (getWidth() * 0.15f, getHeight() * 0.21f); }
     float angleOf (int i) const

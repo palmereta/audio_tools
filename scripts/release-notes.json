@@ -1,0 +1,91 @@
+{
+  "_comment": "What changed in each version, shown at the top of its GitHub release. Key: the tag (<plugin>-v<version>).",
+
+  "at20v-v1.0.6": [
+    "The pitch wheel springs back to centre when you let go (hold Alt to leave it where it is) and turns the right way.",
+    "Shift-drag from an output that already has a cable adds a second cable.",
+    "The value bubble no longer freezes while you drag a knob; jacks light up as soon as a cable starts.",
+    "The lower bar shows the real number of notes with unison; voices beyond the voice count finish their release instead of hanging.",
+    "Sustain pedal and the momentary switch are separate; the wheel position is saved with the session.",
+    "The latency of oversampling is reported to the host; AT20V FX bypasses with the dry sound in time.",
+    "The preset name shows a * when you change something after loading it."
+  ],
+  "at101v-v1.0.5": [
+    "Knob and slider moves are recorded as single gestures in host automation.",
+    "MIDI Learn ignores channel-mode messages and the sustain pedal; the panic button goes first.",
+    "The sequencer grid audition follows LOAD and KEY TRANSPOSE; Shift-drag no longer paints steps.",
+    "The latency of oversampling is reported to the host; the preset name shows a * when edited."
+  ],
+  "at42-v1.0.5": [
+    "Cables are saved safely while you patch; the MOD wheel (CC1) is centred.",
+    "Buttons, switches and the joystick record clean automation gestures.",
+    "The tune bubble shows the chromatic note; the orb's shadow no longer stays after closing.",
+    "The latency of oversampling is reported to the host; the preset name shows a * when edited."
+  ],
+  "at700-v1.0.4": [
+    "The sequencer no longer jumps back to step 1 with large host buffers, and CLOCK OUT no longer sticks high with an external clock.",
+    "Multiple-to-multiple cables are no longer reversed; the BENDER lever moves on screen while you drag it.",
+    "RANDOM no longer stops and restarts the sequencer; sustain pedal (CC64) works.",
+    "The spring reverb sounds the same at every sample rate; the readouts of Clock Rate, ADSR and VCO LO show the right values.",
+    "The latency of oversampling is reported to the host; the preset name shows a * when edited."
+  ],
+  "atfs1-v1.0.4": [
+    "A reused voice always starts with its attack; All Notes Off releases the pedal and the held MIDI keys.",
+    "Typing a value (Algorithm, Fine) sets the right number; Fine stops at 99.",
+    "Clicking the formant sequence no longer forces Round; One-way and Round work with a single point.",
+    "The LCD indicators and the effects diagram follow automation; the effects sound the same at every sample rate.",
+    "The mouse wheel turns the knobs; the help line follows the control under the mouse."
+  ],
+  "orrery-v1.0.4": [
+    "A MIDI port that appears after loading is reopened, and a missing one shows as Not connected instead of vanishing.",
+    "The preview plays on mono tracks; Capture MIDI includes the echoes.",
+    "The preset name shows a * when edited (global settings do not count)."
+  ],
+  "atmd-v1.0.2": [
+    "Changing voices or unison while holding keys no longer leaves notes hanging.",
+    "The computer keyboard releases the right note in every octave; the MOD wheel is saved with the session and in user presets.",
+    "Double-click resets a knob even after a tiny drag; OSC 3 FREQ reads right with CONTROL off; the OVERLOAD lamp catches every peak.",
+    "Delay and reverb start clean; bypass keeps the on-screen keyboard.",
+    "The latency of oversampling is reported to the host; the preset name shows a * when edited."
+  ],
+  "murmur-v1.0.2": [
+    "Freeze survives a sample-rate change and reopening the session (the frozen audio is saved with it).",
+    "On a stereo-to-mono track the feedback no longer runs away; delay and reverb no longer replay old tails.",
+    "The mouse wheel turns the knobs; the help line follows the control under the mouse; the preset name shows a * when edited."
+  ],
+  "lacquer-v1.0.2": [
+    "Closing the plugin during analysis no longer hangs; touching a control no longer stops Learn.",
+    "Bypass keeps the dry sound in time; file mode no longer overwrites the live plan, A/B or the mode.",
+    "Export and re-render can no longer collide; very large host buffers are handled."
+  ],
+  "halation-v1.0.2": [
+    "Long delay divisions are no longer cut short (lines up to 12 s, delay up to 8 s, stutter up to 4 s).",
+    "Stutter stays on the grid and triplets are exact; the pre-delay no longer replays old audio.",
+    "The envelope follower no longer depends on the host buffer size; a repeated note no longer retriggers the resonator.",
+    "The preset name shows a * when edited."
+  ],
+  "tarnish-v1.0.2": [
+    "No more buzz while the host is stopped; bypass keeps the dry sound in time.",
+    "Tape stop on MIDI no longer gets stuck; synced stop follows tempo changes and lasts up to 10 s; the tail rings out for 4 s.",
+    "Presets no longer overwrite your session settings, and a Mix that one preset set goes back to 100 % on the next.",
+    "The preset name shows a * when edited; the manual explains why Mix halfway phases like a flanger when wow is up."
+  ],
+  "at303-v1.0.2": [
+    "A slide into a closed gate no longer mutes the next note; changing the length or the pattern no longer skips steps.",
+    "Triplets no longer leave a 5-step gap; host jumps and negative positions no longer drop a step or hang the gate.",
+    "Mutate always changes something; Accent and Slide edit only in Pitch mode; Transpose and Accent velocity move in whole steps.",
+    "Tempo works with the host stopped; Quality changes without cutting the note; the latency of oversampling is reported."
+  ],
+  "plumb-v1.0.1": [
+    "Throat and Formant no longer lower the voice: moving the formants keeps the level within 2 dB (it dropped 5 to 9 dB).",
+    "The live note view draws every note again (in some takes it kept clearing itself).",
+    "Hard tune no longer flips between two notes on a vibrato near the midpoint; notes that start with a scoop are corrected naturally.",
+    "MIDI scale stays latched until the next chord; the reported latency is right after reopening a session.",
+    "Compare, the keys, the latency and the preset name follow changes made from the host; the preset name shows a * when edited."
+  ],
+  "launcher-v1.0.2": [
+    "Copies installed by hand or for another user count for the version check, and an update removes them or tells you where they are.",
+    "Updates are replaced in two steps and rolled back if anything fails.",
+    "Installing for all users hands the queue to the elevated launcher."
+  ]
+}

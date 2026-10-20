@@ -26,6 +26,7 @@ AtmdProcessor::AtmdProcessor()
     vals.assign (raw.size(), 0.0f);
     loadFactory();
     rescanUserPresets();
+    { juce::StringArray g; for (auto& e : params()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout AtmdProcessor::createLayout()
@@ -70,6 +71,7 @@ void AtmdProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     maxBlock = std::max (64, samplesPerBlock);
     osNow = oversamplingFactor (value ("oversampling"));
     eng.prepare (sampleRate, maxBlock, osNow);
+    latency.setNow ((int) std::lround (dh::halfbandChainDelay (osNow)));   // el retardo de los filtros del sobremuestreo
     extBuf.assign ((size_t) maxBlock + 64, 0.0f);
     tmpR.assign ((size_t) maxBlock + 64, 0.0f);
     keyboardState.reset();
@@ -104,7 +106,7 @@ void AtmdProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
 
     // El sobremuestreo cambia el motor entero: se prepara de nuevo (corta las notas, es un ajuste de sistema).
     const int os = oversamplingFactor (vals[(size_t) Ix::get().oversampling]);
-    if (os != osNow) { osNow = os; eng.prepare (sr, std::max (maxBlock, n), osNow); }
+    if (os != osNow) { osNow = os; eng.prepare (sr, std::max (maxBlock, n), osNow); latency.request ((int) std::lround (dh::halfbandChainDelay (osNow))); }
     applyParams (vals.data(), eng);
     if (auto* ph = getPlayHead())
         if (auto pos = ph->getPosition())
@@ -156,6 +158,9 @@ void AtmdProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
 void AtmdProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
 {
     if (! wasBypassed) { eng.allNotesOff (false); wasBypassed = true; }
+    // El teclado en pantalla sigue al MIDI del host (los note-off llegan) y lo tocado con el mouse en bypass se
+    // consume acá: al salir del bypass no entra todo junto.
+    keyboardState.processNextMidiBuffer (midi, 0, buffer.getNumSamples(), true);
     buffer.clear();
     midi.clear();
 }
@@ -182,6 +187,7 @@ void AtmdProcessor::loadPreset (int index)
     // Presets cuyo sonido es la modulación traen la rueda MOD ya levantada (no es un parámetro: es la mano).
     modWheel.store (juce::jlimit (0.0f, 1.0f, (float) v.getProperty ("mod_wheel", 0.0)));
     currentPresetName = presets[(size_t) index].name;
+    tracker.capture (*this);
     notifyUi (onPresetChanged);
 }
 
@@ -235,6 +241,7 @@ bool AtmdProcessor::saveUserPreset (const juce::String& name)
     dir.createDirectory();
     auto* o = new juce::DynamicObject(); auto* prm = new juce::DynamicObject();
     o->setProperty ("name", name); o->setProperty ("category", "User");
+    o->setProperty ("mod_wheel", modWheel.load());
     const auto& ps = params();
     for (size_t k = 0; k < ps.size(); ++k) if (! ps[k].global && std::abs (raw[k]->load() - ps[k].def) > 1e-4f) prm->setProperty (ps[k].id, raw[k]->load());
     o->setProperty ("params", juce::var (prm));
@@ -242,6 +249,7 @@ bool AtmdProcessor::saveUserPreset (const juce::String& name)
     const bool ok = file.replaceWithText (juce::JSON::toString (juce::var (o)));
     rescanUserPresets();
     currentPresetName = name;
+    tracker.capture (*this);
     for (int i = 0; i < (int) presets.size(); ++i) if (! presets[(size_t) i].factory && presets[(size_t) i].file == file) currentProgram = i;
     notifyUi (onPresetChanged);
     return ok;
@@ -259,6 +267,8 @@ void AtmdProcessor::getStateInformation (juce::MemoryBlock& destData)
     auto state = apvts.copyState();
     state.setProperty ("presetName", currentPresetName.get(), nullptr);
     state.setProperty ("program", currentProgram, nullptr);
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
+    state.setProperty ("modWheel", modWheel.load(), nullptr);             // la rueda MOD es parte del sonido (Wind, Laser Zap…)
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
 
@@ -270,7 +280,9 @@ void AtmdProcessor::setStateInformation (const void* data, int sizeInBytes)
     if (! state.isValid() || ! state.hasType (apvts.state.getType())) return;
     currentPresetName = state.getProperty ("presetName", "Init").toString();
     currentProgram = state.getProperty ("program", 0);
-    for (auto id : { "presetName", "program" }) state.removeProperty (id, nullptr);
+    modWheel.store (juce::jlimit (0.0f, 1.0f, (float) state.getProperty ("modWheel", 0.0)));
+    const auto snapshot = state.getProperty ("presetSnapshot").toString();
+    for (auto id : { "presetName", "program", "modWheel", "presetSnapshot" }) state.removeProperty (id, nullptr);
     std::set<juce::String> present;
     for (const auto& c : state) if (c.hasProperty ("id")) present.insert (c.getProperty ("id").toString());
     apvts.replaceState (state);
@@ -278,6 +290,8 @@ void AtmdProcessor::setStateInformation (const void* data, int sizeInBytes)
     for (auto* p : getParameters())
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (p))
             if (! dh::isFiniteF (rp->getValue()) || present.count (rp->paramID) == 0) rp->setValueNotifyingHost (rp->getDefaultValue());
+    if (snapshot.isNotEmpty()) tracker.fromString (*this, snapshot);
+    else tracker.capture (*this);
     notifyUi (onPresetChanged);
 }
 

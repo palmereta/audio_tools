@@ -254,6 +254,20 @@ int main()
         }
     }
 
+    std::printf ("Cambios con teclas apretadas: unísono, notas repetidas\n");
+    {
+        // UNISON 4, tecla apretada; UNISON 1, se suelta; UNISON 4 otra vez: no tiene que quedar un drone.
+        Engine e = fresh(); e.p.decayOn = false; e.st.unison = 4; e.noteOn (60, 0.8f); run (e, 0.3);
+        e.st.unison = 1; run (e, 0.05); e.noteOff (60); run (e, 0.05);
+        e.st.unison = 4; auto o = run (e, 3.0);
+        std::printf ("  después de soltar: %.0f dB a los 2-3 s\n", 20 * std::log10 (std::max (1e-9f, rms (o.L, 2.0, 3.0))));
+        check (rms (o.L, 2.0, 3.0) < 1e-3f, "cambiar el unísono con una tecla apretada no deja voces sonando");
+        // Dos note-on de la misma nota y un solo note-off (un host que repite el note-on): no queda colgada.
+        Engine f = fresh(); f.p.decayOn = false; f.noteOn (60, 0.8f); run (f, 0.1); f.noteOn (60, 0.8f); run (f, 0.1); f.noteOff (60);
+        auto q = run (f, 0.5);
+        check (rms (q.L, 0.3, 0.5) < 1e-3f, "dos note-on de la misma nota y un note-off: se suelta (sin notas colgadas)");
+    }
+
     std::printf (fails ? "\n%d FALLAS\n" : "\nTODO OK (0 fallas)\n", fails);
     return fails ? 1 : 0;
 }

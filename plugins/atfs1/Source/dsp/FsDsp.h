@@ -126,6 +126,7 @@ struct AmpEg
         stage = holdTime > 0.0f ? 0 : 1;
     }
     void keyOff() { if (stage < 4) stage = 4; }
+    void reset() { db = -96.0f; stage = 5; holdLeft = 0.0f; }   // voz nueva: el ataque arranca de cero
     bool idle() const { return stage == 5; }
 
     // dt: segundos de este paso de control.

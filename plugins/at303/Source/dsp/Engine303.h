@@ -29,7 +29,7 @@ public:
     void prepare (double sampleRate, int maxBlock)
     {
         fs = (float) sampleRate; maxB = std::max (16, maxBlock);
-        setOversample (P.oversample);
+        setOversample (P.oversample, true);
         delayL.assign ((size_t) (4.0 * fs) + 8, 0.0f); delayR = delayL;
         reset();
     }
@@ -40,7 +40,7 @@ public:
     }
     void set (const EngineParams& p)
     {
-        if (p.oversample != P.oversample) setOversample (p.oversample);
+        if (p.oversample != P.oversample) setOversample (p.oversample, false);
         P = p; voice.set (p.voice); seq.setTranspose (p.transpose);
     }
     void setPattern (const Pattern& pt) { seq.setPattern (pt); }
@@ -72,6 +72,9 @@ public:
     // la primera muestra; `clocksPerSample`: el avance del reloj por muestra (tempo).
     void process (float* l, float* r, int n, bool running, double clock0, double clocksPerSample)
     {
+        // Cambio entre MIDI y secuenciador: la nota que sonaba se suelta y las teclas sostenidas se olvidan (si no, la
+        // compuerta quedaba abierta o una tecla soltada después cortaba una nota del secuenciador).
+        if (P.seqMode != lastSeqMode) { voice.gateOff(); voice.setSlide (false); heldN = 0; seq.restart(); lastSeqMode = P.seqMode; }
         if (running && ! wasRunning) { seq.restart(); if (P.seqMode) heldN = 0; }
         if (! running && wasRunning && P.seqMode) voice.gateOff();
         wasRunning = running;
@@ -122,14 +125,18 @@ private:
     float fs = 48000; int maxB = 512, os = 4;
     std::vector<float> delayL, delayR; int dw = 0; float dlpL = 0, dlpR = 0;
     float dcL = 0, dcR = 0, dcIn = 0, driveLp = 0, dcIn2 = 0, dcL2 = 0;
-    std::array<int, 16> held {}; int heldN = 0; bool wasRunning = false;
+    std::array<int, 16> held {}; int heldN = 0; bool wasRunning = false, lastSeqMode = true;
 
-    void setOversample (int f)
+    // En prepare reserva para el factor máximo; el cambio de Quality tocando ya no reserva memoria en el hilo de
+    // audio ni corta la nota.
+    void setOversample (int f, bool initial)
     {
         os = f >= 8 ? 8 : (f >= 4 ? 4 : (f >= 2 ? 2 : 1));
+        if (initial) { decim.prepare (8); decim.prepare (4); decim.prepare (2); }   // cada filtro ya con su tamaño máximo
         decim.prepare (os);
-        osBuf.assign ((size_t) (kChunk * os + 8), 0.0f); dec.assign ((size_t) kChunk + 8, 0.0f);
-        voice.prepare (fs, os);
+        if (osBuf.size() < (size_t) (kChunk * 8 + 8)) osBuf.assign ((size_t) (kChunk * 8 + 8), 0.0f);
+        if (dec.size() < (size_t) kChunk + 8) dec.assign ((size_t) kChunk + 8, 0.0f);
+        if (initial) voice.prepare (fs, os); else voice.changeOversample (os);
     }
 
     // Distorsión: tres circuitos genéricos (sin marcas), con un tono antes de la mezcla.

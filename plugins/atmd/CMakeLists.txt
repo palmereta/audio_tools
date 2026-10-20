@@ -1,5 +1,5 @@
 # ATMD — recreación del Moog Minimoog Model D (unidad de mediados de los 70, placa de osciladores Rev 2).
-set(ATMD_VERSION 1.0.1)
+set(ATMD_VERSION 1.0.2)
 
 if(APPLE)
     set(ATMD_FORMATS VST3 AU Standalone)

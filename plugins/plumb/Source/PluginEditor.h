@@ -44,6 +44,7 @@ private:
     std::unique_ptr<juce::Component> manual;
     juce::TooltipWindow tips { this, 700 };
     juce::String suggestion;
+    int shownLatency = -1; uint32_t keySignature = 0xffffffffu;
 
     void showPresetMenu();
     void showManual (bool on);

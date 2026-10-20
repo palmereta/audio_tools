@@ -2,7 +2,7 @@
 
 A real-time granular effect. Everything that comes in is recorded into a memory of up to 16 seconds,
 and up to 128 grains read it at once, each with its own length, pitch, direction, envelope and place in
-the stereo field. VST3, Audio Unit (macOS) and standalone. Version 1.0.0.
+the stereo field. VST3, Audio Unit (macOS) and standalone. Version 1.0.2.
 
 The window draws the memory as a horizon and each grain as a bird: its place is the moment it reads, its
 height is its pitch, its size follows its envelope, and reverse grains fly the other way.

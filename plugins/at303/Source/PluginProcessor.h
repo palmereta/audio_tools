@@ -5,8 +5,11 @@
 
 #include <JuceHeader.h>
 #include "Params303.h"
+#include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/PresetTracker.h"
+#include "../../../shared/tools/LatencyReporter.h"
 
-class At303Processor : public juce::AudioProcessor
+class At303Processor : public juce::AudioProcessor, private juce::AsyncUpdater
 {
 public:
     At303Processor();
@@ -34,6 +37,13 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     juce::AudioProcessorValueTreeState apvts;
+    // Lectura sin reservar memoria (se llama ~50 veces por bloque en el hilo de audio): ids literales contra una
+    // tabla armada en el constructor, en vez de construir un juce::String por llamada.
+    float value (const char* id) const
+    {
+        for (auto& r : rawIds) if (std::strcmp (r.first, id) == 0) return r.second->load();
+        return 0.0f;
+    }
     float value (const juce::String& id) const { if (auto* p = apvts.getRawParameterValue (id)) return p->load(); return 0.0f; }
     void setValue (const juce::String& id, float v);
 
@@ -51,7 +61,14 @@ public:
     const std::vector<PresetEntry>& getPresets() const { return presets; }
     void loadPreset (int index);
     std::function<void()> onPresetChanged;
-    juce::String currentPresetName { "Init" };
+    dh::SafeString currentPresetName { "Init" };
+    dh::PresetTracker tracker { { "run", "sync", "mode", "pattern", "quality", "tempo" } };   // transporte y sesión no "modifican"
+    dh::LatencyReporter latency { *this };
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
+    std::vector<std::pair<const char*, std::atomic<float>*>> rawIds;
+    std::vector<juce::String> rawIdStore;
+    std::atomic<bool> presetDirty { false }, patternsDirty { false };
+    void handleAsyncUpdate() override { if (presetDirty.exchange (false) && onPresetChanged) onPresetChanged(); if (patternsDirty.exchange (false) && onPatternsChanged) onPatternsChanged(); }
 
     // ── Para la vista ──
     struct ViewState { std::atomic<int> step { -1 }; std::atomic<float> c13 { 0 }, meg { 0 }, veg { 0 }, cutoffHz { 500 }, cv { 2 }, k { 0 }, level { 0 }; std::atomic<bool> running { false }, gate { false }; std::array<std::atomic<float>, 4> ladder {}; std::atomic<float> vca { 0 }; } view;

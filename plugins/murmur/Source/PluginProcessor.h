@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "ParamsMm.h"
 #include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/PresetTracker.h"
 
 class MurmurProcessor : public juce::AudioProcessor
 {
@@ -47,6 +48,8 @@ public:
     bool saveUserPreset (const juce::String& name);
     void rescanUserPresets();
     dh::SafeString currentPresetName { "Init" };
+    dh::PresetTracker tracker;
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
     static juce::File userPresetDir();
     std::function<void()> onPresetChanged;
 
@@ -57,6 +60,7 @@ private:
     std::vector<std::atomic<float>*> raw;
     std::vector<float> vals;
     std::vector<float> tmpL, tmpR;
+    std::vector<int16_t> memData; int memCount = 0; double memRate = 48000.0; std::atomic<bool> memPending { false };
     juce::AudioBuffer<float> demoIn;      // MURMUR_DEMO_INPUT=archivo.wav: entrada de prueba en loop (capturas, demos)
     int demoPos = 0;
     double sr = 48000.0;

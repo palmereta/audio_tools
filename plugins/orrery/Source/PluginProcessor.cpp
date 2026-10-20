@@ -54,6 +54,13 @@ void DirectMidi::setLanePort (int lane, const juce::String& identifier)
     for (int s = 0; s < kSlots; ++s) if (! used[(size_t) s] && slots[(size_t) s] != nullptr) { slots[(size_t) s].reset(); slotIds[(size_t) s] = {}; }
 }
 
+// Puertos elegidos que no se pudieron abrir (el sinte estaba apagado al cargar el proyecto): se reintentan.
+void DirectMidi::reopenMissing()
+{
+    for (int l = 0; l < kLanes; ++l)
+        if (lanePorts[(size_t) l].isNotEmpty() && laneSlot[(size_t) l].load() < 0) setLanePort (l, lanePorts[(size_t) l]);
+}
+
 void DirectMidi::push (double atMs, int slot, const uint8_t* data, int size)
 {
     const auto w = fifo.write (1);
@@ -99,6 +106,8 @@ OrreryProcessor::OrreryProcessor()
     events.reserve (4096);
     loadFactory();
     rescanUserPresets();
+    { juce::StringArray g; for (auto& e : params()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
+    tracker.capture (*this);
 }
 
 OrreryProcessor::~OrreryProcessor()
@@ -141,6 +150,7 @@ void OrreryProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     sr = sampleRate;
     gen.prepare (sampleRate);
     preview.prepare ((float) sampleRate, std::max (64, samplesPerBlock) + 64);
+    monoR.assign ((size_t) std::max (64, samplesPerBlock) + 64, 0.0f);
     directQ.reserve (8192);
 }
 
@@ -228,7 +238,10 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     buffer.clear();
     auto* L = buffer.getWritePointer (0);
     auto* R = buffer.getNumChannels() > 1 ? buffer.getWritePointer (1) : nullptr;
-    float* rr = R;
+    // Pista mono: la vista previa se mezcla a mono (antes sólo sonaba si había canal derecho).
+    if ((int) monoR.size() < n) monoR.resize ((size_t) n);
+    if (R == nullptr) std::fill (monoR.begin(), monoR.begin() + n, 0.0f);
+    float* rr = R != nullptr ? R : monoR.data();
     int done = 0;
     const float pvol = vals[(size_t) X.previewVol], prev = vals[(size_t) X.previewRev];
     for (auto& e : events)
@@ -255,7 +268,7 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         }
     }
     if (previewOn && rr != nullptr && done < n) preview.render (L, rr, done, n, pvol, prev);
-    if (R == nullptr) buffer.applyGain (0.5f);
+    if (R == nullptr) for (int i = 0; i < n; ++i) L[i] = 0.5f * (L[i] + monoR[(size_t) i]);
 
     // Reloj MIDI (24 por negra) y start/stop hacia los puertos directos.
     const bool running = gen.isRunning();
@@ -389,6 +402,7 @@ void OrreryProcessor::loadPreset (int index)
         setValue (e.id, obj != nullptr && obj->hasProperty (e.id) ? (float) obj->getProperty (e.id) : e.def);
     }
     currentPresetName = presets[(size_t) index].name;
+    tracker.capture (*this);
     gen.resetRequest.store (true);      // la sesión nueva la arma el hilo de audio (antes era una carrera con process())
     notifyUi (onPresetChanged);
 }
@@ -406,6 +420,7 @@ bool OrreryProcessor::saveUserPreset (const juce::String& name)
     const bool ok = file.replaceWithText (juce::JSON::toString (juce::var (o)));
     rescanUserPresets();
     currentPresetName = name;
+    tracker.capture (*this);
     for (int i = 0; i < (int) presets.size(); ++i) if (! presets[(size_t) i].factory && presets[(size_t) i].file == file) currentProgram = i;
     notifyUi (onPresetChanged);
     return ok;
@@ -415,11 +430,12 @@ bool OrreryProcessor::saveUserPreset (const juce::String& name)
 void OrreryProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
-    state.setProperty ("presetName", currentPresetName, nullptr);
+    state.setProperty ("presetName", currentPresetName.get(), nullptr);
     state.setProperty ("program", currentProgram, nullptr);
     juce::StringArray ports;
     for (int l = 0; l < kLanes; ++l) ports.add (direct.lanePort (l));
     state.setProperty ("ports", ports.joinIntoString ("\n"), nullptr);
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
 
@@ -432,12 +448,15 @@ void OrreryProcessor::setStateInformation (const void* data, int sizeInBytes)
     currentPresetName = state.getProperty ("presetName", "Init").toString();
     currentProgram = state.getProperty ("program", 0);
     const auto ports = juce::StringArray::fromLines (state.getProperty ("ports", "").toString());
-    for (auto id : { "presetName", "program", "ports" }) state.removeProperty (id, nullptr);
+    const auto snapshot = state.getProperty ("presetSnapshot").toString();
+    for (auto id : { "presetName", "program", "ports", "presetSnapshot" }) state.removeProperty (id, nullptr);
     apvts.replaceState (state);
     juce::MessageManager::callAsync ([safe = juce::WeakReference<OrreryProcessor> (this), ports] {
         if (safe == nullptr) return;
         for (int l = 0; l < kLanes && l < ports.size(); ++l) safe->direct.setLanePort (l, ports[l]);
     });
+    if (snapshot.isNotEmpty()) tracker.fromString (*this, snapshot);
+    else tracker.capture (*this);
     notifyUi (onPresetChanged);
 }
 

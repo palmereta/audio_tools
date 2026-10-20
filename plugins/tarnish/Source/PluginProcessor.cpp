@@ -11,6 +11,7 @@ TarnishProcessor::TarnishProcessor()
     for (auto& a : view.scopeH) a.store (0.0f);
     for (auto& a : view.scopeM) a.store (0.0f);
     loadFactory();
+    tracker.capture (*this);
 }
 
 bool TarnishProcessor::isBusesLayoutSupported (const BusesLayout& l) const
@@ -30,7 +31,8 @@ void TarnishProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     engine.prepare (sr, samplesPerBlock);
     engine.set (buildParams (bpmNow.load()), true);
     setLatencySamples (engine.latency());
-    lastValues.clear(); counter = 0; heldNotes = 0; midiStop = transportStop = false; lastStop = false;
+    lastValues.clear(); counter = 0; heldNotes.reset(); midiStop = transportStop = false; lastStop = false;
+    bypassDelay.setSize (2, std::max (1, engine.latency())); bypassDelay.clear(); bypassPos = 0;   // un anillo de L muestras retrasa L
     const auto demoPath = juce::SystemStats::getEnvironmentVariable ("TARNISH_DEMO_INPUT", {});
     if (demoPath.isNotEmpty() && demo.getNumSamples() == 0)
     {
@@ -65,7 +67,7 @@ EngineParams TarnishProcessor::buildParams (double bpm) const
     p.crushRaw = (int) value ("crush_mode") == 1; p.jitter = value ("jitter") / 100.0; p.dither = value ("dither") > 0.5f;
     p.varispeed = value ("varispeed");
     const double beats = params::stopSyncBeats ((int) value ("stop_sync"));
-    p.stopS = beats > 0 ? beats * 60.0 / std::max (20.0, bpm) : value ("stop_time");
+    p.stopS = beats > 0 ? std::min (10.0, beats * 60.0 / std::max (20.0, bpm)) : value ("stop_time");
     p.startS = value ("start_time"); p.stopCurve = value ("stop_curve") / 100.0;
     p.groove = value ("groove") / 100.0; p.grooveFollow = value ("groove_follow") > 0.5f;
     p.compress = value ("compress") / 100.0; p.fading = value ("fading") / 100.0; p.tuning = value ("tuning") / 100.0;
@@ -104,22 +106,28 @@ void TarnishProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
             playing = pos->getIsPlaying();
         }
     bpmNow.store (bpm);
-    // Notas MIDI: mientras haya una sostenida, la cinta está parada.
-    if (value ("stop_midi") > 0.5f)
+    // Notas MIDI: mientras haya una sostenida, la cinta está parada. Se cuenta por número de nota (dos note-on de
+    // la misma nota no dejan la cuenta trabada) y al apagar la opción se olvidan las notas sostenidas.
+    const bool stopOnMidi = value ("stop_midi") > 0.5f;
+    if (stopOnMidi)
         for (const auto m : midi)
         {
             const auto msg = m.getMessage();
-            if (msg.isNoteOn()) ++heldNotes;
-            else if (msg.isNoteOff()) heldNotes = std::max (0, heldNotes - 1);
-            else if (msg.isAllNotesOff() || msg.isAllSoundOff()) heldNotes = 0;
+            if (msg.isNoteOn()) heldNotes.set ((size_t) msg.getNoteNumber());
+            else if (msg.isNoteOff()) heldNotes.reset ((size_t) msg.getNoteNumber());
+            else if (msg.isAllNotesOff() || msg.isAllSoundOff()) heldNotes.reset();
         }
-    midiStop = heldNotes > 0;
+    else heldNotes.reset();
+    midiStop = stopOnMidi && heldNotes.any();
     // Con el transporte del host: al parar la reproducción, la cinta frena (en los hosts que siguen llamando al
     // proceso con el transporte detenido).
     transportStop = value ("stop_transport") > 0.5f && ! playing;
 
     const bool stopNow = value ("stop") > 0.5f || midiStop || transportStop;
-    if (paramsChanged()) { auto p = buildParams (bpm); p.stop = stopNow; engine.set (p); lastStop = stopNow; }
+    // El stop sincronizado depende del tempo: un cambio de tempo también recalcula.
+    const bool tempoChanged = std::abs (bpm - lastBpm) > 1.0e-3 && (int) value ("stop_sync") > 0;
+    lastBpm = bpm;
+    if (paramsChanged() || tempoChanged) { auto p = buildParams (bpm); p.stop = stopNow; engine.set (p); lastStop = stopNow; }
     else if (stopNow != lastStop) { engine.setStop (stopNow); lastStop = stopNow; }
 
     if (buffer.getNumChannels() == 1 || getTotalNumInputChannels() == 1) buffer.copyFrom (1, 0, buffer, 0, 0, n);
@@ -130,7 +138,10 @@ void TarnishProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
     for (int c = 0; c < 2; ++c) inPk = std::max (inPk, buffer.getMagnitude (c, 0, n));
 
     // Posición: la del host si está atado a la línea de tiempo y el host la da; si no, un contador propio.
-    const bool lock = value ("timeline") > 0.5f && hostPos >= 0;
+    // Sólo mientras el host reproduce: con el transporte parado muchos hosts siguen procesando con la misma posición
+    // en cada bloque, y el soplido, el zumbido y el crujido (que salen de la posición) repetían el mismo bloque: un
+    // tono a fs / tamaño de bloque.
+    const bool lock = value ("timeline") > 0.5f && playing && hostPos >= 0;
     const int64_t pos0 = lock ? hostPos : counter;
     // De a 32 muestras para tomar el osciloscopio B-H a lo largo del bloque.
     for (int i = 0; i < n; i += 32)
@@ -189,25 +200,39 @@ void TarnishProcessor::loadPreset (int index)
 {
     if (index < 0 || index >= (int) presets.size()) return;
     const auto& pr = presets[(size_t) index];
-    // Primero todo a su valor por defecto (menos Mix y el stop, si el preset no los nombra), después lo del preset.
+    // Primero todo a su valor por defecto, después lo del preset. Lo que es de la sesión y no del sonido (Mix, el
+    // stop y cómo se dispara, la línea de tiempo, la calidad, la salida) queda como está si el preset no lo nombra.
+    static const juce::StringArray keep { "mix", "stop", "stop_midi", "stop_transport", "timeline", "quality", "out", "auto_gain" };
     const auto pv = pr.data.getProperty ("params", {});
     for (auto* param : getParameters())
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (param))
         {
             const auto id = rp->getParameterID();
-            if ((id == "mix" || id == "stop") && ! pv.hasProperty (id)) continue;
+            if (keep.contains (id) && ! pv.hasProperty (id))
+            {
+                const auto it = presetSessionValues.find (id);
+                const bool untouched = it != presetSessionValues.end() && std::abs (rp->getValue() - it->second) < 1.0e-4f;
+                if (! untouched) continue;
+            }
             rp->setValueNotifyingHost (rp->getDefaultValue());
         }
     if (auto* obj = pv.getDynamicObject())
         for (auto& kv : obj->getProperties()) setValue (kv.name.toString(), (float) kv.value);
+    presetSessionValues.clear();
+    for (auto& id : keep)
+        if (pv.hasProperty (id))
+            if (auto* rp = apvts.getParameter (id)) presetSessionValues[id] = rp->getValue();
     currentProgram = index; currentPresetName = pr.name;
-    if (onPresetChanged) juce::MessageManager::callAsync ([this] { if (onPresetChanged) onPresetChanged(); });
+    tracker.capture (*this);
+    triggerAsyncUpdate();                        // la interfaz se entera en el hilo de mensajes (y no después de destruido)
 }
 
 void TarnishProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
-    state.setProperty ("preset", currentPresetName, nullptr);
+    state.setProperty ("preset", currentPresetName.get(), nullptr);
+    state.setProperty ("program", currentProgram, nullptr);
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
 
@@ -223,6 +248,25 @@ void TarnishProcessor::setStateInformation (const void* data, int sizeInBytes)
     for (auto* prm : getParameters())
         if (auto* pb = dynamic_cast<juce::AudioParameterBool*> (prm)) pb->setValueNotifyingHost (pb->get() ? 1.0f : 0.0f);
     currentPresetName = state.getProperty ("preset", "Init").toString();
+    currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
+    if (state.hasProperty ("presetSnapshot")) tracker.fromString (*this, state.getProperty ("presetSnapshot").toString());
+    else tracker.capture (*this);                // sesión de una versión anterior: el nombre sin marca
+    triggerAsyncUpdate();
+}
+
+// Bypass: el seco sale retrasado la misma latencia que se le informó al host, así la pista no salta.
+void TarnishProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
+{
+    const int n = buffer.getNumSamples(), L = bypassDelay.getNumSamples();
+    if (n == 0 || L < 1) return;
+    if (buffer.getNumChannels() > 1 && getTotalNumInputChannels() == 1) buffer.copyFrom (1, 0, buffer, 0, 0, n);
+    for (int c = 0; c < std::min (2, buffer.getNumChannels()); ++c)
+    {
+        auto* x = buffer.getWritePointer (c); auto* d = bypassDelay.getWritePointer (c);
+        int p = bypassPos;
+        for (int i = 0; i < n; ++i) { const float y = d[p]; d[p] = x[i]; x[i] = y; if (++p >= L) p = 0; }
+    }
+    bypassPos = (bypassPos + n) % L;
 }
 
 juce::AudioProcessorEditor* TarnishProcessor::createEditor() { return new TarnishEditor (*this); }

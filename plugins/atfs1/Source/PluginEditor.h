@@ -7,8 +7,11 @@
 #include "ui/Pages.h"
 #include "ui/KeyboardStrip.h"
 
-class ATFS1Editor : public juce::AudioProcessorEditor, public juce::FileDragAndDropTarget, private juce::Timer
+class ATFS1Editor : public juce::AudioProcessorEditor, public juce::FileDragAndDropTarget, public dh::HelpSink, private juce::Timer
 {
+public:
+    void routeHelp (const juce::String& s) override { help = s; content.repaint (0, statusY, baseW, 24); }
+    void routeLcd (const juce::String& n, const juce::String& v) override { rack.flash (n, v); }
 public:
     explicit ATFS1Editor (ATFS1Processor&);
     ~ATFS1Editor() override;

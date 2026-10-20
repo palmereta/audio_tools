@@ -65,6 +65,20 @@ inline void designStage (HalfbandFir& f, int stageFromBase)
     else f.design (31, 7.0);
 }
 
+// Retardo de grupo, en muestras a la frecuencia base, de la cadena de medias bandas de un factor (el mismo para el
+// diezmador y el interpolador): cada etapa de N coeficientes demora (N − 1)/2 muestras a su frecuencia.
+inline double halfbandChainDelay (int factor)
+{
+    const int stages = factor >= 8 ? 3 : factor >= 4 ? 2 : factor >= 2 ? 1 : 0;
+    double d = 0.0;
+    for (int s = 0; s < stages; ++s)
+    {
+        const int taps = (stages - 1 - s) == 0 ? 95 : 31;            // como designStage
+        d += 0.5 * (taps - 1) / (double) (1 << (stages - s));        // la etapa s corre a base · 2^(stages − s)
+    }
+    return d;
+}
+
 class Decimator
 {
 public:
@@ -72,7 +86,7 @@ public:
     {
         stages = factor >= 8 ? 3 : factor >= 4 ? 2 : factor >= 2 ? 1 : 0;
         for (int s = 0; s < stages; ++s) designStage (fir[s], stages - 1 - s);
-        work.assign (8192 * 8, 0.0f);
+        if (work.size() != 8192 * 8) work.assign (8192 * 8, 0.0f);        // una sola vez: cambiar de factor no reserva
     }
 
     // in: n·factor muestras; out: n muestras (se suma gain·y a out).
@@ -109,7 +123,7 @@ public:
     {
         stages = factor >= 8 ? 3 : factor >= 4 ? 2 : factor >= 2 ? 1 : 0;
         for (int s = 0; s < stages; ++s) designStage (fir[s], s);
-        work.assign (8192 * 8 * 2, 0.0f);
+        if (work.size() != 8192 * 8 * 2) work.assign (8192 * 8 * 2, 0.0f);
     }
 
     // in: n muestras; out: n·factor muestras.

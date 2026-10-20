@@ -103,6 +103,7 @@ struct RenderOpts
     std::function<float (juce::int64, int)> audioIn;   // (muestra, canal) → entrada, si el plugin tiene entradas
     std::vector<Transport> transport;
     bool keepBlockTimes = false;
+    bool frozenPosition = false;       // el host parado que sigue procesando: la misma posición en cada bloque
 };
 
 Out render (Plug& pl, std::vector<Ev> events, juce::int64 total, const RenderOpts& o = {})
@@ -138,7 +139,7 @@ Out render (Plug& pl, std::vector<Ev> events, juce::int64 total, const RenderOpt
         if (o.audioIn && pl.ins > 0)
             for (int c = 0; c < pl.ins; ++c)
                 for (int i = 0; i < n; ++i) buf.setSample (c, i, o.audioIn (pos + i, c));
-        pl.ph.pos = pos;
+        pl.ph.pos = o.frozenPosition ? 0 : pos;
         if (o.randomBlocks && rnd.nextInt (16) == 0)       // bloques de 0 muestras: algunos hosts VST3 los mandan
         {
             juce::AudioBuffer<float> empty (buf.getNumChannels(), 0); juce::MidiBuffer none;
@@ -157,7 +158,7 @@ Out render (Plug& pl, std::vector<Ev> events, juce::int64 total, const RenderOpt
             if (md.samplePosition < 0 || md.samplePosition >= n) ++out.badOffsets;
             out.midi.push_back ({ pos + md.samplePosition, md.getMessage() });
         }
-        if (pl.ph.playing) pl.ph.ppq += n * pl.ph.bpm / 60.0 / pl.sr;
+        if (pl.ph.playing && ! o.frozenPosition) pl.ph.ppq += n * pl.ph.bpm / 60.0 / pl.sr;
         pos += n;
     }
     return out;
@@ -808,6 +809,92 @@ void testReprepare()
             fmt ("pico %.2f, final %.0f dB", b.peak, end3));
 }
 
+// Host parado que sigue procesando (Ableton, Bitwig): la posición no cambia entre bloques. Lo aleatorio que sale de la
+// posición no puede repetir el mismo bloque (se oye como un tono a fs / tamaño de bloque). Entrada en silencio.
+void testStopped()
+{
+    auto pl = load (pluginPath);
+    auto& p = *pl->p;
+    const int np = std::max (1, p.getNumPrograms());
+    int worst = 0;
+    for (int k = 0; k < np; ++k)
+    {
+        if (np > 1) p.setCurrentProgram (k);
+        RenderOpts o; o.frozenPosition = true;
+        if (isEffect (*pl)) o.audioIn = [] (juce::int64, int) { return 0.0f; };
+        pl->ph.playing = false; pl->ph.ppq = 8.0;
+        auto r = render (*pl, {}, S (1.5, pl->sr), o);
+        const int B = pl->block; int repeats = 0, loud = 0;
+        for (size_t b = (size_t) S (0.5, pl->sr) / (size_t) B; (b + 2) * (size_t) B <= r.L.size(); ++b)
+        {
+            double e = 0; bool same = true;
+            for (int i = 0; i < B; ++i)
+            {
+                const float a = r.L[b * (size_t) B + (size_t) i], c = r.L[(b + 1) * (size_t) B + (size_t) i];
+                e += (double) a * a;
+                if (a != c) same = false;
+            }
+            if (e / B > 1e-12) { ++loud; if (same) ++repeats; }
+        }
+        if (repeats > 0 && repeats * 2 >= loud)
+        {
+            ++worst;
+            report ("stopped", juce::String (k) + " " + p.getProgramName (k), "FAIL", fmt ("%d de %d bloques con sonido repiten el anterior con el host parado", repeats, loud));
+        }
+    }
+    if (worst == 0) report ("stopped", U ("todos los programas, host parado"), "PASS", fmt ("%d programas sin bloques repetidos", np));
+}
+
+// Freeze y sesión: lo congelado tiene que seguir sonando después de guardar y reabrir el proyecto (y después de un
+// prepareToPlay del host, que muchos mandan al cambiar el tamaño de bloque o al exportar).
+void testFreezeState()
+{
+    auto a = load (pluginPath);
+    juce::AudioProcessorParameter* fr = nullptr;
+    for (auto* prm : realParams (*a)) if (prm->getName (32).equalsIgnoreCase ("Freeze")) fr = prm;
+    if (fr == nullptr || a->ins == 0) return;
+    const double sr = a->sr;
+    RenderOpts feed; feed.audioIn = testInput (sr, 4.0);
+    render (*a, phrase (sr), S (4.0, sr), feed);
+    fr->setValue (1.0f);
+    RenderOpts quiet; quiet.audioIn = [] (juce::int64, int) { return 0.0f; };
+    const double la = db (stats (render (*a, {}, S (2.0, sr), quiet), 1.0, 2.0, sr).rms);
+    a->p->prepareToPlay (sr, a->block * 2);                          // el host re-prepara
+    const double lp = db (stats (render (*a, {}, S (2.0, sr), quiet), 1.0, 2.0, sr).rms);
+    juce::MemoryBlock st; a->p->getStateInformation (st);
+    auto b = load (pluginPath);
+    b->p->setStateInformation (st.getData(), (int) st.getSize());
+    const double lb = db (stats (render (*b, {}, S (2.0, sr), quiet), 1.0, 2.0, sr).rms);
+    const bool ok = la > -60.0 && lp > la - 6.0 && lb > la - 6.0;
+    report ("freeze", U ("congelado: re-preparar y reabrir la sesión"), ok ? "PASS" : "FAIL",
+            fmt ("congelado %.0f dB, tras prepareToPlay %.0f dB, sesión reabierta %.0f dB (%d bytes)", la, lp, lb, (int) st.getSize()));
+}
+
+// Bypass: el host sigue compensando la latencia informada, así que el seco tiene que salir retrasado lo mismo.
+void testBypass()
+{
+    auto pl = load (pluginPath);
+    auto& p = *pl->p;
+    const int L = p.getLatencySamples();
+    if (pl->ins == 0 || L <= 0) { report ("bypass", U ("sin latencia o sin entrada"), "PASS", fmt ("latencia %d", L)); return; }
+    if (p.getPluginDescription().isInstrument) { report ("bypass", U ("instrumento: en bypass no suena"), "PASS", fmt ("latencia %d", L)); return; }
+    const int n = pl->block, total = 4 * n + L + 64, at = 1000;
+    juce::AudioBuffer<float> buf (std::max ({ 2, pl->ins, pl->outs }), n);
+    juce::MidiBuffer mb;
+    std::vector<float> out;
+    for (int pos = 0; pos < total; pos += n)
+    {
+        buf.clear();
+        if (at >= pos && at < pos + n) for (int c = 0; c < pl->ins; ++c) buf.setSample (c, at - pos, 1.0f);
+        p.processBlockBypassed (buf, mb);
+        for (int i = 0; i < n; ++i) out.push_back (buf.getSample (0, i));
+    }
+    int peakAt = -1; float pk = 0;
+    for (int i = 0; i < (int) out.size(); ++i) if (std::abs (out[(size_t) i]) > pk) { pk = std::abs (out[(size_t) i]); peakAt = i; }
+    const int got = peakAt - at;
+    report ("bypass", U ("impulso por processBlockBypassed"), got == L ? "PASS" : "FAIL", fmt ("sale a %d muestras; latencia informada %d", got, L));
+}
+
 void testMidiOut()
 {
     auto probe = load (pluginPath);
@@ -968,7 +1055,7 @@ int main (int argc, char** argv)
         for (auto* p : realParams (*pl)) std::printf ("%3d %s (%d pasos)\n", i++, p->getName (40).toRawUTF8(), p->getNumSteps());
         return 0;
     }
-    juce::StringArray tests = juce::StringArray::fromTokens (opt ("--tests", "info,programs,midi,rates,state,fuzz,params,cpu,reprepare,midiout"), ",", "");
+    juce::StringArray tests = juce::StringArray::fromTokens (opt ("--tests", "info,programs,midi,rates,state,fuzz,params,cpu,reprepare,midiout,stopped,bypass,freeze"), ",", "");
     std::printf ("%s\n", pluginPath.toRawUTF8());
     const auto t0 = Clock::now();
     for (auto& t : tests)
@@ -984,6 +1071,9 @@ int main (int argc, char** argv)
         else if (t == "cpu") testCpu();
         else if (t == "reprepare") testReprepare();
         else if (t == "midiout") testMidiOut();
+        else if (t == "stopped") testStopped();
+        else if (t == "bypass") testBypass();
+        else if (t == "freeze") testFreezeState();
     }
     writeJson();
     std::printf ("\n%s: %d FAIL, %d WARN en %.0f s\n", plugName.toRawUTF8(), fails, warns, std::chrono::duration<double> (Clock::now() - t0).count());

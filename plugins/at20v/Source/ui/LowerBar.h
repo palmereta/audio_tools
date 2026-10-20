@@ -52,7 +52,14 @@ public:
         const auto* pu = proc.apvts.getRawParameterValue ("unison");
         static const char* vn[] = { "Mono", "Poly 2", "Poly 4", "Poly 6", "Poly 8", "Poly 12" };
         juce::String voices = vn[juce::jlimit (0, 5, (int) pv->load())];
-        if ((int) pu->load() > 0) voices << juce::String::fromUTF8 ("  ·  Unison ") << ((int) pu->load() + 1);
+        if ((int) pu->load() > 0)
+        {
+            // Con unísono, las 12 voces se reparten: Poly 12 con Unison 4 toca 3 notas a la vez. Se dice cuántas.
+            static const int vc[] = { 1, 2, 4, 6, 8, 12 };
+            const int u = (int) pu->load() + 1, poly = vc[juce::jlimit (0, 5, (int) pv->load())];
+            voices << juce::String::fromUTF8 ("  ·  Unison ") << u;
+            if (poly > 1) voices << " (" << juce::jmax (1, juce::jmin (poly, 12 / u)) << " notes)";
+        }
         label (14, "VOICES", dim, true);
         label (70, voices, txt, false, 220);
 

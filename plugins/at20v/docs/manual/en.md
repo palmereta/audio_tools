@@ -257,7 +257,7 @@ All 35 jacks work, including the default connections. The white lines printed be
 ### Working with cables
 
 - **Connect**: drag from a free jack to a compatible one, always output to input. While you drag, the jacks you can reach are highlighted.
-- **Stack**: an output accepts several plugs, so one source can feed many inputs. An input takes one plug; a new cable replaces the old one.
+- **Stack**: an output accepts several plugs, so one source can feed many inputs. Shift-drag from an output that already has a cable to add another one. An input takes one plug; a new cable replaces the old one.
 - **Move**: click a jack with a cable to lift the end of the last cable plugged into it, and drop it on another jack.
 - **Unplug**: lift an end and drop it away from any jack. Alt-click (Option-click on a Mac) a jack to remove all its cables.
 - **Menu**: right-click a jack for Cable color (red, blue, yellow, green, white or black) and Unplug.

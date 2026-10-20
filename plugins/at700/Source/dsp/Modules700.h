@@ -298,6 +298,16 @@ public:
             sp.lp = 0.0f; sp.hp = 0.0f; sp.hpx = 0.0f;
         }
         lpC = 1.0f - fastExp (-kTwoPi * 3800.0f / fs);
+        // Coeficientes de los pasa-todos por frecuencia, no por muestra: se afinaron en 0,62 y 0,58 a 96 kHz (48 kHz
+        // con el 2x por defecto), donde la fase pasa por −90° a ~7,0 y ~7,9 kHz. Así el chirrido del resorte es el
+        // mismo en 1x, 2x y 4x y a 44,1, 48 o 96 kHz.
+        for (int s = 0; s < 2; ++s)
+        {
+            const double a96 = s == 0 ? 0.62 : 0.58, fs96 = 96000.0;
+            const double fc = std::atan ((1.0 - a96) / (1.0 + a96)) * fs96 / 3.14159265358979323846;
+            const double t = std::tan (3.14159265358979323846 * std::min (fc, 0.45 * (double) fs) / fs);
+            apA[(size_t) s] = (float) ((1.0 - t) / (1.0 + t));
+        }
         hpR = fastExp (-kTwoPi * 90.0f / fs);
     }
 
@@ -310,7 +320,7 @@ public:
             const float fb = sp.buf[(size_t) sp.pos];
             float v = x * 0.5f + fb * 0.76f;
             // Dispersión: pasa-todos de primer orden en cascada (coeficiente alto → chirrido).
-            const float a = s == 0 ? 0.62f : 0.58f;
+            const float a = apA[(size_t) s];
             for (int i = 0; i < kAp; ++i)
             {
                 const float y = -a * v + sp.apx[(size_t) i] + a * sp.ap[(size_t) i];
@@ -331,6 +341,7 @@ private:
     struct Spring { std::vector<float> buf; int len = 1, pos = 0; std::array<float, kAp> ap {}, apx {}; float lp = 0, hp = 0, hpx = 0; };
     std::array<Spring, 2> springs;
     float fs = 48000.0f, lpC = 0.3f, hpR = 0.99f;
+    std::array<float, 2> apA { 0.62f, 0.58f };
 };
 
 // ───────── 711A: phase shifter (8 pasa-todos con JFET, 1440°) ─────────

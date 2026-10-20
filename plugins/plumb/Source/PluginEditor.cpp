@@ -79,7 +79,11 @@ public:
     }
     void tick (float dt)
     {
-        const auto o = proc.getEngine().last();
+        // La última estimación, del mismo anillo que lee la vista de notas (last() es una copia sin sincronizar de
+        // una estructura que el audio escribe mientras tanto).
+        const auto& eng = proc.getEngine();
+        const int64_t vw = eng.viewWrite();
+        const auto o = vw > 0 ? eng.viewAt (vw - 1) : CorrectOut {};
         float target = 0;
         if (o.voiced && o.target > 0) { errIn = (o.pitch - o.target) * 100.0f; errOut = (o.output - o.target) * 100.0f; target = juce::jlimit (-25.0f, 25.0f, errIn * 0.5f); voiced = true; }
         else voiced = false;
@@ -131,7 +135,13 @@ public:
         const auto& e = proc.getEngine();
         const int64_t w = e.viewWrite();
         if (w - readPos > 3000) readPos = w - 3000;
-        for (; readPos < w; ++readPos) { pts.push_back (e.viewAt (readPos)); med.push_back ({}); }
+        for (; readPos < w; ++readPos)
+        {
+            const auto o = e.viewAt (readPos);
+            // El tiempo volvió atrás (prepareToPlay, un render): lo viejo ya no se descartaría nunca.
+            if (! pts.empty() && o.time < pts.back().time) { pts.clear(); med.clear(); medDone = 0; }
+            pts.push_back (o); med.push_back ({});
+        }
         const double sr = proc.getSampleRateNow();
         if (! pts.empty())
         {
@@ -437,8 +447,9 @@ PlumbEditor::PlumbEditor (PlumbProcessor& p) : AudioProcessorEditor (&p), proc (
     knob (speed, "speed", speedAtt, "Speed: how fast the correction reaches the target. 0 is instant: the hard-tune effect.");
     knob (style, "style", styleAtt, "Style: from Natural (keeps vibrato, scoops and bends) to Hard (every note exactly on pitch).");
 
-    proc.onPresetChanged = [this] { presetBtn.setButtonText (proc.currentPresetName.get()); refreshKeys(); content.repaint(); };
-    presetBtn.setButtonText (proc.currentPresetName.get());
+    proc.onPresetChanged = [this] { presetBtn.setButtonText (proc.presetDisplayName()); refreshKeys(); content.repaint(); };
+    presetBtn.setButtonText (proc.presetDisplayName());
+    compareBtn.setToggleState (proc.compare.load(), juce::dontSendNotification);
     refreshKeys();
     setResizable (true, true);
     setResizeLimits (baseW / 2, baseH / 2, (int) (baseW * 1.5), (int) (baseH * 1.5));
@@ -534,6 +545,13 @@ void PlumbEditor::timerCallback()
     notes->tick();
     const int m = (int) proc.value ("mode");
     for (int i = 0; i < 3; ++i) modeBtns[i]->setToggleState (i == m, juce::dontSendNotification);
+    // Lo que puede cambiar sin un clic acá (automatización del host, Apply, otra instancia del editor): Compare, la
+    // latencia informada, la tonalidad y la escala, el nombre del preset con su marca de modificado.
+    compareBtn.setToggleState (proc.compare.load(), juce::dontSendNotification);
+    if (const int lat = proc.getLatencySamples(); lat != shownLatency) { shownLatency = lat; content.repaint (juce::Rectangle<int> (676, 52, 268, 18)); }
+    const uint32_t sig = (uint32_t) proc.allowedMask() | ((uint32_t) proc.bypassMask() << 12) | ((uint32_t) (int) proc.value ("key") << 24) | ((uint32_t) (int) proc.value ("scale") << 28);
+    if (sig != keySignature) { keySignature = sig; refreshKeys(); content.repaint(); }
+    if (const auto name = proc.presetDisplayName(); name != presetBtn.getButtonText()) presetBtn.setButtonText (name);
     if (proc.isListening())
     {
         int t; bool mi; float cf; proc.keySuggestion (t, mi, cf);

@@ -8,6 +8,7 @@ PlumbProcessor::PlumbProcessor()
       apvts (*this, nullptr, "PLUMB", params::layout())
 {
     loadFactory();
+    tracker.capture (*this);
     for (int i = 0; i < 12; ++i) degPtr[(size_t) i] = apvts.getRawParameterValue ("deg" + juce::String (i));
 }
 
@@ -169,13 +170,21 @@ void PlumbProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, juc
     samplesDone += n;
 }
 
-void PlumbProcessor::handleAsyncUpdate() { setLatencySamples (engine.latencySamples()); }
+// Hilo de mensajes: la latencia del modo elegido (la del parámetro, que es la que el audio adopta en el bloque
+// siguiente) y el aviso a la interfaz de un preset o estado nuevo.
+void PlumbProcessor::handleAsyncUpdate()
+{
+    setLatencySamples (engine.latencyForMode ((Mode) juce::jlimit (0, 2, (int) value ("mode"))));
+    if (presetDirty.exchange (false) && onPresetChanged) onPresetChanged();
+}
 
 // ── Estado ──
 void PlumbProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     state.setProperty ("preset", currentPresetName.get(), nullptr);
+    state.setProperty ("program", currentProgram, nullptr);
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
 
@@ -190,7 +199,13 @@ void PlumbProcessor::setStateInformation (const void* data, int sizeInBytes)
     for (auto* prm : getParameters())
         if (auto* pb = dynamic_cast<juce::AudioParameterBool*> (prm)) pb->setValueNotifyingHost (pb->get() ? 1.0f : 0.0f);
     currentPresetName = state.getProperty ("preset", "Init").toString();
-    if (onPresetChanged) juce::MessageManager::callAsync ([this] { if (onPresetChanged) onPresetChanged(); });
+    currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
+    if (state.hasProperty ("presetSnapshot")) tracker.fromString (*this, state.getProperty ("presetSnapshot").toString());
+    else tracker.capture (*this);
+    // La latencia del modo restaurado se informa ya: el host la lee al cargar la sesión (Logic restaura el estado
+    // después de prepareToPlay) y una exportación que empiece antes del primer bloque compensaría mal.
+    setLatencySamples (engine.latencyForMode ((Mode) juce::jlimit (0, 2, (int) value ("mode"))));
+    presetDirty = true; triggerAsyncUpdate();
 }
 
 // ── Presets: el carácter de la corrección; nunca tocan la tonalidad ni la escala ──
@@ -218,7 +233,7 @@ void PlumbProcessor::loadPreset (int index)
     if (index < 0 || index >= (int) presets.size()) return;
     const auto& pr = presets[(size_t) index];
     const auto pv = pr.data.getProperty ("params", {});
-    static const juce::StringArray keep { "key", "scale", "mode", "ref_a", "gate", "midi_mode",
+    static const juce::StringArray keep { "key", "scale", "mode", "ref_a", "gate", "midi_mode", "voice", "mix", "output",
                                           "deg0", "deg1", "deg2", "deg3", "deg4", "deg5", "deg6", "deg7", "deg8", "deg9", "deg10", "deg11" };
     for (auto* param : getParameters())
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (param))
@@ -230,7 +245,8 @@ void PlumbProcessor::loadPreset (int index)
     if (auto* obj = pv.getDynamicObject())
         for (auto& kv : obj->getProperties()) setValue (kv.name.toString(), (float) kv.value);
     currentProgram = index; currentPresetName = pr.name;
-    if (onPresetChanged) juce::MessageManager::callAsync ([this] { if (onPresetChanged) onPresetChanged(); });
+    tracker.capture (*this);
+    presetDirty = true; triggerAsyncUpdate();
 }
 
 juce::AudioProcessorEditor* PlumbProcessor::createEditor() { return new PlumbEditor (*this); }

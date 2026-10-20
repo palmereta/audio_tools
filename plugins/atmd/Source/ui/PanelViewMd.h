@@ -157,7 +157,13 @@ public:
     {
         if (const auto* c = controlAt (e.position))
             if (c->type == "knob")
-                if (auto* prm = param (c->id)) { prm->beginChangeGesture(); prm->setValueNotifyingHost (prm->getDefaultValue()); prm->endChangeGesture(); }
+                if (auto* prm = param (c->id))
+                {
+                    // El segundo clic ya abrió el gesto en mouseDown: se usa ese (sin anidar) y el arrastre siguiente
+                    // parte del valor por defecto, así un movimiento mínimo antes de soltar no deshace el reinicio.
+                    prm->setValueNotifyingHost (prm->getDefaultValue());
+                    startNorm = prm->getDefaultValue(); dragStart = e.position;
+                }
     }
 
     void mouseWheelMove (const juce::MouseEvent& e, const juce::MouseWheelDetails& w) override
@@ -265,7 +271,14 @@ private:
         if (c->id == "mod_wheel") { onHelp ("MOD wheel: how much oscillator 3 or noise modulates, where the modulation switches send it"); return; }
         if (c->id == "power") { onHelp ("POWER: always on in the plugin"); return; }
         const auto& d = paramDef (c->id);
-        onHelp (d.name + ": " + formatParam (d, proc.value (c->id)) + "   " + d.help);
+        // OSC 3 FREQUENCY con OSC 3 CONTROL apagado abarca ±3 octavas (el motor escala 36/7,5): el texto también.
+        juce::String txt = formatParam (d, proc.value (c->id));
+        if (c->id == "osc3_freq" && proc.value ("osc3_ctrl") < 0.5f)
+        {
+            const float st = proc.value (c->id) * (36.0f / 7.5f);
+            txt = (st > 0.005f ? "+" : "") + juce::String (st, 1) + " st";
+        }
+        onHelp (d.name + ": " + txt + "   " + d.help);
     }
 
     void timerCallback() override

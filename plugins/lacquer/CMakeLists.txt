@@ -1,5 +1,5 @@
 # Lacquer — masterizador automático (análisis + cadena de mastering con reglas propias; docs/research.md).
-set(LACQUER_VERSION 1.0.1)
+set(LACQUER_VERSION 1.0.2)
 
 if(APPLE)
     set(LACQUER_FORMATS VST3 AU Standalone)

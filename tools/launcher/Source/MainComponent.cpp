@@ -755,6 +755,12 @@ void MainComponent::buildRows()
         });
     }
     layoutList();
+    // Instalaciones pedidas al relanzar como administrador (--install id,id): se ponen en cola una vez.
+    if (! pendingInstalls.isEmpty())
+    {
+        const auto ids = pendingInstalls; pendingInstalls.clear();
+        for (auto* r : rows) if (ids.contains (r->product.id)) enqueue (*r, false);
+    }
 }
 
 void MainComponent::layoutList()
@@ -893,7 +899,14 @@ void MainComponent::enqueue (ProductRow& row, bool removeOnly)
                                                if (safe == nullptr) return;
                                                auto rows = std::move (safe->waitingForAdmin);
                                                safe->waitingForAdmin.clear();
-                                               if (result == 0) { if (platform::relaunchElevated()) juce::JUCEApplicationBase::quit(); return; }
+                                               if (result == 0)
+                                               {
+                                                   // El launcher elevado sigue con lo que estaba en cola (antes había que volver a pedirlo).
+                                                   juce::StringArray ids;
+                                                   for (auto& r : rows) if (r != nullptr) ids.add (r->product.id);
+                                                   if (platform::relaunchElevated ("--install " + ids.joinIntoString (","))) juce::JUCEApplicationBase::quit();
+                                                   return;
+                                               }
                                                if (result == 1)
                                                {
                                                    safe->settings.systemWideVst3 = false;

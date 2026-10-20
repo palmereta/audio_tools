@@ -377,6 +377,20 @@ Detected detect (const Product& p, const InstalledDb& db, const Paths& paths)
         {
             d.present = d.viaLauncher = true;
             d.version = r->version;
+            // Other copies in the plugin folders (a manual install, the other scope): the DAW may load an old one
+            // while the launcher says "up to date". They count for the version, so the update replaces them.
+            for (auto& item : p.forThisOS().files)
+            {
+                const auto f = formatOf (item);
+                if (f == Format::other) continue;
+                for (auto& dir : searchDirs (paths, f, p.name))
+                {
+                    const auto b = dir.getChildFile (item);
+                    if (! b.exists() || d.paths.contains (b.getFullPathName())) continue;
+                    d.strays.add (b.getFullPathName());
+                    if (auto v = bundleVersion (b); v.isEmpty() || compareVersions (v, d.version) < 0) d.version = v;
+                }
+            }
             return d;
         }
     }
@@ -548,8 +562,11 @@ Result install (const Product& p, const File& zip, const Paths& paths, const Set
     if (prev != nullptr)
         for (auto& s : prev->paths) prevNames.add (File (s).getFileName());
 
-    StringArray installed;
-    bool gotAU = false;
+    // Two phases, so a failure never leaves a half-replaced plugin. First every old copy is moved aside (on Windows a
+    // DAW holding the .vst3 makes that rename fail before anything is touched); then the new ones go in. Any failure
+    // puts the old copies back.
+    struct Step { File item, dest, aside; Format f; };
+    std::vector<Step> steps;
     for (auto& item : root.findChildFiles (File::findFilesAndDirectories, false, "*", File::FollowSymlinks::no))
     {
         const auto name = item.getFileName();
@@ -558,26 +575,49 @@ Result install (const Product& p, const File& zip, const Paths& paths, const Set
         if (! settings.wants (f) && ! prevNames.contains (name)) continue;
         const auto dest = paths.destinationFor (name, p.name, settings);
         if (dest == File()) continue;
-
-        if (! dest.getParentDirectory().createDirectory())
-            return Result::fail ("Could not create " + dest.getParentDirectory().getFullPathName() + "." + writeHint (dest));
-        if (dest.exists() && ! dest.deleteRecursively())
-            return Result::fail ("Could not replace " + dest.getFullPathName() + ". Close any app or DAW that is using it and try again." + writeHint (dest));
-        if (! moveInto (item, dest))
-            return Result::fail ("Could not write " + dest.getFullPathName() + "." + writeHint (dest));
-        clearQuarantine (dest);
-        installed.add (dest.getFullPathName());
-        gotAU = gotAU || f == Format::au;
+        steps.push_back ({ item, dest, dest.getSiblingFile (name + ".launcher-old"), f });
     }
+    auto rollBack = [&] (size_t movedAside, size_t placed) {
+        for (size_t k = 0; k < placed; ++k) steps[k].dest.deleteRecursively();
+        for (size_t k = 0; k < movedAside; ++k) if (steps[k].aside.exists()) steps[k].aside.moveFileTo (steps[k].dest);
+    };
+    for (size_t k = 0; k < steps.size(); ++k)
+    {
+        auto& s = steps[k];
+        if (! s.dest.getParentDirectory().createDirectory())
+        { rollBack (k, 0); work.deleteRecursively(); return Result::fail ("Could not create " + s.dest.getParentDirectory().getFullPathName() + "." + writeHint (s.dest)); }
+        s.aside.deleteRecursively();
+        if (s.dest.exists() && ! s.dest.moveFileTo (s.aside))
+        { rollBack (k, 0); work.deleteRecursively(); return Result::fail ("Could not replace " + s.dest.getFullPathName() + ". Close any app or DAW that is using it and try again." + writeHint (s.dest)); }
+    }
+    StringArray installed;
+    bool gotAU = false;
+    for (size_t k = 0; k < steps.size(); ++k)
+    {
+        auto& s = steps[k];
+        if (! moveInto (s.item, s.dest))
+        { rollBack (steps.size(), k); work.deleteRecursively(); return Result::fail ("Could not write " + s.dest.getFullPathName() + "." + writeHint (s.dest)); }
+        clearQuarantine (s.dest);
+        installed.add (s.dest.getFullPathName());
+        gotAU = gotAU || s.f == Format::au;
+    }
+    for (auto& s : steps)
+        if (s.aside.exists() && ! s.aside.deleteRecursively())
+            notes.add ("Could not delete the old copy " + s.aside.getFullPathName() + "; it is safe to delete it by hand.");
     work.deleteRecursively();
 
     if (installed.isEmpty())
         return Result::fail ("Nothing to install. Turn on at least one format in Settings.");
 
-    // Copies from a previous install that this one did not replace (moved folder, removed item).
-    if (prev != nullptr)
-        for (auto& s : prev->paths)
-            if (! installed.contains (s)) File (s).deleteRecursively();
+    // Copies from a previous install that this one did not replace (moved folder, removed item), and copies the
+    // launcher did not put there (a manual install, the other scope). If one cannot be removed (it needs other
+    // permissions), say where it is: the DAW could keep loading it.
+    StringArray old;
+    if (prev != nullptr) old.addArray (prev->paths);
+    old.addArray (detect (p, db, paths).strays);
+    for (auto& s : old)
+        if (! installed.contains (s) && File (s).exists() && ! File (s).deleteRecursively())
+            notes.add ("An older copy is still at " + s + " and your DAW may load it. Delete it by hand (it needs other permissions).");
 
     installed.sort (true);
     InstallRecord rec;

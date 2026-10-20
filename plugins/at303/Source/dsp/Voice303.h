@@ -57,6 +57,8 @@ public:
     {
         fsBase = baseRate; os = std::max (1, oversample); fs = baseRate * (float) os; reset();
     }
+    // Cambio de calidad tocando: la frecuencia interna cambia, las envolventes y la nota siguen.
+    void changeOversample (int oversample) { os = std::max (1, oversample); fs = fsBase * (float) os; }
     void reset()
     {
         phase = 0.0; y1 = y2 = y3 = y4 = 0; s1 = s2 = s3 = s4 = 0; hpFb.reset(); hpIn.reset(); hpOut.reset();
@@ -73,7 +75,9 @@ public:
     {
         cvTarget = cvVolts;
         accentOn = accent;
-        if (! legato)
+        // Una nota ligada sólo sigue sin flanco si la compuerta está alta: si estaba cerrada (el slide del final del
+        // patrón hacia el primer paso al dar Play, un patrón editado que cerró la compuerta) se dispara como nueva.
+        if (! legato || ! gate)
         {
             cv = cvVolts;                // sin slide la CV salta (el op-amp sigue al DAC)
             gate = true;

@@ -74,7 +74,7 @@ class Sequencer
 {
 public:
     // Reinicio al principio del patrón (o al arrancar el transporte).
-    void restart() { lastStep = -1; noteIdx = -1; gateOffAt = -1; lastC1 = -1; }
+    void restart() { lastStep = -1; noteIdx = -1; gateOffAt = -1; lastC1 = -1; patPos = 0; shownStep = -1; }
     void setPattern (const Pattern& p) { pending = p; pendingNotes = compile (p); havePending = true; }
     void setTranspose (int semis) { transpose = semis; }
 
@@ -83,21 +83,29 @@ public:
     template <typename F> void advance (double c0, double c1, F&& emit)
     {
         if (havePending && lastStep < 0) adopt();
+        // ¿El reloj sigue de corrido? Entre bloques puede quedar una rendija de redondeo; más que eso es un salto del
+        // host (loop, otra posición): la nota que sonaba se suelta (un fin de compuerta pendiente quedaría en la
+        // línea de tiempo vieja y la nota colgada) y se recalcula como al arrancar, incluido el paso justo en c0.
+        const bool continuous = lastC1 >= 0 && c0 >= lastC1 - 0.5 && c0 <= lastC1 + 0.5;
+        if (! continuous && lastStep >= 0)
+        {
+            emit (SeqEvent { SeqEvent::kSlide, 0, false, false, false }, 0.0);
+            emit (SeqEvent { SeqEvent::kGateOff, 0, false, false, false }, 0.0);
+            lastStep = -1; gateOffAt = -1; noteIdx = -1;
+            if (havePending) adopt();
+        }
         const int cps = cur.clocksPerStep();
         // Fin de compuerta pendiente.
         auto checkGate = [&] (double a, double b) {
             if (gateOffAt >= 0 && gateOffAt > a && gateOffAt <= b) { emit (SeqEvent { SeqEvent::kGateOff, 0, false, false, false }, (gateOffAt - c0) / std::max (1e-12, c1 - c0)); gateOffAt = -1; }
         };
-        // El reloj de cada bloque sale de la posición del host: entre el final de un bloque y el principio del
-        // siguiente puede quedar una rendija de redondeo. Si el reloj sigue de corrido, se retoma desde donde quedó
-        // (un paso o un fin de compuerta que cae en la rendija no se pierde); un salto real del host recalcula.
-        const bool continuous = lastC1 >= 0 && c0 >= lastC1 - 0.5 && c0 <= lastC1 + 0.5;
+        // Si el reloj sigue de corrido se retoma desde donde quedó: un paso o un fin de compuerta que cae en la
+        // rendija entre bloques no se pierde.
         double from = continuous ? std::min (c0, lastC1) : c0;
         // Pasos que empiezan en (from, c1]; al arrancar, también el que cae justo en c0.
         int64_t sFirst;
         if (lastStep < 0) sFirst = (int64_t) std::ceil (c0 / cps - 1e-9);
-        else if (continuous) sFirst = std::max (lastStep + 1, (int64_t) std::floor (from / cps) + 1);
-        else sFirst = (int64_t) std::floor (c0 / cps) + 1;
+        else sFirst = std::max (lastStep + 1, (int64_t) std::floor (from / cps) + 1);
         const int64_t sLast = (int64_t) std::floor (c1 / cps);
         lastC1 = c1;
         for (int64_t s = sFirst; s <= sLast; ++s)
@@ -105,26 +113,41 @@ public:
             const double at = (double) s * cps;
             checkGate (from, at - 1e-9);
             from = at - 1e-9;
+            if (s < 0) continue;                                    // pre-roll o cuenta previa del host (posición negativa)
             stepStart (s, at, c0, c1, emit);
         }
         checkGate (from, c1);
     }
 
-    int currentStep() const { return lastStep < 0 ? -1 : (int) (lastStep % std::max (1, cur.length)); }
+    int currentStep() const { return lastStep < 0 ? -1 : shownStep; }
     const Pattern& pattern() const { return cur; }
 
 private:
     Pattern cur, pending; std::vector<CompiledNote> notes, pendingNotes; bool havePending = false;
     int64_t lastStep = -1; int noteIdx = -1; double gateOffAt = -1, lastC1 = -1; int transpose = 0;
+    int patPos = 0, shownStep = -1;                             // el paso dentro del patrón (contador propio)
 
     void adopt() { cur = pending; notes = pendingNotes; havePending = false; }
 
     template <typename F> void stepStart (int64_t sAbs, double at, double c0, double c1, F&& emit)
     {
-        const int L = std::max (1, cur.length);
-        int s = (int) (sAbs % L);
-        if (s == 0 && havePending) { adopt(); s = 0; }             // el patrón nuevo entra en el compás siguiente
+        int L = std::max (1, cur.length);
+        // El paso dentro del patrón lleva su propio contador: con la posición absoluta módulo el largo, un patrón de
+        // otro largo (o cambiar el largo tocando) entraba en cualquier paso y salteaba los del medio. Al arrancar se
+        // alinea con la grilla del host.
+        if (lastStep < 0) patPos = (int) (((sAbs % L) + L) % L);
+        if (patPos >= L) patPos = 0;
+        int s = patPos;
         lastStep = sAbs;
+        if (s == 0 && havePending)                                  // el patrón nuevo entra en el compás siguiente
+        {
+            const int oldCps = cur.clocksPerStep();
+            adopt(); L = std::max (1, cur.length);
+            // Tresillos ↔ corcheas: el paso cambia de 6 a 8 pulsos (o al revés); la cuenta de pasos pasa a las
+            // unidades nuevas (si no, el paso siguiente caía cinco pasos más tarde).
+            if (cur.clocksPerStep() != oldCps) lastStep = (int64_t) std::llround (at / cur.clocksPerStep());
+        }
+        patPos = s + 1; shownStep = s;
         const int cps = cur.clocksPerStep();
         const double frac = (at - c0) / std::max (1e-12, c1 - c0);
         for (size_t k = 0; k < notes.size(); ++k)

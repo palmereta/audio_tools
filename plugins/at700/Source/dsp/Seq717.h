@@ -116,7 +116,10 @@ struct Seq717
         }
         const int sc = serMode == 3 ? manualChan : chan;
         serOut = par[(size_t) sc];
-        const bool high = pos < (double) pw;
+        // Con reloj externo la salida sigue además al pulso que entra: con un pulso por paso (DIVIDE 1/32) pos vuelve
+        // a 0 en cada pulso y CLOCK OUT quedaba siempre alto.
+        const bool extClock = extPatched && hostPpqDelta < 0.0;
+        const bool high = pos < (double) pw && (! extClock || ext >= 5.0f);
         clockOut = running && ! isHold && high ? 15.0f : 0.0f;
         for (int i = 0; i < 12; ++i) gateOut[(size_t) i] = (i == s && (! running || high)) ? 15.0f : 0.0f;
         if (startPulse > 0.0f) { startPulse -= dt; startOut = 15.0f; } else startOut = 0.0f;

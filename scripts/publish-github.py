@@ -126,6 +126,11 @@ def build_tree():
 
 
 # ── 2. El commit ──
+# Lo nuevo de cada versión (scripts/release-notes.json, clave = tag), arriba de las notas de su release.
+_rn = os.path.join(ROOT, "scripts", "release-notes.json")
+RELEASE_NOTES = {k: v for k, v in json.load(open(_rn, encoding="utf-8")).items() if not k.startswith("_")} if os.path.exists(_rn) else {}
+
+
 def versions():
     """{tag: (producto, versión)} de cada plugin y del launcher, leídos de sus CMakeLists en REF."""
     names = dict(re.findall(r"package (\w+) (\w+)", git("show", f"{REF}:scripts/package-macos.sh")))
@@ -195,6 +200,8 @@ def main():
             notes = (f"{title} for macOS (11+, universal) and Windows (10/11 x64). Unzip and follow INSTALL.txt, or install it "
                      f"with the Audio Tools Launcher. More on {HOMEPAGE}.\n\nThe builds are not code-signed yet: macOS may need "
                      "`xattr -dr com.apple.quarantine` on the installed files and Windows SmartScreen may ask to confirm.")
+            changes = RELEASE_NOTES.get(tag)
+            if changes: notes = "What's new:\n\n" + "\n".join(f"- {c}" for c in changes) + "\n\n" + notes
             print(f"release {tag}: {title}")
             if DRY: continue
             status, rel = api("POST", f"/repos/{OWNER}/{REPO}/releases", {"tag_name": tag, "name": title, "body": notes, "make_latest": "false"})

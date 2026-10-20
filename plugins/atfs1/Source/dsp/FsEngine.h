@@ -46,6 +46,7 @@ struct PartParams
     bool fseqOn = false, fseqSmooth = false, fseqScratch = false;
     float fseqSpeed = 1.0f;                   // 0,1..5 (100 % = 1)
     int fseqLoopMode = 0, fseqStart = 0, fseqLoopStart = 0, fseqLoopEnd = 0;   // loop end 0 = el del Fseq
+    bool fseqLoopOverride = false;                                                 // el modo elegido en la parte (no el del Fseq)
     int fseqPitchMode = 0;                    // 0 la altura del Fseq, 1 la de la tecla
     int fseqSpeedVel = 0, fseqLevelVel = 0, fseqDelay = 0;
     int muteMode = 0;                         // 0 todo, 1 sólo con voz, 2 sólo sin voz (MUTE/SOLO)
@@ -96,7 +97,8 @@ inline float levelScaleDb (const VoicedOp& o, int note)
 // Velocidad −7..+7: 0 dB a velocidad máxima para las positivas, a velocidad mínima para las negativas.
 inline float velDb (int sens, float vel) { return sens >= 0 ? (float) sens / 7.0f * 30.0f * (vel - 1.0f) : (float) -sens / 7.0f * 30.0f * -vel; }
 inline float ampModScale (int sens) { static const float S[8] = { 0, 1, 2, 4, 5, 6, 7, 8 }; return S[sens & 7] / 8.0f; }
-inline float ratioOf (int coarse, int fine) { return (coarse <= 0 ? 0.5f : (float) coarse) * (1.0f + (float) fine / 100.0f); }
+// En modo ratio Fine va de 0 a 99 (como muestra el campo); un valor mayor que quedó del modo fijo se limita.
+inline float ratioOf (int coarse, int fine) { return (coarse <= 0 ? 0.5f : (float) coarse) * (1.0f + (float) std::min (fine, 99) / 100.0f); }
 inline float fixedHz (int coarse, int fine) { return 440.0f * fastExp2 ((float) coarse + (float) fine / 128.0f - 16.0f); }
 // Detune: un paso es una fracción de cent que se achica con la nota (la tabla del original disminuye arriba).
 inline float detuneRatio (int detune, int note) { return fastExp2 ((float) detune * 0.6f * fastExp2 (-(float) (note - 60) / 36.0f) / 1200.0f); }
@@ -201,7 +203,9 @@ public:
         sustain = on;
         if (! on) for (auto& vc : voices) if (vc.active && vc.sustained) { vc.sustained = false; release (vc); }
     }
-    void allNotesOff() { for (auto& vc : voices) if (vc.active) release (vc); heldCount = 0; }
+    // También suelta el pedal: si el sustain se levantó durante un bypass (o el host mandó sólo All Notes Off), las
+    // notas siguientes quedaban sostenidas hasta volver a pisarlo.
+    void allNotesOff() { sustain = false; for (auto& vc : voices) { vc.sustained = false; if (vc.active) release (vc); } heldCount = 0; }
     void resetControllers() { bend = 0.0f; modWheel = 0.0f; aftertouch = 0.0f; setSustain (false); }     // CC121
     void panic() { reset(); }
     void setBend (float b) { bend = b; }            // −1..+1
@@ -305,6 +309,9 @@ private:
         for (int k = 0; k < kOps; ++k)
         {
             const auto& o = vd.op[(size_t) k];
+            // Una voz reutilizada (o después de un pánico) puede tener envolventes de moduladores a mitad del
+            // release: sin esto el operador saltaba a ese nivel y la nota perdía el ataque.
+            if (! wasActive) { vc.egV[(size_t) k].reset(); vc.egN[(size_t) k].reset(); }
             vc.egV[(size_t) k].setup (o.eg, note, -attackOfs, -decayOfs, -releaseOfs, 0.0f);
             vc.egV[(size_t) k].keyOn (legato);
             if (! legato) { vc.fegV[(size_t) k].keyOn (o.feg); vc.fo[(size_t) k].reset (o.keySync && o.form != Frmt); }
@@ -409,8 +416,8 @@ private:
             else
             {
                 const int nf = (int) fsq->frames.size();
-                if (pp.fseqLoopEnd > 0) vc.fseq.advance (*fsq, std::clamp (pp.fseqLoopStart, 0, nf - 1), std::clamp (pp.fseqLoopEnd, 0, nf - 1), pp.fseqLoopMode, dt, speed);
-                else vc.fseq.advance (*fsq, fsq->loopStart, fsq->loopEnd, fsq->loopMode, dt, speed);
+                if (pp.fseqLoopOverride && pp.fseqLoopEnd > pp.fseqLoopStart) vc.fseq.advance (*fsq, std::clamp (pp.fseqLoopStart, 0, nf - 1), std::clamp (pp.fseqLoopEnd, 0, nf - 1), pp.fseqLoopMode, dt, speed);
+                else vc.fseq.advance (*fsq, fsq->loopStart, fsq->loopEnd, pp.fseqLoopOverride ? pp.fseqLoopMode : fsq->loopMode, dt, speed);
             }
             frame = vc.fseq.frame (*fsq, pp.fseqSmooth);
             fseqActive = true;

@@ -84,7 +84,7 @@ OrreryEditor::OrreryEditor (OrreryProcessor& p)
     tabHarm.onClick = [this] { showPage (2); };
     tabOut.onClick = [this] { showPage (3); };
     simple.onLane = [this] (int l) { lanes.highlight (l); showPage (1); };
-    Help::get().show = [this] (const juce::String& s) { help = s; content.repaint (statusR); };
+    dh::HelpRouter::add (this);
     proc.onPresetChanged = [this] { refreshAll(); };
 
     for (auto* pg : std::initializer_list<juce::Component*> { &simple, &lanes, &harmony, &outputs }) pg->setBounds (0, barH, baseW, baseH - barH - footH);
@@ -135,7 +135,7 @@ OrreryEditor::OrreryEditor (OrreryProcessor& p)
     }
 }
 
-OrreryEditor::~OrreryEditor() { recorder.reset(); proc.onPresetChanged = nullptr; Help::get().show = nullptr; setLookAndFeel (nullptr); }
+OrreryEditor::~OrreryEditor() { recorder.reset(); proc.onPresetChanged = nullptr; dh::HelpRouter::remove (this); setLookAndFeel (nullptr); }
 
 void OrreryEditor::refreshAll()
 {
@@ -234,7 +234,7 @@ void OrreryEditor::timerCallback()
     }
     const auto st = statusText();
     if (st != lastStatus) { lastStatus = st; content.repaint (playBtn.getRight(), 0, 320, barH); }
-    presetBtn.setButtonText (proc.currentPresetName);
+    presetBtn.setButtonText (proc.presetDisplayName());
     if (messageUntil != 0 && juce::Time::getMillisecondCounter() > messageUntil) { messageUntil = 0; content.repaint (statusR); }
 }
 
@@ -257,7 +257,7 @@ void OrreryEditor::showPresetMenu()
 void OrreryEditor::savePreset()
 {
     auto* w = new juce::AlertWindow ("Save preset", "Name of the new user preset:", juce::MessageBoxIconType::NoIcon, this);
-    w->addTextEditor ("name", proc.currentPresetName);
+    w->addTextEditor ("name", proc.currentPresetName.get());
     w->addButton ("Save", 1, juce::KeyPress (juce::KeyPress::returnKey));
     w->addButton ("Cancel", 0, juce::KeyPress (juce::KeyPress::escapeKey));
     w->enterModalState (true, juce::ModalCallbackFunction::create ([this, w] (int r) {

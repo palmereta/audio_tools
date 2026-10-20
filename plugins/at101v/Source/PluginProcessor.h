@@ -3,6 +3,9 @@
 
 #include <JuceHeader.h>
 #include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/LatencyReporter.h"
+#include "../../../shared/tools/PresetTracker.h"
+#include "../../../shared/tools/AutoGesture.h"
 #include "ExtParams101.h"
 #include "Preset101.h"
 
@@ -62,6 +65,10 @@ public:
     void rescanUserPresets();
     void randomizePanel();
     dh::SafeString currentPresetName { "Init" };     // lo escribe el host desde cualquier hilo
+    dh::PresetTracker tracker;
+    dh::LatencyReporter latency { *this };
+    dh::AutoGesture gesture;                          // gestos de automatización de lo que mueve la interfaz
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
     std::function<void()> onPresetChanged;
     static juce::File userPresetDir();
 

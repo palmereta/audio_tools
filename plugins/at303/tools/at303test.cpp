@@ -100,6 +100,62 @@ int main()
         check (ok, "todos los pasos suenan con el reloj del host en bloques");
     }
 
+    std::printf ("\nT2c Cambios en marcha: largo, tresillos, slide desde la compuerta cerrada, salto del host\n");
+    {
+        const double sr = 48000.0, bpm = 120.0, cps = bpm / 60.0 * 24.0 / sr;
+        // Corre el secuenciador muestra a muestra y guarda en qué paso del patrón empieza cada nota y en qué pulso.
+        struct Hit { double clock; int step; bool legato; };
+        auto run = [&] (Sequencer& s, double fromClock, double secs, std::vector<Hit>& hits, std::vector<double>* offs = nullptr) {
+            for (int i = 0; i < (int) (secs * sr); ++i)
+            {
+                const double c0 = fromClock + i * cps;
+                s.advance (c0, c0 + cps, [&] (const SeqEvent& e, double) {
+                    if (e.kind == SeqEvent::kNoteOn) hits.push_back ({ c0, s.currentStep(), e.legato });
+                    if (e.kind == SeqEvent::kGateOff && offs) offs->push_back (c0);
+                });
+            }
+            return fromClock + (int) (secs * sr) * cps;
+        };
+        Pattern p16; for (auto& t : p16.time) t = kNote;
+        // Largo 16 → 12 tocando: después del cambio los pasos siguen 0, 1, 2… sin saltos.
+        {
+            Sequencer s; s.setPattern (p16); s.restart();
+            std::vector<Hit> h; double c = run (s, 0.0, 2.1, h);
+            Pattern p12 = p16; p12.length = 12; s.setPattern (p12);
+            const size_t from = h.size(); c = run (s, c, 4.0, h);
+            // El patrón viejo termina su vuelta; desde el primer paso 0 manda el nuevo, de 12.
+            size_t z = from; while (z < h.size() && h[z].step != 0) ++z;
+            bool seq = true; int after = 0;
+            for (size_t k = z + 1; k < h.size(); ++k) { ++after; if (h[k].step != (h[k - 1].step + 1) % 12) seq = false; }
+            check (seq && after > 12, "largo 16 → 12 tocando: el patrón nuevo sigue paso a paso, sin saltear");
+        }
+        // Corcheas → tresillos tocando: ningún hueco mayor que un paso de tresillo (8 pulsos).
+        {
+            Sequencer s; s.setPattern (p16); s.restart();
+            std::vector<Hit> h; double c = run (s, 0.0, 1.3, h);
+            Pattern pt = p16; pt.triplet = true; s.setPattern (pt);
+            c = run (s, c, 4.0, h);
+            double gap = 0; for (size_t k = 1; k < h.size(); ++k) gap = std::max (gap, h[k].clock - h[k - 1].clock);
+            check (gap <= 10.0, "corcheas → tresillos tocando: sin silencio en el cambio (hueco máximo ≤ 10 pulsos)");
+        }
+        // Slide del último paso hacia el primero, al dar Play: la primera nota suena (compuerta cerrada = nota nueva).
+        {
+            Voice v; v.prepare ((float) sr, 2); VoiceParams vp; v.set (vp);
+            v.noteOn (2.0f, false, true);                      // ligada pero con la compuerta cerrada
+            check (v.gateHigh(), "una nota ligada con la compuerta cerrada abre la compuerta");
+        }
+        // Salto del host hacia atrás con una nota sonando y su fin de compuerta pendiente: no queda colgada.
+        {
+            Pattern pr; for (auto& t : pr.time) t = kRest; pr.time[0] = kNote; pr.time[15] = kNote;
+            Sequencer s; s.setPattern (pr); s.restart();
+            std::vector<Hit> h; std::vector<double> offs;
+            run (s, 0.0, 1.9, h, &offs);                       // la nota del paso 15 empieza a ~1,875 s
+            const size_t ons = h.size(), offsBefore = offs.size();
+            run (s, 0.0, 0.1, h, &offs);                       // el host vuelve al principio
+            check (offs.size() > offsBefore && h.size() > ons, "salto del host: la nota que sonaba se suelta y el paso 0 vuelve a sonar");
+        }
+    }
+
     std::printf ("\nT3 El anillo de calibración (Cutoff al medio, Resonance al máximo)\n");
     {
         Voice v; v.prepare ((float) fs, 4);

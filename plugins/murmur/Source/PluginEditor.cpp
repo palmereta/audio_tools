@@ -23,7 +23,7 @@ MurmurEditor::MurmurEditor (MurmurProcessor& p)
    #if ! DH_HAS_MANUAL
     manualBtn.setVisible (false);
    #endif
-    Help::get().show = [this] (const juce::String& s) { help = s; content.repaint (statusR); };
+    dh::HelpRouter::add (this);
     proc.onPresetChanged = [this] { refreshAll(); };
     showPage (0);
     setResizable (true, true);
@@ -66,7 +66,7 @@ MurmurEditor::MurmurEditor (MurmurProcessor& p)
     }
 }
 
-MurmurEditor::~MurmurEditor() { proc.onPresetChanged = nullptr; Help::get().show = nullptr; manual.reset(); setLookAndFeel (nullptr); }
+MurmurEditor::~MurmurEditor() { proc.onPresetChanged = nullptr; dh::HelpRouter::remove (this); manual.reset(); setLookAndFeel (nullptr); }
 
 void MurmurEditor::showManual (bool on)
 {

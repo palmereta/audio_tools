@@ -5,8 +5,10 @@
 
 #include <JuceHeader.h>
 #include "ParamsSp.h"
+#include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/PresetTracker.h"
 
-class SpaceProcessor : public juce::AudioProcessor
+class SpaceProcessor : public juce::AudioProcessor, private juce::AsyncUpdater
 {
 public:
     SpaceProcessor();
@@ -44,7 +46,8 @@ public:
     const std::vector<PresetEntry>& getPresets() const { return presets; }
     void loadPreset (int index);
     std::function<void()> onPresetChanged;
-    juce::String currentPresetName { "Init" };
+    dh::SafeString currentPresetName { "Init" };
+    juce::String presetDisplayName() { return tracker.displayName (*this, currentPresetName.get()); }
 
     // ── Para la vista (escritos por el hilo de audio) ──
     struct ViewState
@@ -68,6 +71,8 @@ private:
     std::map<juce::String, float> sceneB; std::atomic<bool> sceneBValid { false };
     juce::CriticalSection sceneLock;
     float envFollow = 0.0f;
+    dh::PresetTracker tracker;
+    void handleAsyncUpdate() override { if (onPresetChanged) onPresetChanged(); }
     double lastPpq = -1.0;
     juce::AudioBuffer<float> demo; int demoPos = 0;        // HALATION_DEMO_INPUT: entrada de prueba en loop (capturas)
 

@@ -3,7 +3,7 @@
 A MIDI generator for ambient, dark ambient, drone and calm music. Eight lanes orbit a slow shared
 harmony; each lane plays one role (drone, pad, melody, arpeggio, cloud, bass or pulse) on its own MIDI
 channel, so one Orrery plays a whole rack of software or hardware synthesizers. VST3, Audio Unit
-(macOS) and standalone. Version 1.0.0.
+(macOS) and standalone. Version 1.0.4.
 
 Orrery makes no sound by itself: it plays other instruments. The built-in preview sound (Outputs page)
 exists only to try it without routing anything.

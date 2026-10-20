@@ -431,6 +431,10 @@ private:
                 const double t = at + k * L.echoBeats * mfac (g.space);
                 pending.push_back ({ t, 1, ch, (uint8_t) pitch, (uint8_t) ev, (int8_t) lane, nextId });
                 pending.push_back ({ t + std::min (dur, (double) L.echoBeats), 0, ch, (uint8_t) pitch, 0, (int8_t) lane, nextId++ });
+                // El clip capturado lleva los ecos: es lo que se oyó.
+                const int hc = captureHead.load (std::memory_order_relaxed);
+                capture[(size_t) (hc % (int) capture.size())] = { playedBeats + (t - blockB0), (uint8_t) (ch + 1), (uint8_t) pitch, (uint8_t) ev, (float) std::min (dur, (double) L.echoBeats) };
+                captureHead.store (hc + 1, std::memory_order_release);
             }
         }
     }

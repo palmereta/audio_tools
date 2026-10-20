@@ -19,6 +19,7 @@ AT42Processor::AT42Processor()
     loadFactoryPresets();
     rescanUserPresets();
     if (! presets.empty()) loadPreset (0);
+    { juce::StringArray g; for (auto& e : extParams42()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout AT42Processor::createLayout()
@@ -76,6 +77,7 @@ void AT42Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
     currentSr = sampleRate;
     currentBlock = std::max (64, samplesPerBlock);
     engine.prepare (sampleRate, currentBlock, kOversampling42[juce::jlimit (0, 2, (int) apvts.getRawParameterValue ("quality")->load())]);
+    latency.setNow ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0));      // el retardo de los filtros del sobremuestreo, para que el host lo compense
     for (int i = 0; i < kNumP42; ++i) smoothed[(size_t) i] = panelRaw[(size_t) i]->load();
     outL.assign ((size_t) currentBlock + 64, 0.0f);
     outR.assign ((size_t) currentBlock + 64, 0.0f);
@@ -115,7 +117,9 @@ void AT42Processor::handleMidi (const juce::MidiMessage& m)
             if (auto* prm = apvts.getParameter (allParamIds[target])) prm->setValueNotifyingHost ((float) val / 127.0f);
             return;
         }
-        if (cc == 1) setValue (P42::joy_y, (float) val / 127.0f);          // rueda = joystick Y
+        // Rueda = joystick Y: en reposo el joystick queda al centro y subir la rueda lo sube (Y OUT positivo). Antes,
+        // CC1 en 0 lo mandaba al tope (+5 V) y subir la rueda lo bajaba.
+        if (cc == 1) setValue (P42::joy_y, 0.5f - 0.5f * (float) val / 127.0f);
     }
     else if (m.isAllNotesOff() || m.isAllSoundOff()) { engine.keys.clear(); midiDrone.fill (false); }
 }
@@ -128,7 +132,7 @@ void AT42Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     if (n <= 0) return;
     wasBypassed = false;
     const int wantOs = kOversampling42[juce::jlimit (0, 2, (int) apvts.getRawParameterValue ("quality")->load())];
-    if (wantOs != engine.oversampling()) engine.prepare (currentSr, currentBlock, wantOs);
+    { if (wantOs != engine.oversampling()) engine.prepare (currentSr, currentBlock, wantOs); latency.request ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0)); }
     if ((int) outL.size() < n) { outL.resize ((size_t) n); outR.resize ((size_t) n); }
     if (! midi.isEmpty()) midiInFlash.store (true);
 
@@ -375,6 +379,7 @@ void AT42Processor::loadPresetData (const Preset42& p)
     for (int i = 0; i < 16; ++i) pendingSeq[(size_t) i] = p.keySeq[(size_t) i];
     pendingSeqCount.store (p.keySeqCount);
     currentPresetName = p.name;
+    tracker.capture (*this);
     setCables (p.cables);
     notifyUi (onPresetChanged);
 }
@@ -387,7 +392,7 @@ Preset42 AT42Processor::currentAsPreset (const juce::String& name, const juce::S
     const auto& ps = extParams42();
     for (size_t k = 0; k < ps.size(); ++k)
         if (! ps[k].global && std::abs (extRaw[k]->load() - ps[k].def) > 1e-4f) p.settings.set (ps[k].id, extRaw[k]->load());
-    p.cables = cables;
+    p.cables = getCables();                      // bajo el candado: el host puede guardar mientras se patchea
     // Si hay una secuencia restaurada que el audio todavía no tomó (setState sin procesar), es esa la vigente.
     if (const int pend = pendingSeqCount.load(); pend >= 0)
     {
@@ -410,6 +415,7 @@ bool AT42Processor::saveUserPreset (const juce::String& name)
     const bool ok = file.replaceWithText (juce::JSON::toString (presetToJson42 (currentAsPreset (name, "User"))));
     rescanUserPresets();
     currentPresetName = name;
+    tracker.capture (*this);
     for (int i = 0; i < (int) presets.size(); ++i) if (! presets[(size_t) i].factory && presets[(size_t) i].file == file) currentProgram = i;
     notifyUi (onPresetChanged);
     return ok;
@@ -446,6 +452,8 @@ void AT42Processor::getStateInformation (juce::MemoryBlock& destData)
     auto state = apvts.copyState();
     const auto pr = presetToJson42 (currentAsPreset (currentPresetName, ""));
     state.setProperty ("presetName", currentPresetName.get(), nullptr);
+    state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
+    state.setProperty ("program", currentProgram, nullptr);
     state.setProperty ("cables", juce::JSON::toString (pr.getProperty ("cables", {}), true), nullptr);
     state.setProperty ("keyseq", juce::JSON::toString (pr.getProperty ("keyseq", {}), true), nullptr);
     juce::StringArray map;
@@ -483,6 +491,9 @@ void AT42Processor::setStateInformation (const void* data, int sizeInBytes)
     for (int i = 0; i < 16; ++i) pendingSeq[(size_t) i] = extra.keySeq[(size_t) i];
     pendingSeqCount.store (extra.keySeqCount);
     setCables (extra.cables);
+    currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
+    if (state.hasProperty ("presetSnapshot")) tracker.fromString (*this, state.getProperty ("presetSnapshot").toString());
+    else tracker.capture (*this);           // sesión anterior a la marca: el nombre sin "*"
     notifyUi (onPresetChanged);
 }
 
