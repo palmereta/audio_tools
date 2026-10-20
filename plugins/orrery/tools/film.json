@@ -1,0 +1,15 @@
+{
+  "title": "Orrery",
+  "tagline": "Music that plays itself, slowly.",
+  "fps": 24,
+  "audio": {"file": "web/assets/samples/orrery/first-light.m4a", "start": 43.8},
+  "shots": [
+    {"name": "open", "seconds": 4.8},
+    {"name": "lanes", "seconds": 4.2},
+    {"name": "sun", "seconds": 3.4},
+    {"name": "top", "seconds": 5.0},
+    {"name": "wide", "seconds": 3.2},
+    {"name": "end", "seconds": 3.4}
+  ],
+  "poster": {"shot": "wide", "frame": 40}
+}

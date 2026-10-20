@@ -10,5 +10,5 @@ namespace atl::config
 
     // The "Support Audio Tools" button. The manifest's "donate_url" wins over this value, so the
     // link can change without shipping a new launcher. Empty in both places hides the button.
-    inline constexpr const char* kDonateUrl   = "https://buymeacoffee.com/efectopalma";
+    inline constexpr const char* kDonateUrl   = "https://cafecito.app/palmereta";
 }

@@ -2204,7 +2204,7 @@ PRES = {
                     ("orrery/hl-close", "Plays your hardware.", "Each lane can go to its own MIDI port and channel, with MIDI clock: one Orrery plays a whole rack."),
                     ("orrery/hl-top", "Sessions that breathe.", "Set a length with slow fades, pace the music to your breathing and keep it gentle for sleep.")],
         stats=[("8", "", "lanes, each on its own MIDI channel"), ("16", "", "scales and modes"), (str(NOR), "", "presets in seven moods"), ("&lt;0.01", "%", "of a CPU core for the generator")],
-        film_cap="A brass orrery rendered in 3D, each planet turning at its own period. The sound is Orrery playing First Light through ATFS1, AT700 and AT101V."),
+        film_cap="A brass orrery rendered in 3D: each planet orbits at its own speed and lights up when its lane plays, and the sun breathes with the music. The sound is Orrery playing First Light through ATFS1, AT700 and AT101V."),
     "es": dict(tag="Música que se toca sola, despacio.",
         highlights=[("orrery/hl-sky", "Ocho planetas, ocho carriles.", "Cada carril orbita al largo de su lazo, así las partes entran y salen de fase durante horas, como los lazos de cinta de Eno."),
                     ("orrery/hl-moods", "Elegí un clima, apretá Play.", "Ambient, dark ambient, drone, dormir, meditar, foco y celestial, con cinco perillas que le dan forma a todo."),
@@ -2212,7 +2212,7 @@ PRES = {
                     ("orrery/hl-close", "Toca tus sintes físicos.", "Cada carril puede salir por su propio puerto y canal MIDI, con reloj: una sola Orrery toca un rack entero."),
                     ("orrery/hl-top", "Sesiones que respiran.", "Fijás una duración con fades lentos, llevás la música al ritmo de tu respiración y la dejás suave para dormir.")],
         stats=[("8", "", "carriles, cada uno en su canal MIDI"), ("16", "", "escalas y modos"), (str(NOR), "", "presets en siete climas"), ("&lt;0,01", "%", "de un núcleo para el generador")],
-        film_cap="Un orrery de bronce renderizado en 3D, cada planeta girando con su propio período. El sonido es Orrery tocando First Light con el ATFS1, el AT700 y el AT101V."),
+        film_cap="Un orrery de bronce renderizado en 3D: cada planeta orbita a su velocidad y se enciende cuando toca su carril, y el sol respira con la música. El sonido es Orrery tocando First Light con el ATFS1, el AT700 y el AT101V."),
 },
 "atmd": {
     "en": dict(tag="The fattest bass ever wired.",
@@ -2620,27 +2620,35 @@ TEXTS = lambda slug, lang: {"at20v": T, "at101v": S, "at42": Q, "at700": Z, "atf
 # dominio real, así las pruebas locales no cuentan. Las descargas llegan como eventos (ver site.js); el panel es privado.
 PULSE_SRC = "https://analytics.digitalhub.com.ar/t/4sfku5fquj4c.js"
 
-# Antes de cada descarga, un diálogo para quien quiera devolver algo: un café o tokens (el código se copia).
-# La descarga sigue con un botón; sin JavaScript los enlaces descargan directo.
-SUPPORT_CODE = "cemo-sfvj-ehqc-vkfg-pftt"
-SUPPORT_COFFEE_URL = "https://buymeacoffee.com/efectopalma"   # vacía, el botón no se muestra
+# Antes de cada descarga, un diálogo que pide colaborar con tokens (los plugins se hacen con tokens de IA) por Cafecito.
+# La descarga sigue con un botón; sin JavaScript los enlaces descargan directo. El botón de Cafecito también va en el pie.
+SUPPORT_COFFEE_URL = "https://cafecito.app/palmereta"   # vacía, el botón no se muestra
+CAFECITO_IMG = "https://cdn.cafecito.app/imgs/buttons/button_5"
 SUPPORT = {
-    "en": dict(h="Your download is ready.", p="Audio Tools is free and stays free. If it ends up in your music, you can give something back: buy me a coffee, or gift tokens with this code.",
-               code="Token code", copy="Copy", copied="Copied", coffee="Buy me a coffee", go="Continue to download", close="Close"),
-    "es": dict(h="Tu descarga está lista.", p="Audio Tools es gratis y lo va a seguir siendo. Si termina en tu música, podés devolver algo: invitarme un café o regalar tokens con este código.",
-               code="Código de tokens", copy="Copiar", copied="Copiado", coffee="Invitame un café", go="Seguir con la descarga", close="Cerrar"),
+    "en": dict(h="Your download is ready.",
+               p="Audio Tools is free and stays free. It is built with AI tokens: if it ends up in your music, chip in for the next ones on Cafecito.",
+               coffee="Chip in for tokens on cafecito.app", foot="Like Audio Tools? Chip in for tokens:",
+               go="Continue to download", close="Close"),
+    "es": dict(h="Tu descarga está lista.",
+               p="Audio Tools es gratis y lo va a seguir siendo. Se hace con tokens de IA: si termina en tu música, colaborá con los próximos en Cafecito.",
+               coffee="Invitame con unos tokens en cafecito.app", foot="¿Te gusta Audio Tools? Colaborá con unos tokens:",
+               go="Seguir con la descarga", close="Cerrar"),
 }
+
+def cafecito_button(lang, cls="cafecito"):
+    """El botón oficial de Cafecito (imagen de su CDN en 1x, 2x y 3,75x), con el texto alternativo en el idioma de la página."""
+    if not SUPPORT_COFFEE_URL: return ""
+    i = CAFECITO_IMG
+    return (f'<a class="{cls}" href="{html.escape(SUPPORT_COFFEE_URL)}" rel="noopener" target="_blank">'
+            f'<img srcset="{i}.png 1x, {i}_2x.png 2x, {i}_3.75x.png 3.75x" src="{i}.png" alt="{html.escape(SUPPORT[lang]["coffee"])}" height="40" loading="lazy"></a>')
 
 def support_dialog(lang):
     u = SUPPORT[lang]
-    coffee = (f'<a class="pill ghost" href="{html.escape(SUPPORT_COFFEE_URL)}" target="_blank" rel="noopener">{u["coffee"]}</a>' if SUPPORT_COFFEE_URL else "")
     return f"""  <dialog class="support-modal" aria-labelledby="support-h">
     <button class="support-x" type="button" aria-label="{u['close']}" data-support-close>×</button>
     <h2 id="support-h">{u['h']}</h2>
     <p>{u['p']}</p>
-    <div class="support-code"><span class="sc-label">{u['code']}</span><code>{SUPPORT_CODE}</code>
-      <button class="pill small ghost" type="button" data-copy="{SUPPORT_CODE}" data-copied="{u['copied']}">{u['copy']}</button></div>
-    <div class="support-actions">{coffee}<a class="pill primary" href="#" data-support-go>{u['go']}</a></div>
+    <div class="support-actions">{cafecito_button(lang)}<a class="pill primary" href="#" data-support-go>{u['go']}</a></div>
     <p class="support-file" data-support-file></p>
   </dialog>
 """
@@ -2981,6 +2989,7 @@ def shell(lang, path, title, description, body, og_image, footer_extra, body_cla
     <div class="wrap">
       <div class="row"><span>Audio Tools</span><span>{"Free software under the GNU AGPL v3." if lang == "en" else "Software libre bajo la GNU AGPL v3."} <a href="https://github.com/palmereta/audio_tools">{"Source code on GitHub" if lang == "en" else "Código fuente en GitHub"}</a></span></div>
 {footer_extra}
+      <div class="row support-row"><span>{SUPPORT[lang]['foot']}</span>{cafecito_button(lang)}</div>
     </div>
   </footer>
 {support_dialog(lang)}</body>
