@@ -2,6 +2,8 @@
 
 Corre en pc50-wsl (RTX 3090, Cycles + OptiX):
   blender -b -P scene.py -- --layout layout.json --silk silkscreen.png --out out/ --mode all
+  blender -b --factory-startup -P scene.py -- --mode film2 [--shot open,keys] [--quality draft|final]
+          --audio film.wav --out out/      (film de la web; ver film2 más abajo)
 
 Convenciones:
   - 1 unidad de Blender (BU) = 10 unidades de panel. Panel (u, v) con v hacia abajo → (u/10, -v/10, 0).
@@ -11,14 +13,18 @@ Convenciones:
   - Resolución: PX_PER_UNIT píxeles por unidad de panel (2 = retina del tamaño 1x).
 """
 import bpy, bmesh, json, math, os, sys
-from mathutils import Vector, Euler
+from mathutils import Vector, Euler, Matrix
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 def arg(name, default=None):
     return argv[argv.index(name) + 1] if name in argv else default
 
-LAYOUT = json.load(open(arg("--layout", "layout.json")))
-SILK = os.path.abspath(arg("--silk", "silkscreen.png"))
+# Sin --layout/--silk (film2) se toman los del repo, al lado de este script.
+_ASSETS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets")
+def _default(name, repo):
+    return name if os.path.exists(name) else os.path.join(_ASSETS, repo)
+LAYOUT = json.load(open(arg("--layout", _default("layout.json", "layout.json"))))
+SILK = os.path.abspath(arg("--silk", _default("silkscreen.png", os.path.join("render", "silkscreen.png"))))
 OUT = os.path.abspath(arg("--out", "out"))
 MODE = arg("--mode", "all")
 SAMPLES = int(arg("--samples", "256"))
@@ -829,9 +835,320 @@ def mode_hero_still():
     MODE_STILL[0] = True
     mode_hero()
 
+# ───────────────────────── film de la web (filmkit, --mode film2) ─────────────────────────
+FS = 1 / 200.0               # 1 BU ≈ 5 mm, pero Cycles calcula el desenfoque como si fuera 1 m: f-stop real × FS
+TILT = math.radians(52)
+PIV = Vector((0, -(PH + CASE_B) / 10, 0))
+FILM_SHOTS = [("open", 0, 8), ("keys", 8, 6), ("filter", 14, 8), ("plug", 22, 8), ("wheel", 30, 4), ("hero", 34, 6),
+              ("end", 40, 8)]                    # (toma, tiempo de compás en que empieza, tiempos que dura)
+FILM_CABLES = [("white_out", "sh_in", "red"), ("mg_sq_out", "sh_clock_in", "green"), ("sh_out", "hpf_cut_in", "blue")]
+NEW_CABLE = ("mg_tri_out", "lpf_cut_in", "yellow")   # el que se enchufa en la toma "plug"
+
+def pv(u, v, h=0.0):
+    """Punto del mundo sobre el panel inclinado: (u, v) de panel y h en BU a lo largo de su normal."""
+    return PIV + Matrix.Rotation(TILT, 3, "X") @ (P(u, v) + Vector((0, 0, h)) - PIV)
+
+def plug_shaft(plug, name):
+    """Vástago de 6,35 mm bajo la virola: manga niquelada, anillo aislante y punta con cuello. Enchufada no se ve (queda
+    dentro del jack); en la toma del enchufe se ve entrar."""
+    sleeve = mesh_obj(name + "_s", lathe([(6.3, -30.0), (6.3, 10.6), (0.0, 10.6)], 48), MAT["nickel"])
+    ins = mesh_obj(name + "_i", lathe([(6.15, -34.0), (6.15, -30.0)], 48), principled("Insul", (0.01, 0.01, 0.011), 0.35))
+    tip = mesh_obj(name + "_t", lathe([(0.0, -56.0), (3.5, -55.4), (5.6, -53.6), (6.3, -51.0), (6.3, -45.0), (4.4, -43.0),
+                                       (4.4, -38.0), (5.6, -36.5), (5.6, -34.0), (0.0, -34.0)], 48), MAT["nickel"])
+    for o in (sleeve, ins, tip): o.parent = plug
+    return [sleeve, ins, tip]
+
+def cable_keys(c, new=False):
+    """Claves de forma del cable: "sway" mueve el punto medio de costado (el cable se mece); el cable nuevo tiene además
+    lx/ly/lz, que corren su extremo 1 BU por unidad (sigue a la ficha mientras entra)."""
+    c.shape_key_add(name="Basis", from_mix=False)
+    sw = c.shape_key_add(name="sway", from_mix=False); sw.slider_min, sw.slider_max = -2, 2
+    d = Vector((0.8, -0.45, 0.0))
+    pt = sw.data[1]; pt.co += d; pt.handle_left += d; pt.handle_right += d
+    if new:
+        for ax, d in (("lx", Vector((1, 0, 0))), ("ly", Vector((0, 1, 0))), ("lz", Vector((0, 0, 1)))):
+            k = c.shape_key_add(name=ax, from_mix=False); k.slider_min, k.slider_max = -40, 40
+            pt = k.data[2]; pt.co += d; pt.handle_left += d; pt.handle_right += d
+
+def film_keyboard(y0):
+    """Teclado del film: las 37 teclas (algo más angostas que en las fotos) giran sobre su borde trasero, y a la
+    izquierda la rueda de control en su ranura con el pulsador."""
+    white = principled("KeyWhite", (0.66, 0.64, 0.58), 0.3, coat=0.4)       # algo más gris que en las fotos: en macro se quemaba
+    black = principled("KeyBlack", (0.01, 0.01, 0.011), 0.25, coat=0.5)
+    W, L = 6.3, 41.0
+    whites = [n for n in range(37) if (n % 12) in (0, 2, 4, 5, 7, 9, 11)]
+    x0 = (PW + CASE_R) / 10 - 2.0 - len(whites) * W
+    keys = {}
+    for i, n in enumerate(whites):
+        bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0)
+        for v in bm.verts:
+            v.co.x *= W - 0.18; v.co.y = -L / 2 + v.co.y * L; v.co.z = -1.1 + v.co.z * 2.2
+        bmesh.ops.bevel(bm, geom=bm.edges[:], offset=0.12, segments=3, affect="EDGES")
+        o = mesh_obj(f"KeyW{n}", bm, white); o.location = (x0 + i * W + W / 2, y0, 2.2); keys[n] = (o, False)
+    for n in range(37):
+        if (n % 12) not in (1, 3, 6, 8, 10): continue
+        cx = x0 + sum(1 for m in whites if m < n) * W + {1: -0.12, 3: 0.12, 6: -0.15, 8: 0.0, 10: 0.15}[n % 12] * W
+        bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0)
+        for v in bm.verts:
+            v.co.x *= W * 0.56; v.co.y = -12.5 + v.co.y * 25.0; v.co.z = -1.7 + v.co.z * 3.4
+        bmesh.ops.bevel(bm, geom=bm.edges[:], offset=0.15, segments=3, affect="EDGES")
+        o = mesh_obj(f"KeyB{n}", bm, black); o.location = (cx, y0, 4.6); keys[n] = (o, True)
+    vb0, vb1 = -y0 * 10 + 6, -y0 * 10 + L * 10 + 30
+    box("KeyBed", -CASE_L, vb0, PW + CASE_R, vb1, -30, 0, MAT["case"])
+    box("KbCheekR", (x0 + len(whites) * W) * 10 + 4, vb0, PW + CASE_R, vb1, 0, 52, MAT["cheek"])
+    # Cubierta de la rueda: pintura en polvo oscura con grano (la de las mejillas, en macro, se veía gris y plana).
+    paint = principled("DeckPaint", (0.010, 0.010, 0.011), 0.6, spec=0.18)
+    nt = paint.node_tree; bs = nt.nodes["Principled BSDF"]
+    nz = nt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 700.0; nz.inputs["Detail"].default_value = 6.0
+    tc = nt.nodes.new("ShaderNodeTexCoord"); nt.links.new(tc.outputs["Object"], nz.inputs["Vector"])
+    rr = nt.nodes.new("ShaderNodeMapRange"); rr.inputs["To Min"].default_value = 0.55; rr.inputs["To Max"].default_value = 0.75
+    nt.links.new(nz.outputs["Fac"], rr.inputs["Value"]); nt.links.new(rr.outputs["Result"], bs.inputs["Roughness"])
+    bp = nt.nodes.new("ShaderNodeBump"); bp.inputs["Strength"].default_value = 0.05; bp.inputs["Distance"].default_value = 0.002
+    nt.links.new(nz.outputs["Fac"], bp.inputs["Height"]); nt.links.new(bp.outputs["Normal"], bs.inputs["Normal"])
+    box("WheelDeck", -CASE_L, vb0, x0 * 10 - 4, vb1, 0, 18, paint)
+    wy = y0 - 16.0
+    box("WheelSlot", 52, -wy * 10 - 72, 88, -wy * 10 + 72, 17.6, 18.3, principled("SlotBlack", (0.003, 0.003, 0.003), 0.9, spec=0.1))
+    # Estrías redondeadas con 8 segmentos cada una (con 128 se veían escalones en macro).
+    wheel = mesh_obj("FilmWheel", lathe([(0.0, -16.0), (56.0, -16.0), (59.0, -13.0), (59.0, -12.0), (59.0, 12.0), (59.0, 13.0), (56.0, 16.0), (0.0, 16.0)], 448,
+                                        radial=lambda t, r, z: r - (1.6 * max(0.0, math.cos(t * 56)) ** 2 if abs(z) < 12.5 else 0.0)),
+                     principled("FilmWheelRubber", (0.008, 0.008, 0.009), 0.4, spec=0.35))
+    wheel.rotation_mode = "ZYX"; wheel.rotation_euler = Euler((0, math.radians(90), 0), "ZYX")
+    wheel.location = Vector((7.0, wy, 1.8 + 1.7 - 5.9))
+    ring = mesh_obj("FilmMswRing", lathe([(19.0, 0.0), (19.0, 3.0), (16.5, 4.0), (0.0, 4.0)], 64), MAT["nickel"])
+    cap = mesh_obj("FilmMswCap", lathe([(14.0, 0.0), (14.0, 7.0), (12.0, 9.0), (0.0, 9.5)], 64), principled("Cap", (0.02, 0.02, 0.022), 0.35, coat=0.4))
+    for o in (ring, cap): o.location = Vector((17.0, wy, 1.8))
+    return keys, wheel
+
+def film_scene(pr, ang, with_new=True):
+    """El instrumento como en las fotos (mode_hero), con lo que el film anima a mano: perillas por id, LEDs con su
+    material, cables con claves de forma, la ficha que se enchufa (con su vástago) y el teclado con la rueda."""
+    reset_scene(); materials()
+    sc = bpy.context.scene
+    panel_object(); case_objects()
+    proto = {"small": knob_object("small", "KnobSmall"), "big": knob_object("big", "KnobBig")}
+    knobs = {}
+    for k in LAYOUT["knobs"]:
+        o = proto[k["kind"]].copy(); link(o)
+        ind = proto[k["kind"]].children[0].copy(); link(ind); ind.parent = o
+        place(o, *k["pos"], ang[k["id"]]); knobs[k["id"]] = o
+    for pz in proto.values():
+        pz.hide_render = True
+        for ch in pz.children: ch.hide_render = True
+    jp = jack_object("JackProto")
+    for j in LAYOUT["jacks"]:
+        o = jp.copy(); link(o)
+        for ch in jp.children:
+            c2 = ch.copy(); link(c2); c2.parent = o
+        place(o, *j["pos"])
+    for ch in jp.children: ch.hide_render = True
+    jp.hide_render = True
+    for i, (u, v) in enumerate(LAYOUT["screws"]):
+        place(screw_object(f"Screw{i}"), u, v, 20 * i)
+    for i, (u, v) in enumerate(LAYOUT["holes"]):
+        place(trim_hole_object(f"Trim{i}"), u, v)
+    leds = {}
+    for l in LAYOUT["leds"]:
+        m = principled("Led_" + l["id"], (0.18, 0.02, 0.02), 0.15, coat=0.6)
+        b = m.node_tree.nodes["Principled BSDF"]
+        b.inputs["Emission Color"].default_value = (1.0, 0.07, 0.03, 1); b.inputs["Emission Strength"].default_value = 0.0
+        o = led_object("Led_" + l["id"], m); place(o, *l["pos"]); leds[l["id"]] = b
+    jpos = {j["id"]: j["pos"] for j in LAYOUT["jacks"]}
+    cables = []
+    for i, (a, b_, cn) in enumerate(FILM_CABLES + ([NEW_CABLE] if with_new else [])):
+        col = PLUG_COLORS[cn]; plugs = []
+        for end in (a, b_):
+            o = plug_object(col, f"Plug{i}{end}"); place(o, *jpos[end]); plugs.append(o)
+        c = cable_curve(f"Cable{i}", jpos[a], jpos[b_], col)
+        cable_keys(c, new=(cn == NEW_CABLE[2] and i == len(FILM_CABLES)))
+        cables.append((c, plugs))
+    newplug = None
+    if with_new:
+        newplug = cables[-1][1][1]; plug_shaft(newplug, "NewShaft")
+    pivot = bpy.data.objects.new("Pivot", None); link(pivot)
+    pivot.location = PIV.copy()
+    bpy.context.view_layer.update()
+    for o in list(bpy.data.objects):
+        if o is pivot or o.parent is not None or o.type in ("CAMERA", "LIGHT"): continue
+        o.parent = pivot; o.matrix_parent_inverse = pivot.matrix_world.inverted()
+    pivot.rotation_euler.x = TILT
+    bpy.context.view_layer.update()
+    keys, wheel = film_keyboard(PIV.y - 1.0)
+    bm = bmesh.new(); bmesh.ops.create_grid(bm, x_segments=1, y_segments=1, size=400.0)
+    for v in bm.verts: v.co.z = -3.05
+    mesh_obj("Floor", bm, principled("Floor", (0.012, 0.012, 0.014), 0.28), smooth=False)
+    def area(name, loc, rot, size, energy, color):
+        L_ = bpy.data.lights.new(name, "AREA"); L_.size = size; L_.energy = energy; L_.color = color
+        o = bpy.data.objects.new(name, L_); link(o); o.location = loc; o.rotation_euler = Euler(rot, "XYZ"); return o
+    area("Key", (-40, -120, 140), (math.radians(40), math.radians(-12), 0), 90, 9e6, (1.0, 0.96, 0.9))
+    area("Rim", (120, 60, 90), (math.radians(-35), math.radians(55), 0), 60, 3e6, (1.0, 0.72, 0.45))
+    area("Fill", (200, -160, 40), (math.radians(75), 0, math.radians(50)), 120, 1.5e6, (0.6, 0.75, 1.0))
+    sweep = area("Sweep", (0, -80, 60), (0, 0, 0), 14, 0.0, (1.0, 0.86, 0.68))
+    sc.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.015
+    sc.view_settings.exposure = -2.6
+    return dict(sc=sc, knobs=knobs, leds=leds, cables=cables, newplug=newplug, keys=keys, wheel=wheel, sweep=sweep)
+
+def aim(o, target):
+    o.rotation_euler = (Vector(target) - o.location).to_track_quat("-Z", "Y").to_euler()
+
+def film2():
+    """Film de la web del AT20V: 48 tiempos a 124 BPM (23,2 s), siete tomas cortadas en el tiempo. El audio es
+    film_audio.py: una línea acid en La menor cuyo filtro se abre hasta gritar; las perillas de corte y pico giran con
+    lo que suena, las teclas bajan en cada nota, un cable entra en el CV del pasa bajos y el filtro empieza a oscilar
+    a tempo, la rueda dobla una nota larga.
+
+    Storyboard (tiempo de compás de inicio · tiempos · segundos):
+      open   0 · 8 · 3,9 s  Rasante desde el extremo izquierdo: las perillas de los VCO desenfocadas adelante (abajo
+                            a la izquierda, oscuro y calmo: ahí va el título) y el panel que se aleja hacia la patchera.
+                            Travelling lento hacia la derecha; un barrido de luz cálida cruza el panel. LED del EG en
+                            cada nota.
+      keys   8 · 6 · 2,9 s  Macro bajo a ras del teclado: las teclas bajan con la línea acid; foco que pasa de las
+                            teclas a las perillas del filtro detrás. Cámara en mano muy sutil.
+      filter 14 · 8 · 3,9 s Macro de las perillas del pasa bajos: el corte y el pico giran mientras el filtro se abre
+                            (lo que suena); foco del corte al pico. Desplazamiento lateral lento.
+      plug   22 · 8 · 3,9 s Macro rasante de la fila superior de la patchera: la ficha amarilla baja desde arriba, se
+                            alinea y entra en CUTOFF FREQ (llega al fondo en el tiempo 26); desde ahí el filtro oscila
+                            a tempo y el cable se mece.
+      wheel  30 · 4 · 1,9 s Macro a ras de la rueda, contra el teclado y el panel: la nota larga se dobla una cuarta y
+                            vuelve, la rueda gira con ella y un brillo chico recorre las estrías.
+      hero   34 · 6 · 2,9 s Grúa amplia sobre el instrumento entero, el filtro gritando: todo se mueve a la vez.
+      end    40 · 8 · 3,9 s Fundido; alejamiento frontal lento y alto mientras el filtro se cierra (film.py lo oscurece
+                            y pone el cierre encima).
+    """
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "shared", "film"))
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import filmkit as fk
+    import film_audio as fa
+    only = arg("--shot"); quality = arg("--quality", "final"); probe = arg("--probe")
+    # Las notas, el filtro y la rueda salen de la partitura de film_audio.py (la misma que suena): más exacto que
+    # leer la envolvente del WAV. --audio se acepta por compatibilidad con los demás films, no hace falta.
+    B = fa.BEAT
+    pr, ang = preset_angles(os.path.join(_ASSETS, "presets", "15_acid_bass.json"))
+    kn = {k["id"]: k for k in LAYOUT["knobs"]}
+    deg = lambda kid, v: kn[kid]["startDeg"] + (kn[kid]["endDeg"] - kn[kid]["startDeg"]) * v
+    by_key = {}
+    for (s, d, n, v) in fa.NOTES: by_key.setdefault(n - 24, []).append((s, s + d))
+    starts = [s for (s, d, n, v) in fa.NOTES]
+
+    def press(n, b):
+        p = 0.0
+        for (s, e) in by_key.get(n, ()):
+            if s <= b <= e + 0.2:
+                p = max(p, min(1.0, (b - s) / 0.06) if b <= e else min(1.0, (e - s) / 0.06) * max(0.0, 1 - (b - e) / 0.14))
+        return fk.ease(p, "smooth")
+
+    def eg_led(b):
+        past = [s for s in starts if s <= b]
+        return math.exp(-(b - past[-1]) / 0.35) if past else 0.0
+
+    idx = {n: i for i, (n, _, _) in enumerate(FILM_SHOTS)}
+    for (name, b0, nb) in FILM_SHOTS:
+        if only and name not in only.split(","): continue
+        S = film_scene(pr, ang, with_new=idx[name] >= idx["plug"])
+        sc = S["sc"]; fk.setup(sc, quality); sc.view_settings.exposure = -2.6; sc.render.image_settings.color_mode = "RGB"
+        cam = fk.camera(sc)
+        if name == "wheel": S["sweep"].data.size = 2.5
+        frames = int(round(nb * B * fk.FPS))
+        W_ = PW / 10
+        k = lambda u, pos, look, lens, fs: (u, Vector(pos), Vector(look), lens, fs * FS)
+        paths = {
+            "open":   fk.Path([k(0, pv(-160, 300, 25), pv(700, 220, 0), 35, 5.6), k(1, pv(-70, 300, 21), pv(800, 210, 0), 36, 5.6)]),
+            "keys":   fk.Path([k(0, (40, -120, 14), (95, -80, 2), 40, 5.6), k(1, (54, -118, 13), (108, -78, 2.5), 40, 5.6)]),
+            "filter": fk.Path([k(0, pv(520, 210, 55), pv(538, 160, 0), 50, 2.8), k(1, pv(545, 200, 46), pv(548, 160, 0), 50, 2.8)]),
+            "plug":   fk.Path([k(0, pv(1460, 190, 14), pv(1263, 112, 5), 45, 4.0), k(1, pv(1440, 175, 12), pv(1263, 110, 3.5), 45, 4.0)]),
+            # Rueda: macro bajo, casi a ras de la cubierta (poca cubierta en cuadro, la rueda contra el teclado y el panel);
+            # mira 2 BU a la derecha de la rueda, así queda en el tercio izquierdo-central durante todo el leve arco.
+            "wheel":  fk.Path([k(0, (-4, -88, 4.6), (10.5, -70.5, 2.6), 55, 40.0), k(1, (-1, -89.5, 4.4), (11.0, -70.5, 2.6), 55, 40.0)]),
+            "hero":   fk.Path([k(0, (35, -195, 92), (80, -38, 18), 35, 8.0), k(1, (125, -192, 112), (84, -38, 18), 35, 8.0)]),
+            "end":    fk.Path([k(0, (W_ * 0.5, -165, 118), (W_ * 0.5, -38, 18), 38, 8.0),
+                               k(1, (W_ * 0.5, -215, 158), (W_ * 0.5, -38, 18), 38, 8.0)], easing="out"),
+        }
+        path = paths[name]
+        cut, peak = S["knobs"]["lpf_cutoff"], S["knobs"]["lpf_peak"]
+        newplug = S["newplug"]
+        cables = S["cables"]
+
+        def plug_state(b):
+            """(dx, dy, h, inclinación) de la ficha nueva respecto del jack, en BU."""
+            if b >= 26.0: return 0.0, 0.0, 0.0, 0.0
+            a = fk.ease((b - 22.0) / 2.8, "out")
+            h = 24.0 + (7.4 - 24.0) * a
+            dx, dy, tl = 1.0 * (1 - a), -2.5 * (1 - a), math.radians(10) * (1 - a)
+            if b > 24.8: h = 7.4 - 0.4 * fk.ease((b - 24.8) / 0.4, "smooth")
+            if b > 25.2: h = 7.0 - 6.6 * fk.ease((b - 25.2) / 0.65, "inout")
+            if b > 25.85: h = 0.4 * (1 - fk.ease((b - 25.85) / 0.15, "in"))
+            return dx, dy, h, tl
+
+        def pose(f, t, u, name=name, path=path, b0=b0):
+            b = b0 + t / B
+            x = fa.x_at(b); cv, pk = fa.knob_values(x)
+            cut.rotation_euler.z = -math.radians(deg("lpf_cutoff", cv))
+            peak.rotation_euler.z = -math.radians(deg("lpf_peak", pk))
+            moved = [cut, peak]
+            for n, (o, isb) in S["keys"].items():
+                o.rotation_euler.x = math.radians(3.6 if isb else 3.2) * press(n, b); moved.append(o)
+            S["wheel"].rotation_euler = Euler((0, math.radians(90), math.radians(-34) * fa.bend_at(b)), "ZYX"); moved.append(S["wheel"])
+            if newplug is not None:
+                dx, dy, h, tl = plug_state(b)
+                jx, jy = [j["pos"] for j in LAYOUT["jacks"] if j["id"] == NEW_CABLE[1]][0]
+                newplug.location = P(jx, jy) + Vector((dx, dy, h)); newplug.rotation_euler.x = tl; moved.append(newplug)
+            sw = S["sweep"]
+            if name == "open":
+                sw.location = Vector((-40 + 260 * fk.ease(u, "inout"), -95, 62)); aim(sw, (sw.location.x + 10, -30, 20))
+            elif name == "hero":
+                sw.location = Vector((170 - 200 * u, -105, 75)); aim(sw, (sw.location.x - 10, -30, 20))
+            elif name == "wheel":                # brillo chico que recorre las estrías de adelante hacia atrás
+                sw.location = Vector((3.0, -84 + 22 * fk.ease(u, "inout"), 8.5)); aim(sw, (7.0, -72, 2.0))
+            moved.append(sw)
+            focus = None
+            if name == "keys": focus = Vector((84, -92, 2.5)).lerp(pv(538.6, 224.0, 4), fk.rack(u, 0.55, 0.9, 0, 1))
+            if name == "filter": focus = pv(537.7, 97.1, 5.5).lerp(pv(538.6, 224.0, 4.2), fk.rack(u, 0.35, 0.75, 0, 1))
+            if name == "plug": focus = pv(1263.3, 109.9, 4.0)
+            if name == "wheel": focus = Vector((7.0, -74.5, 2.9))       # estrías del frente de la rueda
+            shake = {"keys": 0.2, "filter": 0.18, "plug": 0.15, "wheel": 0.06}.get(name, 0.0)   # BU: ≈ 1 mm reales
+            path.apply(cam, u, focus=focus, shake=shake, t=b0 * B + t)
+            return moved
+
+        def keys_(f, name=name, b0=b0, frames=frames):
+            b = b0 + (f - 1) / fk.FPS / B
+            S["leds"]["eg_led"].inputs["Emission Strength"].default_value = 70.0 * eg_led(b)
+            S["leds"]["mg_led"].inputs["Emission Strength"].default_value = 55.0 * fa.lfo_led(b)
+            for lid in ("eg_led", "mg_led"): S["leds"][lid].inputs["Emission Strength"].keyframe_insert("default_value")
+            sw = S["sweep"].data
+            sw.energy = {"open": 1.4e6, "hero": 0.9e6, "wheel": 3.0e4}.get(name, 0.0); sw.keyframe_insert("energy")
+            T = b * B
+            for i, (c, _) in enumerate(cables):
+                kb = c.data.shape_keys.key_blocks
+                v = 0.55 * fk.noise1(T, 7 + i, rate=0.28)
+                if newplug is not None and i == len(cables) - 1:
+                    dx, dy, h, tl = plug_state(b)
+                    kb["lx"].value = dx; kb["ly"].value = dy - 7.0 * math.sin(tl); kb["lz"].value = h + 7.0 * (math.cos(tl) - 1)
+                    for ax in ("lx", "ly", "lz"): kb[ax].keyframe_insert("value")
+                    if b > 26: v += 1.1 * math.exp(-(b - 26) * B / 0.9) * math.sin(2 * math.pi * 1.4 * (b - 26) * B)
+                kb["sway"].value = v; kb["sway"].keyframe_insert("value")
+
+        if probe:
+            os.makedirs(OUT, exist_ok=True)
+            for pu in [float(x) for x in probe.split(",")]:
+                f = 1 + int(round(pu * (frames - 1))); sc.frame_set(f)
+                pose(f, (f - 1) / fk.FPS, (f - 1) / max(1, frames - 1)); keys_(f)
+                sc.render.filepath = os.path.join(OUT, f"probe_{name}_{f:04d}.jpg"); bpy.ops.render.render(write_still=True)
+            continue
+        if arg("--cams"):                  # pruebas de encuadre: {"name", "shot", "u", "pos", "look", "lens", "fstop", "focus"}
+            vec = lambda c: pv(*c[1:]) if isinstance(c[0], str) else Vector(c)      # ["pv", u, v, h] o [x, y, z]
+            for c in json.load(open(arg("--cams"))):
+                if c["shot"] != name: continue
+                f = 1 + int(round(c.get("u", 0.0) * (frames - 1))); sc.frame_set(f)
+                pose(f, (f - 1) / fk.FPS, (f - 1) / max(1, frames - 1)); keys_(f)
+                pth = fk.Path([(0, vec(c["pos"]), vec(c["look"]), c["lens"], c["fstop"] * FS), (1, vec(c["pos"]), vec(c["look"]), c["lens"], c["fstop"] * FS)])
+                pth.apply(cam, 0.0, focus=vec(c["focus"]) if "focus" in c else None)
+                sc.render.filepath = os.path.join(OUT, f"cam_{c['name']}.jpg"); bpy.ops.render.render(write_still=True)
+            continue
+        fk.render_shot(sc, name, frames, pose, OUT, extra_keys=keys_)
+
+
 if __name__ == "__main__":
     modes = {"bg": mode_bg, "preview": mode_preview, "knobs": mode_knobs, "plugs": mode_plugs, "leds": mode_leds,
-             "hero": mode_hero, "herostill": mode_hero_still, "keys": mode_keys}
+             "hero": mode_hero, "herostill": mode_hero_still, "keys": mode_keys, "film2": film2}
     for m in (["bg", "knobs", "plugs", "leds"] if MODE == "all" else MODE.split(",")):
         print("== modo", m, flush=True)
         modes[m]()

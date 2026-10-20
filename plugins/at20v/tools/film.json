@@ -1,0 +1,17 @@
+{
+  "title": "AT20V",
+  "tagline": "The semi-modular that screams.",
+  "fps": 24,
+  "bpm": 124,
+  "audio": {"cmd": ["plugins/at20v/tools/blender/film_audio.py", "{out}"]},
+  "shots": [
+    {"name": "open", "beats": 8},
+    {"name": "keys", "beats": 6},
+    {"name": "filter", "beats": 8},
+    {"name": "plug", "beats": 8},
+    {"name": "wheel", "beats": 4},
+    {"name": "hero", "beats": 6},
+    {"name": "end", "beats": 8, "in": "dissolve"}
+  ],
+  "poster": {"shot": "hero", "frame": 40}
+}

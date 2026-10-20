@@ -2110,7 +2110,7 @@ PRES = {
                     ("ui-extensions", "A vocoder in the box.", "Sing into the audio input and play chords, from 8 to 20 bands."),
                     ("render-low", "Up to twelve voices.", "Mono like the original, or polyphonic with unison, detune and stereo spread.")],
         stats=[("35", "", "live jacks on the patch bay"), ("2", "", "filter revisions, Korg35 and OTA"), ("12", "", "voices with up to 4-voice unison"), ("51", "", "presets, from the 1978 charts to self-playing patches")],
-        film_cap="AT20V rendered in 3D, in three shots. The sound is the engine playing Random Bleeps, a self-playing preset."),
+        film_cap="AT20V rendered in 3D: the keys play an acid line, the cutoff and peak knobs turn as the filter opens and screams, a cable is patched into the cutoff input and the wheel bends a note. The sound is the engine playing that line with the same filter moves."),
     "es": dict(tag="El semimodular que grita.",
         highlights=[("render-closeup", "Treinta y cinco jacks vivos.", "Cada entrada y salida de la patchera original funciona, con cables que cuelgan como los de verdad."),
                     ("ui-synth", "Dos filtros con carácter.", "Pasa bajos y pasa altos Korg35, resueltos muestra por muestra, con las pendientes del circuito de 1978."),
@@ -2118,7 +2118,7 @@ PRES = {
                     ("ui-extensions", "Un vocoder adentro.", "Cantás por la entrada de audio y tocás acordes, de 8 a 20 bandas."),
                     ("render-low", "Hasta doce voces.", "Mono como el original, o polifónico con unísono, desafinación y apertura estéreo.")],
         stats=[("35", "", "jacks vivos en la patchera"), ("2", "", "revisiones del filtro, Korg35 y OTA"), ("12", "", "voces con unísono de hasta 4"), ("51", "", "presets, de las cartas de 1978 a patches que se tocan solos")],
-        film_cap="El AT20V renderizado en 3D, en tres tomas. El sonido es el motor tocando Random Bleeps, un preset que se toca solo."),
+        film_cap="El AT20V renderizado en 3D: las teclas tocan una línea ácida, las perillas de corte y pico giran mientras el filtro se abre y grita, un cable entra en la entrada de corte y la rueda dobla una nota. El sonido es el motor tocando esa línea con los mismos movimientos del filtro."),
 },
 "at101v": {
     "en": dict(tag="The bass line machine.",
