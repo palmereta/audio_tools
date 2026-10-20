@@ -1,0 +1,18 @@
+{
+  "title": "AT101V",
+  "tagline": "The bass line machine.",
+  "fps": 24,
+  "bpm": 120,
+  "audio": {"file": "web/assets/samples/at101v/acid-line.m4a"},
+  "shots": [
+    {"name": "open", "beats": 8},
+    {"name": "seq", "beats": 6},
+    {"name": "filter", "beats": 8},
+    {"name": "keys", "beats": 6},
+    {"name": "trio1", "beats": 2},
+    {"name": "trio2", "beats": 2},
+    {"name": "trio3", "beats": 2},
+    {"name": "end", "beats": 8}
+  ],
+  "poster": {"shot": "trio3", "frame": 12}
+}

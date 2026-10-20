@@ -2,18 +2,24 @@
 
 Corre en pc50-wsl:  blender -b -P scene101.py -- --layout layout101.json --silk silkscreen101.png \
                          --out out101 --mode bg,keys,sprites --samples 256 [--colors grey,blue,red]
+Film de la web (filmkit, ver film2):  blender -b --factory-startup -P scene101.py -- --mode film2 \
+                         --quality draft|final --audio acid-line.wav --out <dir> [--shot open,seq]
 
 1 unidad de Blender = 10 mm. Punto del panel (x, y) en mm, y hacia el frente → (x/10, −y/10, z/10).
 Cámara ortográfica inclinada THETA: en pantalla sx = x, sy = y·cosθ − z·sinθ (mm).
 """
 import bpy, bmesh, json, math, os, sys
-from mathutils import Vector, Euler
+from mathutils import Vector, Euler, Matrix
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 def arg(n, d=None): return argv[argv.index(n) + 1] if n in argv else d
 
-L = json.load(open(arg("--layout", "layout101.json")))
-SILK = os.path.abspath(arg("--silk", "silkscreen101.png"))
+# Sin --layout/--silk se buscan en el directorio actual y, si no están, en plugins/at101v/assets (film2 desde el repo).
+HERE = os.path.dirname(os.path.abspath(__file__))
+ASSETS = os.path.join(HERE, "..", "..", "assets")
+def _default(name, sub): return name if os.path.exists(name) else os.path.join(ASSETS, sub)
+L = json.load(open(arg("--layout", _default("layout101.json", "layout101.json"))))
+SILK = os.path.abspath(arg("--silk", _default("silkscreen101.png", os.path.join("render", "silkscreen101.png"))))
 OUT = os.path.abspath(arg("--out", "out101"))
 SAMPLES = int(arg("--samples", "256"))
 COLORS = arg("--colors", "grey,blue,red").split(",")
@@ -306,8 +312,11 @@ def sprite_camera(cx, cy, size_mm, lift_mm=0.0):
 def fader_cap(line_mat, w=10.0, h=13.6, tall=7.0):
     """Capuchón del 101: bloque negro con lomo moldeado y una línea de color sobre el frente."""
     o = box("Cap", -w / 2, -h / 2, w / 2, h / 2, 0.0, tall, M["cap"], 0.9)
-    box("CapRidge", -w / 2 + 0.4, -h / 2 + 0.2, w / 2 - 0.4, -h / 2 + h * 0.42, tall, tall + 1.4, M["cap"], 0.6)
-    box("CapLine", -w / 2 + 0.6, h * 0.08, w / 2 - 0.6, h * 0.08 + 1.0, tall + 0.02, tall + 0.14, line_mat, 0.0)
+    r = box("CapRidge", -w / 2 + 0.4, -h / 2 + 0.2, w / 2 - 0.4, -h / 2 + h * 0.42, tall, tall + 1.4, M["cap"], 0.6)
+    ln = box("CapLine", -w / 2 + 0.6, h * 0.08, w / 2 - 0.6, h * 0.08 + 1.0, tall + 0.02, tall + 0.14, line_mat, 0.0)
+    # Lomo y línea cuelgan del capuchón: sin esto, en las vistas en perspectiva (populate mueve sólo el capuchón)
+    # quedaban todos amontonados en el origen, un bloque negro flotando en la esquina trasera izquierda.
+    for c in (r, ln): c.parent = o
     return o
 
 def knob_obj():
@@ -375,10 +384,11 @@ def populate(preset_path):
     """Pone los controles en 3D con los valores de un preset (sliders, selectores, perillas)."""
     pv = json.load(open(preset_path))["panel"] if preset_path else {}
     get = lambda k, d: pv.get(k, d)
+    caps = {}                                  # capuchón de cada fader por id (el film los mueve)
     for s in L["sliders"]:
         v = get(s["id"], 0.5)
         o = fader_cap(M["green"] if s["color"] == "green" else M["orange"])
-        o.location = P(s["x"], s["y0"] + (s["y10"] - s["y0"]) * v)
+        o.location = P(s["x"], s["y0"] + (s["y10"] - s["y0"]) * v); caps[s["id"]] = o
     for s in L["switches"]:
         i = int(round(get(s["id"], 1)))
         o = fader_cap(M["yellow"], 9.0, 9.0, 6.0); o.location = P(s["x"], s["ys"][min(i, len(s["ys"]) - 1)])
@@ -401,6 +411,7 @@ def populate(preset_path):
     for b in L["buttons"]:
         if b["id"] in lit: box("LedOn" + b["id"], b["led"][0] - 1.9, b["led"][1] - 0.8, b["led"][0] + 1.9, b["led"][1] + 0.8, 0, 0.7, em, 0.2)
     pw = L["power"]; box("PowerLedOn", pw["led"][0] - 1.9, pw["led"][1] - 0.8, pw["led"][0] + 1.9, pw["led"][1] + 0.8, 0, 0.7, em, 0.2)
+    return caps
 
 def stage():
     """Piso oscuro y luz de estudio para las vistas en perspectiva."""
@@ -487,7 +498,217 @@ def mode_film():
     sc.render.use_persistent_data = True     # la escena se sincroniza una vez, no en cada cuadro
     bpy.ops.render.render(animation=True)
 
+
+# ───────── film de la web (filmkit) ─────────
+# Música: web/assets/samples/at101v/acid-line.m4a (preset 16_acid_line, 120 bpm). El secuenciador da un paso cada
+# semicorchea (0,125 s, 16 pasos = 2 s) desde t = 0; el teclado lo transpone en 4, 8, 12 y 17,75 s (+3, +5, −2, 0).
+# Verificado sobre el audio: inicios cada 0,125 s y la altura del paso 0 en cada tramo (36, 39, 41, 34, 36).
+BPM = 120.0
+BEAT = 60.0 / BPM
+STEP = BEAT / 4
+TRANSPOSE = [(0.0, 0), (4.0, 3), (8.0, 5), (12.0, -2), (17.75, 0)]
+# (toma, comienzo en el film en s, duración en tiempos, color del gabinete)
+FILM_SHOTS = [("open", 0.0, 8, "grey"), ("seq", 4.0, 6, "blue"), ("filter", 7.0, 8, "red"), ("keys", 11.0, 6, "grey"),
+              ("trio1", 14.0, 2, "blue"), ("trio2", 15.0, 2, "red"), ("trio3", 16.0, 2, "grey"), ("end", 17.0, 8, "grey")]
+FILM_PRESET = os.path.join(ASSETS, "presets", "16_acid_line.json")
+
+def note_num(name):
+    """'D#2' → 39 (C4 = 60)."""
+    i = 2 if len(name) > 1 and name[1] == "#" else 1
+    return 12 * (int(name[i:]) + 1) + "C D EF G A B".index(name[0]) + (1 if i == 2 else 0)
+
+def key_events(seq, until=24.0):
+    """Teclas que bajan con cada paso: (nota, desde, hasta, acento). El secuenciador suena en las octavas 1-3; en el
+    teclado (F3-C6) se muestra dos octavas arriba, con la transposición del momento. Ligadura: la tecla sigue abajo
+    hasta que baja la del paso siguiente (legato)."""
+    ev = []
+    for k in range(int(until / STEP)):
+        t = k * STEP; s = seq[k % len(seq)].split()
+        if not s or s[0] == "-": continue
+        tr = [d for (t0, d) in TRANSPOSE if t0 <= t][-1]
+        off = t + (STEP + 0.03 if "slide" in s else 0.62 * STEP)
+        ev.append((note_num(s[0]) + 24 + tr, t, off, "acc" in s))
+    return ev
+
+def key_depth(ev, note, t):
+    """0..1: la tecla se adelanta 15 ms al sonido (se lee en sincronía), baja en 30 ms y sube en 50 ms."""
+    d = 0.0
+    for (n, a, b, acc) in ev:
+        if n != note or t < a - 0.04 or t > b + 0.08: continue
+        down = fk_ease((t - (a - 0.015)) / 0.03) if t < b else 1.0 - fk_ease((t - b) / 0.05)
+        d = max(d, down * (1.0 if acc else 0.82))
+    return d
+
+def fk_ease(u):
+    u = min(1.0, max(0.0, u)); return u * u * (3 - 2 * u)
+
+def automation(t):
+    """Lo que la mano hace en los faders a lo largo del film (s): abre el corte y sube la envolvente en la toma del
+    filtro, y después lo devuelve a medio camino."""
+    freq = 0.24 + 0.24 * fk_ease((t - 7.3) / 3.4) - 0.10 * fk_ease((t - 12.5) / 3.5)
+    env = 0.60 + 0.14 * fk_ease((t - 8.1) / 2.8) - 0.06 * fk_ease((t - 13.0) / 3.0)
+    res = 0.82 - 0.06 * fk_ease((t - 9.0) / 2.0)
+    return {"vcf_freq": freq, "vcf_env": env, "vcf_res": res}
+
+def film_lights():
+    """Estudio oscuro: llave cálida arriba a la izquierda, relleno frío bajo a la derecha, contraluz que dibuja los
+    bordes y un cenital suave para la serigrafía. Sin los soles de la vista cenital (aclaraban el piso a gris)."""
+    for n in ("Key", "Fill", "Rim", "Soft"):
+        o = bpy.data.objects.get(n)
+        if o: bpy.data.objects.remove(o, do_unlink=True)
+    C = Vector((28.5, -15.5, 0.0))
+    def area(name, loc, look, size, energy, col, spread=None, rect=None):
+        l = bpy.data.lights.new(name, "AREA"); l.energy = energy; l.color = col
+        if rect: l.shape = "RECTANGLE"; l.size, l.size_y = rect
+        else: l.size = size
+        if spread: l.spread = math.radians(spread)
+        o = link(bpy.data.objects.new(name, l)); o.location = Vector(loc)
+        o.rotation_euler = (Vector(look) - o.location).to_track_quat("-Z", "Y").to_euler()
+        return o
+    area("FKey", (-18, -62, 72), C, 45, 80000, (1.0, 0.95, 0.89), spread=75)
+    area("FFill", (100, -58, 22), C, 60, 9000, (0.82, 0.88, 1.0))
+    area("FRim", (22, 58, 38), C + Vector((0, -6, 0)), 70, 28000, (1.0, 0.97, 0.93))
+    area("FTop", (28.5, -18, 85), C, 70, 6000, (1.0, 1.0, 1.0), spread=60)
+    # Barrido: una tira de luz detrás y arriba que cruza de izquierda a derecha (el brillo corre por los faders).
+    return area("Sweep", (-20, 30, 26), (-20, -12, 0), 0, 0.0, (1.0, 0.92, 0.82), rect=(3.0, 60.0))
+
+def led(name, xy, energy=0.0):
+    """LED con su propio material (la intensidad se anima): apagado se ve como los demás, rojo oscuro."""
+    m = bpy.data.materials.new("Led" + name); m.use_nodes = True; b = m.node_tree.nodes["Principled BSDF"]
+    b.inputs["Base Color"].default_value = (0.35, 0.04, 0.04, 1); b.inputs["Roughness"].default_value = 0.2
+    b.inputs["Emission Color"].default_value = (1, 0.07, 0.025, 1); b.inputs["Emission Strength"].default_value = energy
+    if "Coat Weight" in b.inputs: b.inputs["Coat Weight"].default_value = 0.6
+    box("FLed" + name, xy[0] - 1.9, xy[1] - 0.8, xy[0] + 1.9, xy[1] + 0.8, 0, 0.75, m, 0.2)
+    return b.inputs["Emission Strength"]
+
+def film2():
+    """Film de la web del AT101V: 21 s, 42 tiempos a 120 bpm sobre "Acid Line"; el instrumento toca la línea.
+
+    Guion (comienzo s, tiempos, gabinete):
+      open    0,0  8  gris  Apertura con el título abajo a la izquierda (esa zona es piso oscuro): 3/4 desde la
+                            derecha y un poco abajo, acercándose despacio. Las teclas bajan con cada paso de la
+                            secuencia, el LED de RATE late en cada tiempo. Foco en las teclas que tocan.
+      seq     4,0  6  azul  Macro de la fila de botones del secuenciador, cámara baja: foco en el LED de RATE que
+                            late al tempo y cambio de foco al LED de PLAY (titila con cada paso, más en los acentos).
+                            Travelling lateral lento, cámara en mano muy sutil.
+      filter  7,0  8  rojo  Los faders del VCF: el de corte sube de 0,24 a 0,48 y el de envolvente de 0,60 a 0,74
+                            (como una mano); una tira de luz barre el panel de izquierda a derecha. Acercamiento
+                            frontal bajo con el foco en el capuchón del corte.
+      keys   11,0  6  gris  Rasante sobre el teclado desde la derecha: las teclas de la línea bajan (con la
+                            transposición a −2 desde 12 s), travelling a lo largo de las teclas, poca profundidad.
+      trio1  14,0  2  azul  Los tres colores: un mismo giro lento en 3/4 desde la izquierda, cortado en cada medio
+      trio2  15,0  2  rojo  compás (azul, rojo, gris) sin interrumpir el movimiento de cámara.
+      trio3  16,0  2  gris
+      end    17,0  8  gris  De frente y algo alto, se aleja despacio; film.py lo oscurece y pone el cierre.
+
+    --mode film2 [--shot a,b] [--quality draft|final] [--audio wav] [--out dir] [--probe N: un cuadro cada N]
+    """
+    sys.path.insert(0, os.path.join(HERE, "..", "..", "..", "..", "shared", "film"))
+    import filmkit as fk
+    global REAL_KEYS; REAL_KEYS = True
+    only = arg("--shot"); quality = arg("--quality", "final"); probe = int(arg("--probe", "0"))
+    env = fk.envelope(arg("--audio")) if arg("--audio") else []
+    preset = json.load(open(FILM_PRESET))
+    ev = key_events(preset["sequence"])
+    fps = fk.FPS
+    sl = {s["id"]: s for s in L["sliders"]}
+    rl, bt = L["rateLed"], {b["id"]: b for b in L["buttons"]}
+    C = Vector((28.5, -15.5, 0.0))
+    def orbit(deg, r, z, look_z=-2.0, cx=28.5, cy=-15.5):
+        a = math.radians(deg); return (cx + r * math.cos(a), cy + r * math.sin(a), z)
+    trio = fk.Path([(0.0, orbit(-128, 112, 40), (27.0, -15.5, -2.5), 62, 0.10),
+                    (1.0, orbit(-108, 108, 34), (30.0, -15.5, -2.5), 62, 0.10)], easing="linear")
+    # f-stop dividido por 100: 1 unidad = 10 mm, así la profundidad de campo es la de una cámara real.
+    paths = {
+        "open":   fk.Path([(0, (116.0, -95.0, 29.0), (30.0, -12.5, -6.0), 58, 0.08),
+                           (1, (102.0, -81.0, 23.0), (29.5, -12.0, -6.0), 58, 0.08)]),
+        "seq":    fk.Path([(0, (23.5, -24.0, 10.0), (12.0, -10.0, 0.3), 70, 0.06),
+                           (1, (20.0, -24.5, 9.0), (12.5, -10.8, 0.3), 70, 0.06)]),
+        "filter": fk.Path([(0, (42.0, -27.0, 11.0), (37.0, -8.4, 0.4), 70, 0.05),
+                           (1, (39.8, -22.5, 9.0), (36.6, -8.6, 0.4), 70, 0.05)]),
+        "keys":   fk.Path([(0, (55.0, -47.0, 10.0), (31.0, -25.0, -1.0), 60, 0.07),
+                           (1, (49.0, -48.0, 9.0), (26.0, -25.0, -1.0), 60, 0.07)]),
+        "end":    fk.Path([(0, (28.5, -96.0, 42.0), (28.5, -14.5, -2.5), 50, 0.10),
+                           (1, (28.5, -128.0, 56.0), (28.5, -14.5, -2.5), 50, 0.10)], easing="out"),
+    }
+    t_trio, d_trio = 14.0, 3.0
+    for (name, t0, beats, color) in FILM_SHOTS:
+        if only and name not in only.split(","): continue
+        keys = build_static(color); caps = populate(FILM_PRESET); stage()
+        for o in list(bpy.data.objects):
+            if o.name.startswith("LedOnseq_play"): bpy.data.objects.remove(o, do_unlink=True)
+        sweep = film_lights()
+        fk.setup(bpy.context.scene, quality)
+        sc = bpy.context.scene
+        sc.render.image_settings.color_mode = "RGB"; sc.render.use_persistent_data = True
+        # Los primeros planos ven el panel casi de frente a la luz: un poco menos de exposición para que el rojo y
+        # el azul no se laven hacia el rosa y el celeste.
+        sc.view_settings.exposure = {"seq": -0.35, "filter": -0.6}.get(name, 0.0)
+        cam = fk.camera(sc); cam.data.clip_start = 0.1; cam.data.clip_end = 3000
+        # Teclas: el origen pasa al eje trasero para girarlas como al apretarlas (8 mm abajo en el frente, se lee de lejos).
+        kobj = []
+        for k, o in keys:
+            top = -0.6 if k["black"] else -6.0
+            piv = P((k["x0"] + k["x1"]) / 2, k["y0"] - 9.0, top)
+            o.data.transform(Matrix.Translation(-piv)); o.location = piv
+            kobj.append((k["note"], o, math.atan2(8.0, k["y1"] - k["y0"] + 9.0)))
+        rate = led("Rate", rl); play = led("Play", bt["seq_play"]["led"]); trn = led("Trans", bt["key_transpose"]["led"])
+        path = paths.get(name, trio)
+        frames = int(round(beats * BEAT * fps)); f0 = int(round(t0 * fps))
+
+        def active_key(T):
+            """Centro de la tecla que suena en T (para que el foco la siga en la toma del teclado)."""
+            cur = [e for e in ev if e[1] <= T][-1]
+            k = next(k for k in L["keyboard"]["keys"] if k["note"] == cur[0])
+            return P((k["x0"] + k["x1"]) / 2, (k["y0"] + k["y1"]) / 2, -6.0)
+        foc = {"T": None}
+
+        def pose(f, t, u, name=name, path=path, t0=t0):
+            T = t0 + t
+            moved = []
+            for note, o, amax in kobj:
+                o.rotation_euler.x = amax * key_depth(ev, note, T); moved.append(o)
+            for sid, v in automation(T).items():
+                s = sl[sid]; caps[sid].location = P(s["x"], s["y0"] + (s["y10"] - s["y0"]) * v); moved.append(caps[sid])
+            uu, shake, focus = u, 0.0, None
+            if name.startswith("trio"):
+                uu = (T - t_trio) / d_trio; focus = Vector((28.0, -18.0, -1.0))
+            elif name == "open":
+                focus = Vector((27.0, -22.0, -0.6))
+            elif name == "seq":                     # del LED de RATE al de PLAY
+                k = fk.rack(u, 0.32, 0.68, 0.0, 1.0)
+                focus = P(*rl, 0.6).lerp(P(*bt["seq_play"]["led"], 0.6), k); shake = 0.10
+            elif name == "filter":
+                focus = caps["vcf_freq"].location + Vector((0, 0, 0.7)); shake = 0.08
+            elif name == "keys":                    # el foco sigue la tecla que suena, suavizado
+                tgt = active_key(T)
+                foc["T"] = tgt if foc["T"] is None else foc["T"].lerp(tgt, 0.18)
+                focus = foc["T"]; shake = 0.06
+            elif name == "end":
+                focus = Vector((28.5, -16.0, -1.0))
+            path.apply(cam, uu, focus=focus, shake=shake, t=T)
+            return moved
+
+        def extra(f, name=name, f0=f0):
+            T = t0 + (f - 1) / fps; g = f0 + f - 1
+            e = env[min(g, len(env) - 1)] if env else 0.5
+            ph = (T % BEAT) / BEAT
+            rate.default_value = 12.0 if ph < 0.22 else 0.0; rate.keyframe_insert("default_value")
+            play.default_value = 3.0 + 9.0 * e; play.keyframe_insert("default_value")
+            trn.default_value = 4.0; trn.keyframe_insert("default_value")
+            # El barrido cruza el panel durante la toma del filtro y vuelve, más tenue, en el trío.
+            if name == "filter": k = (T - 7.0) / 4.0
+            elif name.startswith("trio"): k = (T - t_trio) / d_trio
+            else: k = -1.0
+            sweep.location.x = -20.0 + 100.0 * fk_ease(k)
+            sweep.data.energy = (22000.0 if name == "filter" else 30000.0) * math.sin(math.pi * min(1, max(0, k)))
+            sweep.keyframe_insert("location"); sweep.data.keyframe_insert("energy")
+
+        if probe: fk.render_shot(sc, name, frames, pose, OUT, step=probe, extra_keys=extra)
+        else: fk.render_shot(sc, name, frames, pose, OUT, extra_keys=extra)
+
 if __name__ == "__main__":
-    modes = {"bg": mode_bg, "sprites": mode_sprites, "preview": mode_preview, "hero": mode_hero, "anim": mode_anim, "film": mode_film}
+    modes = {"bg": mode_bg, "sprites": mode_sprites, "preview": mode_preview, "hero": mode_hero, "anim": mode_anim, "film": mode_film,
+             "film2": film2}
     for m in arg("--mode", "bg,sprites").split(","):
         print("== modo", m, flush=True); modes[m]()

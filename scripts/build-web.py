@@ -2129,7 +2129,7 @@ PRES = {
                     ("at101v/hero-red", "Three classic colours.", "Grey, blue or red, rendered from measurements of the original.")],
         stats=[("1", "+ sub", "oscillator, as on the original"), ("100", "", "sequencer steps with accent and slide"), ("8", "", "voices when you want more than one"), (str(N101), "", "presets, from acid lines to ambient")],
         colours=[("grey", "Grey", "#5b5a56"), ("blue", "Blue", "#24629b"), ("red", "Red", "#ae352f")],
-        film_cap="AT101V rendered in 3D, in three shots. The sound is the engine playing Acid Line, a sequence preset."),
+        film_cap="AT101V rendered in 3D in its grey, blue and red bodies: the keys follow the sequence, the LEDs blink on the beat and the filter faders move. The sound is the engine playing Acid Line, a sequence preset."),
     "es": dict(tag="La máquina de líneas de bajo.",
         highlights=[("at101v/hl-filter", "Un filtro que canta.", "El pasa bajos de cuatro polos IR3109, con una resonancia que autooscila afinada."),
                     ("at101v/hl-seq", "Un secuenciador que se ve.", "100 pasos con acento, slide, ligadura y probabilidad, más azar, mutar y exportar a .mid."),
@@ -2138,7 +2138,7 @@ PRES = {
                     ("at101v/hero-red", "Tres colores clásicos.", "Gris, azul o rojo, renderizados a partir de mediciones del original.")],
         stats=[("1", "+ sub", "oscilador, como el original"), ("100", "", "pasos de secuencia con acento y slide"), ("8", "", "voces cuando querés más de una"), (str(N101), "", "presets, de líneas acid a ambient")],
         colours=[("grey", "Gris", "#5b5a56"), ("blue", "Azul", "#24629b"), ("red", "Rojo", "#ae352f")],
-        film_cap="El AT101V renderizado en 3D, en tres tomas. El sonido es el motor tocando Acid Line, un preset de secuencia."),
+        film_cap="El AT101V renderizado en 3D en sus cuerpos gris, azul y rojo: las teclas siguen la secuencia, los LED marcan el pulso y se mueven los faders del filtro. El sonido es el motor tocando Acid Line, un preset de secuencia."),
 },
 "at42": {
     "en": dict(tag="Twenty oscillators. One slow storm.",
