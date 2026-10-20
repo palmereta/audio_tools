@@ -156,9 +156,18 @@ def main():
         src = wav
     else:
         src = os.path.join(ROOT, a["file"])
-    norm = os.path.join(tmp, "audio16.wav")
+    # −16 LUFS en dos pasadas: se mide el tramo ya recortado y con sus fundidos, y después se aplica una ganancia fija
+    # (loudnorm lineal). En una sola pasada loudnorm adivina y erraba hasta 1,2 LU con material ya masterizado.
+    cut, norm = os.path.join(tmp, "audio-cut.wav"), os.path.join(tmp, "audio16.wav")
     run(["ffmpeg", "-y", "-loglevel", "error", "-ss", str(a.get("start", 0)), "-i", src, "-t", f"{total:.3f}",
-         "-af", f"loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,afade=t=in:st=0:d=0.25,afade=t=out:st={total - 1.4:.3f}:d=1.4", norm])
+         "-af", f"aresample=48000,afade=t=in:st=0:d=0.25,afade=t=out:st={total - 1.4:.3f}:d=1.4", cut])
+    target = "I=-16:TP=-1.5:LRA=11"
+    r = subprocess.run(["ffmpeg", "-hide_banner", "-i", cut, "-af", f"loudnorm={target}:print_format=json", "-f", "null", "-"],
+                       capture_output=True, text=True)
+    m = json.loads(r.stderr[r.stderr.rindex("{"):r.stderr.rindex("}") + 1])
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", cut, "-af",
+         f"loudnorm={target}:measured_I={m['input_i']}:measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}:"
+         f"measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true,aresample=48000", norm])
     inputs += ["-i", norm]
 
     out = os.path.join(ROOT, "web", "assets", "video", f"{slug}.mp4")

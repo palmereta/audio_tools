@@ -1,0 +1,16 @@
+{
+  "title": "Lacquer",
+  "tagline": "Cut it loud. Or cut it right.",
+  "fps": 24,
+  "bpm": 104,
+  "audio": {"file": "web/assets/samples/lacquer/balanced.m4a", "start": 4.6154},
+  "shots": [
+    {"name": "open", "beats": 8},
+    {"name": "stylus", "beats": 6},
+    {"name": "scope", "beats": 6},
+    {"name": "hero", "beats": 8},
+    {"name": "carriage", "beats": 6},
+    {"name": "end", "beats": 8, "in": "dissolve"}
+  ],
+  "poster": {"shot": "hero", "frame": 60}
+}

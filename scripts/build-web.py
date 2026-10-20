@@ -2332,7 +2332,7 @@ PRES = {
                     ("lacquer/hl-mod", "Nothing hidden.", "Every module says what it did and why, with its gain reduction as it happens."),
                     ("lacquer/hl-top", "Exact loudness.", "From a file, it renders, measures and corrects until the master reads the target within a few hundredths of a LU.")],
         stats=[("6", "", "styles over our own target curves"), ("8x", "", "true-peak detection in the limiter"), ("0.04", "LU", "worst loudness miss in the tests, reachable targets"), ("2.9", "%", "of a CPU core with every module on, M4")],
-        film_cap="A cutting lathe rendered in 3D, in three shots; the groove follows the demo master. The sound is the demo mix mastered by Lacquer in the Balanced style."),
+        film_cap="A disc-cutting lathe rendered in 3D: the stylus cuts the groove live, its width and spacing following the music, with the swarf, the view through the microscope and the carriage advancing. The sound is the demo mix mastered by Lacquer in the Balanced style."),
     "es": dict(tag="Cortalo fuerte. O cortalo bien.",
         highlights=[("lacquer/hl-close", "Una perilla de trabajo.", "Apretás Learn o soltás una mezcla. Lacquer la mide y arma una cadena de mastering entera en segundos."),
                     ("lacquer/hl-ui", "Tu canción, como un surco.", "El disco es una laca y su surco es tu master: cuanto más fuerte el momento, más ancho el corte."),
@@ -2340,7 +2340,7 @@ PRES = {
                     ("lacquer/hl-mod", "Nada escondido.", "Cada módulo dice qué hizo y por qué, con su reducción de ganancia mientras ocurre."),
                     ("lacquer/hl-top", "Sonoridad exacta.", "Desde un archivo, renderiza, mide y corrige hasta que el master mide el objetivo con un error de centésimas de LU.")],
         stats=[("6", "", "estilos sobre curvas objetivo propias"), ("8x", "", "detección de pico verdadero en el limitador"), ("0,04", "LU", "peor error de sonoridad en las pruebas, objetivos alcanzables"), ("2,9", "%", "de un núcleo con todos los módulos, M4")],
-        film_cap="Un torno de corte renderizado en 3D, en tres tomas; el surco sigue al master de demostración. El sonido es la mezcla de demostración masterizada por Lacquer en el estilo Balanced."),
+        film_cap="Un torno de corte de discos renderizado en 3D: la púa corta el surco en vivo, con el ancho y el paso siguiendo a la música, la viruta, la vista por el microscopio y el carro avanzando. El sonido es la mezcla de demostración masterizada por Lacquer en el estilo Balanced."),
 },
 }
 
