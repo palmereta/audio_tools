@@ -34,7 +34,10 @@ esac
 # Con el usuario del host (los archivos de build/ y dist/ no quedan de root) y sin pasar de 6 GB: el host corre
 # otros servicios (Postgres, Redis).
 RUN="docker run --rm -u \$(id -u):\$(id -g) -e HOME=/tmp --memory=6g -v \$HOME/$REMOTE:/work -w /work/src $IMAGE"
-ssh "$HOST" "$RUN sh -c 'cmake -S /work/src -B /work/build -G Ninja -DCMAKE_BUILD_TYPE=Release >/dev/null \
+# Un link por vez (pool "link"): los links con LTO de un plugin (VST3, LV2, standalone) piden ~2 GB cada uno y tres
+# juntos pasaban los 6 GB (Orrery 1.0.6: "Killed signal terminated program lto1").
+ssh "$HOST" "$RUN sh -c 'cmake -S /work/src -B /work/build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_JOB_POOLS=link=1 -DCMAKE_JOB_POOL_LINK=link >/dev/null \
     && nice ninja -C /work/build -j$JOBS $TARGETS \
     && BUILD=/work/build DIST=/work/dist sh scripts/package-linux.sh $ONLY'"
 
