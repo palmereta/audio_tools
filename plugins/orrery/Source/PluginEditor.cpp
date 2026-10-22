@@ -55,7 +55,8 @@ struct DemoRecorder : juce::Timer, juce::Thread
 }
 
 OrreryEditor::OrreryEditor (OrreryProcessor& p)
-    : AudioProcessorEditor (&p), proc (p), simple (p), lanes (p), harmony (p), outputs (p)
+    : AudioProcessorEditor (&p), proc (p), simple (p), lanes (p), harmony (p), outputs (p), satellite (p),
+      previewBtn (p, "preview", "Preview sound", "Orrery's own built-in sound, to try it without routing. Turn it off when your synths play: the MIDI is the same either way")
 {
     setLookAndFeel (&lnf);
     content.painter = [this] (juce::Graphics& g) { paintBackdrop (g); };
@@ -67,7 +68,8 @@ OrreryEditor::OrreryEditor (OrreryProcessor& p)
     content.setOpaque (true);
     addAndMakeVisible (content);
     content.setSize (baseW, baseH);
-    for (auto* c : std::initializer_list<juce::Component*> { &simple, &lanes, &harmony, &outputs }) content.addChildComponent (c);
+    for (auto* c : std::initializer_list<juce::Component*> { &simple, &lanes, &harmony, &outputs, &satellite }) content.addChildComponent (c);
+    content.addAndMakeVisible (previewBtn);
     for (auto* b : { &playBtn, &prevBtn, &nextBtn, &presetBtn, &saveBtn, &captureBtn, &panicBtn, &simpleBtn, &advBtn, &tabLanes, &tabHarm, &tabOut }) content.addAndMakeVisible (b);
     content.addAndMakeVisible (manualBtn);
     manualBtn.onClick = [this] { manualHost.toggle (*this, manualTheme()); };
@@ -87,7 +89,7 @@ OrreryEditor::OrreryEditor (OrreryProcessor& p)
     dh::HelpRouter::add (this);
     proc.onPresetChanged = [this] { refreshAll(); };
 
-    for (auto* pg : std::initializer_list<juce::Component*> { &simple, &lanes, &harmony, &outputs }) pg->setBounds (0, barH, baseW, baseH - barH - footH);
+    for (auto* pg : std::initializer_list<juce::Component*> { &simple, &lanes, &harmony, &outputs, &satellite }) pg->setBounds (0, barH, baseW, baseH - barH - footH);
     showPage (0);
     setResizable (true, true);
     setResizeLimits (baseW / 2, baseH / 2, (int) (baseW * 1.5), (int) (baseH * 1.5));
@@ -102,6 +104,32 @@ OrreryEditor::OrreryEditor (OrreryProcessor& p)
         const bool manualOpen = juce::SystemStats::getEnvironmentVariable ("ORRERY_MANUAL", "0").getIntValue() != 0;      // con el manual abierto
         const int presetIndex = juce::SystemStats::getEnvironmentVariable ("ORRERY_PRESET", "-1").getIntValue();
         const int pg = juce::SystemStats::getEnvironmentVariable ("ORRERY_PAGE", "0").getIntValue();
+        // ORRERY_ROLE=1..3 (Independent, Main, Satellite) y ORRERY_SAT_LANES=máscara: capturas del manual.
+        // ORRERY_SAT_DEMO=1: esta es satélite de un Main que se crea acá (con ORRERY_PRESET y Play); =2: esta es el
+        // Main y se crean dos satélites (carriles 3 y 5). Al terminar la captura todo vuelve a Auto.
+        const int satDemo = juce::SystemStats::getEnvironmentVariable ("ORRERY_SAT_DEMO", "0").getIntValue();
+        const int roleEnv = juce::SystemStats::getEnvironmentVariable ("ORRERY_ROLE", "-1").getIntValue();
+        if (satDemo == 1)
+        {
+            auto m = std::make_unique<OrreryProcessor>();
+            m->setRoleFromUi (dh::orr::RoleMain);
+            const int pi = juce::SystemStats::getEnvironmentVariable ("ORRERY_PRESET", "0").getIntValue();
+            m->loadPreset (std::max (0, pi)); m->setValue ("run", 1.0f); m->setValue ("clock", 0.0f); m->setValue ("preview", 0.0f);
+            proc.addDemoInstance (std::move (m), true);
+            proc.setRoleFromUi (dh::orr::RoleSatellite);
+        }
+        else if (satDemo == 2)
+        {
+            proc.setRoleFromUi (dh::orr::RoleMain);
+            for (int lanes : { 0x04, 0x10 })
+            {
+                auto s2 = std::make_unique<OrreryProcessor>();
+                s2->setRoleFromUi (dh::orr::RoleSatellite); s2->setValue ("sat_lanes", (float) lanes);
+                proc.addDemoInstance (std::move (s2), false);
+            }
+        }
+        else if (roleEnv >= 0) proc.setRoleFromUi (roleEnv);
+        if (const int sl = juce::SystemStats::getEnvironmentVariable ("ORRERY_SAT_LANES", "0").getIntValue(); sl > 0) proc.setValue ("sat_lanes", (float) sl);
         const bool run = juce::SystemStats::getEnvironmentVariable ("ORRERY_RUN", "0").getIntValue() != 0;
         const int wait = juce::SystemStats::getEnvironmentVariable ("ORRERY_WAIT", "4").getIntValue();
         juce::Component::SafePointer<OrreryEditor> safe (this);
@@ -131,6 +159,8 @@ OrreryEditor::OrreryEditor (OrreryProcessor& p)
             juce::File f (snap); f.deleteFile();
             juce::FileOutputStream os (f);
             juce::PNGImageFormat().writeImageToStream (img, os);
+            // La standalone guarda su estado al salir: el rol de la captura no se queda.
+            safe->proc.setRoleFromUi (dh::orr::RoleAuto); safe->proc.setValue ("sat_lanes", 0.0f);
         });
     }
 }
@@ -139,16 +169,21 @@ OrreryEditor::~OrreryEditor() { recorder.reset(); proc.onPresetChanged = nullptr
 
 void OrreryEditor::refreshAll()
 {
-    for (auto* pg : std::initializer_list<Page*> { &simple, &lanes, &harmony, &outputs }) pg->refresh();
+    for (auto* pg : std::initializer_list<Page*> { &simple, &lanes, &harmony, &outputs, &satellite }) pg->refresh();
     content.repaint();
 }
 
 void OrreryEditor::showPage (int p)
 {
     page = juce::jlimit (0, 3, p);
-    simple.setVisible (page == 0); lanes.setVisible (page == 1); harmony.setVisible (page == 2); outputs.setVisible (page == 3);
+    // Un satélite muestra sólo su página: qué carril del Main toca. El resto lo decide el Main.
+    const bool sat = isSatellite();
+    shownRole = proc.role();
+    satellite.setVisible (sat);
+    simple.setVisible (! sat && page == 0); lanes.setVisible (! sat && page == 1); harmony.setVisible (! sat && page == 2); outputs.setVisible (! sat && page == 3);
+    for (auto* b : { &playBtn, &prevBtn, &nextBtn, &presetBtn, &saveBtn, &captureBtn, &simpleBtn, &advBtn }) b->setVisible (! sat);
     simpleBtn.setToggleState (page == 0, juce::dontSendNotification); advBtn.setToggleState (page != 0, juce::dontSendNotification);
-    for (auto* t : { &tabLanes, &tabHarm, &tabOut }) t->setVisible (page != 0);
+    for (auto* t : { &tabLanes, &tabHarm, &tabOut }) t->setVisible (! sat && page != 0);
     tabLanes.setToggleState (page == 1, juce::dontSendNotification); tabHarm.setToggleState (page == 2, juce::dontSendNotification); tabOut.setToggleState (page == 3, juce::dontSendNotification);
     resized();
     content.repaint();
@@ -158,10 +193,10 @@ juce::String OrreryEditor::statusText() const
 {
     const auto& v = proc.view();
     auto mmss = [] (float s) { const int t = (int) s; return juce::String (t / 60) + ":" + juce::String (t % 60).paddedLeft ('0', 2); };
-    juce::String s = v.running ? "Playing  " + mmss (v.sessionSeconds) : (v.ended ? "Session finished" : "Stopped");
+    if (isSatellite()) return v.running ? "satellite, playing" : "satellite";
+    juce::String s = v.running ? "playing " + mmss (v.sessionSeconds) : (v.ended ? "session finished" : "stopped");
     const int session = (int) proc.value ("session");
     if (session > 0) s << " / " << session << ":00";
-    if (proc.value ("breath") > 0.5f) s << "   breathing " << (int) proc.value ("breath") << " per minute";
     return s;
 }
 
@@ -177,11 +212,11 @@ void OrreryEditor::paintBackdrop (juce::Graphics& g)
     g.setColour (col::sun.withAlpha (0.5f)); g.drawEllipse (c.x - 15, c.y - 15, 30, 30, 1.2f);
     g.setColour (col::lane (1)); g.fillEllipse (c.x + 9, c.y - 13, 6, 6);
     g.setColour (col::text); g.setFont (font (24.0f, true));
-    g.drawText ("orrery", 58, 0, 110, barH, juce::Justification::centredLeft);
+    g.drawText ("orrery", 58, 4, 110, 34, juce::Justification::centredLeft);
     wordR = { 10, 0, 160, barH };
-    // Estado bajo el botón de play.
-    g.setColour (col::dim); g.setFont (font (12.5f));
-    g.drawText (statusText(), playBtn.getRight() + 14, 0, prevBtn.getX() - playBtn.getRight() - 20, barH, juce::Justification::centredLeft);
+    // Estado bajo el nombre (al lado de Play va la llave del sonido de prueba).
+    g.setColour (col::dim); g.setFont (font (11.5f));
+    g.drawFittedText (statusText(), 59, 36, playBtn.getX() - 66, 18, juce::Justification::centredLeft, 1, 0.8f);
     // Pie: ayuda o mensaje, y el clip capturado para arrastrar.
     statusR = { 14, baseH - footH, baseW - 28, footH };
     const bool msg = juce::Time::getMillisecondCounter() < messageUntil;
@@ -205,9 +240,10 @@ void OrreryEditor::resized()
     content.setTransform (juce::AffineTransform::scale ((float) getWidth() / (float) baseW));
     const int y = (barH - 34) / 2;
     playBtn.setBounds (186, y - 2, 110, 38);
-    int x = 470;
+    previewBtn.setBounds (playBtn.getRight() + 10, y - 2, 176, 38);
+    int x = previewBtn.getRight() + 16;
     prevBtn.setBounds (x, y, 34, 34); x += 38;
-    presetBtn.setBounds (x, y, 210, 34); x += 214;
+    presetBtn.setBounds (x, y, 200, 34); x += 204;
     nextBtn.setBounds (x, y, 34, 34); x += 40;
     saveBtn.setBounds (x, y, 64, 34);
     panicBtn.setBounds (baseW - 14 - 120, y, 120, 34);
@@ -219,6 +255,7 @@ void OrreryEditor::resized()
     for (auto* t : { &tabLanes, &tabHarm, &tabOut }) { t->setBounds (tx, barH + 10, t == &tabHarm ? 170 : 110, 30); tx += t->getWidth() + 6; }
     const int top = page == 0 ? barH : barH + 44;
     for (auto* pg : std::initializer_list<juce::Component*> { &simple, &lanes, &harmony, &outputs }) pg->setBounds (0, top, baseW, baseH - top - footH);
+    satellite.setBounds (0, barH, baseW, baseH - barH - footH);
     manualBtn.setBounds (baseW - 14 - 96, baseH - footH + 3, 96, footH - 6);
     manualHost.layout (getLocalBounds());
 }
@@ -232,8 +269,9 @@ void OrreryEditor::timerCallback()
         playBtn.setButtonText (run > 0.5f ? "Stop" : "Play");
         playBtn.setToggleState (run > 0.5f, juce::dontSendNotification);
     }
+    if (proc.role() != shownRole) showPage (page);
     const auto st = statusText();
-    if (st != lastStatus) { lastStatus = st; content.repaint (playBtn.getRight(), 0, 320, barH); }
+    if (st != lastStatus) { lastStatus = st; content.repaint (0, 0, playBtn.getX(), barH); }
     presetBtn.setButtonText (proc.presetDisplayName());
     if (messageUntil != 0 && juce::Time::getMillisecondCounter() > messageUntil) { messageUntil = 0; content.repaint (statusR); }
 }

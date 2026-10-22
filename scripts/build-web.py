@@ -159,6 +159,12 @@ WINA3 = f"AT303-{VA3}-Windows.zip"
 VPL = version("plumb")
 MACPL = f"Plumb-{VPL}-macOS.zip"
 WINPL = f"Plumb-{VPL}-Windows.zip"
+VPA = version("pallor")
+MACPA = f"Pallor-{VPA}-macOS.zip"
+WINPA = f"Pallor-{VPA}-Windows.zip"
+VTH = version("thrum")
+MACTH = f"Thrum-{VTH}-macOS.zip"
+WINTH = f"Thrum-{VTH}-Windows.zip"
 
 # ───────────────────────── AT20V (y textos de la portada sobre código abierto) ─────────────────────────
 T = {
@@ -389,6 +395,14 @@ H = {
              what="A bass line synthesizer with its own sequencer.",
              body="A diode ladder that squelches, accents that climb, slides that glide, and the original's two-list sequencer you can finally see. Plus an acid line generator, the classic circuit modifications and the circuit itself, live.",
              alt="A graphite bass line synthesizer rendered in 3D, its step pads lit amber, five large knobs and a one-octave keyboard"),
+        dict(slug="pallor", name="Pallor", year="2026", img="hero", imgdir="pallor/", ver=VPA, mac=MACPA, win=WINPA,
+             what="A drum machine for the dark genres.",
+             body="Sixteen voices, each with an analog circuit engine and an 80s sampler engine, the gated rooms, tape echoes and flangers of the period, and a sequencer with probability, ratchets, conditions, polymeter and a song chain. Sixty-five presets from dark wave to witch house.",
+             alt="A black drum machine rendered in 3D: a large dark screen, a row of knobs with pale ceramic tops and sixteen pale pads, some of them glowing rose"),
+        dict(slug="thrum", name="Thrum", year="2026", img="hero", imgdir="thrum/", ver=VTH, mac=MACTH, win=WINTH,
+             what="An electric guitar, played string by string.",
+             body="Six guitars modelled from the strings up, with a guitarist inside that fingers every note on a real string and fret, strums in time with your song, bends, slides and mutes. Then thirteen pedals, four amps and a cabinet with microphones you move. No samples.",
+             alt="A red electric guitar with an original body shape on a stand, a black amplifier stack and a pedalboard under a warm stage light, rendered in 3D"),
     ],
     about="About", dl_mac="macOS", dl_win="Windows", formats="VST3, Audio Unit and standalone app. Free.",
     hero_alt="Close-up of the blue AT101V rendered in 3D: sliders with black caps and the white AT101V logo",
@@ -455,6 +469,14 @@ H = {
              what="Un sintetizador de bajo con su propio secuenciador.",
              body="Una escalera de diodos que chilla, acentos que suben, slides que se deslizan y el secuenciador de dos listas del original, que por fin se ve. Más un generador de líneas ácidas, las modificaciones clásicas del circuito y el circuito mismo, en vivo.",
              alt="Un sintetizador de bajo de grafito renderizado en 3D, con los pads de los pasos encendidos en ámbar, cinco perillas grandes y un teclado de una octava"),
+        dict(slug="pallor", name="Pallor", year="2026", img="hero", imgdir="pallor/", ver=VPA, mac=MACPA, win=WINPA,
+             what="Una caja de ritmos para los géneros oscuros.",
+             body="Dieciséis voces, cada una con un motor de circuito analógico y un motor de sampler de los 80, las salas con gate, los ecos de cinta y los flangers de la época, y un secuenciador con probabilidad, ratchets, condiciones, polimetría y cadena de canción. Sesenta y cinco presets, del dark wave al witch house.",
+             alt="Una caja de ritmos negra renderizada en 3D: una pantalla grande y oscura, una fila de perillas con tapas de cerámica pálida y dieciséis pads pálidos, algunos encendidos en rosa"),
+        dict(slug="thrum", name="Thrum", year="2026", img="hero", imgdir="thrum/", ver=VTH, mac=MACTH, win=WINTH,
+             what="Una guitarra eléctrica, tocada cuerda por cuerda.",
+             body="Seis guitarras modeladas desde las cuerdas, con un guitarrista adentro que digita cada nota en una cuerda y un traste reales, rasguea a tiempo con tu tema, hace bends, slides y apagados. Después, trece pedales, cuatro amplificadores y un gabinete con micrófonos que movés. Sin samples.",
+             alt="Una guitarra eléctrica roja de forma propia en un soporte, un stack de amplificador negro y una pedalera bajo una luz cálida de escenario, renderizados en 3D"),
     ],
     about="Ver más", dl_mac="macOS", dl_win="Windows", formats="VST3, Audio Unit y aplicación independiente. Gratis.",
     hero_alt="Primer plano del AT101V azul renderizado en 3D: faders con capuchones negros y el logo AT101V en blanco",
@@ -1834,6 +1856,236 @@ PL = {
 ),
 }
 
+PA = {
+"en": dict(
+    title="Pallor — free drum machine for dark wave, coldwave, post-punk and EBM | Audio Tools",
+    description="Pallor is a free, open-source drum machine for macOS, Windows and Linux, made for dark wave, coldwave, post-punk, EBM, synthpop, goth rock, industrial and witch house: sixteen voices with an analog circuit engine and an 80s sampler engine each, gated and nonlinear rooms, tape echo and flangers, a step sequencer with probability, ratchets, conditions, polymeter and a song chain, multiple outputs and MIDI out. VST3, Audio Unit, LV2, standalone and a command-line renderer.",
+    listen_p="Every clip is Pallor alone, playing a factory preset with its own patterns and song, rendered offline with no edits. The three sketches add a bass and a pad from our other instruments. Every clip is at the same loudness.",
+    sound_h="Cold machines, from the circuit up.",
+    sound_p1="The analog engine models the circuits of the drum machines of 1978 to 1984: the bridged-T kick that settles at 49.5 Hz, the six squares behind the hats and cymbals, the hexagonal pads with their falling bend. Each of the 44 models is measured against the published analyses of the originals and calibrated so a new kit is balanced.",
+    sound_p2="The digital engine plays samples through the chain of the 80s samplers: the 8-bit companding converter, the pitch set by the clock so that tuning down brings the images into the band, the 12-bit machines at 26 and 40 kHz. Eight kits are built in, synthesised by Pallor itself, and any voice takes a sample of your own.",
+    spec=[("Voices", "16, each with an analog engine (44 circuit models) and a digital engine (8 kits and a user sample)"),
+          ("Sequencer", "16 patterns with A, B and Fill, up to 64 steps, per-track length, swing per pattern, song chain of 64 entries"),
+          ("Per step", "velocity, accent, probability, ratchet 1 to 8, flam, nudge and nine conditions"),
+          ("Effects", "gated, nonlinear and reverse rooms, plate, spring, hall; tape, BBD and 12-bit echoes, chorus, ensemble, flanger, phaser; lo-fi, tape and glue on the master"),
+          ("Outputs and MIDI", "main and six stereo buses; MIDI in with GM or chromatic maps; the sequencer as MIDI out, or dragged into the DAW"),
+          ("Repeatable", "sample-accurate at any block size; the same render every time, chance included")],
+    flow_h="A machine you can see into.",
+    flow_p="Pallor is drawn as a piece of hardware seen from above: a black slab with a dark glass screen, a row of knobs for the voice you are playing, and sixteen pale pads that glow rose with every hit. The screen holds the pattern, the voice, the mixer, the effects, the song, your samples and the presets.",
+    flow_caption="Night Shift Mercury playing: the grid, the knobs of the kick and the pads lit by the pattern.",
+    room_h="Every step, in detail.",
+    room_p="Click to write, drag to paint, and open the lanes below the grid to shape what each step does.",
+    room_facts=[("Chance that repeats.", "Probability decided by the position and a seed: varied from bar to bar, identical on every render."),
+                ("Ratchets and flams.", "One to eight hits inside a step, and a softer grace note before the beat."),
+                ("Conditions.", "Steps that play only on fills, never on fills, once every two or four passes, or only the first time."),
+                ("Polymeter and swing.", "A track can have its own length, and each pattern its own swing, from straight to dotted.")],
+    room_caption="Body Discipline: the pattern bank, the grid and the velocity lane of the kick.",
+    mods_h="The sound of the period, in two sends.",
+    mods_p="Send A is the room, send B the echo, and the master has what the bus of a 1985 mix had.",
+    mods_facts=[("The 80s rooms.", "A gated room squashed and cut by what you send it, the flat nonlinear burst, its reverse, and plate, spring, hall and room."),
+                ("Echoes that move.", "Tape echo with three heads and wow, a bucket-brigade delay, a 12-bit digital delay, and chorus, ensemble, jet flanger and phaser."),
+                ("The master.", "A 12-bit or 8-bit sampler over the whole kit, tape with hysteresis, a bus compressor with its gain reduction meter, and an exciter."),
+                ("Out into the DAW.", "Six extra stereo outputs for the kick, snares, hats, toms, percussion and FX, and the sequencer as MIDI out.")],
+    mods_caption="The FX page: Space, Echo and the master chain.",
+    slow_h="From dark wave to witch house.",
+    slow_p="Sixty-five presets in thirteen genres, each a kit, its effects, its patterns and often a song, and a library of 156 patterns to start from. Load the sound or the patterns alone, save your own, and drag any pattern into your DAW as MIDI.",
+    presets_h="Sixty-five presets.",
+    presets=[("15", "Dark wave, coldwave, post-punk", "Night Shift Mercury, Cathode Hymn, Thin Ice Lines, Winter Transmission, Floor Tom Sermon, Wire and Rain…"),
+             ("15", "Minimal wave, EBM, synthpop", "Bedroom Rhythm Box, Cassette Ritual, Steel Boots, Sweat Engine, Neon Promenade, Mirror Ballroom…"),
+             ("15", "Goth rock, industrial, new beat", "Bat Cave Stomp, Vigil Machine, Rust Choir, Broken Conveyor, Slow Leather, Dense Smoke 108…"),
+             ("20", "Italo, witch house, trip-hop, ambient", "Chrome Heartbeat, Hi-Energy Ghost, Pale Coven, Triangle Static, Rainy Breakbeat, Catacomb Drift, Moth Light…")],
+    dl_h=f"Download Pallor {VPA}.",
+    dl_p="Free, no account, no subscription.",
+    mac_h="macOS", mac_req="macOS 11 or later. Apple silicon and Intel in one universal binary.",
+    mac_fmt="VST3, Audio Unit, standalone app and pallorrender",
+    mac_steps=["Unzip the file.", "Copy <code>Pallor.vst3</code> to <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copy <code>Pallor.component</code> to <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "Rescan plugins in your DAW and put Pallor on an instrument track."],
+    win_h="Windows", win_req="Windows 10 or 11, 64-bit.", win_fmt="VST3, standalone app and pallorrender",
+    win_steps=["Unzip the file.", "Copy <code>Pallor.vst3</code> to <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Rescan plugins in your DAW and put Pallor on an instrument track."],
+    file_label="file",
+    dl_note="The builds are not code-signed yet. macOS may refuse to open them until you run <code>xattr -dr com.apple.quarantine</code> on the installed files, and Windows SmartScreen may ask you to confirm the first time. Every package includes an INSTALL.txt with the exact steps and the renderer's options.",
+    os_p="Pallor is free software under the GNU Affero General Public License v3, like the JUCE framework it is built on. You can use it, study it, change it and share it. The source code is on <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, with every release.",
+    os_link="Why Audio Tools is open source",
+    trademark="Audio Tools is an independent project. Pallor is an original design and does not copy any commercial product; it contains no samples of other machines, and no brand names or logos appear in it.",
+    photo_credit="The instrument in the pictures is a 3D render made for this page; the screen shows the real interface. Every sound on this page is Pallor's own.",
+    hero_alt="A black drum machine rendered in 3D on a dark table: the screen with a step grid, eight knobs with pale ceramic tops and sixteen pale pads, some glowing rose.",
+    alt_ui="Pallor with the Night Shift Mercury preset", alt_room="Pallor's PATTERN page with the Body Discipline preset", alt_frozen="Pallor's FX page",
+),
+"es": dict(
+    title="Pallor — caja de ritmos gratis para dark wave, coldwave, post-punk y EBM | Audio Tools",
+    description="Pallor es una caja de ritmos libre y de código abierto para macOS, Windows y Linux, hecha para dark wave, coldwave, post-punk, EBM, synthpop, goth rock, industrial y witch house: dieciséis voces con un motor de circuito analógico y un motor de sampler de los 80 cada una, salas con gate y no lineales, eco de cinta y flangers, un secuenciador por pasos con probabilidad, ratchets, condiciones, polimetría y cadena de canción, salidas múltiples y salida MIDI. VST3, Audio Unit, LV2, aplicación independiente y render por línea de comandos.",
+    listen_p="Cada clip es Pallor solo, tocando un preset de fábrica con sus propios patrones y su canción, renderizado sin edición. Los tres bocetos suman un bajo y un pad de nuestros otros instrumentos. Todos los clips están a la misma sonoridad.",
+    sound_h="Máquinas frías, desde el circuito.",
+    sound_p1="El motor analógico modela los circuitos de las cajas de ritmos de 1978 a 1984: el bombo de puente en T que se asienta en 49,5 Hz, las seis cuadradas detrás de los charles y los platillos, los pads hexagonales con su caída de altura. Cada uno de los 44 modelos se midió contra los análisis publicados de los originales y se calibró para que un kit nuevo suene equilibrado.",
+    sound_p2="El motor digital toca muestras por la cadena de los samplers de los 80: el conversor de 8 bits con companding, la afinación por el reloj, que al bajar trae las imágenes a la banda, las máquinas de 12 bits a 26 y 40 kHz. Trae ocho kits sintetizados por el propio Pallor, y cualquier voz acepta una muestra tuya.",
+    spec=[("Voces", "16, cada una con un motor analógico (44 modelos de circuito) y uno digital (8 kits y una muestra propia)"),
+          ("Secuenciador", "16 patrones con A, B y Fill, hasta 64 pasos, largo por pista, swing por patrón, cadena de canción de 64 entradas"),
+          ("Por paso", "velocidad, acento, probabilidad, ratchet de 1 a 8, flam, corrimiento y nueve condiciones"),
+          ("Efectos", "salas con gate, no lineales e invertidas, placa, resorte, hall; ecos de cinta, BBD y 12 bits, chorus, ensemble, flanger, phaser; lo-fi, cinta y glue en el master"),
+          ("Salidas y MIDI", "principal y seis buses estéreo; entrada MIDI con mapa GM o cromático; el secuenciador como salida MIDI, o arrastrado al DAW"),
+          ("Repetible", "exacto a la muestra con cualquier tamaño de bloque; el mismo render cada vez, azar incluido")],
+    flow_h="Una máquina por dentro, a la vista.",
+    flow_p="Pallor se dibuja como un aparato visto desde arriba: una losa negra con una pantalla de vidrio oscuro, una fila de perillas para la voz que estás tocando y dieciséis pads pálidos que se encienden en rosa con cada golpe. En la pantalla están el patrón, la voz, el mixer, los efectos, la canción, tus muestras y los presets.",
+    flow_caption="Night Shift Mercury sonando: la grilla, las perillas del bombo y los pads encendidos por el patrón.",
+    room_h="Cada paso, en detalle.",
+    room_p="Hacé clic para escribir, arrastrá para pintar, y abrí las líneas de abajo de la grilla para decidir qué hace cada paso.",
+    room_facts=[("Azar que se repite.", "La probabilidad la decide la posición y una semilla: varía de compás a compás y es idéntica en cada render."),
+                ("Ratchets y flams.", "De uno a ocho golpes dentro de un paso, y una nota de gracia más suave antes del tiempo."),
+                ("Condiciones.", "Pasos que suenan sólo en los fills, nunca en los fills, una vez cada dos o cuatro pasadas, o sólo la primera vez."),
+                ("Polimetría y swing.", "Una pista puede tener su propio largo, y cada patrón su propio swing, de derecho a puntillo.")],
+    room_caption="Body Discipline: el banco de patrones, la grilla y la línea de velocidad del bombo.",
+    mods_h="El sonido de la época, en dos envíos.",
+    mods_p="El envío A es la sala, el B el eco, y el master tiene lo que tenía el bus de una mezcla de 1985.",
+    mods_facts=[("Las salas de los 80.", "Una sala con gate aplastada y cortada por lo que le mandás, la ráfaga plana no lineal, su reverso, y placa, resorte, hall y sala."),
+                ("Ecos que se mueven.", "Eco de cinta con tres cabezas y wow, un delay de bucket-brigade, un delay digital de 12 bits, y chorus, ensemble, jet flanger y phaser."),
+                ("El master.", "Un sampler de 12 u 8 bits sobre todo el kit, cinta con histéresis, un compresor de bus con su medidor de reducción y un excitador."),
+                ("Hacia el DAW.", "Seis salidas estéreo extra para bombo, cajas, charles, toms, percusión y FX, y el secuenciador como salida MIDI.")],
+    mods_caption="La página FX: Space, Echo y la cadena del master.",
+    slow_h="Del dark wave al witch house.",
+    slow_p="Sesenta y cinco presets en trece géneros, cada uno con un kit, sus efectos, sus patrones y muchas veces una canción, y una biblioteca de 156 patrones para arrancar. Cargá sólo el sonido o sólo los patrones, guardá los tuyos y arrastrá cualquier patrón al DAW como MIDI.",
+    presets_h="Sesenta y cinco presets.",
+    presets=[("15", "Dark wave, coldwave, post-punk", "Night Shift Mercury, Cathode Hymn, Thin Ice Lines, Winter Transmission, Floor Tom Sermon, Wire and Rain…"),
+             ("15", "Minimal wave, EBM, synthpop", "Bedroom Rhythm Box, Cassette Ritual, Steel Boots, Sweat Engine, Neon Promenade, Mirror Ballroom…"),
+             ("15", "Goth rock, industrial, new beat", "Bat Cave Stomp, Vigil Machine, Rust Choir, Broken Conveyor, Slow Leather, Dense Smoke 108…"),
+             ("20", "Italo, witch house, trip-hop, ambient", "Chrome Heartbeat, Hi-Energy Ghost, Pale Coven, Triangle Static, Rainy Breakbeat, Catacomb Drift, Moth Light…")],
+    dl_h=f"Descargá Pallor {VPA}.",
+    dl_p="Gratis, sin cuenta y sin suscripción.",
+    mac_h="macOS", mac_req="macOS 11 o posterior. Apple silicon e Intel en un solo binario universal.",
+    mac_fmt="VST3, Audio Unit, aplicación independiente y pallorrender",
+    mac_steps=["Descomprimí el archivo.", "Copiá <code>Pallor.vst3</code> a <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copiá <code>Pallor.component</code> a <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "Volvé a escanear los plugins en tu DAW y poné Pallor en una pista de instrumento."],
+    win_h="Windows", win_req="Windows 10 u 11, de 64 bits.", win_fmt="VST3, aplicación independiente y pallorrender",
+    win_steps=["Descomprimí el archivo.", "Copiá <code>Pallor.vst3</code> a <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Volvé a escanear los plugins en tu DAW y poné Pallor en una pista de instrumento."],
+    file_label="archivo",
+    dl_note="Los builds todavía no están firmados. macOS puede negarse a abrirlos hasta que corras <code>xattr -dr com.apple.quarantine</code> sobre los archivos instalados, y SmartScreen de Windows puede pedirte que confirmes la primera vez. Cada paquete trae un INSTALL.txt con los pasos exactos y las opciones del render.",
+    os_p="Pallor es software libre bajo la GNU Affero General Public License v3, como el framework JUCE sobre el que está hecho. Lo podés usar, estudiar, modificar y compartir. El código fuente está en <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, con cada versión.",
+    os_link="Por qué Audio Tools es de código abierto",
+    trademark="Audio Tools es un proyecto independiente. Pallor es un diseño original y no copia ningún producto comercial; no contiene muestras de otras máquinas y no aparecen nombres de marcas ni logos.",
+    photo_credit="El instrumento de las imágenes es un render 3D hecho para esta página; la pantalla muestra la interfaz real. Todos los sonidos de esta página son de Pallor.",
+    hero_alt="Una caja de ritmos negra renderizada en 3D sobre una mesa oscura: la pantalla con una grilla de pasos, ocho perillas con tapas de cerámica pálida y dieciséis pads pálidos, algunos encendidos en rosa.",
+    alt_ui="Pallor con el preset Night Shift Mercury", alt_room="La página PATTERN de Pallor con el preset Body Discipline", alt_frozen="La página FX de Pallor",
+),
+}
+
+TH = {
+"en": dict(
+    title="Thrum — free electric guitar plugin by physical modelling, with strummer and pedals | Audio Tools",
+    description="Thrum is a free, open-source electric guitar for macOS, Windows and Linux, made by physical modelling with no samples: six guitars with waveguide strings and real pickups, a guitarist that assigns every note to a string and fret, strums in time, picks with the fingers and plays bends, slides, hammer-ons, palm mutes and harmonics, thirteen reorderable pedals, four tube amps and a cabinet with movable microphones or your own impulse responses. VST3, Audio Unit, LV2, standalone, MPE and MIDI out.",
+    listen_p="Every clip is Thrum alone, playing factory presets from MIDI written for it, rendered offline with no edits. The dark wave clip adds Pallor and the AT101V. Every clip is at the same loudness.",
+    sound_h="A guitar, from the strings up.",
+    sound_p1="Every string is a vibrating string simulated as it plays: its gauge and tension, its stiffness fitted fret by fret, the two planes it moves in, the bridge it shares with the others. The pickups listen at their real distance from the bridge, through the coil, the volume and tone pots and the cable, so the neck pickup is round, the bridge one thin, and lowering the volume cleans up the amp.",
+    sound_p2="A guitarist inside decides how each note is played: which string and fret, how hard, where the pick lands, how the strum spreads across the strings with the middle ones on the beat. Nothing is recorded, so the same note never sounds twice the same, and the same MIDI always renders the same take.",
+    spec=[("Guitars", "Six: solid with three single coils or two humbuckers, semi-hollow, hollow jazz, baritone and seven-string"),
+          ("Strings", "Waveguides with two polarisations, stiffness per fret, tension, a shared bridge and fret buzz; nine tunings and four gauges"),
+          ("Playing", "Melody with smart legato, chords voiced like a guitarist, 32 strum and 11 fingerpicking patterns, ten articulations, keyswitches and MPE"),
+          ("Board", "Gate, compressor, wah, overdrive, distortion, fuzz, chorus, phaser, flanger, tremolo, vibrato, delay and reverb, in any order"),
+          ("Amp and cabinet", "Four tube amps with the real tone stack and sag; our own speaker and microphone model or impulse responses up to 3 s"),
+          ("Repeatable", "The same render every time at any block size; a seed gives another natural take")],
+    flow_h="See what the guitarist plays.",
+    flow_p="The fretboard runs across the whole window and shows, live, the finger on every string and fret that sounds and the strings vibrating. Below it, the chosen guitar in 3D, its strings, tuning, pickups and the noises of the hands. Inspect adds the technical view in cyan: the note names, where each pickup listens, the signal path, the cabinet's response.",
+    flow_caption="Campfire Strum: the strummed chord on the fretboard and the solid-body guitar with three single coils.",
+    room_h="Strum, pick, bend.",
+    room_p="Hold a chord and Thrum plays it the way a guitarist would, in time with your song.",
+    room_facts=[("Real voicings.", "The chord you hold is recognised and fingered in open, barre, power, triad or jazz shapes, in the region of the neck you choose."),
+                ("Strummed in time.", "Thirty-two patterns from rock to reggae and post-punk, with up-strokes on the high strings, palm mutes and dead strums, and an editor for your own."),
+                ("The middle on the beat.", "Strums start a little early so their middle strings land on the beat, as guitarists keep time; or on the beat, if you prefer."),
+                ("Every articulation.", "Hammer-ons, pull-offs and slides where notes overlap, bends with the wheel, palm mute, harmonics, pinch, tremolo picking and feedback that sustains forever.")],
+    room_caption="The Play page: modes, articulations, the strum pattern editor and the human variation.",
+    mods_h="Pedals, an amp and a microphone.",
+    mods_p="Thirteen pedals you switch with their footswitch and drag into any order, four tube amplifiers and a cabinet you can hear the microphones move in front of.",
+    mods_facts=[("A whole board.", "Gate, compressor, wah, a green overdrive, distortion, silicon or germanium fuzz, chorus, phaser, flanger, tremolo, vibrato, tape echo and spring reverb."),
+                ("Four amplifiers.", "American clean, British crunch, modern high gain and a small combo, with the real interacting tone stack, presence, depth and sag."),
+                ("Move the mic.", "Two microphones, dynamic, condenser or ribbon, placed across the cone and away from it, blended with their real time difference."),
+                ("Your own cabinets.", "Load any impulse response up to three seconds: a cabinet, a room or a whole studio chain. And a DI output to re-amp later.")],
+    mods_caption="The Amp / Cab page: the amplifier and its cabinet, with the two microphones in front of the speaker.",
+    slow_h="From jazz to shoegaze.",
+    slow_p="Sixty-nine presets in nine categories: clean jazz and funk, crunch and blues, rock and high gain, post-punk and dark wave, surf, shoegaze and ambient, strummed chords, leads with legato and bends, effects, and the guitar alone for your own amps.",
+    presets_h="Sixty-nine presets.",
+    presets=[("16", "Clean, crunch and blues", "Glass Arpeggio, Warm Jazz Box, Funk Scratch, Bossa Night, Texas Shuffle, Open G Slide, Edge of Breakup…"),
+             ("18", "Rock, high gain, post-punk and dark wave", "Arena Lead, Modern Chug, Baritone Doom, Stoner Fuzz, Night Drive Strum, Cold Chorus Arpeggio, Coldwave Tremolo…"),
+             ("18", "Surf, shoegaze, ambient and strummed chords", "Surf Spring Drip, Shoegaze Wall, Ambient Freeze, Feedback Drone, Campfire Strum, Reggae Skank, Boom Chuck…"),
+             ("17", "Leads, effects and direct", "Legato Runs, Bend Into Note, Whammy Dives, Wah Lead, Jet Flanger Chords, Tape Echo Twang, DI Humbuckers…")],
+    dl_h=f"Download Thrum {VTH}.",
+    dl_p="Free, no account, no subscription.",
+    mac_h="macOS", mac_req="macOS 11 or later. Apple silicon and Intel in one universal binary.",
+    mac_fmt="VST3, Audio Unit, standalone app and thrumrender",
+    mac_steps=["Unzip the file.", "Copy <code>Thrum.vst3</code> to <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copy <code>Thrum.component</code> to <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "Rescan plugins in your DAW and put Thrum on an instrument track."],
+    win_h="Windows", win_req="Windows 10 or 11, 64-bit.", win_fmt="VST3, standalone app and thrumrender",
+    win_steps=["Unzip the file.", "Copy <code>Thrum.vst3</code> to <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Rescan plugins in your DAW and put Thrum on an instrument track."],
+    file_label="file",
+    dl_note="The builds are not code-signed yet. macOS may refuse to open them until you run <code>xattr -dr com.apple.quarantine</code> on the installed files, and Windows SmartScreen may ask you to confirm the first time. Every package includes an INSTALL.txt with the exact steps and the renderer's options.",
+    os_p="Thrum is free software under the GNU Affero General Public License v3, like the JUCE framework it is built on. You can use it, study it, change it and share it. The source code is on <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, with every release.",
+    os_link="Why Audio Tools is open source",
+    trademark="Audio Tools is an independent project. Thrum is an original design: its guitars, pedals and amplifiers are described generically, have shapes of their own and copy no commercial product; it contains no samples, and no brand names or logos appear in it.",
+    photo_credit="The guitars, pedals and amplifiers in the pictures are 3D renders made for this page; the screenshots show the real interface. Every sound on this page is Thrum's own.",
+    hero_alt="A red electric guitar with an original body shape on a stand, beside a black amplifier stack and a pedalboard, under a warm stage light, rendered in 3D.",
+    alt_ui="Thrum with the Campfire Strum preset", alt_room="Thrum's Play page", alt_frozen="Thrum's Amp / Cab page",
+),
+"es": dict(
+    title="Thrum — guitarra eléctrica gratis por modelado físico, con rasgueo y pedales | Audio Tools",
+    description="Thrum es una guitarra eléctrica libre y de código abierto para macOS, Windows y Linux, hecha por modelado físico y sin samples: seis guitarras con cuerdas de guía de onda y pastillas reales, un guitarrista que asigna cada nota a una cuerda y un traste, rasguea a tiempo, puntea con los dedos y toca bends, slides, hammer-ons, palm mute y armónicos, trece pedales que se reordenan, cuatro amplificadores a válvulas y un gabinete con micrófonos que se mueven o tus propias respuestas al impulso. VST3, Audio Unit, LV2, aplicación independiente, MPE y salida MIDI.",
+    listen_p="Cada clip es Thrum solo, tocando presets de fábrica con MIDI escrito para él, renderizado sin edición. El clip de dark wave suma a Pallor y al AT101V. Todos los clips están a la misma sonoridad.",
+    sound_h="Una guitarra, desde las cuerdas.",
+    sound_p1="Cada cuerda es una cuerda que vibra, simulada mientras suena: su calibre y su tensión, su rigidez ajustada traste por traste, los dos planos en que se mueve, el puente que comparte con las demás. Las pastillas escuchan a su distancia real del puente, a través de la bobina, los potes de volumen y tono y el cable: la del mástil es redonda, la del puente fina, y bajar el volumen limpia el amplificador.",
+    sound_p2="Un guitarrista adentro decide cómo se toca cada nota: en qué cuerda y traste, con qué fuerza, dónde cae la púa, cómo se abre el rasgueo sobre las cuerdas con las del medio en el tiempo. No hay nada grabado, así que la misma nota nunca suena dos veces igual, y el mismo MIDI da siempre la misma toma.",
+    spec=[("Guitarras", "Seis: sólida con tres single-coil o dos humbuckers, semi-hollow, hollow de jazz, barítono y siete cuerdas"),
+          ("Cuerdas", "Guías de onda con dos polarizaciones, rigidez por traste, tensión, un puente compartido y trasteo; nueve afinaciones y cuatro calibres"),
+          ("Tocar", "Melodía con ligado inteligente, acordes armados como los arma un guitarrista, 32 patrones de rasgueo y 11 de fingerpicking, diez articulaciones, keyswitches y MPE"),
+          ("Pedalera", "Gate, compresor, wah, overdrive, distorsión, fuzz, chorus, phaser, flanger, trémolo, vibrato, delay y reverb, en cualquier orden"),
+          ("Amplificador y gabinete", "Cuatro amplificadores a válvulas con el tonestack real y sag; nuestro modelo de parlante y micrófonos o respuestas al impulso de hasta 3 s"),
+          ("Repetible", "El mismo render cada vez con cualquier tamaño de bloque; una semilla da otra toma natural")],
+    flow_h="Mirá lo que toca el guitarrista.",
+    flow_p="El diapasón cruza toda la ventana y muestra en vivo el dedo en cada cuerda y traste que suena y las cuerdas vibrando. Debajo, la guitarra elegida en 3D, sus cuerdas, la afinación, las pastillas y los ruidos de las manos. Inspect agrega la vista técnica en cian: los nombres de las notas, dónde escucha cada pastilla, el camino de la señal, la respuesta del gabinete.",
+    flow_caption="Campfire Strum: el acorde rasgueado en el diapasón y la guitarra sólida de tres single-coil.",
+    room_h="Rasgueá, punteá, doblá.",
+    room_p="Mantené un acorde y Thrum lo toca como lo tocaría un guitarrista, a tiempo con tu tema.",
+    room_facts=[("Acordes reales.", "El acorde que mantenés se reconoce y se digita en formas abiertas, con cejilla, quintas, tríadas o de jazz, en la región del mástil que elijas."),
+                ("Rasgueo a tiempo.", "Treinta y dos patrones del rock al reggae y el post-punk, con golpes hacia arriba en las cuerdas agudas, palm mute y rasgueos muertos, y un editor para los tuyos."),
+                ("El medio en el tiempo.", "Los rasgueos empiezan un poco antes para que sus cuerdas del medio caigan en el tiempo, como marcan el tiempo los guitarristas; o en el tiempo, si preferís."),
+                ("Todas las articulaciones.", "Hammer-ons, pull-offs y slides donde las notas se pisan, bends con la rueda, palm mute, armónicos, pinch, trémolo y un acople que sostiene para siempre.")],
+    room_caption="La página Play: modos, articulaciones, el editor del patrón de rasgueo y la variación humana.",
+    mods_h="Pedales, un amplificador y un micrófono.",
+    mods_p="Trece pedales que se encienden con su pulsador y se arrastran a cualquier orden, cuatro amplificadores a válvulas y un gabinete donde se escucha cómo se mueven los micrófonos.",
+    mods_facts=[("Una pedalera entera.", "Gate, compresor, wah, un overdrive verde, distorsión, fuzz de silicio o germanio, chorus, phaser, flanger, trémolo, vibrato, eco de cinta y reverb de resorte."),
+                ("Cuatro amplificadores.", "Limpio americano, crunch británico, alta ganancia moderna y un combo chico, con el tonestack real, presencia, profundidad y sag."),
+                ("Mové el micrófono.", "Dos micrófonos, dinámico, condensador o de cinta, ubicados sobre el cono y a distancia, mezclados con su diferencia de tiempo real."),
+                ("Tus propios gabinetes.", "Cargá cualquier respuesta al impulso de hasta tres segundos: un gabinete, una sala o una cadena de estudio entera. Y una salida DI para reamplificar después.")],
+    mods_caption="La página Amp / Cab: el amplificador y su gabinete, con los dos micrófonos frente al parlante.",
+    slow_h="Del jazz al shoegaze.",
+    slow_p="Sesenta y nueve presets en nueve categorías: jazz y funk limpios, crunch y blues, rock y alta ganancia, post-punk y dark wave, surf, shoegaze y ambient, acordes rasgueados, punteos con ligados y bends, efectos, y la guitarra sola para tus propios amplificadores.",
+    presets_h="Sesenta y nueve presets.",
+    presets=[("16", "Limpios, crunch y blues", "Glass Arpeggio, Warm Jazz Box, Funk Scratch, Bossa Night, Texas Shuffle, Open G Slide, Edge of Breakup…"),
+             ("18", "Rock, alta ganancia, post-punk y dark wave", "Arena Lead, Modern Chug, Baritone Doom, Stoner Fuzz, Night Drive Strum, Cold Chorus Arpeggio, Coldwave Tremolo…"),
+             ("18", "Surf, shoegaze, ambient y acordes rasgueados", "Surf Spring Drip, Shoegaze Wall, Ambient Freeze, Feedback Drone, Campfire Strum, Reggae Skank, Boom Chuck…"),
+             ("17", "Punteos, efectos y directo", "Legato Runs, Bend Into Note, Whammy Dives, Wah Lead, Jet Flanger Chords, Tape Echo Twang, DI Humbuckers…")],
+    dl_h=f"Descargá Thrum {VTH}.",
+    dl_p="Gratis, sin cuenta y sin suscripción.",
+    mac_h="macOS", mac_req="macOS 11 o posterior. Apple silicon e Intel en un solo binario universal.",
+    mac_fmt="VST3, Audio Unit, aplicación independiente y thrumrender",
+    mac_steps=["Descomprimí el archivo.", "Copiá <code>Thrum.vst3</code> a <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copiá <code>Thrum.component</code> a <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "Volvé a escanear los plugins en tu DAW y poné Thrum en una pista de instrumento."],
+    win_h="Windows", win_req="Windows 10 u 11, de 64 bits.", win_fmt="VST3, aplicación independiente y thrumrender",
+    win_steps=["Descomprimí el archivo.", "Copiá <code>Thrum.vst3</code> a <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Volvé a escanear los plugins en tu DAW y poné Thrum en una pista de instrumento."],
+    file_label="archivo",
+    dl_note="Los builds todavía no están firmados. macOS puede negarse a abrirlos hasta que corras <code>xattr -dr com.apple.quarantine</code> sobre los archivos instalados, y SmartScreen de Windows puede pedirte que confirmes la primera vez. Cada paquete trae un INSTALL.txt con los pasos exactos y las opciones del render.",
+    os_p="Thrum es software libre bajo la GNU Affero General Public License v3, como el framework JUCE sobre el que está hecho. Lo podés usar, estudiar, modificar y compartir. El código fuente está en <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, con cada versión.",
+    os_link="Por qué Audio Tools es de código abierto",
+    trademark="Audio Tools es un proyecto independiente. Thrum es un diseño original: sus guitarras, pedales y amplificadores se describen de forma genérica, tienen formas propias y no copian ningún producto comercial; no contiene samples y no aparecen nombres de marcas ni logos.",
+    photo_credit="Las guitarras, los pedales y los amplificadores de las imágenes son renders 3D hechos para esta página; las capturas muestran la interfaz real. Todos los sonidos de esta página son de Thrum.",
+    hero_alt="Una guitarra eléctrica roja de forma propia en un soporte, junto a un stack de amplificador negro y una pedalera, bajo una luz cálida de escenario, renderizados en 3D.",
+    alt_ui="Thrum con el preset Campfire Strum", alt_room="La página Play de Thrum", alt_frozen="La página Amp / Cab de Thrum",
+),
+}
+
 A3 = {
 "en": dict(
     title="AT303 — free bass line synthesizer with a diode ladder filter and step sequencer | Audio Tools",
@@ -1980,6 +2232,14 @@ CPU_PL = (3.16, 3.16, 7.95)            # Apple M4: plumbrender sobre la voz demo
 WINCPU_PL = (3.53, 3.54, 9.61)        # Ryzen 9 5900XT: lo mismo con plumbrender.exe (pc50 sin otra carga)
 DISK_PL = (81, 23)
 UICPU_PL = 6
+CPU_PA = (3.84, 5.37, 7.06)        # Apple M4: pallorrender --bench (Night Shift Mercury / el preset más pesado) y pallortest T20 (16 voces digitales con todos los efectos)
+WINCPU_PA = (5.67, 7.18, 9.93)   # Ryzen 9 5900XT: lo mismo con pallorrender.exe y pallortest.exe (pc50 sin otra carga)
+DISK_PA = (94, 28)
+UICPU_PA = 10
+CPU_TH = (3.25, 4.91, 8.49)        # Apple M4: thrumrender --bench (promedio de los 69 presets / el más pesado) y thrumtest T12 (alta ganancia a 8x con delay y sala)
+WINCPU_TH = (6.23, 7.89, 11.68)   # Ryzen 9 5900XT: lo mismo con thrumrender.exe y thrumtest.exe (pc50 sin otra carga)
+DISK_TH = (132, 42)
+UICPU_TH = 2
 UICPU_HA = 8
 DISK_FS1 = (80, 24)
 CPU = {
@@ -1996,6 +2256,8 @@ CPU = {
     "tarnish": [("tnstudio", CPU_TN[0], WINCPU_TN[0]), ("tndusty", CPU_TN[1], WINCPU_TN[1]), ("tnvinyl", CPU_TN[2], WINCPU_TN[2])],
     "at303": [("a3def", CPU_A3[0], WINCPU_A3[0]), ("a3all", CPU_A3[1], WINCPU_A3[1]), ("a3x8", CPU_A3[2], WINCPU_A3[2])],
     "plumb": [("plnat", CPU_PL[0], WINCPU_PL[0]), ("plhard", CPU_PL[1], WINCPU_PL[1]), ("plthroat", CPU_PL[2], WINCPU_PL[2])],
+    "pallor": [("padef", CPU_PA[0], WINCPU_PA[0]), ("paheavy", CPU_PA[1], WINCPU_PA[1]), ("paworst", CPU_PA[2], WINCPU_PA[2])],
+    "thrum": [("thavg", CPU_TH[0], WINCPU_TH[0]), ("thheavy", CPU_TH[1], WINCPU_TH[1]), ("thworst", CPU_TH[2], WINCPU_TH[2])],
 }
 CPU_LABEL = {
     "en": {"mono": "Mono patch, 4x", "poly8": "8 voices with delay and reverb, 4x", "poly12": "12 voices, 8x (the heaviest setting)",
@@ -2009,7 +2271,9 @@ CPU_LABEL = {
            "hacath": "Cathedral of Glass, a hall with shimmer", "haspec": "Spectral Ice, the heaviest factory preset", "haall": "Every module on at once, Length at infinite",
            "tnstudio": "Studio tape, the default (magnetic model at 4x)", "tndusty": "Dusty Cassette", "tnvinyl": "Worn Vinyl (no magnetic model)",
            "a3def": "The default sound at 4x, sequencer running", "a3all": "Square wave, distortion, delay and filter FM, 4x", "a3x8": "The default sound at 8x",
-           "plnat": "Natural Lead, Tight mode, formants preserved", "plhard": "Hard Tune, Tight mode", "plthroat": "Throat Down: formants moved"},
+           "plnat": "Natural Lead, Tight mode, formants preserved", "plhard": "Hard Tune, Tight mode", "plthroat": "Throat Down: formants moved",
+           "padef": "Night Shift Mercury, sequencer running", "paheavy": "Ash Choir Pulse, the heaviest factory preset", "paworst": "All 16 voices digital on every other step, every effect on",
+           "thavg": "Average of the 69 factory presets, each playing its phrase", "thheavy": "The heaviest factory preset", "thworst": "Strummed chords, high-gain amp at 8x, delay and hall"},
     "es": {"mono": "Patch mono, 4x", "poly8": "8 voces con delay y reverb, 4x", "poly12": "12 voces, 8x (el ajuste más pesado)",
            "poly6": "Pad de 6 voces, 4x", "poly6x8": "Pad de 6 voces, 8x", "drones": "Dos voces drone con efectos, 2x",
            "all2": "Todas las voces y el efector, 2x", "all4": "Todas las voces y el efector, 4x",
@@ -2021,10 +2285,12 @@ CPU_LABEL = {
            "hacath": "Cathedral of Glass, una sala con shimmer", "haspec": "Spectral Ice, el preset de fábrica más pesado", "haall": "Todos los módulos prendidos a la vez, Length en infinito",
            "tnstudio": "Cinta de estudio, por defecto (modelo magnético a ×4)", "tndusty": "Dusty Cassette", "tnvinyl": "Worn Vinyl (sin modelo magnético)",
            "a3def": "El sonido de fábrica a ×4, con el secuenciador corriendo", "a3all": "Cuadrada, distorsión, delay y FM del filtro, ×4", "a3x8": "El sonido de fábrica a ×8",
-           "plnat": "Natural Lead, modo Tight, formantes preservados", "plhard": "Hard Tune, modo Tight", "plthroat": "Throat Down: formantes movidos"},
+           "plnat": "Natural Lead, modo Tight, formantes preservados", "plhard": "Hard Tune, modo Tight", "plthroat": "Throat Down: formantes movidos",
+           "padef": "Night Shift Mercury, con el secuenciador corriendo", "paheavy": "Ash Choir Pulse, el preset de fábrica más pesado", "paworst": "Las 16 voces digitales en un paso de cada dos, todos los efectos prendidos",
+           "thavg": "Promedio de los 69 presets de fábrica, cada uno tocando su frase", "thheavy": "El preset de fábrica más pesado", "thworst": "Acordes rasgueados, amplificador de alta ganancia a ×8, delay y sala"},
 }
-UI_CPU = {"at20v": 15, "at101v": 5, "at42": 11, "at700": 8, "atfs1": UICPU_FS1, "orrery": 4, "murmur": UICPU_MM, "atmd": 6, "lacquer": UICPU_LQ, "halation": UICPU_HA, "tarnish": UICPU_TN, "at303": UICPU_A3, "plumb": UICPU_PL}          # lo que suma el editor abierto en el M4 (% de un núcleo)
-DISK = {"at20v": (219, 73), "at101v": (71, 24), "at42": (125, 42), "at700": (78, 26), "atfs1": DISK_FS1, "orrery": DISK_OR, "murmur": DISK_MM, "atmd": DISK_MD, "lacquer": DISK_LQ, "halation": DISK_HA, "tarnish": DISK_TN, "at303": DISK_A3, "plumb": DISK_PL}
+UI_CPU = {"at20v": 15, "at101v": 5, "at42": 11, "at700": 8, "atfs1": UICPU_FS1, "orrery": 4, "murmur": UICPU_MM, "atmd": 6, "lacquer": UICPU_LQ, "halation": UICPU_HA, "tarnish": UICPU_TN, "at303": UICPU_A3, "plumb": UICPU_PL, "pallor": UICPU_PA, "thrum": UICPU_TH}          # lo que suma el editor abierto en el M4 (% de un núcleo)
+DISK = {"at20v": (219, 73), "at101v": (71, 24), "at42": (125, 42), "at700": (78, 26), "atfs1": DISK_FS1, "orrery": DISK_OR, "murmur": DISK_MM, "atmd": DISK_MD, "lacquer": DISK_LQ, "halation": DISK_HA, "tarnish": DISK_TN, "at303": DISK_A3, "plumb": DISK_PL, "pallor": DISK_PA, "thrum": DISK_TH}
 
 REQ = {
 "en": dict(
@@ -2038,7 +2304,7 @@ REQ = {
     cpu_note="Percentage of one CPU core at 48 kHz, sound engine only. With the editor open, the interface adds about {ui} % on the M4. Hosts run each instrument on one core, so single-core speed is what counts.",
     cpu_cols=("Setting", "Apple M4", "AMD Ryzen 9 5900XT"),
     disk="Disk space: {mac} MB on macOS (all formats), {win} MB on Windows.",
-    heavy={"at303": "", "at20v": "The 12-voice, 8x setting needs the recommended processor.", "at101v": "", "at42": "", "at700": "Eight voices at 4x need the recommended processor.", "atfs1": "Thirty-two voices with every operator need the recommended processor.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
+    heavy={"at303": "", "pallor": "", "thrum": "", "at20v": "The 12-voice, 8x setting needs the recommended processor.", "at101v": "", "at42": "", "at700": "Eight voices at 4x need the recommended processor.", "atfs1": "Thirty-two voices with every operator need the recommended processor.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
 ),
 "es": dict(
     min_h="Mínimo", rec_h="Recomendado", cpu_h="Carga de CPU medida",
@@ -2051,7 +2317,7 @@ REQ = {
     cpu_note="Porcentaje de un núcleo de CPU a 48 kHz, sólo el motor de sonido. Con el editor abierto, la interfaz suma alrededor de {ui} % en el M4. Los DAW corren cada instrumento en un núcleo, así que lo que cuenta es la velocidad de un núcleo.",
     cpu_cols=("Ajuste", "Apple M4", "AMD Ryzen 9 5900XT"),
     disk="Espacio en disco: {mac} MB en macOS (todos los formatos), {win} MB en Windows.",
-    heavy={"at303": "", "at20v": "El ajuste de 12 voces a 8x necesita el procesador recomendado.", "at101v": "", "at42": "", "at700": "Ocho voces a 4x necesitan el procesador recomendado.", "atfs1": "Treinta y dos voces con todos los operadores necesitan el procesador recomendado.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
+    heavy={"at303": "", "pallor": "", "thrum": "", "at20v": "El ajuste de 12 voces a 8x necesita el procesador recomendado.", "at101v": "", "at42": "", "at700": "Ocho voces a 4x necesitan el procesador recomendado.", "atfs1": "Treinta y dos voces con todos los operadores necesitan el procesador recomendado.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
 ),
 }
 
@@ -2288,6 +2554,42 @@ PRES = {
         stats=[("0.67", "ms", "agregados en modo Live, informados al host"), ("3", "", "modos de latencia, del escenario a la mezcla"), ("25", "", "presets"), ("3", "%", "de un núcleo en un Apple M4")],
         film_cap="Una plomada de bronce renderizada en 3D, oscilando sobre una pizarra y calmándose a medida que la nota se afina. El sonido es la demo Natural Lead: una frase como se cantó y después corregida."),
 },
+"thrum": {
+    "en": dict(tag="Strings, hands and a stage. No samples.",
+        highlights=[("thrum/hl-guitar", "Strings that vibrate.", "Six guitars modelled from the strings up: gauge, tension, stiffness, the bridge, and pickups at their real places."),
+                    ("thrum/hl-fretboard", "A guitarist inside.", "Every note goes to a real string and fret, live on the fretboard, with legato, slides, bends and the noises of the hands."),
+                    ("thrum/hl-pedals", "A board you can rearrange.", "Thirteen pedals switched with their footswitch and dragged into any order, before or after the amp."),
+                    ("thrum/hl-amp", "Move the microphone.", "Four tube amps and a cabinet with two microphones you place on the cone, or your own impulse responses."),
+                    ("thrum/hl-lineup", "Six guitars, one shape.", "Single coils, humbuckers, semi-hollow, hollow jazz, baritone and seven strings, with sixty-nine presets.")],
+        stats=[("6", "", "guitars, each with its strings and pickups"), ("32", "", "strum patterns, plus your own"), ("69", "", "presets in nine categories"), ("3.3", "%", "of one core on an Apple M4")],
+        film_cap="A guitar, a pedalboard and an amplifier on a dark stage, rendered in 3D: the pickups under the strings, the neck, the pedals lighting one by one, the speaker moving with the sound. The sound is Thrum playing Night Drive Strum."),
+    "es": dict(tag="Cuerdas, manos y un escenario. Sin samples.",
+        highlights=[("thrum/hl-guitar", "Cuerdas que vibran.", "Seis guitarras modeladas desde las cuerdas: calibre, tensión, rigidez, el puente y las pastillas en sus lugares reales."),
+                    ("thrum/hl-fretboard", "Un guitarrista adentro.", "Cada nota va a una cuerda y un traste reales, en vivo en el diapasón, con ligados, slides, bends y los ruidos de las manos."),
+                    ("thrum/hl-pedals", "Una pedalera que se reordena.", "Trece pedales que se encienden con su pulsador y se arrastran a cualquier orden, antes o después del amplificador."),
+                    ("thrum/hl-amp", "Mové el micrófono.", "Cuatro amplificadores a válvulas y un gabinete con dos micrófonos que ubicás sobre el cono, o tus propias respuestas al impulso."),
+                    ("thrum/hl-lineup", "Seis guitarras, una forma.", "Single-coil, humbuckers, semi-hollow, hollow de jazz, barítono y siete cuerdas, con sesenta y nueve presets.")],
+        stats=[("6", "", "guitarras, cada una con sus cuerdas y pastillas"), ("32", "", "patrones de rasgueo, más los tuyos"), ("69", "", "presets en nueve categorías"), ("3,3", "%", "de un núcleo en un Apple M4")],
+        film_cap="Una guitarra, una pedalera y un amplificador en un escenario oscuro, renderizados en 3D: las pastillas bajo las cuerdas, el mástil, los pedales que se encienden de a uno, el parlante que se mueve con el sonido. El sonido es Thrum tocando Night Drive Strum."),
+},
+"pallor": {
+    "en": dict(tag="The cold drum machine.",
+        highlights=[("pallor/hl-close", "Pads that glow.", "Sixteen pale pads lit from inside with every hit, from the sequencer, from MIDI or from your hand."),
+                    ("pallor/hl-ui", "Two engines per voice.", "A circuit model or an 80s sampler with its 8-bit converter, on every one of the sixteen voices."),
+                    ("pallor/hl-knobs", "The voice at hand.", "Eight knobs follow the voice you play: tune, decay, tone, the two character controls of its model, drive, cutoff and level."),
+                    ("pallor/hl-pattern", "Chance, ratchets, conditions.", "Lanes under the grid shape every step, and a pattern drags into your DAW as MIDI."),
+                    ("pallor/hl-side", "Thirteen genres.", "Sixty-five presets from dark wave to witch house, and a library of 156 patterns.")],
+        stats=[("16", "", "voices, each with two engines"), ("44", "", "analog circuit models"), ("65", "", "presets in 13 genres"), ("3.8", "%", "of one core on an Apple M4")],
+        film_cap="A black drum machine rendered in 3D: the pads light with the pattern, the snare's Decay opens as you hear it ring longer. The sound is Pallor playing Night Shift Mercury."),
+    "es": dict(tag="La caja de ritmos fría.",
+        highlights=[("pallor/hl-close", "Pads que se encienden.", "Dieciséis pads pálidos que se iluminan desde adentro con cada golpe, del secuenciador, del MIDI o de tu mano."),
+                    ("pallor/hl-ui", "Dos motores por voz.", "Un modelo de circuito o un sampler de los 80 con su conversor de 8 bits, en cada una de las dieciséis voces."),
+                    ("pallor/hl-knobs", "La voz a mano.", "Ocho perillas siguen a la voz que tocás: afinación, decay, tono, los dos controles de carácter de su modelo, drive, corte y nivel."),
+                    ("pallor/hl-pattern", "Azar, ratchets, condiciones.", "Las líneas bajo la grilla le dan forma a cada paso, y un patrón se arrastra al DAW como MIDI."),
+                    ("pallor/hl-side", "Trece géneros.", "Sesenta y cinco presets del dark wave al witch house, y una biblioteca de 156 patrones.")],
+        stats=[("16", "", "voces, cada una con dos motores"), ("44", "", "modelos de circuito analógico"), ("65", "", "presets en 13 géneros"), ("3,8", "%", "de un núcleo en un Apple M4")],
+        film_cap="Una caja de ritmos negra renderizada en 3D: los pads se encienden con el patrón y el Decay de la caja se abre mientras la escuchás sonar más larga. El sonido es Pallor tocando Night Shift Mercury."),
+},
 "tarnish": {
     "en": dict(tag="Every sound gets old. Choose how.",
         highlights=[("tarnish/hl-close", "Real tape, modelled.", "Magnetic hysteresis with the record and playback curves of real standards: hot cassettes close their top end, under-biased tape grits up."),
@@ -2480,6 +2782,72 @@ SPECS = {
                                    "Transposición ±24 semitonos, fina ±100 cents, vibrato sintético con velocidad, profundidad y retardo", "MIDI: escala desde las notas apretadas, nota fija con pitch bend, automático"]),
            ("Formatos", ["VST3, Audio Unit (macOS, efecto musical con entrada MIDI) y aplicación independiente", "plumbrender: render por línea de comandos con cambios de parámetros en el tiempo", "Entrada mono, la voz corregida en todos los canales de salida"])],
 },
+"thrum": {
+    "en": [("Guitars", ["Solid body with three single coils (648 mm, 22 frets, five-way selector), solid body with two humbuckers, semi-hollow and hollow jazz (628 mm), baritone (686 mm, 24 frets, a fourth lower) and seven-string (648 mm, 24 frets)",
+                        "Strings: waveguides with two polarisations, a 6-point fractional delay, stiffness fitted per fret (partials within 2.5 cents of the stiff string), tension modulation, bridge coupling and a neck dead spot",
+                        "Pickups at their measured distances from the bridge, single coil aperture and humbucker coils, coil, pots, tone capacitor and cable as a passive network",
+                        "Nine tunings including drop, open and DADGAD plus custom per string, four gauges, capo, string age, action, fret buzz, sympathetic strings, hum and the noises of the hands"]),
+           ("Playing", ["Melody, polyphonic or monophonic with legato that becomes hammer-ons, pull-offs or slides on the same string",
+                        "Chords: 22 chord types with slash basses, voiced open, barre, power, triads or jazz in the region you choose",
+                        "32 strum patterns and 11 fingerpicking patterns, synced to the host, with a step editor; strums centred on the beat or starting on it",
+                        "Ten articulations by keyswitch, velocity or controller: sustain, palm mute, staccato, dead notes, harmonics, pinch, tremolo picking, bend in, slide in, slide out; vibrato, bends, whammy and controlled feedback",
+                        "Fingering by cost with a fixed hand position and a preferred string; human variation of tuning, timing, force and pick, repeatable with a seed"]),
+           ("Pedals, amp and cabinet", ["Thirteen pedals in any order: gate, compressor, wah (manual, auto, CC 11), green overdrive, distortion, fuzz (silicon, germanium), chorus, phaser, flanger, tremolo, vibrato, delay (digital, analog, tape), reverb (spring, room, hall, freeze)",
+                                        "Amplifiers: American clean, British crunch, modern high gain, small combo; triode stages, the FMV tone stack, push-pull power stage with presence, depth and sag, oversampled 2x, 4x or 8x; Auto level",
+                                        "Cabinet: five speakers, four boxes, two dynamic, condenser or ribbon microphones with position and distance, a floor reflection; eight factory impulse responses; your own up to 3 s with partitioned convolution and no added latency"]),
+           ("MIDI and outputs", ["MIDI in: keyswitches, pitch bend, mod wheel, aftertouch, CC 2, 4, 11, 64, 68, 74; guitar mode with a channel per string; MPE",
+                                 "MIDI out of what the guitar played, optionally a channel per string; export of the pattern and of the played notes to .mid",
+                                 "Main stereo output and a DI output with the guitar alone, aligned with the amp latency, for re-amping"]),
+           ("Formats", ["Instrument VST3, Audio Unit (macOS), LV2 (Linux) and standalone app", "thrumrender: command-line renderer with MIDI files or chord progressions, benchmarks and the factory impulse responses",
+                        "Latency 47, 55 or 57 samples with the amp at 2x, 4x or 8x, reported to the host"])],
+    "es": [("Guitarras", ["Sólida con tres single-coil (648 mm, 22 trastes, selector de cinco posiciones), sólida con dos humbuckers, semi-hollow y hollow de jazz (628 mm), barítono (686 mm, 24 trastes, una cuarta más grave) y siete cuerdas (648 mm, 24 trastes)",
+                          "Cuerdas: guías de onda con dos polarizaciones, retardo fraccionario de 6 puntos, rigidez ajustada por traste (parciales a menos de 2,5 cents de la cuerda rígida), modulación de tensión, acople por el puente y punto muerto del mástil",
+                          "Pastillas a sus distancias medidas del puente, apertura de la single-coil y bobinas del humbucker, bobina, potes, capacitor de tono y cable como una red pasiva",
+                          "Nueve afinaciones, entre ellas drop, abiertas y DADGAD, más una propia por cuerda, cuatro calibres, cejilla, edad de las cuerdas, acción, trasteo, cuerdas por simpatía, zumbido y los ruidos de las manos"]),
+           ("Tocar", ["Melodía, polifónica o monofónica, con ligado que se vuelve hammer-on, pull-off o slide en la misma cuerda",
+                      "Acordes: 22 tipos con bajos invertidos, armados abiertos, con cejilla, quintas, tríadas o de jazz en la región que elijas",
+                      "32 patrones de rasgueo y 11 de fingerpicking, sincronizados con el host, con un editor por pasos; rasgueos centrados en el tiempo o empezando en él",
+                      "Diez articulaciones por keyswitch, velocity o controlador: sustain, palm mute, staccato, notas muertas, armónicos, pinch, trémolo, bend de entrada, slide de entrada y de salida; vibrato, bends, palanca y acople controlado",
+                      "Digitación por costo con posición de mano fija y cuerda preferida; variación humana de afinación, tiempo, fuerza y púa, repetible con una semilla"]),
+           ("Pedales, amplificador y gabinete", ["Trece pedales en cualquier orden: gate, compresor, wah (manual, automático, CC 11), overdrive verde, distorsión, fuzz (silicio, germanio), chorus, phaser, flanger, trémolo, vibrato, delay (digital, analógico, cinta), reverb (resorte, sala, hall, congelado)",
+                                                  "Amplificadores: limpio americano, crunch británico, alta ganancia moderna, combo chico; etapas de triodo, el tonestack FMV, etapa de potencia push-pull con presencia, profundidad y sag, sobremuestreo ×2, ×4 u ×8; Auto level",
+                                                  "Gabinete: cinco parlantes, cuatro cajas, dos micrófonos dinámicos, condensadores o de cinta con posición y distancia, un reflejo del piso; ocho respuestas al impulso de fábrica; las tuyas de hasta 3 s con convolución particionada y sin latencia agregada"]),
+           ("MIDI y salidas", ["Entrada MIDI: keyswitches, pitch bend, rueda de modulación, aftertouch, CC 2, 4, 11, 64, 68, 74; modo guitarra con un canal por cuerda; MPE",
+                               "Salida MIDI de lo que tocó la guitarra, opcionalmente un canal por cuerda; exportación del patrón y de lo tocado a .mid",
+                               "Salida estéreo principal y una salida DI con la guitarra sola, alineada con la latencia del amplificador, para reamplificar"]),
+           ("Formatos", ["Instrumento VST3, Audio Unit (macOS), LV2 (Linux) y aplicación independiente", "thrumrender: render por línea de comandos con archivos MIDI o progresiones de acordes, mediciones de CPU y las respuestas al impulso de fábrica",
+                         "Latencia de 47, 55 o 57 muestras con el amplificador a ×2, ×4 u ×8, informada al host"])],
+},
+"pallor": {
+    "en": [("Voices", ["Sixteen: kick, snare, clap, rim, closed and open hat, crash, ride, four toms, cowbell, clave, tambourine and FX",
+                       "Analog engine: 44 circuit models in twelve families (bridged-T, VCO, six-square metal, noise, hexagonal, FM and more), each calibrated against published measurements",
+                       "Digital engine: 8-bit companding converter with clock pitch and output filters, 12-bit at 26.04 and 40 kHz, clean; eight built-in kits synthesised at load; your own WAV, AIFF or FLAC per voice",
+                       "Per voice: tune ±24 semitones, decay, tone, two character controls, accent, velocity, drive, bit and rate reduction, multimode filter, level, pan, two sends, choke group, output bus, mute and solo"]),
+           ("Sequencer", ["16 patterns × A, B and Fill; up to 64 steps of 1/32, 1/16, 1/8 or triplets; per-track length for polymeter",
+                          "Per step: velocity, accent, probability (seeded, repeatable), ratchet 1 to 8, flam, nudge ±50 %, nine conditions",
+                          "Swing 50 to 75 % on 8ths or 16ths, global or per pattern; play modes A, B, A > B and Song; manual and automatic fills",
+                          "Song chain of up to 64 entries with repeats and fills; follows host jumps exactly; library of 52 pattern sets"]),
+           ("Effects", ["Space: gated, nonlinear, reverse, plate, spring, hall and room", "Echo: 12-bit digital, tape, BBD, chorus, ensemble, jet flanger, phaser; time synced from 1/32 to a bar",
+                        "Master: lo-fi sampler (12-bit 26 or 40 kHz, 8-bit 22 or 11 kHz), tape with hysteresis, glue compressor with stepped attack and release, exciter"]),
+           ("MIDI and outputs", ["MIDI in with GM drum or chromatic 36-51 note maps; accent by velocity", "MIDI out of the sequencer with adjustable gate; drag a pattern into the DAW as a MIDI file",
+                                 "Main stereo output plus six stereo buses (kick, snare/clap, hats/cymbals, toms, perc, FX), aligned with the master latency"]),
+           ("Formats", ["Instrument VST3, Audio Unit (macOS), LV2 (Linux) and standalone app", "pallorrender: command-line renderer with stems, timed parameter changes and .mid export",
+                        "Latency 24 samples, 78 with the master tape, reported to the host"])],
+    "es": [("Voces", ["Dieciséis: bombo, caja, palmas, rim, charles cerrado y abierto, platillo, ride, cuatro toms, cencerro, clave, pandereta y FX",
+                      "Motor analógico: 44 modelos de circuito en doce familias (puente en T, VCO, metal de seis cuadradas, ruido, hexagonal, FM y más), cada uno calibrado contra mediciones publicadas",
+                      "Motor digital: conversor de 8 bits con companding, afinación por el reloj y filtros de salida, 12 bits a 26,04 y 40 kHz, limpio; ocho kits sintetizados al cargar; tu propio WAV, AIFF o FLAC por voz",
+                      "Por voz: afinación ±24 semitonos, decay, tono, dos controles de carácter, acento, velocidad, drive, reducción de bits y de frecuencia, filtro multimodo, nivel, paneo, dos envíos, grupo de choke, bus de salida, mute y solo"]),
+           ("Secuenciador", ["16 patrones × A, B y Fill; hasta 64 pasos de 1/32, 1/16, 1/8 o tresillos; largo por pista para polimetría",
+                             "Por paso: velocidad, acento, probabilidad (con semilla, repetible), ratchet de 1 a 8, flam, corrimiento ±50 %, nueve condiciones",
+                             "Swing de 50 a 75 % en corcheas o semicorcheas, general o por patrón; modos A, B, A > B y Song; fills a mano y automáticos",
+                             "Cadena de canción de hasta 64 entradas con repeticiones y fills; sigue los saltos del host con exactitud; biblioteca de 52 juegos de patrones"]),
+           ("Efectos", ["Space: gated, nonlinear, reverse, placa, resorte, hall y sala", "Echo: digital de 12 bits, cinta, BBD, chorus, ensemble, jet flanger, phaser; tiempo sincronizado de 1/32 a un compás",
+                        "Master: sampler lo-fi (12 bits a 26 o 40 kHz, 8 bits a 22 u 11 kHz), cinta con histéresis, compresor glue con ataque y liberación por pasos, excitador"]),
+           ("MIDI y salidas", ["Entrada MIDI con mapa de batería GM o cromático 36-51; acento por velocidad", "Salida MIDI del secuenciador con compuerta ajustable; un patrón se arrastra al DAW como archivo MIDI",
+                               "Salida estéreo principal más seis buses estéreo (bombo, caja/palmas, charles/platillos, toms, percusión, FX), alineados con la latencia del master"]),
+           ("Formatos", ["Instrumento VST3, Audio Unit (macOS), LV2 (Linux) y aplicación independiente", "pallorrender: render por línea de comandos con stems, cambios de parámetros en el tiempo y exportación .mid",
+                         "Latencia de 24 muestras, 78 con la cinta del master, informada al host"])],
+},
 "tarnish": {
     "en": [("Machines", ["Studio tape at 30, 15, 7.5 and 3.75 ips with IEC or NAB equalisation", "Cassette: ferric (120 µs), chrome and metal (70 µs), half speed", "Video linear audio, SP and EP",
                          "Vinyl at 33, 45 and 78 rpm through the RIAA curve, with inner-groove loss and tracing distortion", "AM radio: station compressor, AM envelope with overmodulation, selective fading, diode detector, static, whistle, IF filter, small speaker", "Telephone: 300-3400 Hz, 8 kHz, 8-bit mu-law; mobile with frame loss"]),
@@ -2596,6 +2964,8 @@ PRODUCTS = [  # slug, nombre, año, mac, win, versión
     ("tarnish", "Tarnish", "2026", MACTN, WINTN, VTN),
     ("at303", "AT303", "1981", MACA3, WINA3, VA3),
     ("plumb", "Plumb", "2026", MACPL, WINPL, VPL),
+    ("pallor", "Pallor", "2026", MACPA, WINPA, VPA),
+    ("thrum", "Thrum", "2026", MACTH, WINTH, VTH),
 ]
 # Un producto entra a la web cuando sus dos zips están en web/downloads: así se puede publicar uno mientras el
 # siguiente sigue en preparación con su texto ya escrito.
@@ -2603,7 +2973,7 @@ PRODUCTS = [p for p in PRODUCTS if all(os.path.exists(os.path.join(WEB, "downloa
 RELEASED = {p[0] for p in PRODUCTS}
 # Menú de productos (encabezado): grupos y color de cada uno. Las miniaturas son web/assets/img/nav/<slug>.jpg.
 NAV_GROUPS = [(g, [x for x in sl if x in RELEASED]) for g, sl in
-              [("synths", ["at20v", "at101v", "at42", "at700", "atfs1", "atmd", "at303"]), ("tools", ["orrery", "murmur", "halation", "tarnish", "plumb", "lacquer"])]]
+              [("synths", ["at20v", "at101v", "at42", "at700", "atfs1", "atmd", "at303", "pallor", "thrum"]), ("tools", ["orrery", "murmur", "halation", "tarnish", "plumb", "lacquer"])]]
 # El mismo orden en el carrusel de la portada, las fichas y el launcher: sintetizadores a la izquierda,
 # herramientas y efectos a la derecha (pedido del usuario, 2026-10-19).
 _ORDER = [s for _, sl in NAV_GROUPS for s in sl]
@@ -2611,10 +2981,10 @@ PRODUCTS.sort (key=lambda p: _ORDER.index (p[0]) if p[0] in _ORDER else len (_OR
 NAV_LABELS = {"en": {"synths": "Synthesizers", "tools": "Tools and effects", "button": "Plugins", "all": "All plugins", "close": "Close menu"},
               "es": {"synths": "Sintetizadores", "tools": "Herramientas y efectos", "button": "Plugins", "all": "Todos los plugins", "close": "Cerrar el menú"}}
 # La imagen grande de cada página de producto (web/assets/img/<nombre>-1200.jpg); el launcher la usa en su ficha.
-HERO_IMG = {"at20v": "render-hero", "at303": "at303/hero", "at101v": "at101v/hero-grey", "at42": "at42/hero-blue", "at700": "at700/hero", "atfs1": "atfs1/hero", "orrery": "orrery/hero", "murmur": "murmur/hero", "atmd": "atmd/hero", "lacquer": "lacquer/hero", "halation": "halation/hero", "tarnish": "tarnish/hero", "plumb": "plumb/hero"}
+HERO_IMG = {"at20v": "render-hero", "pallor": "pallor/hero", "thrum": "thrum/hero", "at303": "at303/hero", "at101v": "at101v/hero-grey", "at42": "at42/hero-blue", "at700": "at700/hero", "atfs1": "atfs1/hero", "orrery": "orrery/hero", "murmur": "murmur/hero", "atmd": "atmd/hero", "lacquer": "lacquer/hero", "halation": "halation/hero", "tarnish": "tarnish/hero", "plumb": "plumb/hero"}
 ACCENT = {"at20v": "#d24a35", "at101v": "#3a7bd5", "at42": "#ea8c3f", "at700": "#e0b341", "atfs1": "#a9c83c", "orrery": "#f2c878",
-          "murmur": "#f3a27e", "atmd": "#e8743b", "lacquer": "#e0563f", "halation": "#b8a5ff", "tarnish": "#3e8c84", "at303": "#f2a03d", "plumb": "#9db4c8"}
-TEXTS = lambda slug, lang: {"at20v": T, "at101v": S, "at42": Q, "at700": Z, "atfs1": F, "orrery": O, "murmur": M, "atmd": D, "lacquer": LQ, "halation": HA, "tarnish": TN, "at303": A3, "plumb": PL}[slug][lang]
+          "murmur": "#f3a27e", "atmd": "#e8743b", "lacquer": "#e0563f", "halation": "#b8a5ff", "tarnish": "#3e8c84", "at303": "#f2a03d", "plumb": "#9db4c8", "pallor": "#e0709c", "thrum": "#e8a33d"}
+TEXTS = lambda slug, lang: {"at20v": T, "at101v": S, "at42": Q, "at700": Z, "atfs1": F, "orrery": O, "murmur": M, "atmd": D, "lacquer": LQ, "halation": HA, "tarnish": TN, "at303": A3, "plumb": PL, "pallor": PA, "thrum": TH}[slug][lang]
 
 # Visitas y descargas: Pulse (analytics.digitalhub.com.ar, la analítica propia), sitio "Audio Tools". Sólo carga en el
 # dominio real, así las pruebas locales no cuentan. Las descargas llegan como eventos (ver site.js); el panel es privado.
@@ -3343,6 +3713,70 @@ def page_product(slug, lang):
       <p class="lede center reveal">{t['slow_p']}</p>
     </div>
   </section>"""
+    elif slug == "thrum":
+        sound_img = ("thrum/hl-guitar", t["hero_alt"])
+        mid = f"""
+  <section class="sec statement" id="flow">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{t['flow_h']}</h2>
+      <p class="lede center reveal">{t['flow_p']}</p>
+      <figure class="statement-img reveal">{pic(a, "thrum/ui-overview", t["alt_ui"])}<figcaption>{t['flow_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec deep" id="room">
+    <div class="wrap split">
+      <div class="reveal"><h2 class="sec-head">{t['room_h']}</h2><p class="lede">{t['room_p']}</p><ul class="facts">
+{facts_html(t['room_facts'])}
+        </ul></div>
+      <figure class="reveal">{pic(a, "thrum/ui-play", t["alt_room"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['room_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec" id="modules">
+    <div class="wrap split reverse">
+      <div class="reveal"><h2 class="sec-head">{t['mods_h']}</h2><p class="lede">{t['mods_p']}</p><ul class="facts">
+{facts_html(t['mods_facts'])}
+        </ul></div>
+      <figure class="reveal">{pic(a, "thrum/ui-amp", t["alt_frozen"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['mods_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec statement" id="slow">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{t['slow_h']}</h2>
+      <p class="lede center reveal">{t['slow_p']}</p>
+    </div>
+  </section>"""
+    elif slug == "pallor":
+        sound_img = ("pallor/hl-close", t["hero_alt"])
+        mid = f"""
+  <section class="sec statement" id="flow">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{t['flow_h']}</h2>
+      <p class="lede center reveal">{t['flow_p']}</p>
+      <figure class="statement-img reveal">{pic(a, "pallor/ui-overview", t["alt_ui"])}<figcaption>{t['flow_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec deep" id="room">
+    <div class="wrap split">
+      <div class="reveal"><h2 class="sec-head">{t['room_h']}</h2><p class="lede">{t['room_p']}</p><ul class="facts">
+{facts_html(t['room_facts'])}
+        </ul></div>
+      <figure class="reveal">{pic(a, "pallor/ui-pattern", t["alt_room"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['room_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec" id="modules">
+    <div class="wrap split reverse">
+      <div class="reveal"><h2 class="sec-head">{t['mods_h']}</h2><p class="lede">{t['mods_p']}</p><ul class="facts">
+{facts_html(t['mods_facts'])}
+        </ul></div>
+      <figure class="reveal">{pic(a, "pallor/ui-fx", t["alt_frozen"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['mods_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec statement" id="slow">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{t['slow_h']}</h2>
+      <p class="lede center reveal">{t['slow_p']}</p>
+    </div>
+  </section>"""
     elif slug == "plumb":
         sound_img = ("plumb/hl-close", t["hero_alt"])
         mid = f"""
@@ -3608,7 +4042,7 @@ def page_product(slug, lang):
   </dialog>"""
     foot = f"      <p>{t['trademark']}</p>\n      <p>{t['photo_credit']}</p>"
     title = t["title_20"] if slug == "at20v" else t["title"]
-    og = {"at20v": "og-image.jpg", "at303": "at303/og-image.jpg", "at101v": "at101v/og-image.jpg", "at42": "at42/og-image.jpg", "at700": "at700/og-image.jpg", "atfs1": "atfs1/og-image.jpg", "orrery": "orrery/og-image.jpg", "murmur": "murmur/og-image.jpg", "atmd": "atmd/og-image.jpg", "lacquer": "lacquer/og-image.jpg", "halation": "halation/og-image.jpg", "tarnish": "tarnish/og-image.jpg", "plumb": "plumb/og-image.jpg"}[slug]
+    og = {"at20v": "og-image.jpg", "pallor": "pallor/og-image.jpg", "thrum": "thrum/og-image.jpg", "at303": "at303/og-image.jpg", "at101v": "at101v/og-image.jpg", "at42": "at42/og-image.jpg", "at700": "at700/og-image.jpg", "atfs1": "atfs1/og-image.jpg", "orrery": "orrery/og-image.jpg", "murmur": "murmur/og-image.jpg", "atmd": "atmd/og-image.jpg", "lacquer": "lacquer/og-image.jpg", "halation": "halation/og-image.jpg", "tarnish": "tarnish/og-image.jpg", "plumb": "plumb/og-image.jpg"}[slug]
     return shell(lang, slug + "/", title, t["description"], body, og, foot, "p-" + slug)
 
 def page_home(lang):
@@ -3630,7 +4064,7 @@ def page_home(lang):
     </div>
     <a class="t-img" href="{home}{slug}/">{pic(a, c['imgdir'] + c['img'], c['alt'])}</a>
   </section>""")
-    synths = [x for x in PRODUCTS if x[0] not in ("orrery", "murmur", "lacquer", "halation", "tarnish", "plumb")]
+    synths = [x for x in PRODUCTS if x[0] not in ("orrery", "murmur", "lacquer", "halation", "tarnish", "plumb", "pallor", "thrum")]
     cmp_heads = "".join(f"""<div class="cmp-head reveal">{pic(a, cards[s]['imgdir'] + cards[s]['img'], cards[s]['alt'], "(max-width: 900px) 33vw, 380px")}<h3>{n}</h3><p>{PRES[s][lang]['tag']}</p><a class="pill primary small" href="{home}{s}/" style="--accent:{ACCENT[s]}">{ui['learn']}</a></div>""" for s, n, *_ in synths)
     cmp_rows = "".join("".join(f'<div class="cmp-cell"><b>{label}</b><span>{vals[COMPARE_ORDER.index(sl)]}</span></div>' for sl, *_ in synths) for label, vals in COMPARE_ROWS[lang])
     reasons = "\n".join(f'      <div class="reveal"><h3>{k}</h3><p>{v}</p></div>' for k, v in t["reasons"])

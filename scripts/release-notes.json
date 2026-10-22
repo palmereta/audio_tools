@@ -36,6 +36,14 @@
     "The LCD indicators and the effects diagram follow automation; the effects sound the same at every sample rate.",
     "The mouse wheel turns the knobs; the help line follows the control under the mouse."
   ],
+  "orrery-v1.0.5": [
+    "Main and satellites: with the new default role, Auto, the first Orrery in your set is the Main and every Orrery you add becomes a satellite that plays one lane of it on its own track, note for note. In Ableton Live each synth now simply takes its MIDI from one satellite.",
+    "A satellite has a compact page: which lane of the Main it plays (click to change, Shift-click for several), its activity, and Make independent. It follows the Main's Play, presets and settings.",
+    "The Main skips the lanes its satellites play, so nothing doubles, and lists its satellites. Projects from 1.0.4 open as Independent and sound as before; Link still works.",
+    "macOS and Linux: Publish lanes as MIDI ports gives each lane its own virtual MIDI port (Orrery Drone, Orrery Pad...).",
+    "Preview sound has an On/Off button next to Play, and the Simple page says when you are hearing it; satellites start with it off.",
+    "The preview sound's long releases end within the declared tail."
+  ],
   "orrery-v1.0.4": [
     "A MIDI port that appears after loading is reopened, and a missing one shows as Not connected instead of vanishing.",
     "The preview plays on mono tracks; Capture MIDI includes the echoes.",
@@ -87,5 +95,19 @@
     "Copies installed by hand or for another user count for the version check, and an update removes them or tells you where they are.",
     "Updates are replaced in two steps and rolled back if anything fails.",
     "Installing for all users hands the queue to the elevated launcher."
+  ],
+  "pallor-v1.0.0": [
+    "First release: a drum machine for dark wave, coldwave, post-punk, EBM, synthpop, goth rock, industrial, new beat, italo, witch house, trip-hop and dark ambient.",
+    "Sixteen voices, each with an analog engine (44 circuit models) and an 80s digital engine (8-bit companding, clock pitch, 12-bit samplers) with eight built-in kits and your own samples.",
+    "Step sequencer: 16 patterns with A, B and Fill, up to 64 steps, probability, ratchets, flams, nudge, nine conditions, polymeter, swing per pattern and a song chain.",
+    "Gated, nonlinear and reverse rooms, plate, spring and hall; tape, BBD and 12-bit echoes with chorus, ensemble, flanger and phaser; lo-fi, tape and glue on the master.",
+    "Six extra stereo outputs, MIDI in and out, drag a pattern into the DAW as MIDI, 65 presets in 13 genres and a manual in English and Spanish."
+  ],
+  "thrum-v1.0.0": [
+    "First release: an electric guitar by physical modelling, with no samples.",
+    "Six guitars (three single coils, two humbuckers, semi-hollow, hollow jazz, baritone, seven-string) with waveguide strings, real pickup positions and the passive circuit; nine tunings and four gauges.",
+    "A guitarist inside: every note on a real string and fret, smart legato with hammer-ons, pull-offs and slides, chords voiced like a guitarist, 32 strum and 11 fingerpicking patterns with strums centred on the beat, ten articulations, keyswitches, MPE and MIDI out.",
+    "Thirteen reorderable pedals, four tube amps with Auto level, and a cabinet with two movable microphones or your own impulse responses up to 3 s; a DI output for re-amping.",
+    "A Stage editor with the guitar, pedals and amps rendered in 3D, a live fretboard, an Inspect view, 69 presets and a manual in English and Spanish."
   ]
 }

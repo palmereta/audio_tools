@@ -1,0 +1,93 @@
+{
+ "name": "Grey Factory Floor",
+ "category": "Post-punk",
+ "description": "Motorik: kick and snare locked, sixteenths running underneath.",
+ "order": 11,
+ "params": {
+  "tempo": 150,
+  "swing": 50,
+  "swing_res": 1,
+  "bd_level": -1,
+  "sd_level": 0,
+  "cp_level": -2,
+  "rs_level": -5,
+  "rs_pan": -10,
+  "ch_level": -3,
+  "ch_pan": 20,
+  "oh_level": -4,
+  "oh_pan": 25,
+  "cy_level": -7,
+  "cy_pan": -30,
+  "rd_level": -6,
+  "rd_pan": -20,
+  "t1_level": -4,
+  "t1_pan": -40,
+  "t2_level": -4,
+  "t2_pan": -15,
+  "t3_level": -4,
+  "t3_pan": 15,
+  "t4_level": -4,
+  "t4_pan": 40,
+  "cb_level": -6,
+  "cb_pan": -15,
+  "cl_level": -5,
+  "cl_pan": 30,
+  "tb_level": -6,
+  "tb_pan": 35,
+  "fx_level": -7,
+  "bd_model": 1,
+  "bd_decay": 30,
+  "bd_char1": 60,
+  "sd_model": 1,
+  "sd_char1": 55,
+  "sd_senda": 25,
+  "ch_model": 1,
+  "ch_char1": 35,
+  "ch_decay": 25,
+  "cy_model": 0,
+  "a_type": 6,
+  "a_size": 35,
+  "m_tape": 1,
+  "m_tape_drive": 6,
+  "m_comp": 50,
+  "m_ratio": 2,
+  "autofill": 3,
+  "m_volume": 1.1
+ },
+ "patterns": [
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . 100 . 100 . 100 . . . 100 . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "ch": "72 72 72 72 72 72 72 72 72 72 72 72 72 72 72 72"
+   },
+   "group": 0,
+   "var": "A"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . 100 . 100 . 100 . . . 100 . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "ch": "100 72 72 72 100 72 72 72 100 72 72 72 100 72 72 72",
+    "cy": "100"
+   },
+   "group": 0,
+   "var": "B"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . 100 . 100 . 100 . . . 100 . 100",
+    "sd": ". . . . 100 . . . . . . . 40 72 100 127a",
+    "ch": "72 72 72 72 72 72 72 72 72 72 72 72 72 72 72 72"
+   },
+   "group": 0,
+   "var": "Fill"
+  }
+ ]
+}

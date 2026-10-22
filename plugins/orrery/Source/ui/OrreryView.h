@@ -58,7 +58,7 @@ public:
         }
         // Sol, respiración y avance del acorde.
         const float sunR = R * 0.15f;
-        if (proc.value ("breath") > 0.5f)
+        if (globals().breathRate > 0.5f)
         {
             const float br = sunR * (1.35f + 0.35f * v.breath);
             g.setColour (col::sun.withAlpha (0.10f + 0.1f * v.breath)); g.fillEllipse (juce::Rectangle<float> (2 * br, 2 * br).withCentre (c));
@@ -75,12 +75,12 @@ public:
         g.setFont (font (sunR * 0.55f, true));
         g.drawText (v.running ? juce::String (v.chord) : juce::String ("rest"), juce::Rectangle<float> (2 * sunR, sunR).withCentre (c.translated (0, -sunR * 0.12f)).toNearestInt(), juce::Justification::centred);
         g.setFont (font (std::max (10.0f, sunR * 0.22f)));
-        const auto keyName = juce::String (noteName ((int) proc.value ("key"))) + " " + juce::String (scales()[(size_t) juce::jlimit (0, (int) scales().size() - 1, (int) proc.value ("scale"))].name).upToFirstOccurrenceOf (" (", false, false).toLowerCase();
+        const auto keyName = juce::String (noteName (globals().key)) + " " + juce::String (scales()[(size_t) juce::jlimit (0, (int) scales().size() - 1, globals().scale)].name).upToFirstOccurrenceOf (" (", false, false).toLowerCase();
         g.drawFittedText (keyName, juce::Rectangle<float> (1.6f * sunR, sunR * 0.5f).withCentre (c.translated (0, sunR * 0.42f)).toNearestInt(), juce::Justification::centred, 1, 0.6f);
         if (hover >= 0)
         {
             g.setColour (col::text); g.setFont (font (13.0f));
-            g.drawText ("Lane " + juce::String (hover + 1) + "  " + roleName ((int) proc.value ("l" + juce::String (hover + 1) + "_role")) + "  ch " + juce::String ((int) proc.value ("l" + juce::String (hover + 1) + "_channel")),
+            g.drawText ("Lane " + juce::String (hover + 1) + "  " + roleName (lane (hover).role) + "  ch " + juce::String (lane (hover).channel),
                         getLocalBounds().removeFromBottom (24), juce::Justification::centred);
         }
     }
@@ -100,7 +100,19 @@ private:
 
     juce::Point<float> centre() const { return getLocalBounds().toFloat().getCentre(); }
     float radius() const { return std::min (getWidth(), getHeight()) * 0.5f - 18.0f; }
-    bool laneOn (int l) const { return proc.value ("l" + juce::String (l + 1) + "_on") > 0.5f; }
+    // Un satélite muestra sus carriles con los ajustes del Main (los de su réplica); las demás, los propios.
+    bool sat() const { return proc.role() == RoleSatellite; }
+    bool laneOn (int l) const { return sat() ? (((proc.satelliteLanes() >> l) & 1u) != 0 && proc.satelliteLane (l).on) : proc.value ("l" + juce::String (l + 1) + "_on") > 0.5f; }
+    LaneParams lane (int l) const
+    {
+        if (sat()) return proc.satelliteLane (l);
+        LaneParams L; L.role = (int) proc.value ("l" + juce::String (l + 1) + "_role"); L.channel = (int) proc.value ("l" + juce::String (l + 1) + "_channel"); return L;
+    }
+    GlobalParams globals() const
+    {
+        if (sat()) return proc.satelliteGlobals();
+        GlobalParams g; g.breathRate = proc.value ("breath"); g.key = (int) proc.value ("key"); g.scale = (int) proc.value ("scale"); return g;
+    }
     int activeCount() const { int n = 0; for (int l = 0; l < kLanes; ++l) n += laneOn (l) ? 1 : 0; return n; }
     int orbitIndexOf (int lane) const { int k = 0; for (int l = 0; l < kLanes; ++l) { if (! laneOn (l)) continue; if (l == lane) return k; ++k; } return -1; }
     float orbitRadius (int k, int n) const { const float R = radius(); return n <= 1 ? R * 0.6f : R * (0.34f + 0.64f * (float) k / (float) (n - 1)); }
@@ -127,6 +139,7 @@ private:
     }
     void timerCallback() override
     {
+        if (! isShowing()) return;      // la otra vista (Simple o satélite) se queda con las chispas
         // Chispas nuevas desde el procesador.
         const auto r = proc.sparkFifo.read (proc.sparkFifo.getNumReady());
         const double now = juce::Time::getMillisecondCounterHiRes() * 0.001;

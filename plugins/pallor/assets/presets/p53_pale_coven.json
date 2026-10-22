@@ -1,0 +1,102 @@
+{
+ "name": "Pale Coven",
+ "category": "Witch house",
+ "description": "Hexagonal snare, crushed hats and a blip clave pinging into the tape echo.",
+ "order": 53,
+ "params": {
+  "tempo": 74,
+  "swing": 50,
+  "swing_res": 1,
+  "bd_level": -1,
+  "sd_level": 0,
+  "cp_level": -2,
+  "rs_level": -5,
+  "rs_pan": -10,
+  "ch_level": -3,
+  "ch_pan": 20,
+  "oh_level": -4,
+  "oh_pan": 25,
+  "cy_level": -7,
+  "cy_pan": -30,
+  "rd_level": -6,
+  "rd_pan": -20,
+  "t1_level": -4,
+  "t1_pan": -40,
+  "t2_level": -4,
+  "t2_pan": -15,
+  "t3_level": -4,
+  "t3_pan": 15,
+  "t4_level": -4,
+  "t4_pan": 40,
+  "cb_level": -6,
+  "cb_pan": -15,
+  "cl_level": -5,
+  "cl_pan": 30,
+  "tb_level": -6,
+  "tb_pan": 35,
+  "fx_level": -7,
+  "bd_engine": 1,
+  "bd_kit": 3,
+  "bd_decay": 100,
+  "sd_engine": 1,
+  "sd_kit": 3,
+  "sd_decay": 100,
+  "sd_senda": 40,
+  "ch_model": 0,
+  "ch_bits": 8,
+  "ch_rate": 12000,
+  "cl_model": 2,
+  "cl_sendb": 60,
+  "fx_model": 3,
+  "b_type": 1,
+  "b_time": 7,
+  "b_fb": 55,
+  "b_rate": 60,
+  "b_return": -4,
+  "a_type": 3,
+  "a_size": 70,
+  "m_lofi": 3,
+  "m_lofi_mix": 30,
+  "autofill": 2,
+  "m_volume": 5.2
+ },
+ "patterns": [
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . 100 . . . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "ch": "100 100r2 100 . 100 100r2 100 . 100 100r2 100 . 100 100r3 100 90r4",
+    "cl": ". . . . . . 100 . . . . . . . 100"
+   },
+   "group": 0,
+   "var": "A"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . 100 . . . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "ch": "100 100r2 100 . 100 100r2 100 . 100 100r2 100 . 100 100r3 100 90r4",
+    "cl": ". . 100 . . . 100 . . . 100 . . . 100",
+    "fx": "100"
+   },
+   "group": 0,
+   "var": "B"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . 100 . . . 100",
+    "sd": ". . . . 100 . . . . . . . 40 72 100 127a",
+    "ch": "100 100r2 100 . 100 100r2 100 . 100 100r2 100 . 100 100r3 100 90r4",
+    "cl": ". . . . . . 100"
+   },
+   "group": 0,
+   "var": "Fill"
+  }
+ ]
+}

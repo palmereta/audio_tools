@@ -6,13 +6,21 @@
 using namespace dh::orr;
 
 // ───────────── salidas MIDI directas ─────────────
+juce::MidiOutput* DirectMidi::outputFor (int slot) const
+{
+    if (juce::isPositiveAndBelow (slot, kSlots)) return slots[(size_t) slot].get();
+    if (juce::isPositiveAndBelow (slot - kSlots, kLanes)) return virt[(size_t) (slot - kSlots)].get();
+    return nullptr;
+}
+
 void DirectMidi::allNotesOffOn (int slot, int channel)
 {
-    if (! juce::isPositiveAndBelow (slot, kSlots) || slots[(size_t) slot] == nullptr) return;
+    auto* o = outputFor (slot);
+    if (o == nullptr) return;
     const int ch = juce::jlimit (1, 16, channel);
-    slots[(size_t) slot]->sendMessageNow (juce::MidiMessage::controllerEvent (ch, 64, 0));
-    slots[(size_t) slot]->sendMessageNow (juce::MidiMessage::allNotesOff (ch));
-    slots[(size_t) slot]->sendMessageNow (juce::MidiMessage::allSoundOff (ch));
+    o->sendMessageNow (juce::MidiMessage::controllerEvent (ch, 64, 0));
+    o->sendMessageNow (juce::MidiMessage::allNotesOff (ch));
+    o->sendMessageNow (juce::MidiMessage::allSoundOff (ch));
 }
 
 DirectMidi::~DirectMidi()
@@ -21,6 +29,31 @@ DirectMidi::~DirectMidi()
     // Al cerrar, cada sinte recibe All Notes Off en el canal de su carril (si no, las notas quedaban colgadas).
     const juce::ScopedLock sl (sendLock);
     for (int l = 0; l < kLanes; ++l) allNotesOffOn (laneSlot[(size_t) l].load(), laneChannel[(size_t) l].load());
+    for (int l = 0; l < kLanes; ++l) { if (virtOn[(size_t) l].load()) allNotesOffOn (kSlots + l, laneChannel[(size_t) l].load()); virtOn[(size_t) l].store (false); virt[(size_t) l].reset(); }
+}
+
+// Un puerto virtual por carril. Si un nombre ya existe (otra Orrery, otro programa), CoreMIDI no lo crea: el que
+// llama elige nombres libres. Los que se cierran reciben antes All Notes Off en el canal del carril.
+int DirectMidi::setVirtualPorts (const juce::StringArray& names)
+{
+    const juce::ScopedLock sl (sendLock);
+    for (int l = 0; l < kLanes; ++l)
+        if (virt[(size_t) l] != nullptr)
+        {
+            virtOn[(size_t) l].store (false);
+            allNotesOffOn (kSlots + l, laneChannel[(size_t) l].load());
+            virt[(size_t) l].reset();
+        }
+    virtNames.clear();
+    int made = 0;
+    if (names.size() >= kLanes)
+        for (int l = 0; l < kLanes; ++l)
+        {
+            virt[(size_t) l] = juce::MidiOutput::createNewDevice (names[l]);
+            virtNames.add (virt[(size_t) l] != nullptr ? names[l] : juce::String());
+            if (virt[(size_t) l] != nullptr) { virtOn[(size_t) l].store (true); ++made; }
+        }
+    return made;
 }
 
 void DirectMidi::setLanePort (int lane, const juce::String& identifier)
@@ -91,8 +124,7 @@ void DirectMidi::run()
              wait_ = m.at - juce::Time::getMillisecondCounterHiRes())
             juce::Thread::sleep (juce::jmin (50, (int) wait_));
         const juce::ScopedLock sl (sendLock);
-        if (juce::isPositiveAndBelow ((int) m.slot, kSlots) && slots[(size_t) m.slot] != nullptr)
-            slots[(size_t) m.slot]->sendMessageNow (juce::MidiMessage (m.data, m.size));
+        if (auto* o = outputFor ((int) m.slot)) o->sendMessageNow (juce::MidiMessage (m.data, m.size));
     }
 }
 
@@ -108,11 +140,28 @@ OrreryProcessor::OrreryProcessor()
     rescanUserPresets();
     { juce::StringArray g; for (auto& e : params()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
     tracker.capture (*this);
+    genEvents.reserve (8192);
+    regSlot = Constellation::get().join();
+    { const std::lock_guard<std::mutex> lk (Constellation::get().lock); allInstances().push_back (this); }
+    startTimerHz (4);
+}
+
+namespace {
+// Nombres de los puertos virtuales en uso en este proceso (dos Orrery no pueden publicar el mismo).
+juce::CriticalSection portNamesLock;
+juce::StringArray& portNamesInUse() { static juce::StringArray a; return a; }
 }
 
 OrreryProcessor::~OrreryProcessor()
 {
+    stopTimer();
     if (linkMode == 1) LinkHub::get().leaders.fetch_sub (1);
+    { const std::lock_guard<std::mutex> lk (Constellation::get().lock); auto& v = allInstances(); v.erase (std::remove (v.begin(), v.end(), this), v.end()); }
+    Constellation::get().leave (regSlot);
+    const auto names = direct.virtualPortNames();
+    direct.setVirtualPorts ({});
+    const juce::ScopedLock sl (portNamesLock);
+    for (auto& n : names) portNamesInUse().removeString (n);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout OrreryProcessor::createLayout()
@@ -123,10 +172,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout OrreryProcessor::createLayou
         const juce::ParameterID pid { e.id, 1 };
         const auto* ep = &e;
         if (e.choices.isNotEmpty())
-            layout.add (std::make_unique<juce::AudioParameterChoice> (pid, e.name, juce::StringArray::fromTokens (e.choices, "|", ""), (int) (e.def - e.lo)));
+            layout.add (std::make_unique<juce::AudioParameterChoice> (pid, e.name, juce::StringArray::fromTokens (e.choices, "|", ""), (int) (e.def - e.lo),
+                juce::AudioParameterChoiceAttributes().withAutomatable (e.automatable)));
         else if (e.steps > 0)
             layout.add (std::make_unique<juce::AudioParameterInt> (pid, e.name, (int) e.lo, (int) e.hi, (int) e.def,
-                juce::AudioParameterIntAttributes().withStringFromValueFunction ([ep] (int v, int) { return formatParam (*ep, (float) v); })));
+                juce::AudioParameterIntAttributes().withStringFromValueFunction ([ep] (int v, int) { return formatParam (*ep, (float) v); }).withAutomatable (e.automatable)));
         else
             layout.add (std::make_unique<juce::AudioParameterFloat> (pid, e.name, juce::NormalisableRange<float> (e.lo, e.hi), e.def,
                 juce::AudioParameterFloatAttributes().withStringFromValueFunction ([ep] (float v, int) { return formatParam (*ep, v); })));
@@ -152,6 +202,12 @@ void OrreryProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     preview.prepare ((float) sampleRate, std::max (64, samplesPerBlock) + 64);
     monoR.assign ((size_t) std::max (64, samplesPerBlock) + 64, 0.0f);
     directQ.reserve (8192);
+    updateRole (true);
+    // Un Main que se vuelve a preparar (otra frecuencia, otro buffer) empieza otra generación: sus satélites
+    // se resincronizan. Un satélite que se prepara también.
+    if (effRole.load() == RoleMain) Constellation::get().bumpGeneration (regSlot);
+    sat.desync();
+    if (juce::MessageManager::existsAndIsCurrentThread()) housekeeping();
 }
 
 void OrreryProcessor::queueDirect (double at, int slot, const uint8_t* d, int size)
@@ -175,22 +231,206 @@ void OrreryProcessor::flushDirect()
 }
 
 // En bypass: al entrar se cierran todas las notas (al host y a los puertos directos); la entrada MIDI no pasa.
+// Un satélite suelta las de sus carriles y, al volver, se sincroniza de nuevo.
 void OrreryProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
 {
     buffer.clear();
     midi.clear();
     if (wasBypassed) return;
     wasBypassed = true;
-    gen.panic (events);
+    if (effRole.load() == RoleSatellite) { events.clear(); sat.releaseAll (events); }
+    else gen.panic (events);
     preview.reset();
     const double now = juce::Time::getMillisecondCounterHiRes();
     for (auto& e : events)
     {
         midi.addEvent (e.data, e.size, 0);
         if (e.lane < 0) queueDirect (now, -1, e.data, e.size);
-        else if (const int slot = direct.slotForLane (e.lane); slot >= 0) queueDirect (now, slot, e.data, e.size);
+        else
+        {
+            if (const int slot = direct.slotForLane (e.lane); slot >= 0) queueDirect (now, slot, e.data, e.size);
+            if (const int vs = direct.virtualSlotForLane (e.lane); vs >= 0) queueDirect (now, vs, e.data, e.size);
+        }
     }
     flushDirect();
+}
+
+void OrreryProcessor::updateTrackProperties (const TrackProperties& p)
+{
+    trackName = p.name.value_or (juce::String());
+    auto& reg = Constellation::get();
+    const std::lock_guard<std::mutex> lk (reg.lock);
+    if (regSlot >= 0) trackName.copyToUTF8 (reg.members[(size_t) regSlot].name, sizeof (reg.members[0].name) - 1);
+}
+
+// El rol efectivo: el elegido, o el que Auto resolvió (la primera del proceso es Main; las siguientes, satélites en
+// el próximo carril libre). Con blocking = false (hilo de audio) sólo intenta tomar el registro.
+void OrreryProcessor::updateRole (bool blocking)
+{
+    if (regSlot < 0) { effRole.store (RoleIndependent); return; }
+    const auto& X = Ix::get();
+    const int setting = juce::jlimit (0, 3, (int) std::lround (raw[(size_t) X.role]->load()));
+    const uint32_t lp = (uint32_t) juce::jlimit (0, 255, (int) std::lround (raw[(size_t) X.satLanes]->load()));
+    int want = setting == RoleAuto ? autoRole.load() : setting;
+    uint32_t lanes = want == RoleSatellite ? (lp != 0 ? lp : autoLanes.load()) : 0u;
+    if (want != 0 && want == regRole.load() && (want != RoleSatellite || (lanes != 0 && lanes == regLanes.load()))) return;
+    auto& reg = Constellation::get();
+    std::unique_lock<std::mutex> lk (reg.lock, std::defer_lock);
+    if (blocking) lk.lock(); else if (! lk.try_lock()) return;
+    bool becameSatellite = false;
+    if (want == 0)
+    {
+        want = reg.resolveAutoLocked (regSlot);
+        autoRole.store (want);
+        becameSatellite = want == RoleSatellite;
+    }
+    if (want == RoleSatellite && lanes == 0)
+    {
+        lanes = lp != 0 ? lp : reg.pickLanesLocked (regSlot);
+        if (lp == 0) autoLanes.store (lanes);
+    }
+    if (want == RoleMain)
+    {
+        uint32_t on = 0;
+        for (int l = 0; l < kLanes; ++l) if (raw[(size_t) X.lane[(size_t) l].on]->load() > 0.5f) on |= 1u << l;
+        reg.members[(size_t) regSlot].laneOn.store (on);
+    }
+    reg.setRoleLocked (regSlot, want, lanes);
+    regRole.store (want); regLanes.store (lanes);
+    effLanes.store (lanes);
+    effRole.store (want);
+    lk.unlock();
+    // Una Orrery nueva que se vuelve satélite empieza sin el sonido de prueba: suena el sinte de su pista.
+    if (becameSatellite && ! restoring.load()) setValue ("preview", 0.0f);
+}
+
+void OrreryProcessor::setRoleFromUi (int r)
+{
+    r = juce::jlimit (0, 3, r);
+    if (r == RoleAuto) { autoRole.store (0); autoLanes.store (0); }
+    if (r == RoleSatellite && effRole.load() != RoleSatellite) setValue ("preview", 0.0f);
+    setValue ("role", (float) r);
+    updateRole (true);
+}
+
+bool OrreryProcessor::virtualPortsSupported()
+{
+   #if JUCE_MAC || JUCE_LINUX
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+// Hilo de mensajes: el rol y los puertos virtuales.
+void OrreryProcessor::housekeeping()
+{
+    updateRole (true);
+    const auto& X = Ix::get();
+    const bool want = virtualPortsSupported() && raw[(size_t) X.midiPorts]->load() > 0.5f;
+    const bool have = direct.virtualPortsOpen() || direct.virtualPortNames().size() > 0;
+    if (want == have) return;
+    const juce::ScopedLock sl (portNamesLock);
+    for (auto& n : direct.virtualPortNames()) portNamesInUse().removeString (n);
+    if (! want) { direct.setVirtualPorts ({}); return; }
+    // "Orrery Drone", "Orrery Pad"...; dos carriles con el mismo rol llevan el número; otra Orrery que también
+    // publica usa "Orrery 2 ...". Si el sistema no acepta un nombre (ya existe en otro programa), el siguiente.
+    for (int k = 1; k <= 16; ++k)
+    {
+        juce::StringArray names;
+        const juce::String prefix = k == 1 ? juce::String ("Orrery") : "Orrery " + juce::String (k);
+        for (int l = 0; l < kLanes; ++l)
+        {
+            const int r = (int) std::lround (raw[(size_t) X.lane[(size_t) l].role]->load());
+            int same = 0; for (int o = 0; o < kLanes; ++o) same += (int) std::lround (raw[(size_t) X.lane[(size_t) o].role]->load()) == r;
+            names.add (prefix + " " + roleName (r) + (same > 1 ? " " + juce::String (l + 1) : juce::String()));
+        }
+        bool clash = false;
+        for (auto& n : names) clash = clash || portNamesInUse().contains (n);
+        if (clash) continue;
+        const int made = direct.setVirtualPorts (names);
+        if (made == kLanes) { portNamesInUse().addArray (names); return; }
+        direct.setVirtualPorts ({});
+        if (made == 0 && k > 2) break;      // el sistema no crea puertos (sin servidor MIDI): no seguir probando
+    }
+}
+
+std::vector<OrreryProcessor::SatInfo> OrreryProcessor::satellites() const
+{
+    std::vector<SatInfo> v;
+    auto& reg = Constellation::get();
+    const std::lock_guard<std::mutex> lk (reg.lock);
+    if (regSlot < 0) return v;
+    auto* b = reg.members[(size_t) regSlot].bus.load();
+    if (b == nullptr) return v;
+    const double now = juce::Time::getMillisecondCounterHiRes();
+    std::vector<std::pair<int, int>> order;
+    for (int i = 0; i < Constellation::kMax; ++i)
+    {
+        const auto& m = reg.members[(size_t) i];
+        if (i != regSlot && m.used.load() && m.role.load() == RoleSatellite && (m.follows.load() == b || m.follows.load() == nullptr)) order.push_back ({ m.order.load(), i });
+    }
+    std::sort (order.begin(), order.end());
+    int k = 0;
+    for (auto& [o, i] : order)
+    {
+        const auto& m = reg.members[(size_t) i];
+        SatInfo s; s.lanes = m.lanes.load(); s.sync = m.sync.load();
+        s.alive = m.follows.load() == b && now - m.seenMs.load() < 1500.0;
+        s.name = juce::String::fromUTF8 (m.name);
+        if (s.name.isEmpty()) s.name = "satellite " + juce::String (++k); else ++k;
+        v.push_back (s);
+    }
+    return v;
+}
+
+juce::String OrreryProcessor::mainName() const
+{
+    auto& reg = Constellation::get();
+    const std::lock_guard<std::mutex> lk (reg.lock);
+    const int mi = reg.mainIndex (regSlot);
+    if (mi < 0) return {};
+    const auto n = juce::String::fromUTF8 (reg.members[(size_t) mi].name);
+    return n.isNotEmpty() ? n : juce::String ("the Main Orrery");
+}
+
+bool OrreryProcessor::otherMainActive() const
+{
+    if (effRole.load() != RoleMain) return false;
+    const int mi = Constellation::get().mainIndex();
+    return mi >= 0 && mi != regSlot;
+}
+
+juce::String OrreryProcessor::displayName() const { return trackName.isNotEmpty() ? trackName : juce::String ("Orrery"); }
+
+// Satélite → independiente: toma los ajustes musicales del Main (sólo sus carriles encendidos), así sigue sonando
+// lo mismo y se puede editar todo.
+void OrreryProcessor::makeIndependentFromMain()
+{
+    std::vector<float> mv;
+    {
+        auto& reg = Constellation::get();
+        const std::lock_guard<std::mutex> lk (reg.lock);
+        const int mi = reg.mainIndex (regSlot);
+        if (mi >= 0)
+            for (auto* p : allInstances())
+                if (p != this && p->regSlot == mi) { mv.reserve (raw.size()); for (auto* r : p->raw) mv.push_back (r->load()); }
+    }
+    const uint32_t lanes = effLanes.load();
+    const auto& ps = params();
+    if (mv.size() == ps.size())
+        for (size_t k = 0; k < ps.size(); ++k) if (! ps[k].global) setValue (ps[k].id, mv[k]);
+    for (int l = 0; l < kLanes; ++l) if (lanes != 0 && ! ((lanes >> l) & 1u)) setValue ("l" + juce::String (l + 1) + "_on", 0.0f);
+    setValue ("preview", 0.0f);
+    setRoleFromUi (RoleIndependent);
+    tracker.capture (*this);
+    notifyUi (onPresetChanged);
+}
+
+std::vector<OrreryProcessor*>& OrreryProcessor::allInstances()
+{
+    static std::vector<OrreryProcessor*> v;     // con el lock del registro
+    return v;
 }
 
 void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
@@ -202,36 +442,110 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     if (n <= 0) return;
     wasBypassed = false;
 
+    runDemo (demoBefore, n);
     const auto& X = Ix::get();
     for (size_t k = 0; k < raw.size(); ++k) vals[k] = raw[k]->load();
-    applyParams (vals.data(), gen);
-
-    // Vínculo entre instancias.
-    const int lm = (int) std::lround (vals[(size_t) X.link]);
-    if (lm != linkMode) { if (linkMode == 1) LinkHub::get().leaders.fetch_sub (1); if (lm == 1) LinkHub::get().leaders.fetch_add (1); linkMode = lm; }
-    gen.following = false;
-    if (linkMode == 2 && LinkHub::get().leaders.load() > 0)
-    {
-        Harmony h;
-        if (LinkHub::get().read (h) && h.serial != 0) { gen.following = true; gen.external = h; gen.g.key = h.key; gen.g.scale = h.scale; }
-    }
+    updateRole (false);
+    const int role = effRole.load();
+    auto& reg = Constellation::get();
 
     bool playing = false; double ppq = 0.0, bpm = 120.0;
+    Stamp stamp;
     if (auto* ph = getPlayHead())
         if (auto pos = ph->getPosition())
         {
             playing = pos->getIsPlaying();
             if (auto q = pos->getPpqPosition()) ppq = *q;
             if (auto b = pos->getBpm()) bpm = *b;
+            if (auto t = pos->getTimeInSamples(); t && playing) { stamp.hostSample = *t; stamp.sampleValid = true; }
+            if (auto h = pos->getHostTimeNs()) stamp.ns = (double) *h;
         }
+    // Sin hora del host por ciclo: la de la máquina (ver Constellation.h).
+    if (stamp.ns == 0.0) stamp.ns = juce::Time::highResolutionTicksToSeconds (juce::Time::getHighResolutionTicks()) * 1.0e9;
 
-    if (panicRequest.exchange (false)) { gen.panic (events); preview.reset(); }
-    else gen.process (n, playing, ppq, bpm, events);
-    if (linkMode == 1) LinkHub::get().publish (gen.published());
+    // Cambio de rol: lo que sonaba se suelta.
+    events.clear();
+    if (role != lastRole)
+    {
+        if (lastRole == RoleSatellite) sat.releaseAll (events);
+        else if ((lastRole == RoleIndependent || lastRole == RoleMain) && role == RoleSatellite) { gen.panic (genEvents); events.insert (events.end(), genEvents.begin(), genEvents.end()); }
+        if (role != RoleMain) mainCore.attach (nullptr);
+        lastRole = role;
+    }
 
-    // Salidas: host, puertos directos, sonido de prueba, chispas del editor.
+    // Vínculo entre instancias (sólo Independent sigue a una líder; un Main puede liderar).
+    int lm = (int) std::lround (vals[(size_t) X.link]);
+    if (role == RoleSatellite || role == 0 || (role == RoleMain && lm == 2)) lm = 0;
+    if (lm != linkMode) { if (linkMode == 1) LinkHub::get().leaders.fetch_sub (1); if (lm == 1) LinkHub::get().leaders.fetch_add (1); linkMode = lm; }
+
+    genEvents.clear();
+    uint32_t skip = 0;
+    if (role == RoleSatellite)
+    {
+        auto& m = reg.members[(size_t) regSlot];
+        MainBus* b = reg.mainBus();
+        m.follows.store (b); m.seenMs.store (blockStartMs);
+        sat.process (b, n, sr, stamp, playing, ppq, bpm, effLanes.load(), genEvents);
+        m.sync.store (sat.state.load());
+        resetPending.store (false);
+        if (panicRequest.exchange (false))
+        {
+            // Sólo en sus canales y sin tocar la réplica (sigue al Main).
+            preview.reset();
+            for (int l = 0; l < kLanes; ++l)
+                if ((effLanes.load() >> l) & 1u)
+                {
+                    const int ch = juce::jlimit (1, 16, sat.rep.lanes[(size_t) l].channel) - 1;
+                    for (int cc : { 64, 123, 120 }) { OutEvent e; e.offset = n - 1; e.data[0] = (uint8_t) (0xB0 | ch); e.data[1] = (uint8_t) cc; e.data[2] = 0; e.size = 3; e.lane = (int8_t) l; genEvents.push_back (e); }
+                }
+        }
+    }
+    else if (role == RoleMain)
+    {
+        Controls rawc;
+        applyParams (vals.data(), rawc.g, rawc.lanes);
+        rawc.reset = resetPending.exchange (false);
+        rawc.panic = panicRequest.exchange (false);
+        MainBus* b = reg.members[(size_t) regSlot].bus.load();
+        if (! mainCore.attachedTo (b)) mainCore.attach (b);
+        const Controls& c = mainCore.begin (rawc);
+        gen.g = c.g; gen.lanes = c.lanes; gen.following = false;
+        if (c.reset) gen.resetRequest.store (true);
+        if (c.panic) { gen.panic (genEvents); preview.reset(); }
+        else gen.process (n, playing, ppq, bpm, genEvents);
+        mainCore.end (n, stamp, genEvents, gen);
+        uint32_t on = 0; for (int l = 0; l < kLanes; ++l) if (c.lanes[(size_t) l].on) on |= 1u << l;
+        reg.members[(size_t) regSlot].laneOn.store (on);
+        if (linkMode == 1) LinkHub::get().publish (gen.published());
+        // Los carriles que tocan los satélites no salen también por acá.
+        if (vals[(size_t) X.skipSat] > 0.5f) skip = reg.takenLanes (b, blockStartMs, regSlot);
+    }
+    else if (role == RoleIndependent)
+    {
+        applyParams (vals.data(), gen);
+        gen.following = false;
+        if (linkMode == 2 && LinkHub::get().leaders.load() > 0)
+        {
+            Harmony h;
+            if (LinkHub::get().read (h) && h.serial != 0) { gen.following = true; gen.external = h; gen.g.key = h.key; gen.g.scale = h.scale; }
+        }
+        if (resetPending.exchange (false)) gen.resetRequest.store (true);
+        if (panicRequest.exchange (false)) { gen.panic (genEvents); preview.reset(); }
+        else gen.process (n, playing, ppq, bpm, genEvents);
+        if (linkMode == 1) LinkHub::get().publish (gen.published());
+    }
+    // Un carril que un satélite acaba de tomar: lo que sonaba acá se suelta (si no, su note-off ya no saldría).
+    if (const uint32_t newly = skip & ~skipped.load(); newly != 0)
+        gen.forEachSounding ([&] (int ch, int note, int lane, int) {
+            if (lane >= 0 && ((newly >> lane) & 1u)) { OutEvent e; e.offset = 0; e.data[0] = (uint8_t) (0x80 | ch); e.data[1] = (uint8_t) note; e.data[2] = 0; e.size = 3; e.lane = (int8_t) lane; events.push_back (e); }
+        });
+    skipped.store (skip);
+    for (auto& e : genEvents) if (e.lane < 0 || ! ((skip >> e.lane) & 1u)) events.push_back (e);
+    auto& G = active();
+
+    // Salidas: host, puertos directos, puertos virtuales, sonido de prueba, chispas del editor.
     std::array<int, kLanes> roles {};
-    for (int l = 0; l < kLanes; ++l) roles[(size_t) l] = gen.lanes[(size_t) l].role;
+    for (int l = 0; l < kLanes; ++l) roles[(size_t) l] = G.lanes[(size_t) l].role;
     const bool previewOn = vals[(size_t) X.preview] > 0.5f;
     if (! previewOn && previewWasOn) preview.reset();     // apagado con notas sonando: no recibiría sus note-off
     previewWasOn = previewOn;
@@ -248,12 +562,18 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     {
         const int off = juce::jlimit (0, n - 1, e.offset);
         midi.addEvent (e.data, e.size, off);
+        const double at = blockStartMs + off * 1000.0 / sr;
         if (e.lane >= 0)
         {
-            const int slot = direct.slotForLane (e.lane);
-            if (slot >= 0) queueDirect (blockStartMs + off * 1000.0 / sr, slot, e.data, e.size);
+            if (const int ds = direct.slotForLane (e.lane); ds >= 0) queueDirect (at, ds, e.data, e.size);
+            if (const int vs = direct.virtualSlotForLane (e.lane); vs >= 0) queueDirect (at, vs, e.data, e.size);
         }
-        else queueDirect (blockStartMs + off * 1000.0 / sr, -1, e.data, e.size);
+        else
+        {
+            queueDirect (at, -1, e.data, e.size);
+            for (int l = 0; l < kLanes; ++l)       // pánico y demás: también a los puertos virtuales de ese canal
+                if (const int vs = direct.virtualSlotForLane (l); vs >= 0 && juce::jlimit (1, 16, G.lanes[(size_t) l].channel) - 1 == (e.data[0] & 0x0F)) queueDirect (at, vs, e.data, e.size);
+        }
         if ((e.data[0] & 0xF0) == 0x90 && e.data[2] > 0 && e.lane >= 0)
         {
             const auto w = sparkFifo.write (1);
@@ -271,10 +591,10 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     if (R == nullptr) for (int i = 0; i < n; ++i) L[i] = 0.5f * (L[i] + monoR[(size_t) i]);
 
     // Reloj MIDI (24 por negra) y start/stop hacia los puertos directos.
-    const bool running = gen.isRunning();
+    const bool running = G.isRunning();
     if (vals[(size_t) X.clockOut] > 0.5f && direct.anyOpen())
     {
-        const double perSample = (playing && gen.g.hostClock ? bpm : (double) gen.g.tempo) / 60.0 / sr;
+        const double perSample = (playing && G.g.hostClock ? bpm : (double) G.g.tempo) / 60.0 / sr;
         if (running && ! wasRunning) { const uint8_t st = 0xFA; queueDirect (blockStartMs, -1, &st, 1); clockBeat = 0.0; }
         if (! running && wasRunning) { const uint8_t st = 0xFC; queueDirect (blockStartMs, -1, &st, 1); }
         if (running)
@@ -290,7 +610,28 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     }
     wasRunning = running;
     flushDirect();
-    for (int l = 0; l < kLanes; ++l) direct.setLaneChannel (l, gen.lanes[(size_t) l].channel);
+    for (int l = 0; l < kLanes; ++l) direct.setLaneChannel (l, G.lanes[(size_t) l].channel);
+    for (auto& d : demoAfter) runDemo (d, n);
+}
+
+void OrreryProcessor::runDemo (std::atomic<OrreryProcessor*>& which, int n)
+{
+    auto* d = which.load();
+    if (d == nullptr || n > demoBuf.getNumSamples()) return;
+    juce::AudioBuffer<float> b (demoBuf.getArrayOfWritePointers(), 2, n);
+    d->setPlayHead (getPlayHead());
+    d->processBlock (b, demoMidi);
+}
+
+void OrreryProcessor::addDemoInstance (std::unique_ptr<OrreryProcessor> p, bool before)
+{
+    p->setPlayConfigDetails (0, 2, getSampleRate() > 0 ? getSampleRate() : 48000.0, std::max (64, getBlockSize()));
+    p->prepareToPlay (getSampleRate() > 0 ? getSampleRate() : 48000.0, std::max (64, getBlockSize()));
+    demoMidi.ensureSize (8192);
+    auto* raw_ = p.get();
+    demoOwned.push_back (std::move (p));
+    if (before) demoBefore.store (raw_);
+    else for (auto& d : demoAfter) if (d.load() == nullptr) { d.store (raw_); break; }
 }
 
 void OrreryProcessor::notifyUi (std::function<void()>& cb)
@@ -403,7 +744,7 @@ void OrreryProcessor::loadPreset (int index)
     }
     currentPresetName = presets[(size_t) index].name;
     tracker.capture (*this);
-    gen.resetRequest.store (true);      // la sesión nueva la arma el hilo de audio (antes era una carrera con process())
+    resetPending.store (true);          // la sesión nueva la arma el hilo de audio (un Main la pasa también a sus satélites)
     notifyUi (onPresetChanged);
 }
 
@@ -436,6 +777,9 @@ void OrreryProcessor::getStateInformation (juce::MemoryBlock& destData)
     for (int l = 0; l < kLanes; ++l) ports.add (direct.lanePort (l));
     state.setProperty ("ports", ports.joinIntoString ("\n"), nullptr);
     state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
+    // Lo que Auto resolvió: al reabrir el proyecto, el Main sigue siendo Main y cada satélite su carril.
+    state.setProperty ("autoRole", autoRole.load(), nullptr);
+    state.setProperty ("autoLanes", (int) autoLanes.load(), nullptr);
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
 
@@ -449,8 +793,18 @@ void OrreryProcessor::setStateInformation (const void* data, int sizeInBytes)
     currentProgram = state.getProperty ("program", 0);
     const auto ports = juce::StringArray::fromLines (state.getProperty ("ports", "").toString());
     const auto snapshot = state.getProperty ("presetSnapshot").toString();
-    for (auto id : { "presetName", "program", "ports", "presetSnapshot" }) state.removeProperty (id, nullptr);
+    // Proyectos de 1.0.4 o antes: no tienen rol. Se abren como Independent, con su Link, y suenan como antes.
+    const bool legacy = ! state.getChildWithProperty ("id", "role").isValid();
+    const int savedAutoRole = state.getProperty ("autoRole", 0);
+    const int savedAutoLanes = state.getProperty ("autoLanes", 0);
+    for (auto id : { "presetName", "program", "ports", "presetSnapshot", "autoRole", "autoLanes" }) state.removeProperty (id, nullptr);
+    restoring.store (true);
     apvts.replaceState (state);
+    autoRole.store (legacy ? 0 : juce::jlimit (0, 3, savedAutoRole));
+    autoLanes.store ((uint32_t) juce::jlimit (0, 255, savedAutoLanes));
+    if (legacy) setValue ("role", (float) RoleIndependent);
+    updateRole (true);
+    restoring.store (false);
     juce::MessageManager::callAsync ([safe = juce::WeakReference<OrreryProcessor> (this), ports] {
         if (safe == nullptr) return;
         for (int l = 0; l < kLanes && l < ports.size(); ++l) safe->direct.setLanePort (l, ports[l]);

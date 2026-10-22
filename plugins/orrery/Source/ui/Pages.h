@@ -30,13 +30,57 @@ protected:
     template <typename T, typename... A> T* make (A&&... a) { auto c = std::make_unique<T> (std::forward<A> (a)...); auto* p = c.get(); owned.push_back (std::move (c)); addAndMakeVisible (p); return p; }
 };
 
+// ───────── rol: Auto, Independent, Main, Satellite ─────────
+inline juce::String roleWord (int r) { static const char* N[4] = { "Auto", "Independent", "Main", "Satellite" }; return N[juce::jlimit (0, 3, r)]; }
+inline juce::String laneList (uint32_t m, const std::function<int (int)>& roleOf)
+{
+    juce::StringArray s;
+    for (int l = 0; l < kLanes; ++l) if ((m >> l) & 1u) s.add ("lane " + juce::String (l + 1) + " " + roleName (roleOf (l)));
+    return s.joinIntoString (", ");
+}
+
+class RoleButton : public juce::TextButton, private juce::Timer
+{
+public:
+    explicit RoleButton (OrreryProcessor& p) : proc (p)
+    {
+        onClick = [this] {
+            juce::PopupMenu m;
+            const int cur = (int) proc.value ("role");
+            m.addSectionHeader ("Role of this Orrery");
+            m.addItem (1, "Auto (the first is Main, the next ones satellites)", true, cur == RoleAuto);
+            m.addItem (2, "Independent (plays every lane here; Link works)", true, cur == RoleIndependent);
+            m.addItem (3, "Main (satellites play its lanes)", true, cur == RoleMain);
+            m.addItem (4, "Satellite (plays one lane of the Main)", true, cur == RoleSatellite);
+            m.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (this), [this] (int r) { if (r > 0) proc.setRoleFromUi (r - 1); });
+        };
+        refresh(); startTimerHz (4);
+    }
+    void mouseEnter (const juce::MouseEvent& e) override { juce::TextButton::mouseEnter (e); showHelp ("Role: Main and its satellites play as one Orrery, each satellite one lane on its own track. Independent works like before 1.0.5."); }
+    void mouseExit (const juce::MouseEvent& e) override { juce::TextButton::mouseExit (e); showHelp ({}); }
+private:
+    OrreryProcessor& proc;
+    void refresh()
+    {
+        const int set = (int) proc.value ("role"), eff = proc.role();
+        juce::String t = "Role: " + (eff > 0 ? roleWord (eff) : roleWord (set));
+        if (set == RoleAuto && eff > 0) t << " (Auto)";
+        if (t != getButtonText()) setButtonText (t);
+    }
+    void timerCallback() override { refresh(); }
+};
+
 // ───────── simple ─────────
-class SimplePage : public Page, private juce::ListBoxModel
+class SimplePage : public Page, private juce::ListBoxModel, private juce::Timer
 {
 public:
     std::function<void (int)> onLane;
     explicit SimplePage (OrreryProcessor& p) : Page (p)
     {
+        roleBtn = make<RoleButton> (p);
+        skipT = make<PillToggle> (p, "skip_sat", "Skip satellite lanes", "the Main does not also send the lanes its satellites play (no doubled notes)");
+        if (OrreryProcessor::virtualPortsSupported())
+            portsT = make<PillToggle> (p, "midi_ports", "Publish lanes as MIDI ports", "one virtual MIDI port per lane (Orrery Drone, Orrery Pad...): pick them as MIDI From on each synth track");
         view = make<OrreryView> (p);
         view->onLane = [this] (int l) { if (onLane) onLane (l); };
         for (auto& m : moods())
@@ -66,6 +110,7 @@ public:
             chips.push_back (c);
         }
         refresh();
+        startTimerHz (4);
     }
     void refresh() override
     {
@@ -82,11 +127,25 @@ public:
         g.drawText ("Key and session", keyTitle, juce::Justification::centredLeft);
         g.setColour (col::faint); g.setFont (font (12.0f));
         g.drawText (moodLine (mood), moodLineR, juce::Justification::centredLeft);
+        // La línea del rol (y quién toca qué) y el aviso del sonido de prueba.
+        g.setFont (font (12.5f));
+        auto info = infoR;
+        if (hearingPreview)
+        {
+            const auto hr = info.removeFromRight (290);
+            g.setColour (col::sun);
+            g.drawFittedText ("You're hearing Orrery's preview sound", hr, juce::Justification::centredRight, 1, 0.9f);
+        }
+        g.setColour (warn ? col::sun : col::dim);
+        g.drawFittedText (roleLine, info, juce::Justification::centredLeft, 1, 0.85f);
         for (int l = 0; l < kLanes; ++l)
         {
             const auto r = chipLabels[(size_t) l];
             g.setColour (col::lane (l)); g.fillEllipse (r.getX() + 2.0f, r.getCentreY() - 4.0f, 8.0f, 8.0f);
+            const bool bySat = ((satMask >> l) & 1u) != 0;
+            if (bySat) { g.setColour (col::sun); g.drawEllipse (r.getX() - 0.5f, r.getCentreY() - 6.5f, 13.0f, 13.0f, 1.2f); }
             g.setColour (col::dim); g.setFont (font (11.5f));
+            if (bySat) g.setColour (col::sun);
             g.drawText (roleName ((int) proc.value ("l" + juce::String (l + 1) + "_role")), r.withTrimmedLeft (14), juce::Justification::centredLeft);
             g.setColour (col::faint);
             g.drawText (juce::String ((int) proc.value ("l" + juce::String (l + 1) + "_channel")), r, juce::Justification::centredRight);
@@ -98,6 +157,12 @@ public:
         leftR = r.removeFromLeft (270); r.removeFromLeft (14);
         rightR = r.removeFromRight (360); r.removeFromRight (14);
         auto c = r;
+        auto strip = c.removeFromTop (30);
+        roleBtn->setBounds (strip.removeFromLeft (190)); strip.removeFromLeft (8);
+        if (portsT != nullptr) { portsT->setBounds (strip.removeFromRight (250)); strip.removeFromRight (8); }
+        skipT->setBounds (strip.removeFromLeft (std::min (strip.getWidth(), 210)));
+        c.removeFromTop (2);
+        infoR = c.removeFromTop (22);
         auto chipRow = c.removeFromBottom (56); c.removeFromBottom (8);
         view->setBounds (c);
         const int cw = chipRow.getWidth() / kLanes;
@@ -126,6 +191,34 @@ public:
     }
 private:
     OrreryView* view = nullptr;
+    RoleButton* roleBtn = nullptr;
+    PillToggle *skipT = nullptr, *portsT = nullptr;
+    juce::Rectangle<int> infoR;
+    juce::String roleLine; bool warn = false, hearingPreview = false; uint32_t satMask = 0;
+    void timerCallback() override
+    {
+        const int r = proc.role();
+        skipT->setVisible (r == RoleMain);
+        juce::String line; bool w = false; uint32_t mask = 0;
+        auto roleOf = [this] (int l) { return (int) proc.value ("l" + juce::String (l + 1) + "_role"); };
+        if (r == RoleMain)
+        {
+            const auto sats = proc.satellites();
+            juce::StringArray parts;
+            for (auto& s : sats) if (s.alive) { parts.add (laneList (s.lanes, roleOf) + " (" + s.name + ")"); mask |= s.lanes; }
+            if (proc.otherMainActive()) { line = "Another Orrery is already the Main: satellites follow that one. Set this one to Independent."; w = true; }
+            else if (parts.isEmpty()) line = "Main: each Orrery you add on another track becomes a satellite.";
+            else line = "Satellites: " + parts.joinIntoString (", ");
+        }
+        else if (r == RoleIndependent) line = "Independent: every lane plays from this track" + juce::String (proc.value ("link") > 0.5f ? " (Link is on)." : ".");
+        if (proc.value ("midi_ports") > 0.5f && OrreryProcessor::virtualPortsSupported())
+        {
+            if (! proc.direct.virtualPortsOpen()) { line = "Could not create the MIDI ports (is another program using the same names?)."; w = true; }
+            else line << "  Ports: " << proc.direct.virtualPortNames().joinIntoString (", ").upToFirstOccurrenceOf (",", false, false) << " and 7 more.";
+        }
+        const bool hp = proc.value ("preview") > 0.5f && proc.view().running;
+        if (line != roleLine || w != warn || hp != hearingPreview || mask != satMask) { roleLine = line; warn = w; hearingPreview = hp; satMask = mask; repaint(); }
+    }
     std::vector<juce::TextButton*> moodBtns;
     juce::ListBox list;
     std::vector<OrbitKnob*> knobs;
@@ -310,8 +403,13 @@ public:
                  { "link", "Link", "Lead shares its key and chords; Follow instances in other tracks play over them" },
                  { "preview", "Preview sound", "the built-in sound; turn it off when your synths play" }, { "preview_vol", "Preview volume", "" }, { "preview_rev", "Preview reverb", "" },
                  { "ref_pitch", "Reference pitch", "A4 in Hz, applied by pitch bend" }, { "tune_bend", "Tune by pitch bend", "" },
-                 { "bend_range", "Synth bend range", "set it to your synth's pitch bend range, in semitones" } })
+                 { "bend_range", "Synth bend range", "set it to your synth's pitch bend range, in semitones" },
+                 { "skip_sat", "Skip satellite lanes", "a Main does not also send the lanes its satellites play" },
+                 { "midi_ports", "Lanes as MIDI ports", "one virtual MIDI port per lane, for Ableton Live (macOS and Linux)" } })
+        {
+            if (juce::String (id) == "midi_ports" && ! OrreryProcessor::virtualPortsSupported()) continue;
             opts.push_back (make<ParamBox> (p, id, lab, tip));
+        }
         fillPorts();
         startTimer (3000);
     }
@@ -327,11 +425,14 @@ public:
             g.drawText ("Lane " + juce::String (l + 1) + "  " + roleName ((int) proc.value ("l" + juce::String (l + 1) + "_role")), r.withTrimmedLeft (16), juce::Justification::centredLeft);
         }
         g.setColour (col::dim); g.setFont (font (13.0f));
-        g.drawFittedText ("Every lane always goes to the DAW on its own MIDI channel. To play several synths from one Orrery, pick ports here:\n"
-                          "- hardware synths: their USB or MIDI interface port;\n"
-                          "- other tracks in your DAW: a virtual port (IAC Driver in macOS Audio MIDI Setup, loopMIDI on Windows); then set each track's input to that port and the lane's channel.\n"
-                          "In Ableton Live, routing MIDI between tracks merges all channels, so use a virtual port, or put one Orrery per track with Link set to Lead and Follow.",
-                          note, juce::Justification::topLeft, 12);
+        g.drawFittedText (juce::String ("Every lane always goes to the DAW on its own MIDI channel. To play several synths from one Orrery:\n"
+                          "- Ableton Live: one Orrery per synth, each on its own track. The first is the Main and each new one a satellite that plays one lane (Simple page, Role).\n")
+                          + (OrreryProcessor::virtualPortsSupported()
+                                ? "- Lanes as MIDI ports: one virtual port per lane (Orrery Drone, Orrery Pad...) to pick as each track's MIDI input.\n"
+                                : "- Windows has no virtual MIDI ports of its own: install loopMIDI, create a port and pick it on the left.\n")
+                          + "- Hardware synths: their USB or MIDI interface port, on the left.\n"
+                          "- Other tracks: a virtual port (IAC Driver on macOS, loopMIDI on Windows) with each track's input on that port and the lane's channel.",
+                          note, juce::Justification::topLeft, 14);
     }
     void resized() override
     {
@@ -349,7 +450,7 @@ public:
             ports[(size_t) l]->setBounds (row.reduced (0, 3));
         }
         auto o = b.withTrimmedTop (32).reduced (12, 6);
-        gridLayout (o.removeFromTop (4 * 52), { opts.begin(), opts.end() }, 2, 44, 8);
+        gridLayout (o.removeFromTop (5 * 52), { opts.begin(), opts.end() }, 2, 44, 8);
         o.removeFromTop (16);
         note = o;
     }
@@ -380,6 +481,129 @@ private:
     {
         const auto now = juce::MidiOutput::getAvailableDevices();
         if (now.size() != devices.size()) fillPorts();
+    }
+};
+
+
+// ───────── satélite: lo único que importa es qué carril del Main toca ─────────
+class SatellitePage : public Page, private juce::Timer
+{
+public:
+    explicit SatellitePage (OrreryProcessor& p) : Page (p)
+    {
+        view = make<OrreryView> (p);
+        roleBtn = make<RoleButton> (p);
+        indep = make<juce::TextButton> ("Make independent");
+        indep->onClick = [this] { proc.makeIndependentFromMain(); };
+        mainBtn = make<juce::TextButton> ("Make this the Main");
+        mainBtn->onClick = [this] { proc.setRoleFromUi (RoleMain); };
+        startTimerHz (8);
+    }
+    void paint (juce::Graphics& g) override
+    {
+        panel (g, leftR, {});
+        const uint32_t m = proc.satelliteLanes();
+        const int sync = proc.satelliteSync();
+        const auto mn = proc.mainName();
+        auto r = leftR.reduced (26, 22);
+        g.setColour (col::text); g.setFont (font (26.0f, true));
+        g.drawFittedText (mn.isNotEmpty() ? "Satellite of " + mn : juce::String ("Satellite"), r.removeFromTop (36), juce::Justification::centredLeft, 1, 0.7f);
+        int first = -1; for (int l = 0; l < kLanes; ++l) if ((m >> l) & 1u) { first = l; break; }
+        juce::StringArray lanes;
+        for (int l = 0; l < kLanes; ++l) if ((m >> l) & 1u) lanes.add (juce::String (l + 1) + (sync == 2 ? " " + juce::String (roleName (proc.satelliteLane (l).role)) : juce::String()));
+        g.setColour (first >= 0 ? col::lane (first) : col::dim); g.setFont (font (18.0f, true));
+        g.drawFittedText (lanes.isEmpty() ? juce::String ("no lane chosen")
+                                          : (lanes.size() == 1 ? "playing lane " : "playing lanes ") + lanes.joinIntoString (", ")
+                                            + (first >= 0 && sync == 2 ? ",  channel " + juce::String (proc.satelliteLane (first).channel) : juce::String()),
+                          r.removeFromTop (30), juce::Justification::centredLeft, 1, 0.7f);
+        r.removeFromTop (6);
+        g.setFont (font (13.5f));
+        juce::String st;
+        if (mn.isEmpty()) { g.setColour (col::sun); st = "Waiting for a Main Orrery. Add one on another track, or make this one the Main."; }
+        else if (sync == 2) { g.setColour (col::dim); st = proc.view().running ? "In sync: it plays its lane of the Main, note for note. Play, presets and settings follow the Main."
+                                                                                 : "In sync, the Main is stopped. Press Play on the Main (or start the transport)."; }
+        else { g.setColour (col::sun); st = "Syncing with the Main..."; }
+        g.drawFittedText (st, r.removeFromTop (40), juce::Justification::topLeft, 2);
+        r.removeFromTop (10);
+        g.setColour (col::dim); g.setFont (font (12.5f, true));
+        g.drawText ("Lane", r.removeFromTop (18), juce::Justification::centredLeft);
+        // Las llaves de los carriles: se dibujan acá (chips); el clic se toma en mouseDown.
+        for (int l = 0; l < kLanes; ++l)
+        {
+            const auto c = chips[(size_t) l].toFloat();
+            const bool sel = (m >> l) & 1u, on = sync != 2 || proc.satelliteLane (l).on;
+            g.setColour (sel ? col::lane (l).withAlpha (0.25f) : col::bg); g.fillRoundedRectangle (c, 8.0f);
+            g.setColour (sel ? col::lane (l) : col::border); g.drawRoundedRectangle (c.reduced (0.5f), 8.0f, sel ? 1.6f : 1.0f);
+            g.setColour (on ? col::text : col::faint); g.setFont (font (20.0f, true));
+            g.drawText (juce::String (l + 1), c.withTrimmedBottom (c.getHeight() * 0.42f).toNearestInt(), juce::Justification::centredBottom);
+            g.setColour (on ? col::lane (l) : col::faint); g.setFont (font (11.5f));
+            g.drawText (sync != 2 ? juce::String() : (on ? juce::String (roleName (proc.satelliteLane (l).role)) : "off"), c.withTrimmedTop (c.getHeight() * 0.58f).toNearestInt(), juce::Justification::centredTop);
+        }
+        g.setColour (col::faint); g.setFont (font (12.0f));
+        g.drawFittedText ("Click a lane to play it. Shift-click adds or removes a lane. Lanes that are off in the Main stay silent.", hintR, juce::Justification::topLeft, 2);
+        // Actividad: cuánto suena cada carril y el acorde del Main.
+        const auto& v = proc.view();
+        auto a = actR;
+        g.setColour (col::dim); g.setFont (font (12.5f, true));
+        g.drawText ("Activity", a.removeFromTop (18), juce::Justification::centredLeft);
+        for (int l = 0; l < kLanes; ++l)
+        {
+            if (! ((m >> l) & 1u)) continue;
+            auto row = a.removeFromTop (20); a.removeFromTop (4);
+            g.setColour (col::dim); g.setFont (font (12.0f));
+            g.drawText ("Lane " + juce::String (l + 1), row.removeFromLeft (64), juce::Justification::centredLeft);
+            const auto bar = row.withTrimmedRight (60).toFloat().reduced (0, 5);
+            g.setColour (col::raised); g.fillRoundedRectangle (bar, 4.0f);
+            g.setColour (col::lane (l)); g.fillRoundedRectangle (bar.withWidth (bar.getWidth() * juce::jlimit (0.0f, 1.0f, v.activity[(size_t) l])), 4.0f);
+        }
+        g.setColour (col::faint); g.setFont (font (12.0f));
+        if (v.running) g.drawText ("Chord " + juce::String (v.chord), a.removeFromTop (18), juce::Justification::centredLeft);
+        g.drawFittedText ("Ableton Live: on the synth track set MIDI From to this track and \"Audio Tools Orrery\", and Monitor to In.",
+                          liveR, juce::Justification::topLeft, 2);
+    }
+    void resized() override
+    {
+        auto r = getLocalBounds().reduced (14);
+        leftR = r.removeFromLeft (640); r.removeFromLeft (14);
+        view->setBounds (r);
+        auto in = leftR.reduced (26, 22);
+        in.removeFromTop (36 + 30 + 6 + 40 + 10 + 18);
+        auto chipRow = in.removeFromTop (60);
+        const int cw = (chipRow.getWidth() - 7 * 8) / kLanes;
+        for (int l = 0; l < kLanes; ++l) chips[(size_t) l] = { chipRow.getX() + l * (cw + 8), chipRow.getY(), cw, 60 };
+        in.removeFromTop (6);
+        hintR = in.removeFromTop (36);
+        in.removeFromTop (8);
+        actR = in.removeFromTop (150);
+        auto bottom = in.removeFromBottom (36);
+        liveR = in.removeFromBottom (40);
+        roleBtn->setBounds (bottom.removeFromLeft (190)); bottom.removeFromLeft (8);
+        indep->setBounds (bottom.removeFromLeft (150)); bottom.removeFromLeft (8);
+        mainBtn->setBounds (indep->getBounds());
+    }
+    void mouseDown (const juce::MouseEvent& e) override
+    {
+        for (int l = 0; l < kLanes; ++l)
+            if (chips[(size_t) l].contains (e.getPosition()))
+            {
+                uint32_t m = proc.satelliteLanes();
+                if (e.mods.isShiftDown() || e.mods.isCommandDown()) { m ^= 1u << l; if (m == 0) m = 1u << l; }
+                else m = 1u << l;
+                proc.setValue ("sat_lanes", (float) m);
+                repaint();
+            }
+    }
+private:
+    OrreryView* view = nullptr;
+    RoleButton* roleBtn = nullptr;
+    juce::TextButton *indep = nullptr, *mainBtn = nullptr;
+    juce::Rectangle<int> leftR, hintR, actR, liveR;
+    std::array<juce::Rectangle<int>, kLanes> chips {};
+    void timerCallback() override
+    {
+        const bool noMain = proc.mainName().isEmpty();
+        mainBtn->setVisible (noMain); indep->setVisible (! noMain);
+        repaint (leftR);
     }
 };
 

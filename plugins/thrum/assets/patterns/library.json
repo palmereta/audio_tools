@@ -1,0 +1,339 @@
+{
+ "strum": [
+  {
+   "name": "Eighths",
+   "genre": "Rock",
+   "steps": "DDDDDDDD",
+   "accents": "20102010",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Drive",
+   "genre": "Rock",
+   "steps": "D.DUDUDU",
+   "accents": "20101010",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Muted chug",
+   "genre": "Rock",
+   "steps": "DMMMDMMM",
+   "accents": "20001000",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Sixteenths",
+   "genre": "Rock",
+   "steps": "D.DUD.DUD.DUDUDU",
+   "accents": "2000100010001000",
+   "div": "1/16",
+   "swing": 50
+  },
+  {
+   "name": "Anthem",
+   "genre": "Rock",
+   "steps": "D...D.DUD...D.DU",
+   "accents": "2000100020001000",
+   "div": "1/16",
+   "swing": 50
+  },
+  {
+   "name": "Island",
+   "genre": "Pop",
+   "steps": "D.DU.UDU",
+   "accents": "20001010",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Push",
+   "genre": "Pop",
+   "steps": "D.DU.UD.",
+   "accents": "20001010",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Sixteen",
+   "genre": "Pop",
+   "steps": "D.D.DUD.D.D.DUDU",
+   "accents": "2000100020001000",
+   "div": "1/16",
+   "swing": 50
+  },
+  {
+   "name": "Half time",
+   "genre": "Pop",
+   "steps": "D...D.U.D...DUDU",
+   "accents": "2000100020001000",
+   "div": "1/16",
+   "swing": 50
+  },
+  {
+   "name": "Scratch",
+   "genre": "Funk",
+   "steps": "DxUxDxUDxUDxDxUx",
+   "accents": "2000100010002000",
+   "div": "1/16",
+   "swing": 54
+  },
+  {
+   "name": "Chop",
+   "genre": "Funk",
+   "steps": "S..xS..x.xS.S..x",
+   "accents": "2000100000101000",
+   "div": "1/16",
+   "swing": 54
+  },
+  {
+   "name": "Ghost sixteenths",
+   "genre": "Funk",
+   "steps": "XxXxDxXxXxXxDxXx",
+   "accents": "0000200000002000",
+   "div": "1/16",
+   "swing": 56
+  },
+  {
+   "name": "Disco",
+   "genre": "Funk",
+   "steps": "xUxUxUxUxUxUxUxU",
+   "accents": "0101010101010101",
+   "div": "1/16",
+   "swing": 50
+  },
+  {
+   "name": "One drop",
+   "genre": "Reggae",
+   "steps": "..S...S.",
+   "accents": "00200020",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Skank",
+   "genre": "Reggae",
+   "steps": ".u.u.u.u",
+   "accents": "01010101",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Double chop",
+   "genre": "Reggae",
+   "steps": "....SS......SS..",
+   "accents": "0000210000002100",
+   "div": "1/16",
+   "swing": 56
+  },
+  {
+   "name": "Slow strum",
+   "genre": "Ballad",
+   "steps": "D...D.DU",
+   "accents": "20001010",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Bass and strum",
+   "genre": "Ballad",
+   "steps": "B.d.u.d.",
+   "accents": "20101010",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Six-eight",
+   "genre": "Ballad",
+   "steps": "D.UD.UD.UD.U",
+   "accents": "200100100100",
+   "div": "1/8T",
+   "swing": 50
+  },
+  {
+   "name": "Downstroke drive",
+   "genre": "Post-punk",
+   "steps": "DDDDDDDDDDDDDDDD",
+   "accents": "2010101020101010",
+   "div": "1/16",
+   "swing": 50
+  },
+  {
+   "name": "Choppy",
+   "genre": "Post-punk",
+   "steps": "D.d.D.d.D.dUD.d.",
+   "accents": "2000100020001000",
+   "div": "1/16",
+   "swing": 50
+  },
+  {
+   "name": "Cold stabs",
+   "genre": "Post-punk",
+   "steps": "S..S..S.",
+   "accents": "20020010",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Night drive",
+   "genre": "Dark wave",
+   "steps": "D.D.D.DU",
+   "accents": "20101000",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Wall",
+   "genre": "Shoegaze",
+   "steps": "DUDUDUDU",
+   "accents": "10101010",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Boom chuck",
+   "genre": "Country",
+   "steps": "B.D.A.D.",
+   "accents": "20101010",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Train",
+   "genre": "Country",
+   "steps": "B.d.A.d.B.d.A.du",
+   "accents": "2010101020101010",
+   "div": "1/16",
+   "swing": 50
+  },
+  {
+   "name": "Folk strum",
+   "genre": "Folk",
+   "steps": "B.DUA.DU",
+   "accents": "20102010",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Down eights",
+   "genre": "Punk",
+   "steps": "MMMMMMMM",
+   "accents": "11111111",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Shuffle",
+   "genre": "Blues",
+   "steps": "DUDUDUDU",
+   "accents": "20102010",
+   "div": "1/8",
+   "swing": 67
+  },
+  {
+   "name": "Slow twelve-eight",
+   "genre": "Blues",
+   "steps": "D.UD.UD.UD.U",
+   "accents": "200100200100",
+   "div": "1/8T",
+   "swing": 50
+  },
+  {
+   "name": "Bossa",
+   "genre": "Latin",
+   "steps": "B..D..D.A.D..D..",
+   "accents": "2001001020010010",
+   "div": "1/16",
+   "swing": 50
+  },
+  {
+   "name": "Waltz",
+   "genre": "Other",
+   "steps": "BDD",
+   "accents": "200",
+   "div": "1/4",
+   "swing": 50
+  }
+ ],
+ "arp": [
+  {
+   "name": "Travis",
+   "genre": "Folk",
+   "steps": "T 2 A 1 T 2 A 1",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Travis pinch",
+   "genre": "Folk",
+   "steps": "T1 2 A 1 T 2 A1 2",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Alternating bass",
+   "genre": "Folk",
+   "steps": "T 2 A 2 T 2 A 2",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Forward roll",
+   "genre": "Country",
+   "steps": "T 3 2 1 T 3 2 1",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Backward roll",
+   "genre": "Country",
+   "steps": "1 2 3 T 1 2 3 T",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "p-i-m-a",
+   "genre": "Classical",
+   "steps": "T 3 2 1 2 3",
+   "div": "1/8T",
+   "swing": 50
+  },
+  {
+   "name": "Ballad arpeggio",
+   "genre": "Ballad",
+   "steps": "T 3 2 3 1 3 2 3",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Pinch and roll",
+   "genre": "Ballad",
+   "steps": "T1 3 2 3 A1 3 2 3",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Cascade",
+   "genre": "Post-rock",
+   "steps": "4 3 2 1 4 3 2 1 4 3 2 1 4 3 2 1",
+   "div": "1/16",
+   "swing": 50
+  },
+  {
+   "name": "Night picking",
+   "genre": "Dark wave",
+   "steps": "T 1 3 1 A 1 3 1",
+   "div": "1/8",
+   "swing": 50
+  },
+  {
+   "name": "Sixteenth arpeggio",
+   "genre": "Pop",
+   "steps": "T 3 2 1 2 3 2 1 A 3 2 1 2 3 2 1",
+   "div": "1/16",
+   "swing": 50
+  }
+ ]
+}

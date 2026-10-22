@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "ParamsOr.h"
 #include "gen/Preview.h"
+#include "gen/Constellation.h"
 #include "../../../shared/tools/SafeString.h"
 #include "../../../shared/tools/PresetTracker.h"
 
@@ -23,8 +24,15 @@ public:
     juce::String lanePort (int lane) const { return lanePorts[(size_t) lane]; }
     bool anyOpen() const { for (auto& s : laneSlot) if (s.load() >= 0) return true; return false; }
 
+    // Los carriles como puertos MIDI virtuales (macOS y Linux): uno por carril, con el nombre dado. Vacío = ninguno.
+    // Hilo de mensajes. Devuelve cuántos se pudieron crear.
+    int setVirtualPorts (const juce::StringArray& names);
+    juce::StringArray virtualPortNames() const { const juce::ScopedLock sl (sendLock); return virtNames; }
+    bool virtualPortsOpen() const { for (auto& v : virtOn) if (v.load()) return true; return false; }
+
     // Hilo de audio.
     int slotForLane (int lane) const { return laneSlot[(size_t) lane].load (std::memory_order_relaxed); }
+    int virtualSlotForLane (int lane) const { return virtOn[(size_t) lane].load (std::memory_order_relaxed) ? kSlots + lane : -1; }
     void push (double atMs, int slot, const uint8_t* data, int size);
     void pushToAll (double atMs, const uint8_t* data, int size);   // reloj, start/stop
 
@@ -37,6 +45,10 @@ private:
     std::array<juce::String, dh::orr::kLanes> lanePorts;
     std::array<std::unique_ptr<juce::MidiOutput>, kSlots> slots;
     std::array<juce::String, kSlots> slotIds;
+    std::array<std::unique_ptr<juce::MidiOutput>, dh::orr::kLanes> virt;
+    std::array<std::atomic<bool>, dh::orr::kLanes> virtOn {};
+    juce::StringArray virtNames;
+    juce::MidiOutput* outputFor (int slot) const;        // con sendLock
     juce::CriticalSection sendLock;
     void run() override;
 };
@@ -63,7 +75,7 @@ private:
     dh::orr::Harmony data;
 };
 
-class OrreryProcessor : public juce::AudioProcessor
+class OrreryProcessor : public juce::AudioProcessor, private juce::Timer
 {
 public:
     OrreryProcessor();
@@ -74,13 +86,14 @@ public:
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void updateTrackProperties (const TrackProperties&) override;
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
     const juce::String getName() const override { return "Orrery"; }
     bool acceptsMidi() const override { return true; }
     bool producesMidi() const override { return true; }
-    double getTailLengthSeconds() const override { return 8.0; }
+    double getTailLengthSeconds() const override { return 16.0; }     // la reverb del sonido de prueba (~14 s) y un release de drone
 
     int getNumPrograms() override;
     int getCurrentProgram() override { return currentProgram; }
@@ -101,7 +114,7 @@ public:
     std::vector<DirectItem> directQ;     // mensajes del bloque a los puertos directos, ordenados por hora antes de encolar
     void queueDirect (double at, int slot, const uint8_t* d, int size);
     void flushDirect();
-    const dh::orr::Generator::View& view() const { return gen.view; }
+    const dh::orr::Generator::View& view() const { return effRole.load() == dh::orr::RoleSatellite ? sat.rep.view : gen.view; }
     std::atomic<int> midiOutFlash { 0 };
 
     // Chispas para el orrery: cada nota que sale.
@@ -110,6 +123,26 @@ public:
     std::array<Spark, 512> sparks {};
 
     void panic() { panicRequest.store (true); }
+
+    // ── Main y satélites (gen/Constellation.h)
+    int role() const { return effRole.load(); }                     // 0 sin resolver, 1 independiente, 2 Main, 3 satélite
+    uint32_t satelliteLanes() const { return effLanes.load(); }
+    int satelliteSync() const { return sat.state.load(); }
+    const dh::orr::LaneParams& satelliteLane (int l) const { return sat.rep.lanes[(size_t) juce::jlimit (0, dh::orr::kLanes - 1, l)]; }
+    const dh::orr::GlobalParams& satelliteGlobals() const { return sat.rep.g; }
+    struct SatInfo { juce::String name; uint32_t lanes = 0; int sync = 0; bool alive = false; };
+    std::vector<SatInfo> satellites() const;                        // los satélites que siguen a esta (si es Main)
+    juce::String mainName() const;                                  // el Main que sigue (si es satélite)
+    bool otherMainActive() const;                                   // hay otro Main más antiguo (éste no manda)
+    juce::String displayName() const;                               // nombre de la pista, o "Orrery"
+    void setRoleFromUi (int roleSetting);                           // el menú de rol
+    void makeIndependentFromMain();                                 // satélite → independiente con los ajustes del Main
+    uint32_t skippedLanes() const { return skipped.load(); }
+    void housekeeping();                                            // hilo de mensajes: rol, puertos virtuales
+    static bool virtualPortsSupported();
+    // Capturas del manual (ORRERY_SAT_DEMO): otras Orrery del mismo proceso, procesadas antes (Main) o después
+    // (satélites) de ésta en cada bloque, como pistas de un DAW. Sólo las crea el editor en ese modo.
+    void addDemoInstance (std::unique_ptr<OrreryProcessor> p, bool before);
     // Guarda los últimos "minutes" minutos como archivo MIDI (una pista por canal). Devuelve el archivo.
     juce::File captureToFile (double minutes, const juce::File& dir) const;
     bool newVariation();      // cambia la semilla
@@ -140,6 +173,26 @@ private:
     bool wasRunning = false;
     double clockBeat = 0.0;
     int linkMode = 0;
+    // Main y satélites
+    int regSlot = -1;                                               // en Constellation
+    std::atomic<int> effRole { 0 }, autoRole { 0 };
+    std::atomic<uint32_t> effLanes { 0 }, autoLanes { 0 }, skipped { 0 };
+    std::atomic<int> regRole { -1 }; std::atomic<uint32_t> regLanes { 0 };   // lo registrado (se escribe con el lock del registro)
+    int lastRole = -1;
+    std::atomic<bool> resetPending { false }, restoring { false };
+    dh::orr::MainCore mainCore;
+    dh::orr::SatelliteCore sat;
+    std::vector<dh::orr::OutEvent> genEvents;
+    std::vector<std::unique_ptr<OrreryProcessor>> demoOwned;
+    std::atomic<OrreryProcessor*> demoBefore { nullptr };
+    std::array<std::atomic<OrreryProcessor*>, 4> demoAfter {};
+    juce::AudioBuffer<float> demoBuf { 2, 8192 }; juce::MidiBuffer demoMidi;
+    void runDemo (std::atomic<OrreryProcessor*>& slot_, int n);
+    juce::String trackName;                                         // hilo de mensajes
+    void updateRole (bool blocking);
+    static std::vector<OrreryProcessor*>& allInstances();
+    void timerCallback() override { housekeeping(); }
+    dh::orr::Generator& active() { return effRole.load() == dh::orr::RoleSatellite ? sat.rep : gen; }
     std::vector<PresetEntry> presets;
     int currentProgram = 0;
     void loadFactory();

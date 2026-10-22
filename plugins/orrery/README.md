@@ -3,10 +3,11 @@
 A MIDI generator for ambient, dark ambient, drone and calm music. Eight lanes orbit a slow shared
 harmony; each lane plays one role (drone, pad, melody, arpeggio, cloud, bass or pulse) on its own MIDI
 channel, so one Orrery plays a whole rack of software or hardware synthesizers. VST3, Audio Unit
-(macOS) and standalone. Version 1.0.4.
+(macOS), LV2 (Linux) and standalone. Version 1.0.5.
 
-Orrery makes no sound by itself: it plays other instruments. The built-in preview sound (Outputs page)
-exists only to try it without routing anything.
+Orrery makes no sound by itself: it plays other instruments. The built-in preview sound exists only to try
+it without routing anything; its On/Off button sits next to Play, and the Simple page says "You're hearing
+Orrery's preview sound" while it plays.
 
 ## What it does
 
@@ -25,9 +26,14 @@ exists only to try it without routing anything.
 - **Variations.** The variation number seeds every random choice. The same number plays the same notes
   on macOS and Windows, at any buffer size and sample rate (see Determinism below).
 - **Outputs.** Every lane goes to the host on its own channel and, optionally, to a direct MIDI port
-  (IAC Driver, loopMIDI, a hardware interface), with MIDI clock out. In Ableton Live, which merges
-  channels when routing between tracks, either use a virtual port or put one Orrery per track with Link
-  set to Lead on one and Follow on the others: the followers play over the leader's chords.
+  (IAC Driver, loopMIDI, a hardware interface), with MIDI clock out. On macOS and Linux each lane can also
+  be published as a virtual MIDI port of its own ("Orrery Drone", "Orrery Pad"...).
+- **Main and satellites (1.0.5).** Ableton Live merges channels when routing between tracks. With the
+  default role, Auto, the first Orrery in the host becomes the Main and every Orrery added later becomes a
+  satellite that plays one lane of the Main (the next one free), on its own track, so each synth takes its
+  MIDI from one satellite. A satellite runs its own replica of the Main's generator and outputs exactly
+  the Main's messages for its lane. Projects from 1.0.4 open as Independent, as before; Link (Lead and
+  Follow) still works between Independent Orrerys.
 - **Capture.** Saves the last minutes played as a MIDI file, one channel per lane.
 - **Moods.** 21 factory presets, three per mood: Ambient, Dark Ambient, Drone, Sleep, Meditation, Focus
   and Celestial. Simple mode has the moods and five macros (density, motion, space, brightness,
@@ -38,14 +44,15 @@ exists only to try it without routing anything.
 ```
 Source/gen/Theory.h       scales, chords, voice leading, Markov walk, deterministic math (dm::), RNG
 Source/gen/Generator.h    the engine: harmony, lanes, roles, loops, echoes, sessions, controls, Link
+Source/gen/Constellation.h  Main and satellites: the registry, what a Main publishes, the satellite replica
 Source/gen/Preview.h      the built-in preview sound (one voice per role, plate reverb, delay)
 Source/ParamsOr.h         host parameters (globals + l1..l8) and their mapping to the engine
-Source/PluginProcessor.*  host MIDI, direct ports (own thread), Link hub, clock out, capture, presets
-Source/ui/                orbit view, pages (Simple, Lanes, Harmony & session, Outputs), widgets, help
+Source/PluginProcessor.*  host MIDI, roles, direct and virtual ports (own thread), Link hub, clock out, capture, presets
+Source/ui/                orbit view, pages (Simple, Lanes, Harmony & session, Outputs, Satellite), widgets, help
 tools/gentest.cpp         engine tests without JUCE (scale, hanging notes, traffic, loops, sessions,
-                          breathing, Link, determinism)
+                          breathing, Link, determinism; 9-15: Main and satellites)
 tools/render.cpp          orreryrender: offline MIDI + preview audio of a preset, CPU figures
-tools/miditest.cpp        direct MIDI output through a virtual port (macOS)
+tools/miditest.cpp        direct MIDI output through a virtual port, and lanes as virtual ports (macOS)
 tools/presetsor.py        factory presets
 tools/blender/orrery.py   the 3D orrery for the website (pc50-wsl, CUDA)
 ```
@@ -53,14 +60,18 @@ tools/blender/orrery.py   the 3D orrery for the website (pc50-wsl, CUDA)
 ## Tools
 
 ```bash
-# Engine tests (also on Windows: cl /std:c++17 /O2 /fp:precise /EHsc ...)
+# Engine tests (also on Windows: cl /std:c++17 /O2 /fp:precise /EHsc ...; on Linux add -pthread)
 clang++ -std=c++17 -O2 -ffp-contract=off -I plugins/orrery/Source/gen plugins/orrery/tools/gentest.cpp -o /tmp/orr_gentest && /tmp/orr_gentest
+
+# Main and satellites through the real VST3 (several instances in one process), and the virtual ports
+athosttest build/plugins/orrery/Orrery_artefacts/Release/VST3/Orrery.vst3 --tests roles,ports
 
 # Offline render: outdir/all.mid (one channel per lane), laneN.mid, preview.wav, CPU figure
 build/plugins/orrery/orreryrender_artefacts/Release/orreryrender plugins/orrery/assets/presets/p01_first_light.json out --secs 120
 orreryrender --bench      # generator alone, 8 busy lanes, 10 minutes
 
-# Direct MIDI ports (macOS): creates a virtual port, plays through it, counts notes and clock
+# Direct MIDI ports (macOS): creates a virtual port, plays through it, counts notes and clock; then publishes
+# the lanes as virtual ports and checks that every lane's notes arrive on its own port
 build/plugins/orrery/orrerymiditest_artefacts/Release/orrerymiditest
 
 # Factory presets
@@ -69,6 +80,9 @@ python3 plugins/orrery/tools/presetsor.py
 
 The editor can save a snapshot without a screen grab:
 `ORRERY_SNAPSHOT=/tmp/x.png ORRERY_PAGE=0..3 ORRERY_PRESET=n ORRERY_RUN=1 ORRERY_WAIT=seconds Orrery.app/Contents/MacOS/Orrery`.
+`ORRERY_ROLE=0..3` sets the role; `ORRERY_SAT_DEMO=1` makes the standalone a satellite of a Main it creates in
+the same process (`ORRERY_SAT_LANES=mask`), and `=2` a Main with two satellites. After the snapshot the role
+goes back to Auto, so the standalone does not keep it.
 
 The website demos are recorded the same way. `ORRERY_RECORD=dir` saves one JPEG per 1/30 s of session
 time (not wall-clock time, so a late frame never shifts the picture against the sound), and
@@ -94,9 +108,48 @@ A variation number is only useful if it means the same music everywhere. Four th
 | `std::log`, `std::sin`, `std::exp2` differ by platform; `/fp:fast` reorders; C++ leaves argument evaluation order unspecified (clang and MSVC disagree) | own math in `dm::` (only + − × ÷, `frexp`, `ldexp`), `/fp:precise` on MSVC and `-ffp-contract=off` on clang, one random draw per statement |
 
 Check: `gentest` test 8 prints a fingerprint of three minutes of seven lanes (notes, controllers and
-their sample positions). macOS arm64, macOS x86_64 and Windows x64 (MSVC `/fp:precise`) print
-`60e8a62919b73c14`; MSVC with `/fp:fast` prints another one. The same test plays the same 10,194 messages
+their sample positions). macOS arm64, macOS x86_64, Windows x64 (MSVC `/fp:precise`) and Linux x86_64
+(GCC 11) print `60e8a62919b73c14`; MSVC with `/fp:fast` prints another one. The same test plays the same 10,194 messages
 with buffers of 64, 333, 441, 512 and 1024 samples at 44.1, 48 and 96 kHz.
+
+## Main and satellites: the time base
+
+A satellite does not receive the Main's notes: it runs its own `Generator` with the Main's full musical state
+and outputs only its lanes. The generator is deterministic, so the replica generates what the Main generates,
+at the same sample, as long as both get the same inputs in the same blocks (`Source/gen/Constellation.h`):
+
+- **Transport**: each instance reads its own playhead; in one host cycle every track sees the same one.
+- **Controls** (settings, Play, a new preset, panic): the Main applies them one block after reading them and
+  publishes them for that block. When a satellite processes cycle k, the Main has finished cycle k-1
+  whatever the processing order or thread, so the controls for cycle k are always there.
+- **Common clock**: every instance counts its blocks and samples. To join, a satellite copies the Main's
+  generator at a block boundary (`copyStateFrom`) and decides once whether the Main has already processed
+  the current cycle, comparing per-cycle stamps: the host's sample position while the transport runs, else
+  the host's per-cycle system time (VST3 `systemTime`, AU host time), else the wall clock. From then on both
+  advance in lockstep.
+- **Proof at run time**: the Main publishes an FNV hash of each block's output; a satellite compares its
+  replica's. A replica one block off generates the same events one block late, which the hash cannot see, so
+  the stamps are compared too (sample positions must match; system times must agree on average). On any
+  mismatch, or if the Main stops being processed, the satellite releases its notes, copies the Main again
+  and re-attacks the notes of its lanes that are sounding.
+
+Known limit: with the host transport stopped, no per-cycle host time and a host that always processes a
+satellite's track more than half a block after the Main's, the wall clock cannot tell "late in this cycle"
+from "early in the next", and the satellite settles one block off (gentest 14 checks it stays stable).
+Starting the transport makes it exact.
+
+| Check (gentest 9-15, athosttest roles) | Result |
+|---|---|
+| Generator copied mid-run | 1,924 of 1,924 messages identical over 83 s |
+| Auto | first instance Main, next ones lanes 1, 2, 3; a freed lane is taken again; lanes that are off are skipped |
+| Satellites vs Main, one thread, random order per cycle, blocks 64/333/512/1024, host transport or own clock | every message identical (notes, velocities, sample positions, CC, bend), no resync |
+| Same with each instance on its own thread | identical |
+| Wall-clock stamps with heavy jitter (up to one block) | corrects itself while the Main is stopped; identical |
+| Satellite joining mid-play, satellite changing lane | identical from the next block; no hanging notes |
+| Main not processed for 3 s | satellites release, wait and resync; identical after |
+| Real VST3, 4 instances, blocks 64/512/1024, host clock, own clock, threads | 230/230, 238/238, 488/488 messages (host clock) |
+| Lanes as virtual ports | orrerymiditest (macOS): 33 of 33 notes on the right ports; athosttest ports (macOS, Linux with ALSA sequencer): two instances get distinct names, ports gone on close |
+| Same tests on Windows x64 and Linux x86_64 | gentest 15/15 and athosttest roles identical to macOS |
 
 ## Measurements
 
@@ -108,6 +161,7 @@ with buffers of 64, 333, 441, 512 and 1024 samples at 44.1, 48 and 96 kHz.
 | One-minute session | last note at 59.5 s, CC7 at 0 at the end |
 | Gentle mode | velocity at most 92, highest note 86 |
 | Link follower | 56 notes, none outside the leader's chord |
+| Satellites | identical to the Main's lane (see above) |
 | Direct MIDI port (orrerymiditest) | 36 of 36 notes and 744 of ~744 clock ticks received |
 | pluginval strictness 8, auval | pass (VST3 and AU on macOS, VST3 on Windows) |
 

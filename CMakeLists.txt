@@ -50,6 +50,8 @@ add_subdirectory(plugins/halation)
 add_subdirectory(plugins/tarnish)
 add_subdirectory(plugins/at303)
 add_subdirectory(plugins/plumb)
+add_subdirectory(plugins/pallor)
+add_subdirectory(plugins/thrum)
 
 # Pruebas de los plugins compilados, como un DAW: tools/hosttest (athosttest).
 add_subdirectory(tools/hosttest)

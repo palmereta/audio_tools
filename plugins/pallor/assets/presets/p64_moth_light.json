@@ -1,0 +1,101 @@
+{
+ "name": "Moth Light",
+ "category": "Dark ambient",
+ "description": "Shakers and claves on chance, a bell in the distance.",
+ "order": 64,
+ "params": {
+  "tempo": 90,
+  "swing": 50,
+  "swing_res": 1,
+  "bd_level": -1,
+  "sd_level": 0,
+  "cp_level": -2,
+  "rs_level": -5,
+  "rs_pan": -10,
+  "ch_level": -3,
+  "ch_pan": 20,
+  "oh_level": -4,
+  "oh_pan": 25,
+  "cy_level": -7,
+  "cy_pan": -30,
+  "rd_level": -6,
+  "rd_pan": -20,
+  "t1_level": -4,
+  "t1_pan": -40,
+  "t2_level": -4,
+  "t2_pan": -15,
+  "t3_level": -4,
+  "t3_pan": 15,
+  "t4_level": -4,
+  "t4_pan": 40,
+  "cb_level": -6,
+  "cb_pan": -15,
+  "cl_level": -5,
+  "cl_pan": 30,
+  "tb_level": -6,
+  "tb_pan": 35,
+  "fx_level": -7,
+  "tb_model": 2,
+  "tb_senda": 40,
+  "cl_model": 1,
+  "cl_sendb": 50,
+  "bd_model": 0,
+  "bd_decay": 60,
+  "t1_model": 1,
+  "t1_senda": 50,
+  "t2_model": 1,
+  "t2_senda": 50,
+  "cb_model": 2,
+  "cb_senda": 50,
+  "a_type": 5,
+  "a_size": 80,
+  "b_type": 4,
+  "b_depth": 60,
+  "b_return": -8,
+  "autofill": 2,
+  "m_volume": 6.0
+ },
+ "patterns": [
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . . . 90p25",
+    "t1": ". . . . . . . . . . 100p50",
+    "cl": ". . . 100 . . . . . . . 100",
+    "tb": "100p50 . 90p25 . 100p50 . 90p25 . 100p50 . 90p25 . 100p50 . 90p25"
+   },
+   "group": 0,
+   "var": "A"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . . . 90p25",
+    "t1": ". . . . . . . . . . 100p50",
+    "t2": ". . . . . . 100p50 . . . . . . . 100p50",
+    "cb": "90p25 . . . . . . . 90p25",
+    "cl": ". . . 100 . . . . . . . 100",
+    "tb": "100p50 . 90p25 . 100p50 . 90p25 . 100p50 . 90p25 . 100p50 . 90p25"
+   },
+   "group": 0,
+   "var": "B"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100",
+    "sd": ". . . . . . . . . . . . . . . 100",
+    "t2": ". . . . . . . . . . . . . . 100",
+    "t3": ". . . . . . . . . . . 100",
+    "t4": ". . . . . . . . 127a",
+    "cl": ". . . 100",
+    "tb": "100p50 . 90p25 . 100p50 . 90p25 . 100p50 . 90p25 . 100p50 . 90p25"
+   },
+   "group": 0,
+   "var": "Fill"
+  }
+ ]
+}

@@ -1,0 +1,85 @@
+{
+ "name": "Bedroom Rhythm Box",
+ "category": "Minimal wave",
+ "description": "The cheap analog box on its rock preset: small kick, noise snare and noise hats.",
+ "order": 15,
+ "params": {
+  "tempo": 110,
+  "swing": 50,
+  "swing_res": 1,
+  "bd_level": -1,
+  "sd_level": 0,
+  "cp_level": -2,
+  "rs_level": -5,
+  "rs_pan": -10,
+  "ch_level": -3,
+  "ch_pan": 20,
+  "oh_level": -4,
+  "oh_pan": 25,
+  "cy_level": -7,
+  "cy_pan": -30,
+  "rd_level": -6,
+  "rd_pan": -20,
+  "t1_level": -4,
+  "t1_pan": -40,
+  "t2_level": -4,
+  "t2_pan": -15,
+  "t3_level": -4,
+  "t3_pan": 15,
+  "t4_level": -4,
+  "t4_pan": 40,
+  "cb_level": -6,
+  "cb_pan": -15,
+  "cl_level": -5,
+  "cl_pan": 30,
+  "tb_level": -6,
+  "tb_pan": 35,
+  "fx_level": -7,
+  "bd_model": 2,
+  "sd_model": 3,
+  "ch_model": 1,
+  "ch_decay": 40,
+  "rs_model": 0,
+  "m_lofi": 2,
+  "m_lofi_mix": 40,
+  "m_tape": 1,
+  "autofill": 3,
+  "m_volume": 4.0
+ },
+ "patterns": [
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . 100 . 100 . 100 . . . 100 . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100 . 100 . 100"
+   },
+   "group": 0,
+   "var": "A"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . 100 . 100 . 100 . . . 100 . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "rs": ". . 100 . . . . . . . 100",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100 . 100 . 100"
+   },
+   "group": 0,
+   "var": "B"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . 100 . 100 . 100",
+    "sd": ". . . . 100",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100"
+   },
+   "group": 0,
+   "var": "Fill"
+  }
+ ]
+}

@@ -44,12 +44,12 @@ In Ableton Live:
 
 1. Drag the Orrery VST3 onto an empty MIDI track. Live does not pass on the MIDI that Audio Unit plugins produce, so the AU version cannot play other tracks there.
 2. Put your synth on another MIDI track.
-3. In the synth track's I/O section, set **MIDI From** to the Orrery track, and in the chooser below it pick `Orrery`.
+3. In the synth track's I/O section, set **MIDI From** to the Orrery track, and in the chooser below it pick `Audio Tools Orrery`.
 4. Set the synth track's **Monitor** to `In`, or arm the track.
-5. On Orrery's Outputs page, turn **Preview sound** off so you only hear your synth.
+5. Click **Preview sound** in Orrery's top bar, next to Play, so it reads `Preview sound: Off`. You then hear only your synth.
 6. Press Play in Orrery.
 
-Live merges all MIDI channels when it routes MIDI from one track to another, so that synth receives every lane that is on. That is perfect for one synth playing everything. To send different lanes to different synths in Live, use a virtual port or one Orrery per track with Link: both are explained in Routing, ports and sync.
+Live merges all MIDI channels when it routes MIDI from one track to another, so that synth receives every lane that is on. That is perfect for one synth playing everything. To send different lanes to different synths in Live, add more Orrerys: the first one is the Main and every Orrery you add after it becomes a satellite that plays one lane of the Main. The steps are in One Orrery, many synths, at the start of Routing, ports and sync. A virtual port, or one Orrery per track with Link, also work.
 
 ## First sound
 
@@ -59,24 +59,29 @@ Live merges all MIDI channels when it routes MIDI from one track to another, so 
 
 The preview sound plays right away and the orrery in the middle comes alive: one orbit per lane, a planet travelling round each orbit and a spark for every note. If you hear nothing, see Troubleshooting.
 
+What you hear is Orrery's **preview sound**, a small built-in synth that is there so you can try Orrery without routing anything. It is not your synth. While it plays, the button next to Play reads `Preview sound: On` and the line above the orrery says "You're hearing Orrery's preview sound". When your own synths play, click the button so it reads `Preview sound: Off`: the MIDI Orrery sends is the same either way.
+
 > Many presets fade in over 20 seconds or more, and sleep presets over a minute. The first seconds are quiet on purpose.
 
 ## The interface at a glance
 
 The window has a top bar, a page area and a footer. It can be resized from the corner, from half to one and a half times its normal size, and keeps its proportions.
 
-![The top bar: Play and the status line, the preset selector, Save, Simple and Advanced, Capture MIDI and All notes off.](img/topbar.jpg)
+![The top bar: Play, Preview sound, the preset selector, Save, Simple and Advanced, Capture MIDI and All notes off.](img/topbar.jpg)
 
 The top bar, from left to right:
 
-- **orrery**: the logo. Clicking it returns to the Simple page.
-- **Play** / **Stop**: starts and stops Orrery. Next to it, the status line shows `Playing` and the session time, the session length when there is one, and the breathing pace when it is on. It shows `Stopped` when stopped and `Session finished` when a session has ended.
+- **orrery**: the logo. Clicking it returns to the Simple page. Under it, the status line shows `playing` and the session time (and the session length when there is one), `stopped`, or `session finished` when a session has ended.
+- **Play** / **Stop**: starts and stops Orrery.
+- **Preview sound: On** / **Off**: switches the built-in preview sound. It sits next to Play so you can always see whether the sound you hear is Orrery's own or your synth's. It is the same setting as Preview sound on the Outputs page.
 - **<** and **>**: the previous and next preset. The preset name between them opens the preset menu, grouped by mood, with your own presets under User.
 - **Save**: saves the current settings as a user preset.
 - **Simple** and **Advanced**: switch between the Simple page and the three Advanced pages. On the Advanced pages, tabs below the top bar choose **Lanes**, **Harmony & session** or **Outputs**.
 - **Capture MIDI**: saves the last minutes played as a MIDI file.
 - **All notes off**: stops every sounding note on all 16 channels, in the DAW and on the direct ports.
 - **Manual**, at the right of the footer, opens this manual inside the plugin, in English or Spanish. Press Esc or the cross to close it.
+
+On a satellite (see Main and satellites) the top bar keeps only the logo, Preview sound and All notes off: the rest belongs to the Main.
 
 The footer shows a short help line for whatever is under the mouse, messages such as the name of a captured file, and the captured file itself, ready to drag into your DAW.
 
@@ -110,6 +115,18 @@ The picture in the middle shows what is playing. The sun in the centre shows the
 Each lane that is on has its own orbit, in the lane's colour. Its planet goes once round the orbit every **Loop length** beats of that lane, so lanes with different loop lengths almost never line up, just as their loops do not. The planet grows while the lane is playing notes, and every note leaves a spark on the orbit that fades slowly: bigger sparks for louder notes. When breathing is on, a soft halo round the sun opens and closes with each breath.
 
 Hover over an orbit to see its lane, role and channel. Click an orbit to open the Lanes page with that lane highlighted.
+
+### Role, satellites and ports
+
+![Above the orrery: Role, Skip satellite lanes and Publish lanes as MIDI ports, with the satellites of this Main and the preview sound notice.](img/rolestrip.jpg)
+
+The row above the orrery has:
+
+- **Role**: `Auto`, `Independent`, `Main` or `Satellite`. The button shows the role in use, for example `Role: Main (Auto)`. See Main and satellites.
+- **Skip satellite lanes** (on a Main only): when On, the lanes your satellites play are not also sent from the Main's own track, so no synth receives them twice. On by default.
+- **Publish lanes as MIDI ports** (macOS and Linux): one virtual MIDI port per lane, named after the lane, that each synth track in your DAW can pick as its input. Off by default. See Routing, ports and sync.
+
+The line under them says who plays what. On a Main it lists the satellites and the lane each one plays, and the lane switches of those lanes get a gold ring. While the preview sound is playing, the right end of the line reads "You're hearing Orrery's preview sound".
 
 ### Lane switches
 
@@ -416,20 +433,24 @@ When a lane leaves a port, or Orrery closes, the port receives All Notes Off on 
 |---|---|---|
 | MIDI clock out | Off, On | Off |
 | Link | Off, Lead, Follow | Off |
-| Preview sound | Off, On | On |
+| Preview sound | Off, On | On (Off on a new satellite) |
 | Preview volume | 0 to 100 % | 60 % |
 | Preview reverb | 0 to 100 % | 60 % |
 | Reference pitch | 415 to 466 Hz | 440 Hz |
 | Tune by pitch bend | Off, On | Off |
 | Synth bend range | 2, 3, 12, 24, 48 semitones | 2 |
+| Skip satellite lanes | Off, On | On |
+| Lanes as MIDI ports | Off, On (macOS and Linux) | Off |
 
 **MIDI clock out** sends MIDI clock (24 pulses per beat) plus Start and Stop to every direct port in use, so drum machines, sequencers, arpeggiators and tempo-synced delays on your hardware follow Orrery. The clock runs at the host tempo while the host plays and the clock is Host, and at Orrery's own Tempo otherwise. It is not sent to the DAW, and it is sent only when at least one lane has a direct port.
 
-**Link** connects several Orrery instances loaded in the same DAW. The one set to `Lead` shares its key, scale and chords; the ones set to `Follow` play their own lanes over the leader's chords, ignoring their own Key, Scale and chord settings. Use one Lead. A Follow instance with no Lead in the session plays its own harmony. This link is Orrery's own: it works between instances inside the same host application, and it does not exchange tempo with other applications.
+**Link** connects several Orrery instances loaded in the same DAW. It works on Independent Orrerys; a Main can also be the Lead, and satellites ignore it. The one set to `Lead` shares its key, scale and chords; the ones set to `Follow` play their own lanes over the leader's chords, ignoring their own Key, Scale and chord settings. Use one Lead. A Follow instance with no Lead in the session plays its own harmony. This link is Orrery's own: it works between instances inside the same host application, and it does not exchange tempo with other applications.
 
-**Preview sound** is the built-in synth: one sound per role (a dark drone, a warm pad, a triangle voice, an FM bell for arpeggios, a glass drop for clouds, a round bass, a soft beat for pulses), each lane panned to its own place, with a delay and a long reverb. **Preview volume** and **Preview reverb** set its level and its reverb. Turn it off when your synths play: the MIDI is the same either way.
+**Preview sound** is the built-in synth, also switched by the button next to Play: one sound per role (a dark drone, a warm pad, a triangle voice, an FM bell for arpeggios, a glass drop for clouds, a round bass, a soft beat for pulses), each lane panned to its own place, with a delay and a long reverb. **Preview volume** and **Preview reverb** set its level and its reverb. Turn it off when your synths play: the MIDI is the same either way.
 
 **Reference pitch** retunes the lanes away from A4 = 440 Hz, by pitch bend, for synths that cannot be retuned themselves. It works only with **Tune by pitch bend** on. Set **Synth bend range** to the pitch bend range of your synth (the number of semitones a full bend moves): Pitch drift uses it too. If it does not match, the tuning will be wrong.
+
+**Skip satellite lanes** and **Lanes as MIDI ports** are the same settings as on the Simple page (see Main and satellites, and Routing, ports and sync). On Windows the Options panel explains that a loopMIDI port is needed instead of Lanes as MIDI ports.
 
 > Pitch bend applies to a whole MIDI channel, so tuning and drift need each lane on its own channel.
 
@@ -441,7 +462,7 @@ The file has one track per MIDI channel (so one per lane when each lane has its 
 
 ## Presets and moods
 
-Orrery comes with 21 factory presets, three per mood. Presets change the musical settings: harmony, session and every lane. They do not change Play, Clock, Play with host stopped, Level, the preview sound settings, the tuning settings, MIDI clock out, Link or the direct ports, so switching presets never breaks your routing. Lanes a preset does not use are turned off.
+Orrery comes with 21 factory presets, three per mood. Presets change the musical settings: harmony, session and every lane. They do not change Play, Clock, Play with host stopped, Level, the preview sound settings, the tuning settings, MIDI clock out, Link, the role, the satellite lanes, Skip satellite lanes, Lanes as MIDI ports or the direct ports, so switching presets never breaks your routing. Lanes a preset does not use are turned off.
 
 A new Orrery starts with `Init`: drone, pad, melody (looped at 17 beats), cloud and bass on, in D Dorian at 60 BPM.
 
@@ -473,11 +494,85 @@ All Sleep and Meditation presets use gentle mode, sessions and long fades. Deep 
 
 To save your own, press **Save**, type a name and confirm. User presets appear under User in the preset menu, and the arrows step through them after the factory ones. They are files in `~/Library/Application Support/Audio Tools/Orrery/Presets` on macOS and in `Audio Tools\Orrery\Presets` inside your AppData\Roaming folder on Windows. Saving with an existing name replaces that preset. To remove one, delete its file; it disappears the next time Orrery opens.
 
+## Main and satellites
+
+In Ableton Live a synth track that takes its MIDI from another track receives every MIDI channel of it, so one Orrery track would send every lane to every synth. Main and satellites solve that inside Orrery: one Orrery, the **Main**, holds the music; each other Orrery in the set is a **satellite** that plays exactly one lane of the Main (or a few), on its own track. Each synth then takes its MIDI from one satellite.
+
+| Role | What it does |
+|---|---|
+| Auto | The default for a new Orrery. The first Orrery in the host application becomes the Main; every Orrery added after it becomes a satellite that takes the next lane of the Main that is on and that no other satellite plays. |
+| Independent | Orrery as it was up to 1.0.4: it plays all its own lanes, and Link (Off, Lead, Follow) works as before. |
+| Main | Plays like Independent, publishes everything it does for its satellites and can be a Link leader. |
+| Satellite | Plays only the lanes of the Main it was given. Its own settings are not used. |
+
+What Auto chose is saved with the project, so when you open the set again the Main is still the Main and each satellite plays the same lane, whatever order the host loads them in. Projects saved with Orrery 1.0.4 or earlier have no role: they open as Independent, with the Link setting they had, and sound as before. Presets never change the role, the satellite's lanes, Skip satellite lanes or the MIDI ports.
+
+### The satellite page
+
+![A satellite: which lane of the Main it plays, its activity, and the lane buttons.](img/satellite.jpg)
+
+A satellite shows one page instead of the full editor:
+
+- **Satellite of** and the name of the Main's track (when the host tells plugins their track name), and which lane it plays, with the lane's role and MIDI channel.
+- The state: in sync with the Main, syncing, or waiting for a Main.
+- **Lane**: the eight lanes of the Main with their roles. Click one to play it instead; Shift-click (or Cmd-click) adds or removes a lane, so one satellite can play several lanes. A lane that is off in the Main shows `off` and stays silent.
+- **Activity**: how much each of its lanes is playing, and the Main's current chord. The orrery on the right shows only its lanes.
+- **Role**: the same menu as on the Simple page.
+- **Make independent**: turns this satellite into an Independent Orrery with the Main's current settings and only its own lanes on, so you can edit everything from there.
+- **Make this the Main** appears instead when no Main is playing in the set.
+
+A satellite follows the Main in everything: Play and Stop, the transport, moods and presets, every setting, the variation number and the session clock. Its Preview sound starts Off, because its synth should be what you hear; it can be turned on with the button in the top bar. All notes off on a satellite only resets its own lanes' channels.
+
+### Skip satellite lanes
+
+A Main still sends its MIDI to its own track. With **Skip satellite lanes** On (the default), the lanes that satellites play are left out of it, so a synth fed from the Main's track does not play them a second time. The Main's preview sound leaves them out too. A satellite that stops being processed for more than a second and a half (deleted, deactivated) gives its lane back to the Main.
+
+### How they stay together
+
+A satellite does not receive notes from the Main. It runs its own copy of Orrery's generator with all of the Main's musical state, and because the generator is deterministic it produces the same notes, velocities, controller moves and pitch bend, at the same sample, as the Main does for that lane. To do that:
+
+- Each Orrery reads the host transport (playing, position, tempo) itself: in one processing cycle every track sees the same one.
+- The Main applies setting changes, Play, Stop, new presets and All notes off one audio buffer after reading them, and publishes them for that buffer. When a satellite processes a buffer, the Main has always finished the previous one, whichever track the host processes first and on whichever processor core, so the satellite always knows what applies.
+- When a satellite joins, it copies the Main's state at a buffer boundary and works out, once, which of its buffers is which of the Main's. It uses the host's transport position when the transport runs; otherwise the time the host gives each processing cycle (VST3 system time, Audio Unit host time), or the computer's clock. From then on both count buffers and samples together.
+- For every buffer the Main publishes a fingerprint of all it generated, and each satellite checks its own against it. If they ever differ, or the Main stops being processed, the satellite releases its notes, copies the Main's state again and attacks the notes of its lanes that are sounding at that moment.
+
+This was measured with a Main and several satellites at buffers from 64 to 1024 samples, in random processing orders and with each Orrery on its own thread: every satellite played exactly the Main's messages for its lane.
+
+Things to know:
+
+- Use one Main per set. With two, satellites follow the one that became Main first, and the other one says so.
+- Satellites and their Main must be in the same host application. They do not connect between applications or computers.
+- A satellite plays only while its Main is processed. Bypassing or deactivating the Main silences its satellites, which release their notes and continue when the Main does.
+- Setting changes on a Main take effect one buffer later than on an Independent Orrery (about 10 ms at 512 samples).
+- With the host transport stopped, in a host that gives plugins no time for each processing cycle, and when the host always processes a satellite's track more than half a buffer after the Main's, a satellite can end up one buffer away from the Main. Starting the transport, or using Clock on Host with the transport running, makes it exact.
+
 ## Routing, ports and sync
 
-### Ableton Live, three ways
+### One Orrery, many synths in Ableton Live
 
-Live merges MIDI channels between tracks and does not pass on the MIDI of Audio Unit plugins, so always use the VST3 and pick one of these setups.
+Live merges MIDI channels between tracks and does not pass on the MIDI of Audio Unit plugins, so use the VST3. The quickest way to give each synth its own lane is Main and satellites:
+
+1. Put Orrery on an empty MIDI track and choose a mood. This first Orrery is the **Main**.
+2. For each synth, add another MIDI track and put Orrery on it. Each new Orrery becomes a **satellite** and takes the next lane of the Main: lane 1 (Drone), then lane 2 (Pad), and so on. Its page says `Satellite of ...` and which lane it plays; click another lane there to change it.
+3. Put each synth on its own MIDI track. In the synth track's I/O section set **MIDI From** to the satellite's track, pick `Audio Tools Orrery` in the chooser below it, and set **Monitor** to `In`.
+4. On the Main, click **Preview sound** in the top bar so it reads `Preview sound: Off` once your synths play. Satellites start with it off.
+5. Press Play on the Main, or start Live's transport (with Clock on Host). The satellites follow.
+
+The Main's own track still carries the lanes no satellite plays, so a synth fed from the Main's track (as in step 3) plays the rest. Skip satellite lanes keeps it from doubling the satellites' lanes.
+
+### Lanes as MIDI ports (macOS and Linux)
+
+Instead of satellites, one Orrery can publish each lane as a MIDI port of its own:
+
+1. On the Simple page, turn **Publish lanes as MIDI ports** on. Orrery creates one virtual MIDI port per lane, named after its role: `Orrery Drone`, `Orrery Pad`, `Orrery Melody`... When two lanes share a role the lane number is added (`Orrery Cloud 5`, `Orrery Cloud 8`); a second Orrery that also publishes uses `Orrery 2 Drone` and so on.
+2. Once only: in Live's Settings, on the Link, Tempo & MIDI tab, turn on **Track** for the input of each `Orrery` port you want to use.
+3. On each synth track, set **MIDI From** to a port, for example `Orrery Pad`, with `All Channels`, and set **Monitor** to `In`.
+
+The names are given when you turn the option on: after changing lane roles, turn it off and on to rename the ports. The ports disappear when you remove that Orrery or close the set, and each port receives All Notes Off before it closes. Windows has no virtual MIDI ports of its own, so the option is not shown there: use loopMIDI with the direct outputs as described below.
+
+### Ableton Live, other ways
+
+These setups from earlier versions still work.
 
 One Orrery, one synth: follow the steps in Loading it in a DAW. Every lane that is on reaches that synth, so turn off the lanes you do not want.
 
@@ -586,7 +681,9 @@ Write down the Variation number too: with the same settings, Orrery will play th
 
 ## Troubleshooting
 
-**No sound at all.** Orrery makes MIDI, not audio. Either route it to an instrument (see Loading it in a DAW) or turn **Preview sound** on in the Outputs page, with Preview volume up.
+**No sound at all.** Orrery makes MIDI, not audio. Either route it to an instrument (see Loading it in a DAW) or click **Preview sound** in the top bar so it reads `Preview sound: On`, with Preview volume up on the Outputs page.
+
+**I hear a sound, but it is not my synth.** That is Orrery's preview sound: the button next to Play reads `Preview sound: On` and the line above the orrery says "You're hearing Orrery's preview sound". Click the button to turn it off.
 
 **Nothing happens when I press Play in the DAW.** Orrery has its own Play button: press it in the top bar. The button reads Stop when Orrery is playing.
 
@@ -598,7 +695,17 @@ Write down the Variation number too: with the same settings, Orrery will play th
 
 **The Tempo setting does nothing.** With Clock on Host and the DAW playing, Orrery follows the DAW's tempo. Set Clock to Free to use Orrery's own Tempo.
 
-**In Ableton Live every synth plays every lane.** Live merges channels between tracks. Use a virtual port, or one Orrery per track with Link (see Routing, ports and sync).
+**In Ableton Live every synth plays every lane.** Live merges channels between tracks. Feed each synth from a satellite (see One Orrery, many synths in Ableton Live), use Lanes as MIDI ports or a virtual port, or one Orrery per track with Link.
+
+**A new Orrery shows "Satellite" when I wanted a separate one.** With the role on Auto, every Orrery after the first becomes a satellite. Choose `Independent` from its Role button, or click Make independent to keep the Main's settings.
+
+**A satellite says "Waiting for a Main Orrery".** There is no Main in this host application, or it is not being processed (deleted, deactivated or bypassed). Add one, set an Orrery's Role to Main, or click Make this the Main.
+
+**A satellite plays nothing.** Its lane is off in the Main, or the Main is stopped. Turn the lane on in the Main, pick another lane on the satellite page, or press Play on the Main.
+
+**A lane plays twice.** A synth gets it both from a satellite and from the Main's track. Turn Skip satellite lanes on in the Main.
+
+**The Orrery ports do not appear in Live.** Turn on Publish lanes as MIDI ports first, then open Live's Settings, Link, Tempo & MIDI, and turn on Track for the `Orrery` inputs. On Windows there are no virtual ports: use loopMIDI.
 
 **In Ableton Live no MIDI reaches the other tracks.** You are using the Audio Unit. Load the VST3 instead.
 
@@ -612,7 +719,7 @@ Write down the Variation number too: with the same settings, Orrery will play th
 
 **Changing a lane setting makes no difference.** Some settings only matter for some roles: Rate and the Euclid rows for Arp and Pulse, Arp pattern for Arp, Voices for Pad, Follow for Melody, Arp and Cloud. Check the lane's role.
 
-**A Follow instance does not follow.** There must be an Orrery set to Lead in the same host application, and it must be playing.
+**A Follow instance does not follow.** There must be an Orrery set to Lead in the same host application, and it must be playing. Follow works on Independent Orrerys only.
 
 ## Specifications
 
@@ -628,7 +735,7 @@ Write down the Variation number too: with the same settings, Orrery will play th
 | Rhythm | Euclidean patterns, probability, rates from 2 beats to 1/8, humanize up to 30 ms |
 | Expression | Up to 8 MIDI echoes, one CC curve per lane, pitch drift up to 50 cents |
 | Session | Up to 120 min, fade in up to 120 s, fade out up to 300 s, breathing 1 to 12 per minute, gentle mode |
-| Outputs | DAW MIDI per channel, a direct MIDI port per lane, MIDI clock, Lead and Follow link, preview sound |
+| Outputs | DAW MIDI per channel, a direct MIDI port per lane, MIDI clock, Lead and Follow link, Main and satellites, a virtual MIDI port per lane (macOS, Linux), preview sound |
 | Tuning | Reference pitch 415 to 466 Hz by pitch bend |
 | Capture | Last 1, 2, 5 or 10 minutes to a MIDI file |
 | Presets | 21 in seven moods, plus your own |
@@ -644,6 +751,8 @@ Measured on the engine:
 | Gentle mode | Velocity at most 92, highest note 86 |
 | Link follower | 56 notes, none outside the leader's chord |
 | Same variation | Same notes on macOS and Windows, at buffers from 64 to 1024 samples and at 44.1, 48 and 96 kHz |
+| Satellites | Exactly the Main's messages for their lane, at buffers from 64 to 1024 samples, in any processing order and on separate threads |
+| Lanes as MIDI ports | Every note of every lane arrives on its port; two Orrerys get distinct port names (macOS, Linux) |
 
 CPU, as a percentage of one core at 48 kHz:
 

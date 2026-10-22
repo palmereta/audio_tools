@@ -141,6 +141,53 @@ private:
     bool isToggle() const { return choice != nullptr && choice->choices.size() == 2; }
 };
 
+// Llave de dos estados con su nombre y el estado a la vista ("Preview sound: On"), atada a un parámetro.
+class PillToggle : public juce::TextButton, private juce::Timer
+{
+public:
+    PillToggle (OrreryProcessor& p, const juce::String& id, juce::String label, juce::String help = {})
+        : text (std::move (label)), tip (std::move (help))
+    {
+        param = p.apvts.getParameter (id);
+        if (param != nullptr) attach = std::make_unique<juce::ParameterAttachment> (*param, [this] (float) { refresh(); });
+        onClick = [this] { if (param != nullptr) attach->setValueAsCompleteGesture (param->getValue() > 0.5f ? 0.0f : 1.0f); };
+        refresh();
+        startTimerHz (8);
+    }
+    bool isOn() const { return param != nullptr && param->getValue() > 0.5f; }
+    void mouseEnter (const juce::MouseEvent& e) override { juce::TextButton::mouseEnter (e); if (tip.isNotEmpty()) showHelp (text + ": " + tip); }
+    void mouseExit (const juce::MouseEvent& e) override { juce::TextButton::mouseExit (e); showHelp ({}); }
+    juce::Colour tint = col::sun;
+    void paintButton (juce::Graphics& g, bool over, bool down) override
+    {
+        const auto r = getLocalBounds().toFloat().reduced (0.5f);
+        const bool on = isOn();
+        auto bgc = on ? tint.withAlpha (0.20f) : col::raised;
+        if (over) bgc = bgc.brighter (0.08f);
+        if (down) bgc = bgc.darker (0.12f);
+        g.setColour (bgc); g.fillRoundedRectangle (r, r.getHeight() / 2);
+        g.setColour (on ? tint : col::border); g.drawRoundedRectangle (r, r.getHeight() / 2, on ? 1.4f : 1.0f);
+        // Una luz: encendida, del color; apagada, hueca.
+        const float d = r.getHeight() * 0.32f;
+        const auto dot = juce::Rectangle<float> (d, d).withCentre ({ r.getX() + r.getHeight() * 0.55f, r.getCentreY() });
+        if (on) { g.setColour (tint.withAlpha (0.35f)); g.fillEllipse (dot.expanded (d * 0.5f)); g.setColour (tint); g.fillEllipse (dot); }
+        else { g.setColour (col::faint); g.drawEllipse (dot, 1.2f); }
+        g.setFont (font (std::min (14.0f, r.getHeight() * 0.46f), true));
+        juce::AttributedString a;
+        a.append (text + ": ", font (std::min (14.0f, r.getHeight() * 0.46f)), col::dim);
+        a.append (on ? "On" : "Off", font (std::min (14.0f, r.getHeight() * 0.46f), true), on ? col::text : col::dim);
+        a.setJustification (juce::Justification::centredLeft);
+        a.draw (g, r.withTrimmedLeft (r.getHeight() * 0.95f).withTrimmedRight (8.0f));
+    }
+private:
+    juce::String text, tip;
+    juce::RangedAudioParameter* param = nullptr;
+    std::unique_ptr<juce::ParameterAttachment> attach;
+    bool last = false;
+    void refresh() { last = isOn(); setToggleState (last, juce::dontSendNotification); repaint(); }
+    void timerCallback() override { if (isOn() != last) refresh(); }
+};
+
 inline void gridLayout (juce::Rectangle<int> r, const std::vector<juce::Component*>& items, int cols, int rowH, int gap = 8)
 {
     if (items.empty()) return;

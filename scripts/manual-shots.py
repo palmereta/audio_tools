@@ -16,13 +16,16 @@ PRODUCTS = {   # carpeta → (nombre del .app, prefijo de las variables)
     "atfs1": ("ATFS1", "ATFS1"), "orrery": ("Orrery", "ORRERY"), "murmur": ("Murmur", "MURMUR"),
     "atmd": ("ATMD", "ATMD"), "lacquer": ("Lacquer", "LACQUER"), "halation": ("Halation", "HALATION"), "tarnish": ("Tarnish", "TARNISH"), "at303": ("AT303", "AT303"),
     "plumb": ("Plumb", "PLUMB"),
+    "pallor": ("Pallor", "PALLOR"),
+    "thrum": ("Thrum", "THRUM"),
 }
 TMP = "/tmp/claude-501/manual-shots"
 DEMO_INPUT = os.path.join(TMP, "murmur-demo-input.wav")
 
 
 def app_binary(folder, name):
-    return os.path.join(ROOT, "build", "plugins", folder, f"{name}_artefacts", "Release", "Standalone", f"{name}.app", "Contents", "MacOS", name)
+    # BUILD=<carpeta> usa otro build (por defecto build/).
+    return os.path.join(ROOT, os.environ.get("BUILD", "build"), "plugins", folder, f"{name}_artefacts", "Release", "Standalone", f"{name}.app", "Contents", "MacOS", name)
 
 
 def demo_input():
@@ -50,6 +53,24 @@ def demo_input_plumb():
     return path
 
 
+def demo_samples_pallor():
+    """Carpeta de muestras para la página SAMPLES de Pallor: archivos propios generados acá (no los del usuario)."""
+    import math, struct, wave
+    d = os.path.join(TMP, "pallor-samples", "Cold Kit")
+    os.makedirs(os.path.join(TMP, "pallor-samples", "Cold Kit", "Extras"), exist_ok=True)
+    names = ["kick long.wav", "kick short.wav", "snare plate.wav", "snare gated.wav", "clap room.wav", "hat closed.wav",
+             "hat open.wav", "ride bell.wav", "tom low.wav", "tom high.wav", "metal hit.wav", "noise sweep.wav"]
+    for k, n in enumerate(names):
+        p = os.path.join(d, n)
+        if os.path.exists(p): continue
+        sr, dur = 44100, 0.25 + 0.05 * k
+        with wave.open(p, "w") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(sr)
+            f0 = 60 + 40 * k
+            w.writeframes(b"".join(struct.pack("<h", int(20000 * math.exp(-i / (sr * 0.08)) * math.sin(2 * math.pi * f0 * i / sr))) for i in range(int(sr * dur))))
+    return d
+
+
 def take(folder, shot):
     name, prefix = PRODUCTS[folder]
     binary = app_binary(folder, name)
@@ -62,6 +83,7 @@ def take(folder, shot):
     if folder == "halation": env["HALATION_DEMO_INPUT"] = demo_input_halation()
     if folder == "tarnish": env["TARNISH_DEMO_INPUT"] = demo_input_halation()
     if folder == "plumb": env["PLUMB_DEMO_INPUT"] = demo_input_plumb()
+    if folder == "pallor" and env.get("PALLOR_SAMPLES_DIR") == "demo": env["PALLOR_SAMPLES_DIR"] = demo_samples_pallor()
     if folder == "lacquer":
         # La mezcla de demostración (instrumentos propios); "LACQUER_FILE": "none" deja el modo en vivo.
         demo = os.path.join(ROOT, "build", "lacquer-demo", "demo-mix.wav")

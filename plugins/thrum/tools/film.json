@@ -1,0 +1,17 @@
+{
+  "title": "Thrum",
+  "tagline": "Strings, hands and a stage. No samples.",
+  "fps": 24,
+  "bpm": 100,
+  "shots": [
+    {"name": "open", "beats": 8},
+    {"name": "neck", "beats": 6},
+    {"name": "pedals", "beats": 6},
+    {"name": "amp", "beats": 6},
+    {"name": "lineup", "beats": 6},
+    {"name": "hero", "beats": 10},
+    {"name": "end", "beats": 8, "in": "dissolve"}
+  ],
+  "poster": {"shot": "hero", "frame": 72},
+  "audio": {"cmd": ["build-guitar/plugins/thrum/thrumrender_artefacts/Release/thrumrender", "{out}", "--preset", "Night Drive Strum", "--chords", "Em C G D", "--repeat", "4", "--bpm", "100", "--seconds", "{seconds}"]}
+}

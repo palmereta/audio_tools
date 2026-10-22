@@ -3,16 +3,21 @@
 Orrery is a MIDI generator: it plays other instruments, it does not make sound by itself
 (Preview sound, in Outputs, is a simple built-in synth for trying it out).
 - Ableton Live: load the VST3 on a MIDI track. On each synth track set MIDI From = that track,
-  "Orrery", and the lane's channel (Lane 1 = channel 1, and so on). Live sends AU plugins' MIDI
-  nowhere, so use the VST3. Live merges channels when routing between tracks: to split lanes,
-  use a virtual port in Outputs (IAC Driver on macOS, loopMIDI on Windows) or one Orrery per
-  track with Link set to Lead and Follow.
+  "Audio Tools Orrery", and Monitor = In. Live sends AU plugins' MIDI nowhere, so use the VST3.
+  Live merges channels between tracks, so to give each synth its own lane add one more Orrery
+  per synth on its own track: the first Orrery is the Main, each new one becomes a satellite
+  that plays the next lane, and each synth takes MIDI From its satellite's track. On macOS and
+  Linux, "Publish lanes as MIDI ports" (Simple page) also gives each lane its own MIDI port.
+- Preview sound (the button next to Play) is Orrery's own small synth: turn it off when your
+  synths play.
 - Hardware synths: in Outputs, pick the synth's USB or MIDI interface port for each lane.
 - Standalone: pick the ports in Outputs; MIDI clock out is there too.
 
 Orrery es un generador de MIDI: toca otros instrumentos (Preview sound, en Outputs, es un sinte
-simple para probarlo). En Ableton Live cargar el VST3 en una pista MIDI y en cada pista de sinte
-elegir MIDI From = esa pista, "Orrery" y el canal del carril. Live no saca el MIDI de los AU, asi
-que usar el VST3. Para separar carriles usar un puerto virtual en Outputs (IAC Driver en macOS,
-loopMIDI en Windows) o una Orrery por pista con Link en Lead y Follow. Para sintes fisicos,
-elegir en Outputs el puerto USB o la interfaz MIDI de cada carril.
+simple para probarlo; se apaga con el boton al lado de Play). En Ableton Live cargar el VST3 en
+una pista MIDI y en cada pista de sinte elegir MIDI From = esa pista, "Audio Tools Orrery" y
+Monitor = In. Live no saca el MIDI de los AU, asi que usar el VST3. Para darle a cada sinte su
+carril, agregar una Orrery mas por sinte en su propia pista: la primera es la Main y cada nueva
+un satelite que toca el proximo carril; cada sinte toma el MIDI de su satelite. En macOS y Linux
+"Publish lanes as MIDI ports" (pagina Simple) da ademas un puerto MIDI por carril. Para sintes
+fisicos, elegir en Outputs el puerto USB o la interfaz MIDI de cada carril.

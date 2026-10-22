@@ -1,0 +1,97 @@
+{
+ "name": "Small Machine Love",
+ "category": "Minimal wave",
+ "description": "A bossa from the organ-top box: rim, clave and shaker.",
+ "order": 17,
+ "params": {
+  "tempo": 118,
+  "swing": 50,
+  "swing_res": 1,
+  "bd_level": -1,
+  "sd_level": 0,
+  "cp_level": -2,
+  "rs_level": -5,
+  "rs_pan": -10,
+  "ch_level": -3,
+  "ch_pan": 20,
+  "oh_level": -4,
+  "oh_pan": 25,
+  "cy_level": -7,
+  "cy_pan": -30,
+  "rd_level": -6,
+  "rd_pan": -20,
+  "t1_level": -4,
+  "t1_pan": -40,
+  "t2_level": -4,
+  "t2_pan": -15,
+  "t3_level": -4,
+  "t3_pan": 15,
+  "t4_level": -4,
+  "t4_pan": 40,
+  "cb_level": -6,
+  "cb_pan": -15,
+  "cl_level": -5,
+  "cl_pan": 30,
+  "tb_level": -6,
+  "tb_pan": 35,
+  "fx_level": -7,
+  "bd_model": 2,
+  "rs_model": 0,
+  "ch_model": 1,
+  "cl_model": 0,
+  "tb_model": 0,
+  "a_type": 4,
+  "a_size": 40,
+  "a_return": -8,
+  "b_type": 3,
+  "b_rate": 30,
+  "b_depth": 40,
+  "b_return": -10,
+  "m_tape": 1,
+  "autofill": 3,
+  "m_volume": 6.0
+ },
+ "patterns": [
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . 100 . . . . 100 . . 100",
+    "rs": "100 . . 100 . . 100 . . . 100 . . 100",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100 . 100 . 100",
+    "cl": ". . . 100 . . 100 . . . 100 . . 100"
+   },
+   "group": 0,
+   "var": "A"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . 100 . . . . 100 . . 100",
+    "rs": "100 . . 100 . . 100 . . . 100 . . 100",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100 . 100 . 100",
+    "cl": ". . 100 . . 100 . . . . 100 . . 100",
+    "tb": "72 100 72 100 72 100 72 100 72 100 72 100 72 100 72 100"
+   },
+   "group": 0,
+   "var": "B"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . 100 . . . . 100 . . 100",
+    "rs": "100 . . 100 . . 100",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100 . 100 . 100",
+    "t1": ". . . . . . . . . . . . . . 100",
+    "t2": ". . . . . . . . . . . . 100",
+    "t3": ". . . . . . . . . . 100",
+    "t4": ". . . . . . . . 100f20",
+    "cl": ". . . 100 . . 100"
+   },
+   "group": 0,
+   "var": "Fill"
+  }
+ ]
+}

@@ -44,12 +44,12 @@ En Ableton Live:
 
 1. Arrastrá el VST3 de Orrery a una pista MIDI vacía. Live no saca el MIDI que producen los plugins Audio Unit, así que la versión AU no puede tocar otras pistas ahí.
 2. Poné tu sinte en otra pista MIDI.
-3. En la sección de entrada y salida de la pista del sinte, elegí en **MIDI From** la pista de Orrery, y en el selector de abajo elegí `Orrery`.
+3. En la sección de entrada y salida de la pista del sinte, elegí en **MIDI From** la pista de Orrery, y en el selector de abajo elegí `Audio Tools Orrery`.
 4. Poné el **Monitor** de la pista del sinte en `In`, o armá la pista.
-5. En la página Outputs de Orrery apagá **Preview sound**, así escuchás sólo tu sinte.
+5. Hacé clic en **Preview sound**, en la barra superior de Orrery al lado de Play, hasta que diga `Preview sound: Off`. Así escuchás sólo tu sinte.
 6. Apretá Play en Orrery.
 
-Live junta todos los canales MIDI cuando rutea MIDI de una pista a otra, así que ese sinte recibe todos los carriles encendidos. Para un sinte que toca todo, perfecto. Para mandar carriles distintos a sintes distintos en Live, usá un puerto virtual o una Orrery por pista con Link: las dos cosas se explican en Ruteo, puertos y sincronía.
+Live junta todos los canales MIDI cuando rutea MIDI de una pista a otra, así que ese sinte recibe todos los carriles encendidos. Para un sinte que toca todo, perfecto. Para mandar carriles distintos a sintes distintos en Live, agregá más Orrery: la primera es la Main y cada Orrery que agregues después se vuelve un satélite que toca un carril de la Main. Los pasos están en Una Orrery, muchos sintes, al principio de Ruteo, puertos y sincronía. Un puerto virtual, o una Orrery por pista con Link, también sirven.
 
 ## Primer sonido
 
@@ -59,24 +59,29 @@ Live junta todos los canales MIDI cuando rutea MIDI de una pista a otra, así qu
 
 El sonido de prueba arranca enseguida y el orrery del centro se despierta: una órbita por carril, un planeta que la recorre y una chispa por cada nota. Si no escuchás nada, mirá Problemas y soluciones.
 
+Lo que escuchás es el **sonido de prueba** de Orrery, un sinte chico incorporado para probarla sin rutear nada. No es tu sinte. Mientras suena, el botón al lado de Play dice `Preview sound: On` y la línea de arriba del orrery dice "You're hearing Orrery's preview sound". Cuando toquen tus sintes, hacé clic en el botón hasta que diga `Preview sound: Off`: el MIDI que manda Orrery es el mismo de las dos maneras.
+
 > Muchos presets entran con un fade de 20 segundos o más, y los de dormir con más de un minuto. Los primeros segundos son bajos a propósito.
 
 ## La interfaz de un vistazo
 
 La ventana tiene una barra superior, el área de páginas y un pie. Se puede agrandar o achicar desde la esquina, de la mitad a una vez y media su tamaño normal, y mantiene las proporciones.
 
-![La barra superior: Play y la línea de estado, el selector de presets, Save, Simple y Advanced, Capture MIDI y All notes off.](img/topbar.jpg)
+![La barra superior: Play, Preview sound, el selector de presets, Save, Simple y Advanced, Capture MIDI y All notes off.](img/topbar.jpg)
 
 La barra superior, de izquierda a derecha:
 
-- **orrery**: el logo. Un clic vuelve a la página Simple.
-- **Play** / **Stop**: arranca y frena Orrery. Al lado, la línea de estado muestra `Playing` y el tiempo de sesión, la duración de la sesión cuando la hay y el ritmo de respiración cuando está encendido. Muestra `Stopped` cuando está frenada y `Session finished` cuando terminó una sesión.
+- **orrery**: el logo. Un clic vuelve a la página Simple. Debajo, la línea de estado muestra `playing` y el tiempo de sesión (y la duración de la sesión cuando la hay), `stopped`, o `session finished` cuando terminó una sesión.
+- **Play** / **Stop**: arranca y frena Orrery.
+- **Preview sound: On** / **Off**: prende y apaga el sonido de prueba incorporado. Está al lado de Play para que siempre se vea si lo que suena es Orrery o tu sinte. Es el mismo ajuste que Preview sound en la página Outputs.
 - **<** y **>**: el preset anterior y el siguiente. El nombre del preset, entre las dos flechas, abre el menú de presets agrupados por clima, con los tuyos bajo User.
 - **Save**: guarda los ajustes actuales como preset de usuario.
 - **Simple** y **Advanced**: pasan de la página Simple a las tres páginas avanzadas. En las avanzadas, unas pestañas debajo de la barra eligen **Lanes**, **Harmony & session** u **Outputs**.
 - **Capture MIDI**: guarda los últimos minutos tocados como archivo MIDI.
 - **All notes off**: corta todas las notas que suenan en los 16 canales, en el DAW y en los puertos directos.
 - **Manual**, a la derecha del pie, abre este manual dentro del plugin, en inglés o en castellano. Esc o la cruz lo cierran.
+
+En un satélite (ver Main y satélites) la barra superior deja sólo el logo, Preview sound y All notes off: lo demás lo decide la Main.
 
 El pie muestra una línea de ayuda corta de lo que tengas bajo el mouse, mensajes como el nombre de un archivo capturado, y el archivo capturado mismo, listo para arrastrar al DAW.
 
@@ -110,6 +115,18 @@ El dibujo del centro muestra lo que suena. El sol del medio muestra el acorde ac
 Cada carril encendido tiene su órbita, del color del carril. Su planeta da una vuelta cada **Loop length** pulsos de ese carril, así que carriles con largos de lazo distintos casi nunca se alinean, igual que sus lazos. El planeta crece mientras el carril toca notas, y cada nota deja sobre la órbita una chispa que se apaga despacio: más grande cuanto más fuerte es la nota. Con la respiración encendida, un halo suave alrededor del sol se abre y se cierra con cada respiración.
 
 Pasá el mouse por una órbita para ver su carril, su rol y su canal. Un clic en una órbita abre la página Lanes con ese carril resaltado.
+
+### Rol, satélites y puertos
+
+![Arriba del orrery: Role, Skip satellite lanes y Publish lanes as MIDI ports, con los satélites de esta Main y el aviso del sonido de prueba.](img/rolestrip.jpg)
+
+La fila de arriba del orrery tiene:
+
+- **Role**: `Auto`, `Independent`, `Main` o `Satellite`. El botón muestra el rol en uso, por ejemplo `Role: Main (Auto)`. Ver Main y satélites.
+- **Skip satellite lanes** (sólo en una Main): encendido, los carriles que tocan tus satélites no salen además por la pista de la Main, así ningún sinte los recibe dos veces. Viene encendido.
+- **Publish lanes as MIDI ports** (macOS y Linux): un puerto MIDI virtual por carril, con el nombre del carril, que cada pista de sinte de tu DAW puede elegir como entrada. Viene apagado. Ver Ruteo, puertos y sincronía.
+
+La línea de abajo dice quién toca qué. En una Main lista los satélites y el carril de cada uno, y las llaves de esos carriles llevan un anillo dorado. Mientras suena el sonido de prueba, a la derecha de la línea dice "You're hearing Orrery's preview sound".
 
 ### Llaves de los carriles
 
@@ -416,20 +433,24 @@ Cuando un carril deja un puerto, o se cierra Orrery, el puerto recibe All Notes 
 |---|---|---|
 | MIDI clock out | Off, On | Off |
 | Link | Off, Lead, Follow | Off |
-| Preview sound | Off, On | On |
+| Preview sound | Off, On | On (Off en un satélite nuevo) |
 | Preview volume | 0 a 100 % | 60 % |
 | Preview reverb | 0 a 100 % | 60 % |
 | Reference pitch | 415 a 466 Hz | 440 Hz |
 | Tune by pitch bend | Off, On | Off |
 | Synth bend range | 2, 3, 12, 24, 48 semitonos | 2 |
+| Skip satellite lanes | Off, On | On |
+| Lanes as MIDI ports | Off, On (macOS y Linux) | Off |
 
 **MIDI clock out** manda reloj MIDI (24 pulsos por negra) más Start y Stop a todos los puertos directos en uso, así las cajas de ritmos, secuenciadores, arpegiadores y delays sincronizados de tus equipos siguen a Orrery. El reloj va al tempo del host mientras el host toca y el reloj está en Host, y al Tempo propio de Orrery en los demás casos. No se manda al DAW, y sólo sale cuando por lo menos un carril tiene puerto directo.
 
-**Link** conecta varias Orrery cargadas en el mismo DAW. La que está en `Lead` comparte su tonalidad, su escala y sus acordes; las que están en `Follow` tocan sus propios carriles sobre los acordes de la líder, sin tener en cuenta su propia Key, Scale ni sus ajustes de acordes. Usá una sola líder. Una Orrery en Follow sin líder en la sesión toca su propia armonía. Este vínculo es propio de Orrery: funciona entre instancias dentro de la misma aplicación host, y no intercambia tempo con otras aplicaciones.
+**Link** conecta varias Orrery cargadas en el mismo DAW. Funciona en las Orrery Independent; una Main también puede ser Lead, y los satélites lo ignoran. La que está en `Lead` comparte su tonalidad, su escala y sus acordes; las que están en `Follow` tocan sus propios carriles sobre los acordes de la líder, sin tener en cuenta su propia Key, Scale ni sus ajustes de acordes. Usá una sola líder. Una Orrery en Follow sin líder en la sesión toca su propia armonía. Este vínculo es propio de Orrery: funciona entre instancias dentro de la misma aplicación host, y no intercambia tempo con otras aplicaciones.
 
-**Preview sound** es el sinte incorporado: un sonido por rol (un drone oscuro, un pad tibio, una voz de triángulo, una campana FM para los arpegios, una gota de cristal para las nubes, un bajo redondo, un latido suave para los pulsos), cada carril paneado en su lugar, con un delay y una reverb larga. **Preview volume** y **Preview reverb** marcan su nivel y su reverb. Apagalo cuando toquen tus sintes: el MIDI es el mismo de las dos maneras.
+**Preview sound** es el sinte incorporado, que también prende y apaga el botón al lado de Play: un sonido por rol (un drone oscuro, un pad tibio, una voz de triángulo, una campana FM para los arpegios, una gota de cristal para las nubes, un bajo redondo, un latido suave para los pulsos), cada carril paneado en su lugar, con un delay y una reverb larga. **Preview volume** y **Preview reverb** marcan su nivel y su reverb. Apagalo cuando toquen tus sintes: el MIDI es el mismo de las dos maneras.
 
 **Reference pitch** reafina los carriles lejos de A4 = 440 Hz, por pitch bend, para sintes que no se pueden reafinar solos. Funciona sólo con **Tune by pitch bend** encendido. Poné **Synth bend range** en el rango de pitch bend de tu sinte (los semitonos que mueve un bend completo): Pitch drift también lo usa. Si no coincide, la afinación va a quedar mal.
+
+**Skip satellite lanes** y **Lanes as MIDI ports** son los mismos ajustes que en la página Simple (ver Main y satélites, y Ruteo, puertos y sincronía). En Windows el panel explica que en lugar de Lanes as MIDI ports hace falta un puerto de loopMIDI.
 
 > El pitch bend actúa sobre un canal MIDI entero, así que la afinación y la deriva necesitan cada carril en su propio canal.
 
@@ -441,7 +462,7 @@ El archivo tiene una pista por canal MIDI (o sea, una por carril cuando cada car
 
 ## Presets y climas
 
-Orrery trae 21 presets de fábrica, tres por clima. Los presets cambian los ajustes musicales: armonía, sesión y todos los carriles. No cambian Play, Clock, Play with host stopped, Level, los ajustes del sonido de prueba, los de afinación, MIDI clock out, Link ni los puertos directos, así que cambiar de preset nunca rompe tu ruteo. Los carriles que un preset no usa quedan apagados.
+Orrery trae 21 presets de fábrica, tres por clima. Los presets cambian los ajustes musicales: armonía, sesión y todos los carriles. No cambian Play, Clock, Play with host stopped, Level, los ajustes del sonido de prueba, los de afinación, MIDI clock out, Link, el rol, los carriles del satélite, Skip satellite lanes, Lanes as MIDI ports ni los puertos directos, así que cambiar de preset nunca rompe tu ruteo. Los carriles que un preset no usa quedan apagados.
 
 Una Orrery nueva arranca con `Init`: drone, pad, melodía (en lazo de 17 pulsos), nube y bajo encendidos, en D dórico a 60 BPM.
 
@@ -473,11 +494,85 @@ Todos los presets de Sleep y Meditation usan modo suave, sesiones y fades largos
 
 Para guardar uno propio, apretá **Save**, escribí un nombre y confirmá. Los presets de usuario aparecen bajo User en el menú de presets, y las flechas los recorren después de los de fábrica. Son archivos en `~/Library/Application Support/Audio Tools/Orrery/Presets` en macOS y en `Audio Tools\Orrery\Presets` dentro de tu carpeta AppData\Roaming en Windows. Guardar con un nombre que ya existe reemplaza ese preset. Para borrar uno, borrá su archivo; desaparece la próxima vez que se abra Orrery.
 
+## Main y satélites
+
+En Ableton Live una pista de sinte que toma su MIDI de otra pista recibe todos sus canales MIDI, así que una sola pista de Orrery mandaría todos los carriles a todos los sintes. Main y satélites lo resuelven dentro de Orrery: una Orrery, la **Main**, tiene la música; cada otra Orrery del set es un **satélite** que toca exactamente un carril de la Main (o unos pocos) en su propia pista. Cada sinte toma entonces su MIDI de un satélite.
+
+| Rol | Qué hace |
+|---|---|
+| Auto | El de toda Orrery nueva. La primera Orrery de la aplicación host se vuelve Main; cada Orrery agregada después se vuelve un satélite que toma el próximo carril de la Main que esté encendido y que no toque otro satélite. |
+| Independent | Orrery como era hasta 1.0.4: toca todos sus carriles, y Link (Off, Lead, Follow) funciona como antes. |
+| Main | Toca como Independent, publica todo lo que hace para sus satélites y puede ser líder de Link. |
+| Satellite | Toca sólo los carriles de la Main que le tocaron. Sus propios ajustes no se usan. |
+
+Lo que eligió Auto se guarda con el proyecto: al abrir el set otra vez la Main sigue siendo la Main y cada satélite toca el mismo carril, en el orden que el host las cargue. Los proyectos guardados con Orrery 1.0.4 o anterior no tienen rol: abren como Independent, con el Link que tenían, y suenan como antes. Los presets nunca cambian el rol, los carriles del satélite, Skip satellite lanes ni los puertos MIDI.
+
+### La página del satélite
+
+![Un satélite: qué carril de la Main toca, su actividad y los botones de los carriles.](img/satellite.jpg)
+
+Un satélite muestra una sola página en lugar del editor completo:
+
+- **Satellite of** y el nombre de la pista de la Main (cuando el host les dice a los plugins el nombre de su pista), y qué carril toca, con el rol y el canal MIDI del carril.
+- El estado: en sincronía con la Main, sincronizando, o esperando una Main.
+- **Lane**: los ocho carriles de la Main con sus roles. Un clic en uno lo toca en lugar del actual; Shift-clic (o Cmd-clic) agrega o quita un carril, así un satélite puede tocar varios. Un carril apagado en la Main muestra `off` y queda en silencio.
+- **Activity**: cuánto toca cada uno de sus carriles, y el acorde actual de la Main. El orrery de la derecha muestra sólo sus carriles.
+- **Role**: el mismo menú que en la página Simple.
+- **Make independent**: convierte el satélite en una Orrery Independent con los ajustes actuales de la Main y sólo sus carriles encendidos, para editar todo desde ahí.
+- **Make this the Main** aparece en su lugar cuando no hay ninguna Main tocando en el set.
+
+Un satélite sigue a la Main en todo: Play y Stop, el transporte, climas y presets, cada ajuste, el número de variación y el reloj de la sesión. Su Preview sound arranca apagado, porque lo que tiene que sonar es su sinte; se puede prender con el botón de la barra superior. All notes off en un satélite resetea sólo los canales de sus carriles.
+
+### Skip satellite lanes
+
+Una Main sigue mandando su MIDI a su propia pista. Con **Skip satellite lanes** encendido (viene así), los carriles que tocan los satélites quedan afuera, así un sinte alimentado desde la pista de la Main no los toca por segunda vez. El sonido de prueba de la Main también los deja afuera. Un satélite que deja de procesarse por más de un segundo y medio (borrado, desactivado) le devuelve su carril a la Main.
+
+### Cómo se mantienen juntas
+
+Un satélite no recibe notas de la Main. Corre su propia copia del generador de Orrery con todo el estado musical de la Main, y como el generador es determinista produce las mismas notas, velocidades, controladores y pitch bend, en la misma muestra, que la Main para ese carril. Para eso:
+
+- Cada Orrery lee el transporte del host (si toca, la posición, el tempo) por su cuenta: en un ciclo de proceso todas las pistas ven el mismo.
+- La Main aplica los cambios de ajustes, Play, Stop, los presets nuevos y All notes off un buffer de audio después de leerlos, y los publica para ese buffer. Cuando un satélite procesa un buffer, la Main ya terminó el anterior, sea cual sea la pista que el host procesa primero y en el núcleo que sea, así que el satélite siempre sabe qué vale.
+- Cuando un satélite se suma, copia el estado de la Main en un borde de buffer y averigua, una sola vez, qué buffer suyo es qué buffer de la Main. Usa la posición del transporte del host cuando el transporte corre; si no, la hora que el host le da a cada ciclo de proceso (system time de VST3, host time de Audio Unit), o el reloj de la computadora. Desde ahí las dos cuentan buffers y muestras a la par.
+- En cada buffer la Main publica una huella de todo lo que generó, y cada satélite compara la suya. Si alguna vez difieren, o la Main deja de procesarse, el satélite suelta sus notas, vuelve a copiar el estado de la Main y ataca las notas de sus carriles que estén sonando en ese momento.
+
+Se midió con una Main y varios satélites, con buffers de 64 a 1024 muestras, en órdenes de proceso al azar y con cada Orrery en su propio hilo: cada satélite tocó exactamente los mensajes de la Main para su carril.
+
+A tener en cuenta:
+
+- Usá una sola Main por set. Con dos, los satélites siguen a la que se volvió Main primero, y la otra lo avisa.
+- Los satélites y su Main tienen que estar en la misma aplicación host. No se conectan entre aplicaciones ni entre computadoras.
+- Un satélite toca sólo mientras su Main se procesa. Poner la Main en bypass o desactivarla calla a sus satélites, que sueltan sus notas y siguen cuando la Main vuelve.
+- Los cambios de ajustes en una Main se aplican un buffer más tarde que en una Orrery Independent (unos 10 ms con 512 muestras).
+- Con el transporte del host frenado, en un host que no les da a los plugins la hora de cada ciclo, y si el host procesa siempre la pista de un satélite más de medio buffer después que la de la Main, un satélite puede quedar a un buffer de la Main. Arrancar el transporte, o usar Clock en Host con el transporte en marcha, lo deja exacto.
+
 ## Ruteo, puertos y sincronía
 
-### Ableton Live, tres maneras
+### Una Orrery, muchos sintes en Ableton Live
 
-Live junta los canales MIDI entre pistas y no saca el MIDI de los plugins Audio Unit, así que usá siempre el VST3 y elegí una de estas configuraciones.
+Live junta los canales MIDI entre pistas y no saca el MIDI de los plugins Audio Unit, así que usá el VST3. La forma más rápida de darle a cada sinte su propio carril es Main y satélites:
+
+1. Poné Orrery en una pista MIDI vacía y elegí un clima. Esta primera Orrery es la **Main**.
+2. Por cada sinte, agregá otra pista MIDI y poné Orrery en ella. Cada Orrery nueva se vuelve un **satélite** y toma el próximo carril de la Main: el carril 1 (Drone), después el 2 (Pad), y así. Su página dice `Satellite of ...` y qué carril toca; ahí podés hacer clic en otro carril para cambiarlo.
+3. Poné cada sinte en su propia pista MIDI. En la sección de entrada y salida de la pista del sinte elegí en **MIDI From** la pista del satélite, en el selector de abajo `Audio Tools Orrery`, y poné **Monitor** en `In`.
+4. En la Main, hacé clic en **Preview sound** en la barra superior hasta que diga `Preview sound: Off` cuando toquen tus sintes. Los satélites arrancan con el sonido de prueba apagado.
+5. Apretá Play en la Main, o arrancá el transporte de Live (con Clock en Host). Los satélites la siguen.
+
+La pista de la Main sigue llevando los carriles que no toca ningún satélite, así que un sinte alimentado desde la pista de la Main (como en el paso 3) toca el resto. Skip satellite lanes evita que duplique los carriles de los satélites.
+
+### Los carriles como puertos MIDI (macOS y Linux)
+
+En lugar de satélites, una Orrery puede publicar cada carril como un puerto MIDI propio:
+
+1. En la página Simple, encendé **Publish lanes as MIDI ports**. Orrery crea un puerto MIDI virtual por carril, con el nombre de su rol: `Orrery Drone`, `Orrery Pad`, `Orrery Melody`... Si dos carriles tienen el mismo rol se agrega el número de carril (`Orrery Cloud 5`, `Orrery Cloud 8`); una segunda Orrery que también publica usa `Orrery 2 Drone`, etcétera.
+2. Una sola vez: en Settings de Live, pestaña Link, Tempo & MIDI, encendé **Track** en la entrada de cada puerto `Orrery` que vayas a usar.
+3. En cada pista de sinte, elegí en **MIDI From** un puerto, por ejemplo `Orrery Pad`, con `All Channels`, y poné **Monitor** en `In`.
+
+Los nombres se fijan al encender la opción: después de cambiar los roles de los carriles, apagala y encendela para renombrar los puertos. Los puertos desaparecen al sacar esa Orrery o cerrar el set, y cada uno recibe All Notes Off antes de cerrarse. Windows no tiene puertos MIDI virtuales propios, así que la opción no aparece ahí: usá loopMIDI con las salidas directas, como se explica abajo.
+
+### Ableton Live, otras maneras
+
+Estas configuraciones de versiones anteriores siguen funcionando.
 
 Una Orrery, un sinte: seguí los pasos de Cargarla en un DAW. Todos los carriles encendidos llegan a ese sinte, así que apagá los que no quieras.
 
@@ -586,7 +681,9 @@ Anotá también el número de Variation: con los mismos ajustes, Orrery va a vol
 
 ## Problemas y soluciones
 
-**No suena nada.** Orrery hace MIDI, no audio. Ruteala a un instrumento (ver Cargarla en un DAW) o encendé **Preview sound** en la página Outputs, con Preview volume arriba.
+**No suena nada.** Orrery hace MIDI, no audio. Ruteala a un instrumento (ver Cargarla en un DAW) o hacé clic en **Preview sound** en la barra superior hasta que diga `Preview sound: On`, con Preview volume arriba en la página Outputs.
+
+**Escucho un sonido, pero no es mi sinte.** Es el sonido de prueba de Orrery: el botón al lado de Play dice `Preview sound: On` y la línea de arriba del orrery dice "You're hearing Orrery's preview sound". Hacé clic en el botón para apagarlo.
 
 **No pasa nada cuando aprieto Play en el DAW.** Orrery tiene su propio botón Play: apretalo en la barra superior. El botón dice Stop cuando Orrery está tocando.
 
@@ -598,7 +695,17 @@ Anotá también el número de Variation: con los mismos ajustes, Orrery va a vol
 
 **El ajuste Tempo no hace nada.** Con Clock en Host y el DAW tocando, Orrery sigue el tempo del DAW. Poné Clock en Free para usar el Tempo de Orrery.
 
-**En Ableton Live cada sinte toca todos los carriles.** Live junta los canales entre pistas. Usá un puerto virtual, o una Orrery por pista con Link (ver Ruteo, puertos y sincronía).
+**En Ableton Live cada sinte toca todos los carriles.** Live junta los canales entre pistas. Alimentá cada sinte desde un satélite (ver Una Orrery, muchos sintes en Ableton Live), usá Lanes as MIDI ports o un puerto virtual, o una Orrery por pista con Link.
+
+**Una Orrery nueva muestra "Satellite" y la quería aparte.** Con el rol en Auto, toda Orrery después de la primera se vuelve satélite. Elegí `Independent` en su botón Role, o hacé clic en Make independent para quedarte con los ajustes de la Main.
+
+**Un satélite dice "Waiting for a Main Orrery".** No hay una Main en esta aplicación host, o no se está procesando (borrada, desactivada o en bypass). Agregá una, poné el Role de una Orrery en Main, o hacé clic en Make this the Main.
+
+**Un satélite no toca nada.** Su carril está apagado en la Main, o la Main está frenada. Encendé el carril en la Main, elegí otro carril en la página del satélite, o apretá Play en la Main.
+
+**Un carril suena dos veces.** Un sinte lo recibe de un satélite y de la pista de la Main. Encendé Skip satellite lanes en la Main.
+
+**Los puertos de Orrery no aparecen en Live.** Primero encendé Publish lanes as MIDI ports; después, en Settings de Live, Link, Tempo & MIDI, encendé Track en las entradas `Orrery`. En Windows no hay puertos virtuales: usá loopMIDI.
 
 **En Ableton Live no llega MIDI a las otras pistas.** Estás usando el Audio Unit. Cargá el VST3.
 
@@ -612,7 +719,7 @@ Anotá también el número de Variation: con los mismos ajustes, Orrery va a vol
 
 **Cambio un ajuste de carril y no pasa nada.** Algunos ajustes valen sólo para algunos roles: Rate y las filas Euclid para Arp y Pulse, Arp pattern para Arp, Voices para Pad, Follow para Melody, Arp y Cloud. Revisá el rol del carril.
 
-**Una Orrery en Follow no sigue a nadie.** Tiene que haber una Orrery en Lead en la misma aplicación host, y tiene que estar tocando.
+**Una Orrery en Follow no sigue a nadie.** Tiene que haber una Orrery en Lead en la misma aplicación host, y tiene que estar tocando. Follow funciona sólo en las Orrery Independent.
 
 ## Especificaciones
 
@@ -628,7 +735,7 @@ Anotá también el número de Variation: con los mismos ajustes, Orrery va a vol
 | Ritmo | Patrones euclidianos, probabilidad, valores de 2 pulsos a 1/8, humanizado hasta 30 ms |
 | Expresión | Hasta 8 ecos MIDI, una curva de CC por carril, deriva de afinación hasta 50 cents |
 | Sesión | Hasta 120 min, fade in hasta 120 s, fade out hasta 300 s, respiración de 1 a 12 por minuto, modo suave |
-| Salidas | MIDI al DAW por canal, un puerto MIDI directo por carril, reloj MIDI, vínculo Lead y Follow, sonido de prueba |
+| Salidas | MIDI al DAW por canal, un puerto MIDI directo por carril, reloj MIDI, vínculo Lead y Follow, Main y satélites, un puerto MIDI virtual por carril (macOS, Linux), sonido de prueba |
 | Afinación | Referencia de 415 a 466 Hz por pitch bend |
 | Captura | Los últimos 1, 2, 5 o 10 minutos a un archivo MIDI |
 | Presets | 21 en siete climas, más los tuyos |
@@ -644,6 +751,8 @@ Medido sobre el motor:
 | Modo suave | Velocity como mucho 92, nota más aguda 86 |
 | Seguidora del vínculo | 56 notas, ninguna fuera del acorde de la líder |
 | Misma variación | Mismas notas en macOS y Windows, con buffers de 64 a 1024 muestras y a 44,1, 48 y 96 kHz |
+| Satélites | Exactamente los mensajes de la Main para su carril, con buffers de 64 a 1024 muestras, en cualquier orden de proceso y en hilos separados |
+| Carriles como puertos MIDI | Cada nota de cada carril llega a su puerto; dos Orrery reciben nombres distintos (macOS, Linux) |
 
 CPU, en porcentaje de un núcleo a 48 kHz:
 

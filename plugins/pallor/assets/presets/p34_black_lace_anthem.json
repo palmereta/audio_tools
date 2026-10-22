@@ -1,0 +1,98 @@
+{
+ "name": "Black Lace Anthem",
+ "category": "Goth rock",
+ "description": "Gallop kick, sixteenth hats, a reverse room swelling into the snare.",
+ "order": 34,
+ "params": {
+  "tempo": 146,
+  "swing": 50,
+  "swing_res": 1,
+  "bd_level": -1,
+  "sd_level": 0,
+  "cp_level": -2,
+  "rs_level": -5,
+  "rs_pan": -10,
+  "ch_level": -3,
+  "ch_pan": 20,
+  "oh_level": -4,
+  "oh_pan": 25,
+  "cy_level": -7,
+  "cy_pan": -30,
+  "rd_level": -6,
+  "rd_pan": -20,
+  "t1_level": -4,
+  "t1_pan": -40,
+  "t2_level": -4,
+  "t2_pan": -15,
+  "t3_level": -4,
+  "t3_pan": 15,
+  "t4_level": -4,
+  "t4_pan": 40,
+  "cb_level": -6,
+  "cb_pan": -15,
+  "cl_level": -5,
+  "cl_pan": 30,
+  "tb_level": -6,
+  "tb_pan": 35,
+  "fx_level": -7,
+  "bd_engine": 1,
+  "bd_kit": 1,
+  "bd_decay": 100,
+  "sd_engine": 1,
+  "sd_kit": 1,
+  "sd_decay": 100,
+  "sd_senda": 50,
+  "ch_engine": 1,
+  "ch_kit": 1,
+  "ch_decay": 100,
+  "oh_engine": 1,
+  "oh_kit": 1,
+  "oh_decay": 100,
+  "cy_engine": 1,
+  "cy_kit": 5,
+  "cy_decay": 100,
+  "a_type": 2,
+  "a_gate": 220,
+  "a_size": 60,
+  "a_return": -3,
+  "m_comp": 50,
+  "autofill": 3,
+  "m_volume": 0.2
+ },
+ "patterns": [
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . 100 . . . 100 . 100 . 100 . . . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "ch": "100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100"
+   },
+   "group": 0,
+   "var": "A"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . 100 100 . . 100 . 100 . 100 100 . . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "ch": "100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100",
+    "oh": ". . . . . . . . . . . . . . 100"
+   },
+   "group": 0,
+   "var": "B"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . 100 . . . 100 . 100 . 100 . . . 100",
+    "sd": ". . . . 100 . . . . . . . 40 72 100 127a",
+    "ch": "100 100 100 100 100 100 100 100 100 100 100 100"
+   },
+   "group": 0,
+   "var": "Fill"
+  }
+ ]
+}

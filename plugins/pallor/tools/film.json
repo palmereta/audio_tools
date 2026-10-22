@@ -1,0 +1,30 @@
+{
+  "title": "Pallor",
+  "tagline": "The cold drum machine.",
+  "fps": 24,
+  "bpm": 120,
+  "shots": [
+    {"name": "open", "beats": 8},
+    {"name": "pads", "beats": 8},
+    {"name": "knob", "beats": 8},
+    {"name": "screen", "beats": 6},
+    {"name": "hero", "beats": 12},
+    {"name": "end", "beats": 8, "in": "dissolve"}
+  ],
+  "poster": {"shot": "hero", "frame": 120},
+  "audio": {"cmd": [
+    "build/plugins/pallor/pallorrender_artefacts/Release/pallorrender", "{out}", "--preset", "Night Shift Mercury", "--bpm", "120", "--seconds", "{seconds}", "--set", "sd_decay=32",
+    "--at", "8.50", "sd_decay=32.1", "--at", "8.60", "sd_decay=32.6", "--at", "8.70", "sd_decay=33.2", "--at", "8.80", "sd_decay=34.1", "--at", "8.90", "sd_decay=35.3", "--at", "9.00", "sd_decay=36.6",
+    "--at", "9.10", "sd_decay=38.1", "--at", "9.20", "sd_decay=39.8", "--at", "9.30", "sd_decay=41.6", "--at", "9.40", "sd_decay=43.6", "--at", "9.50", "sd_decay=45.7", "--at", "9.60", "sd_decay=47.8",
+    "--at", "9.70", "sd_decay=50.1", "--at", "9.80", "sd_decay=52.3", "--at", "9.90", "sd_decay=54.7", "--at", "10.00", "sd_decay=57", "--at", "10.10", "sd_decay=59.3", "--at", "10.20", "sd_decay=61.7",
+    "--at", "10.30", "sd_decay=63.9", "--at", "10.40", "sd_decay=66.2", "--at", "10.50", "sd_decay=68.3", "--at", "10.60", "sd_decay=70.4", "--at", "10.70", "sd_decay=72.4", "--at", "10.80", "sd_decay=74.2",
+    "--at", "10.90", "sd_decay=75.9", "--at", "11.00", "sd_decay=77.4", "--at", "11.10", "sd_decay=78.7", "--at", "11.20", "sd_decay=79.9", "--at", "11.30", "sd_decay=80.8", "--at", "11.40", "sd_decay=81.4",
+    "--at", "11.50", "sd_decay=81.9", "--at", "11.60", "sd_decay=82", "--at", "20.20", "sd_decay=81.8", "--at", "20.30", "sd_decay=81.6", "--at", "20.40", "sd_decay=81.2", "--at", "20.50", "sd_decay=80.8",
+    "--at", "20.60", "sd_decay=80.4", "--at", "20.70", "sd_decay=79.8", "--at", "20.80", "sd_decay=79.2", "--at", "20.90", "sd_decay=78.5", "--at", "21.00", "sd_decay=77.8", "--at", "21.10", "sd_decay=77",
+    "--at", "21.20", "sd_decay=76.2", "--at", "21.30", "sd_decay=75.3", "--at", "21.40", "sd_decay=74.4", "--at", "21.50", "sd_decay=73.5", "--at", "21.60", "sd_decay=72.5", "--at", "21.70", "sd_decay=71.5",
+    "--at", "21.80", "sd_decay=70.5", "--at", "21.90", "sd_decay=69.5", "--at", "22.00", "sd_decay=68.5", "--at", "22.10", "sd_decay=67.5", "--at", "22.20", "sd_decay=66.5", "--at", "22.30", "sd_decay=65.5",
+    "--at", "22.40", "sd_decay=64.5", "--at", "22.50", "sd_decay=63.5", "--at", "22.60", "sd_decay=62.6", "--at", "22.70", "sd_decay=61.7", "--at", "22.80", "sd_decay=60.8", "--at", "22.90", "sd_decay=60",
+    "--at", "23.00", "sd_decay=59.2", "--at", "23.10", "sd_decay=58.5", "--at", "23.20", "sd_decay=57.8", "--at", "23.30", "sd_decay=57.2", "--at", "23.40", "sd_decay=56.6", "--at", "23.50", "sd_decay=56.2",
+    "--at", "23.60", "sd_decay=55.8", "--at", "23.70", "sd_decay=55.4", "--at", "23.80", "sd_decay=55.2", "--at", "23.90", "sd_decay=55"
+  ]}
+}

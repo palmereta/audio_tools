@@ -20,7 +20,7 @@ package() {
         cp -R "$f" "$OUT/"
     done
     # Herramientas de línea de comandos del producto (p. ej. lacquerrender).
-    for t in lacquerrender halationrender tarnishrender at303render plumbrender; do
+    for t in lacquerrender halationrender tarnishrender at303render plumbrender thrumrender pallorrender; do
         for f in "$R/$t" "$R/${t}_artefacts/Release/$t"; do [ -x "$f" ] && cp "$f" "$OUT/" && break; done
     done
     cp LICENSE "$OUT/LICENSE.txt"
@@ -96,4 +96,6 @@ ONLY=${1:-}
 [ -z "$ONLY" ] || [ "$ONLY" = launcher ] && package_launcher
 [ -z "$ONLY" ] || [ "$ONLY" = at303 ] && package at303 AT303
 [ -z "$ONLY" ] || [ "$ONLY" = plumb ] && package plumb Plumb
+[ -z "$ONLY" ] || [ "$ONLY" = pallor ] && package pallor Pallor
+[ -z "$ONLY" ] || [ "$ONLY" = thrum ] && package thrum Thrum
 exit 0

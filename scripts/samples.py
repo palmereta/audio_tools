@@ -704,6 +704,121 @@ def plumb_samples(meta):
             print(f"plumb {sid:17s} {dur:5.1f} s  {os.path.getsize(m4a) / 1024:5.0f} KB  {r.stdout.strip()[:70]}")
     return keys
 
+# Pallor: los clips de su herramienta de demos (plugins/pallor/tools/demos.py, que ya los deja a −16 LUFS con un
+# limitador de pico de ≤ 3 dB): un preset por género, dos recorridos y dos bocetos con nuestros otros instrumentos.
+# (id, id del demo, preset, título en, título es, desc en, desc es)
+PALLOR = [
+    ("darkwave", "01_darkwave", "Night Shift Mercury", "Dark wave", "Dark wave",
+     "Night Shift Mercury: bridged-T kick, gated 8-bit snare and chorused hats, its song with A, B and fills.",
+     "Night Shift Mercury: bombo de puente en T, caja de 8 bits con gate y charles con chorus, su canción con A, B y fills."),
+    ("coldwave", "02_coldwave", "Thin Ice Lines", "Coldwave", "Coldwave",
+     "Thin Ice Lines: the hexagonal kit at 8 bits, flanged hats, a cold nonlinear room.",
+     "Thin Ice Lines: el kit hexagonal a 8 bits, charles con flanger y una sala no lineal fría."),
+    ("postpunk", "03_postpunk", "Floor Tom Sermon", "Post-punk", "Post-punk",
+     "Floor Tom Sermon: tribal floor toms around the backbeat, room and tape, a fill every four bars.",
+     "Floor Tom Sermon: toms de piso tribales alrededor del backbeat, sala y cinta, un fill cada cuatro compases."),
+    ("ebm", "05_ebm", "Sweat Engine", "EBM", "EBM",
+     "Sweat Engine: dark kick, clap backbeat, sixteenth hats and a clanking cowbell.",
+     "Sweat Engine: bombo oscuro, palmas en el backbeat, charles en semicorcheas y un cencerro metálico."),
+    ("synthpop", "06_synthpop", "Neon Promenade", "Synthpop", "Synthpop",
+     "Neon Promenade: the 1982-style acoustic sample kit with claps and tambourine.",
+     "Neon Promenade: el kit de muestras acústicas al estilo de 1982, con palmas y pandereta."),
+    ("industrial", "08_industrial", "Broken Conveyor", "Industrial", "Industrial",
+     "Broken Conveyor: the foundry kit, struck sheets, pipes and chains, through a jet flanger.",
+     "Broken Conveyor: el kit de fundición, chapas, caños y cadenas golpeados, por un jet flanger."),
+    ("italo", "10_italo", "Hi-Energy Ghost", "Italo and hi-NRG", "Italo y hi-NRG",
+     "Hi-Energy Ghost: four on the floor, off-beat open hats and hexagonal toms going pew.",
+     "Hi-Energy Ghost: bombo en negras, charles abiertos a contratiempo y toms hexagonales con su pew."),
+    ("witchhouse", "11_witchhouse", "Triangle Static", "Witch house", "Witch house",
+     "Triangle Static: 70 BPM, hat rolls by ratchet, sub drops, a reverse room and an 11 kHz crush.",
+     "Triangle Static: 70 BPM, redobles de charles con ratchet, caídas sub, una sala invertida y reducción a 11 kHz."),
+    ("gated-rooms", "14_gated_tour", "Night Shift Mercury", "Four 80s rooms", "Cuatro salas de los 80",
+     "Kick and snare only, the snare dry, then through the gated, nonlinear and reverse rooms, four bars each.",
+     "Sólo bombo y caja: la caja seca y después por la sala con gate, la no lineal y la invertida, cuatro compases cada una."),
+    ("kit-tour", "15_kit_tour", "Neon Promenade", "Eight kits", "Ocho kits",
+     "One pattern through the eight built-in digital kits, two bars each.",
+     "Un mismo patrón por los ocho kits digitales incorporados, dos compases cada uno."),
+    ("sketch-sodium", "20_sketch_sodium", "Night Shift Mercury", "Sketch: Sodium", "Boceto: Sodium",
+     "A dark wave sketch in A minor: Pallor with a rubber bass from ATMD and a glass choir from ATFS1 through Halation, Tarnish and Lacquer on the mix.",
+     "Un boceto de dark wave en La menor: Pallor con un bajo gomoso del ATMD y un coro de vidrio del ATFS1 por Halation, Tarnish y Lacquer en la mezcla."),
+    ("sketch-steel", "21_sketch_steel", "Sweat Engine", "Sketch: Steel Parade", "Boceto: Steel Parade",
+     "An EBM sketch in D minor: Pallor under a sixteenth-note squelch bass from ATMD and resonant brass from ATFS1.",
+     "Un boceto de EBM en Re menor: Pallor bajo un bajo ácido en semicorcheas del ATMD y bronces resonantes del ATFS1."),
+]
+PYAUDIO = "/Volumes/Docs/Applications/pyaudio-venv/bin/python"
+
+def pallor_samples(meta):
+    """Clips de Pallor: renderiza los demos elegidos (ya a −16 LUFS) y los codifica en AAC con su forma de onda."""
+    d = os.path.join(OUT, "pallor"); os.makedirs(d, exist_ok=True)
+    keys = []
+    with tempfile.TemporaryDirectory() as td:
+        ids = ",".join(x[1] for x in PALLOR)
+        subprocess.run([PYAUDIO, os.path.join(ROOT, "plugins", "pallor", "tools", "demos.py"), td, "--only", ids], check=True, capture_output=True)
+        clips = json.load(open(os.path.join(td, "clips.json")))
+        for sid, did, preset, ten, tes, den, des in PALLOR:
+            wav = os.path.join(td, did + ".wav")
+            dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", wav], capture_output=True, text=True).stdout)
+            m4a = os.path.join(d, sid + ".m4a")
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", wav, "-af", f"afade=t=out:st={max(0.0, dur - 1.5):.2f}:d=1.5",
+                            "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", m4a], check=True)
+            bpm = int(round(float(subprocess.run([os.path.join(ROOT, "build", "plugins", "pallor", "pallorrender_artefacts", "Release", "pallorrender"), "--list"],
+                                                 capture_output=True, text=True).stdout.split(preset + "  (")[1].split(" ")[0])))
+            meta[f"pallor/{sid}"] = dict(plugin="pallor", id=sid, preset=preset, title={"en": ten, "es": tes}, desc={"en": den, "es": des},
+                                         secs=round(dur, 1), peaks=peaks(wav), bpm=bpm, kb=round(os.path.getsize(m4a) / 1024), nomidi=True)
+            keys.append(f"pallor/{sid}")
+            print(f"pallor {sid:16s} {dur:5.1f} s  {os.path.getsize(m4a) / 1024:5.0f} KB  {clips.get(did, {}).get('lufs')} LUFS")
+    return keys
+
+# Thrum: los clips de su herramienta de demos (plugins/thrum/tools/demos.py, que ya los deja a −16 LUFS con un limitador
+# de pico donde hace falta), renderizados con build-guitar (thrumrender, y pallorrender y at101vrender para el dark wave).
+# (id, id del demo, preset principal, título en, título es, desc en, desc es)
+THRUM = [
+    ("clean", "01_clean", "Glass Arpeggio", "Clean", "Limpio",
+     "Glass Arpeggio picking the chords, and Clean Picked Lead on top: legato where the notes overlap, a late vibrato, a bend with the wheel.",
+     "Glass Arpeggio punteando los acordes y Clean Picked Lead arriba: ligados donde las notas se pisan, un vibrato tardío, un bend con la rueda."),
+    ("crunch-blues", "02_crunch_blues", "Texas Shuffle", "Crunch blues", "Blues con crunch",
+     "A shuffle in A through a green overdrive and the small combo, and a lead with wheel bends and the bend-in keyswitch.",
+     "Un shuffle en La por un overdrive verde y el combo chico, y un punteo con bends de la rueda y el keyswitch de bend de entrada."),
+    ("high-gain", "03_high_gain", "Modern Chug", "High gain", "Alta ganancia",
+     "The seven-string in drop tuning, palm-muted through the gate and the high-gain amp, and a legato lead with a pinch harmonic.",
+     "La siete cuerdas en afinación drop, con palm mute por el gate y el amplificador de alta ganancia, y un punteo ligado con un pinch."),
+    ("strummed-chords", "04_strummed_chords", "Sparkle Pop Strum", "Four strum patterns", "Cuatro patrones de rasgueo",
+     "One progression per pattern from the library: pop, funk scratch with ghost notes, a reggae skank and a country boom-chuck, four bars each.",
+     "Una progresión por patrón de la biblioteca: pop, rasgueo funk con ghost notes, un skank de reggae y un boom-chuck country, cuatro compases cada uno."),
+    ("lead-bends", "05_lead_bends", "Blues Lead Bends", "Lead with bends", "Punteo con bends",
+     "Whole, half, pre-bends and releases with the pitch wheel, slide-in and bend-in keyswitches, over chords from the small combo.",
+     "Bends de un tono, de medio, pre-bends y vueltas con la rueda, keyswitches de slide y bend de entrada, sobre acordes del combo chico."),
+    ("darkwave", "06_darkwave_pallor_at101v", "Night Drive Strum", "Dark wave", "Dark wave",
+     "Night Drive Strum and Gothic Lead with chorus, echo and hall, over Pallor's Night Shift Mercury and an AT101V bass.",
+     "Night Drive Strum y Gothic Lead con chorus, eco y hall, sobre Night Shift Mercury de Pallor y un bajo del AT101V."),
+    ("fingerpicking", "07_fingerpicking", "Fingerstyle Semi", "Fingerpicking", "Fingerpicking",
+     "Travis picking on the semi-hollow: the thumb alternates the bass while the fingers play on top.",
+     "Travis picking en la semi-hollow: el pulgar alterna el bajo mientras los dedos tocan arriba."),
+    ("ambient", "08_ambient_feedback", "Ambient Freeze", "Ambient and feedback", "Ambient y acople",
+     "Fingers through tape echo and a long hall, and a held E that blooms into its octave as amplifier feedback.",
+     "Dedos por un eco de cinta y un hall largo, y un Mi sostenido que se abre a su octava como acople del amplificador."),
+]
+
+def thrum_samples(meta):
+    """Clips de Thrum: renderiza los demos (ya a −16 LUFS) y los codifica en AAC con su forma de onda."""
+    d = os.path.join(OUT, "thrum"); os.makedirs(d, exist_ok=True)
+    keys = []
+    with tempfile.TemporaryDirectory() as td:
+        ids = ",".join(x[1] for x in THRUM)
+        subprocess.run([PYAUDIO, os.path.join(ROOT, "plugins", "thrum", "tools", "demos.py"), td, "--only", ids, "--build", os.path.join(ROOT, "build-guitar")], check=True, capture_output=True)
+        index = json.load(open(os.path.join(td, "index.json")))
+        for sid, did, preset, ten, tes, den, des in THRUM:
+            wav = os.path.join(td, did + ".wav")
+            dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", wav], capture_output=True, text=True).stdout)
+            m4a = os.path.join(d, sid + ".m4a")
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", wav, "-af", f"afade=t=out:st={max(0.0, dur - 1.5):.2f}:d=1.5",
+                            "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", m4a], check=True)
+            meta[f"thrum/{sid}"] = dict(plugin="thrum", id=sid, preset=preset, title={"en": ten, "es": tes}, desc={"en": den, "es": des},
+                                        secs=round(dur, 1), peaks=peaks(wav), bpm=index[did]["bpm"], kb=round(os.path.getsize(m4a) / 1024), nomidi=True)
+            keys.append(f"thrum/{sid}")
+            print(f"thrum {sid:16s} {dur:5.1f} s  {os.path.getsize(m4a) / 1024:5.0f} KB  {index[did].get('lufs')} LUFS")
+    return keys
+
 def fx_samples(meta, plugin, items):
     """Clips de un efecto: la fuente propia repetida hasta `secs`, por un preset, a −16 LUFS."""
     tool = os.path.join(ROOT, "build", "plugins", plugin, f"{plugin}render_artefacts", "Release", f"{plugin}render")
@@ -746,6 +861,10 @@ def main():
     if only in (None, "at303"): at303_keys = at303_samples(meta)
     plumb_keys = [k for k in meta.get("_order", []) if k.startswith("plumb/")]
     if only in (None, "plumb"): plumb_keys = plumb_samples(meta)
+    pallor_keys = [k for k in meta.get("_order", []) if k.startswith("pallor/")]
+    if only in (None, "pallor"): pallor_keys = pallor_samples(meta)
+    thrum_keys = [k for k in meta.get("_order", []) if k.startswith("thrum/")]
+    if only in (None, "thrum"): thrum_keys = thrum_samples(meta)
     for sid, plugin, preset, song, extra, ten, tes, den, des in SAMPLES:
         if only and plugin != only: continue
         d = os.path.join(OUT, plugin); os.makedirs(d, exist_ok=True)
@@ -765,7 +884,7 @@ def main():
             meta[f"{plugin}/{sid}"] = dict(plugin=plugin, id=sid, preset=preset, title={"en": ten, "es": tes}, desc={"en": den, "es": des},
                                            secs=round(dur, 1), peaks=peaks(loud), bpm=song.bpm, kb=round(os.path.getsize(m4a) / 1024))
             print(f"{plugin:7s} {sid:18s} {dur:5.1f} s  {os.path.getsize(m4a) / 1024:5.0f} KB  {r.stdout.strip()[:60]}")
-    meta["_order"] = [f"{p}/{s}" for s, p, *_ in SAMPLES] + orrery_keys + murmur_keys + halation_keys + tarnish_keys + at303_keys + plumb_keys
+    meta["_order"] = [f"{p}/{s}" for s, p, *_ in SAMPLES] + orrery_keys + murmur_keys + halation_keys + tarnish_keys + at303_keys + plumb_keys + pallor_keys + thrum_keys
     json.dump(meta, open(meta_path, "w"), indent=1, ensure_ascii=False)
 
 if __name__ == "__main__":

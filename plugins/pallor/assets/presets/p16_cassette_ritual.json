@@ -1,0 +1,87 @@
+{
+ "name": "Cassette Ritual",
+ "category": "Minimal wave",
+ "description": "Triplet sixteenths on the metal-beat hats, as if recorded to a worn cassette.",
+ "order": 16,
+ "params": {
+  "tempo": 122,
+  "swing": 50,
+  "swing_res": 1,
+  "bd_level": -1,
+  "sd_level": 0,
+  "cp_level": -2,
+  "rs_level": -5,
+  "rs_pan": -10,
+  "ch_level": -3,
+  "ch_pan": 20,
+  "oh_level": -4,
+  "oh_pan": 25,
+  "cy_level": -7,
+  "cy_pan": -30,
+  "rd_level": -6,
+  "rd_pan": -20,
+  "t1_level": -4,
+  "t1_pan": -40,
+  "t2_level": -4,
+  "t2_pan": -15,
+  "t3_level": -4,
+  "t3_pan": 15,
+  "t4_level": -4,
+  "t4_pan": 40,
+  "cb_level": -6,
+  "cb_pan": -15,
+  "cl_level": -5,
+  "cl_pan": 30,
+  "tb_level": -6,
+  "tb_pan": 35,
+  "fx_level": -7,
+  "bd_model": 2,
+  "sd_model": 3,
+  "sd_char1": 40,
+  "ch_model": 2,
+  "ch_char1": 70,
+  "rs_model": 0,
+  "m_tape": 1,
+  "m_tape_drive": 8,
+  "m_lofi": 1,
+  "m_lofi_mix": 50,
+  "autofill": 2,
+  "m_volume": 2.1
+ },
+ "patterns": [
+  {
+   "length": 12,
+   "scale": 3,
+   "tracks": {
+    "bd": "100 . . . . . 100",
+    "sd": ". . . 100 . . . . . 100",
+    "ch": "100 . 100 100 . 100 100 . 100 100 . 100"
+   },
+   "group": 0,
+   "var": "A"
+  },
+  {
+   "length": 12,
+   "scale": 3,
+   "tracks": {
+    "bd": "100 . . . . . 100",
+    "sd": ". . . 100 . . . . . 100",
+    "rs": ". . 100 . . . . . 100",
+    "ch": "100 100 100 100 100 100 100 100 100 100 100 100"
+   },
+   "group": 0,
+   "var": "B"
+  },
+  {
+   "length": 12,
+   "scale": 3,
+   "tracks": {
+    "bd": "100 . . . . . 100",
+    "sd": ". . . 100 . . . . 40 72 100 127a",
+    "ch": "100 . 100 100 . 100 100"
+   },
+   "group": 0,
+   "var": "Fill"
+  }
+ ]
+}

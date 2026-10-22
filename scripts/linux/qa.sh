@@ -58,7 +58,7 @@ for l in "$B"/plugins/${ONLY:-*}/*_artefacts/Release/LV2/*.lv2; do
 done
 
 # ── pruebas unitarias (lacquertest tarda: su referencia ×8 de pico verdadero es por fuerza bruta, ~20 min en el host)
-for t in plumb/plumbtest tarnish/tarnishtest at303/at303test halation/halationtest lacquer/lacquertest; do
+for t in pallor/pallortest thrum/thrumtest plumb/plumbtest tarnish/tarnishtest at303/at303test halation/halationtest lacquer/lacquertest; do
     d=${t%/*}; n=${t#*/}
     [ -z "$ONLY" ] || [ "$ONLY" = "$d" ] || continue
     (cd "$B/plugins/$d" && "./$n") > "$Q/unit/$n.txt" 2>&1

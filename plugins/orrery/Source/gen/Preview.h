@@ -20,6 +20,7 @@ public:
     {
         fs = sampleRate;
         rev.prepare (fs); dly.prepare (fs);
+        fastRel = coefFor (0.4f);
         L.assign ((size_t) maxBlock, 0.0f); R.assign ((size_t) maxBlock, 0.0f);
         sL.assign ((size_t) maxBlock, 0.0f); sR.assign ((size_t) maxBlock, 0.0f);
         for (auto& v : voices) v.active = false;
@@ -70,9 +71,11 @@ private:
         float ph1 = 0, ph2 = 0, ph3 = 0, inc1 = 0, inc2 = 0, inc3 = 0, lp = 0, lp2 = 0, lpCoef = 0.1f, fmIdx = 0, fmDecay = 0, pitchEnv = 0;
         float panL = 0.7f, panR = 0.7f, send = 0.4f, age = 0;
         uint32_t order = 0;
+        int relSamples = 0;
     };
     float fs = 48000.0f;
     std::array<Voice, 40> voices {};
+    float fastRel = 0.0005f;
     uint32_t counter = 0;
     std::vector<float> L, R, sL, sR;
     PlateReverb rev; StereoDelay dly;
@@ -113,7 +116,13 @@ private:
             if (v.age < 1.0f) { v.env += (1.02f - v.env) * v.att; if (v.env >= 1.0f) { v.env = 1.0f; v.age = 1.0f; } }
             else if (v.decayRate > 0.0f) v.env += (v.sustain - v.env) * v.decayRate;
         }
-        else v.env -= v.env * v.rel;
+        else
+        {
+            v.env -= v.env * v.rel;
+            // Los releases largos (drone: 6 s de constante) terminan dentro de la cola declarada (8 s): pasados
+            // 5 s se apagan rápido. Antes un drone soltado fuerte seguía sonando casi un minuto.
+            if (++v.relSamples > (int) (5.0f * fs)) v.env -= v.env * fastRel;
+        }
         if (! v.gate && v.env < 1.0e-4f) { v.active = false; return 0.0f; }
         if (! v.gate && v.decayRate > 0.0f) v.env -= v.env * v.decayRate;
         float y;

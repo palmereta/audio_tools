@@ -32,6 +32,10 @@ private:
     dh::orr::ui::LanesPage lanes;
     dh::orr::ui::HarmonyPage harmony;
     dh::orr::ui::OutputsPage outputs;
+    dh::orr::ui::SatellitePage satellite;
+    dh::orr::ui::PillToggle previewBtn;     // en la barra, junto a Play: siempre a la vista
+    int shownRole = -1;
+    bool isSatellite() const { return proc.role() == dh::orr::RoleSatellite; }
     juce::TextButton playBtn, prevBtn { "<" }, nextBtn { ">" }, presetBtn, saveBtn { "Save" }, captureBtn { "Capture MIDI" }, panicBtn { "All notes off" };
     juce::TextButton simpleBtn { "Simple" }, advBtn { "Advanced" }, tabLanes { "Lanes" }, tabHarm { "Harmony & session" }, tabOut { "Outputs" };
     juce::TooltipWindow tips { this, 600 };

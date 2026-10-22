@@ -1,0 +1,183 @@
+{
+ "name": "Thin Ice Lines",
+ "category": "Coldwave",
+ "description": "Hexagonal kit at eight bits, flanged hats, a cold nonlinear room.",
+ "order": 8,
+ "params": {
+  "tempo": 132,
+  "swing": 50,
+  "swing_res": 1,
+  "bd_level": -1,
+  "sd_level": 0,
+  "cp_level": -2,
+  "rs_level": -5,
+  "rs_pan": -10,
+  "ch_level": -3,
+  "ch_pan": 20,
+  "oh_level": -4,
+  "oh_pan": 25,
+  "cy_level": -7,
+  "cy_pan": -30,
+  "rd_level": -6,
+  "rd_pan": -20,
+  "t1_level": -4,
+  "t1_pan": -40,
+  "t2_level": -4,
+  "t2_pan": -15,
+  "t3_level": -4,
+  "t3_pan": 15,
+  "t4_level": -4,
+  "t4_pan": 40,
+  "cb_level": -6,
+  "cb_pan": -15,
+  "cl_level": -5,
+  "cl_pan": 30,
+  "tb_level": -6,
+  "tb_pan": 35,
+  "fx_level": -7,
+  "bd_engine": 1,
+  "bd_kit": 3,
+  "bd_decay": 100,
+  "sd_engine": 1,
+  "sd_kit": 3,
+  "sd_decay": 100,
+  "sd_senda": 40,
+  "ch_engine": 1,
+  "ch_kit": 3,
+  "ch_decay": 100,
+  "ch_sendb": 60,
+  "oh_engine": 1,
+  "oh_kit": 3,
+  "oh_decay": 100,
+  "oh_sendb": 60,
+  "cl_engine": 1,
+  "cl_kit": 3,
+  "cl_decay": 100,
+  "t1_engine": 1,
+  "t1_kit": 3,
+  "t1_decay": 100,
+  "t2_engine": 1,
+  "t2_kit": 3,
+  "t2_decay": 100,
+  "t3_engine": 1,
+  "t3_kit": 3,
+  "t3_decay": 100,
+  "t4_engine": 1,
+  "t4_kit": 3,
+  "t4_decay": 100,
+  "tb_engine": 1,
+  "tb_kit": 3,
+  "tb_decay": 100,
+  "a_type": 1,
+  "a_gate": 300,
+  "a_shape": -40,
+  "b_type": 5,
+  "b_rate": 8,
+  "b_depth": 70,
+  "b_fb": 70,
+  "b_return": -2,
+  "mode": 3,
+  "m_volume": 2.7
+ },
+ "patterns": [
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . . . 100 . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100 . 100 . 100",
+    "cl": ". . . 100 . . . . . . 100"
+   },
+   "group": 0,
+   "var": "A"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . . . 100 . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "ch": "100 100 100 100 100 100 100 100 100 100 100 100 100 100 100 100",
+    "cl": ". . . 100 . . . . . . 100 . . . 100"
+   },
+   "group": 0,
+   "var": "B"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . . . 100 . 100",
+    "sd": ". . . . 100 . . . . . . . 100 100 100r3 90r4",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100 . 100 . 100",
+    "cl": ". . . 100 . . . . . . 100"
+   },
+   "group": 0,
+   "var": "Fill"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . 100 . . . 100 . 100 . 100 . . . 100",
+    "sd": ". . . . 100 . . . . . . . 100",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100 . 100 . 100",
+    "tb": "100 72 100 72 100 72 100 72 100 72 100 72 100 72 100 72"
+   },
+   "group": 1,
+   "var": "A"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . 100 . . . 100 . 100 . 100 . . . 100",
+    "sd": ". . . . 100 . . . . . . . 100 . 100",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100 . 100 . 100",
+    "cy": "100",
+    "tb": "100 72 100 72 100 72 100 72 100 72 100 72 100 72 100 72"
+   },
+   "group": 1,
+   "var": "B"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . 100 . . . 100 . 100 . 100 . . . 100",
+    "sd": ". . . . 100 . . . . . . . 40 72 100 127a",
+    "ch": "100 . 100 . 100 . 100 . 100 . 100",
+    "tb": "100 72 100 72 100 72 100 72 100 72 100 72 100 72 100 72"
+   },
+   "group": 1,
+   "var": "Fill"
+  }
+ ],
+ "chain": [
+  [
+   0,
+   0,
+   4,
+   0
+  ],
+  [
+   0,
+   1,
+   4,
+   1
+  ],
+  [
+   1,
+   0,
+   4,
+   0
+  ],
+  [
+   1,
+   1,
+   4,
+   1
+  ]
+ ]
+}

@@ -5,7 +5,8 @@
 //   athosttest <plugin.vst3|.component> [--tests a,b,...] [--out dir] [--quick]
 //   athosttest --chain <generador.vst3> <sinte.vst3> [--gen-programs all|0,3] [--synth-program n] [--secs 120] [--out dir]
 //
-// Pruebas: info programs midi rates state fuzz params cpu reprepare midiout   (por defecto, todas)
+// Pruebas: info programs midi rates state fuzz params cpu reprepare midiout stopped bypass freeze roles ports (por defecto, todas;
+// roles y ports sólo hacen algo con Orrery: Main y satélites, puertos virtuales)
 // Cada resultado es PASS, WARN (para mirar a mano) o FAIL. Se escribe <out>/<plugin>.json y, de los casos con
 // problemas, un WAV para escucharlos. Sale con 1 si hubo algún FAIL.
 
@@ -16,7 +17,9 @@
 #include <cstdio>
 #include <functional>
 #include <map>
+#include <random>
 #include <set>
+#include <thread>
 
 using Clock = std::chrono::steady_clock;
 
@@ -35,12 +38,14 @@ juce::String fmt (const char* f, ...)
 struct PlayHead : juce::AudioPlayHead
 {
     double sr = 48000.0, bpm = 120.0, ppq = 0.0; bool playing = false; juce::int64 pos = 0;
+    juce::uint64 hostNs = 0; bool hasHostNs = false;     // la hora del sistema por ciclo (VST3 systemTime)
     juce::Optional<PositionInfo> getPosition() const override
     {
         PositionInfo pi;
         pi.setBpm (bpm); pi.setIsPlaying (playing); pi.setPpqPosition (ppq); pi.setTimeInSamples (pos);
         pi.setTimeInSeconds ((double) pos / sr); pi.setTimeSignature (juce::AudioPlayHead::TimeSignature { 4, 4 });
         pi.setPpqPositionOfLastBarStart (std::floor (ppq / 4.0) * 4.0); pi.setIsLooping (false);
+        if (hasHostNs) pi.setHostTimeNs (hostNs);
         return pi;
     }
 };
@@ -160,6 +165,16 @@ Out render (Plug& pl, std::vector<Ev> events, juce::int64 total, const RenderOpt
         }
         if (pl.ph.playing && ! o.frozenPosition) pl.ph.ppq += n * pl.ph.bpm / 60.0 / pl.sr;
         pos += n;
+    }
+    // Los cambios de transporte que caen justo al final (un stop en `total`) también se aplican: si no, el host quedaba
+    // reproduciendo para la prueba siguiente y una caja de ritmos que sigue al host tocaba sola.
+    while (ti < o.transport.size() && o.transport[ti].sample <= total)
+    {
+        const auto& t = o.transport[ti++];
+        if (t.action == 0) pl.ph.playing = true;
+        else if (t.action == 1) pl.ph.playing = false;
+        else if (t.action == 2) pl.ph.ppq = t.value;
+        else pl.ph.bpm = t.value;
     }
     return out;
 }
@@ -324,7 +339,14 @@ void scenario (const juce::String& name, std::vector<Ev> ev, double lastEventSec
     if (all.nan + all.inf > 0) { status = "FAIL"; d << ", " << all.nan << " NaN, " << all.inf << " Inf"; }
     else if (all.peak > 4.0) { status = "FAIL"; d << ", pico excesivo"; }
     else if (all.peak > 1.6) status = "WARN";
-    if (expectSilence && db (end.rms) > std::max (restDb + 6.0, -70.0)) { status = "FAIL"; d << U (", sigue sonando (¿nota colgada?)"); }
+    if (expectSilence && db (end.rms) > std::max (restDb + 6.0, -70.0))
+    {
+        // Una cola declarada más larga que la espera (la reverb larga del sonido de prueba de Orrery) puede seguir
+        // sonando, si decae: una nota colgada se sostiene.
+        const double tail = pl->p->getTailLengthSeconds(), before = db (stats (r, total - 4.5, total - 4.0, pl->sr).rms);
+        if (tail > waitSec (*pl) && before - db (end.rms) > 6.0) d << fmt (", cola declarada de %.0f s (decae %.0f dB en 4 s)", tail, before - db (end.rms));
+        else { status = "FAIL"; d << U (", sigue sonando (¿nota colgada?)"); }
+    }
     if (pl->p->producesMidi())
     {
         auto st = stuckNotes (r.midi);
@@ -895,6 +917,274 @@ void testBypass()
     report ("bypass", U ("impulso por processBlockBypassed"), got == L ? "PASS" : "FAIL", fmt ("sale a %d muestras; latencia informada %d", got, L));
 }
 
+// ───────── Orrery: Main y satélites, puertos virtuales ─────────
+// Varias instancias del mismo VST3 en el mismo proceso (como las pistas de un DAW), procesadas ciclo a ciclo con el
+// mismo transporte y en un orden al azar (o cada una en su hilo).
+juce::AudioProcessorParameter* paramNamed (Plug& pl, const juce::String& name)
+{
+    for (auto* p : realParams (pl)) if (p->getName (64) == name) return p;
+    return nullptr;
+}
+void setChoice (Plug& pl, const juce::String& name, int index, int count)
+{
+    if (auto* p = paramNamed (pl, name)) p->setValueNotifyingHost (count > 1 ? (float) index / (float) (count - 1) : 0.0f);
+}
+
+// El estado propio del plugin dentro del estado VST3 que guarda el host (IComponent → bloque XML de JUCE).
+bool editPluginState (Plug& pl, const std::function<void (juce::XmlElement&)>& edit, juce::MemoryBlock* result = nullptr)
+{
+    juce::MemoryBlock mb; pl.p->getStateInformation (mb);
+    auto host = juce::AudioProcessor::getXmlFromBinary (mb.getData(), (int) mb.getSize());
+    if (host == nullptr) return false;
+    auto* comp = host->getChildByName ("IComponent");
+    if (comp == nullptr) return false;
+    juce::MemoryBlock inner; inner.fromBase64Encoding (comp->getAllSubText().trim());
+    auto x = juce::AudioProcessor::getXmlFromBinary (inner.getData(), (int) inner.getSize());
+    if (x == nullptr) return false;
+    // El bloque XML (8 bytes de cabecera + texto) y lo que el envoltorio VST3 agrega después.
+    const auto* d = static_cast<const juce::uint8*> (inner.getData());
+    const size_t used = 8 + (size_t) juce::ByteOrder::littleEndianInt (d + 4) + 1;
+    juce::MemoryBlock tail; if (used < inner.getSize()) tail.append (d + used, inner.getSize() - used);
+    edit (*x);
+    juce::MemoryBlock fresh; juce::AudioProcessor::copyXmlToBinary (*x, fresh);
+    fresh.append (tail.getData(), tail.getSize());
+    comp->deleteAllTextElements(); comp->addTextElement (fresh.toBase64Encoding());
+    juce::MemoryBlock out; juce::AudioProcessor::copyXmlToBinary (*host, out);
+    if (result != nullptr) { *result = out; return true; }
+    pl.p->setStateInformation (out.getData(), (int) out.getSize());
+    return true;
+}
+juce::String pluginStateAttr (Plug& pl, const char* attr)
+{
+    juce::String v;
+    juce::MemoryBlock dummy;
+    editPluginState (pl, [&] (juce::XmlElement& x) { v = x.getStringAttribute (attr); }, &dummy);
+    return v;
+}
+juce::String pluginParamValue (Plug& pl, const char* id)       // como entero ("1", no "1.0")
+{
+    juce::String v;
+    juce::MemoryBlock dummy;
+    editPluginState (pl, [&] (juce::XmlElement& x) { for (auto* c : x.getChildIterator()) if (c->getStringAttribute ("id") == id) v = juce::String ((int) std::lround (c->getDoubleAttribute ("value"))); }, &dummy);
+    return v;
+}
+
+struct Rig
+{
+    std::vector<std::unique_ptr<Plug>> inst;
+    std::vector<std::vector<Ev>> midi;
+    juce::int64 pos = 0; double ppq = 0.0;
+    std::mt19937 rng { 7 };
+    bool playing = false, threads = false;
+    int block = 512;
+    std::vector<int> bypassed;     // por instancia: 1 = bypass
+    void add (double sr, int n) { inst.push_back (load (pluginPath, sr, n)); midi.emplace_back(); bypassed.push_back (0); block = n; }
+    void cycle()
+    {
+        const int N = (int) inst.size();
+        const double sr = inst[0]->sr;
+        const juce::uint64 ns = (juce::uint64) (5.0e9 + (double) pos / sr * 1.0e9);
+        for (auto& p : inst) { p->ph.playing = playing; p->ph.ppq = ppq; p->ph.pos = pos; p->ph.bpm = 100.0; p->ph.hostNs = ns; p->ph.hasHostNs = true; }
+        auto one = [&] (int i) {
+            auto& p = *inst[(size_t) i];
+            juce::AudioBuffer<float> buf (std::max (2, p.outs), block); buf.clear();
+            juce::MidiBuffer mb;
+            if (bypassed[(size_t) i]) p.p->processBlockBypassed (buf, mb); else p.p->processBlock (buf, mb);
+            for (const auto m : mb) midi[(size_t) i].push_back ({ pos + m.samplePosition, m.getMessage() });
+        };
+        if (threads)
+        {
+            std::vector<std::thread> th;
+            for (int i = 0; i < N; ++i) th.emplace_back ([&, i] { if (rng() % 2) std::this_thread::yield(); one (i); });
+            for (auto& t : th) t.join();
+        }
+        else
+        {
+            std::vector<int> order ((size_t) N); for (int i = 0; i < N; ++i) order[(size_t) i] = i;
+            std::shuffle (order.begin(), order.end(), rng);
+            for (int i : order) one (i);
+        }
+        pos += block;
+        if (playing) ppq += block * 100.0 / 60.0 / sr;
+    }
+    void run (double secs) { const juce::int64 end = pos + (juce::int64) (secs * inst[0]->sr); while (pos < end) cycle(); }
+};
+
+// Los mensajes de unos canales, desde una muestra.
+std::vector<Ev> onChannels (const std::vector<Ev>& v, const std::set<int>& chans, juce::int64 from = 0)
+{
+    std::vector<Ev> r;
+    for (auto& e : v) if (e.sample >= from && chans.count (e.m.getChannel())) r.push_back (e);
+    return r;
+}
+int sameMidi (const std::vector<Ev>& a, const std::vector<Ev>& b)
+{
+    int m = 0;
+    for (size_t i = 0; i < std::min (a.size(), b.size()); ++i)
+        if (a[i].sample == b[i].sample && a[i].m.getRawDataSize() == b[i].m.getRawDataSize()
+            && std::memcmp (a[i].m.getRawData(), b[i].m.getRawData(), (size_t) a[i].m.getRawDataSize()) == 0) ++m;
+    return (a.size() == b.size() && m == (int) a.size()) ? -1 : m;
+}
+
+void testConstellation()
+{
+    {
+        auto probe = load (pluginPath);
+        if (paramNamed (*probe, "Role") == nullptr || paramNamed (*probe, "Satellite Lanes") == nullptr) return;     // sólo Orrery 1.0.5+
+    }
+    // 1. Auto: la primera es Main, las siguientes satélites en el próximo carril libre; se guarda y se restaura.
+    {
+        Rig rig; for (int i = 0; i < 4; ++i) rig.add (48000.0, 512);
+        rig.run (0.1);
+        juce::StringArray roles, lanes;
+        for (auto& p : rig.inst) { roles.add (pluginStateAttr (*p, "autoRole")); lanes.add (pluginStateAttr (*p, "autoLanes")); }
+        const bool ok = roles.joinIntoString (",") == "2,3,3,3" && lanes.joinIntoString (",") == "0,1,2,4";
+        report ("roles", U ("1 Auto: Main y satélites"), ok ? "PASS" : "FAIL", "rol " + roles.joinIntoString (",") + U (", carriles ") + lanes.joinIntoString (","));
+        // Preview: el Main sigue con el sonido de prueba, los satélites nuevos empiezan sin él.
+        juce::StringArray pv; for (auto& p : rig.inst) pv.add (pluginParamValue (*p, "preview"));
+        report ("roles", U ("1 Auto: sonido de prueba"), pv.joinIntoString (",") == "1,0,0,0" ? "PASS" : "FAIL", "preview " + pv.joinIntoString (","));
+        // Reabrir el proyecto: cada una recupera su rol aunque se carguen en otro orden.
+        std::vector<juce::MemoryBlock> st (4); for (int i = 0; i < 4; ++i) rig.inst[(size_t) i]->p->getStateInformation (st[(size_t) i]);
+        rig.inst.clear();
+        Rig again; for (int i = 0; i < 4; ++i) again.add (48000.0, 512);
+        for (int i : { 3, 1, 0, 2 }) again.inst[(size_t) i]->p->setStateInformation (st[(size_t) i].getData(), (int) st[(size_t) i].getSize());
+        again.run (0.1);
+        juce::StringArray r2, l2; for (auto& p : again.inst) { r2.add (pluginStateAttr (*p, "autoRole")); l2.add (pluginStateAttr (*p, "autoLanes")); }
+        report ("roles", U ("1 Auto: proyecto reabierto"), r2.joinIntoString (",") == "2,3,3,3" && l2.joinIntoString (",") == "0,1,2,4" ? "PASS" : "FAIL",
+                "rol " + r2.joinIntoString (",") + U (", carriles ") + l2.joinIntoString (","));
+    }
+    // 2. Un proyecto de 1.0.4 (sin rol) abre como Independent con su Link, aunque ya haya un Main.
+    {
+        Rig rig; rig.add (48000.0, 512); rig.add (48000.0, 512);
+        rig.run (0.1);
+        auto& old = *rig.inst[1];
+        juce::MemoryBlock legacy;
+        editPluginState (old, [] (juce::XmlElement& x) {
+            for (auto* id : { "role", "sat_lanes", "skip_sat", "midi_ports" })
+                for (auto* c : x.getChildIterator()) if (c->getStringAttribute ("id") == id) { x.removeChildElement (c, true); break; }
+            x.removeAttribute ("autoRole"); x.removeAttribute ("autoLanes");
+            for (auto* c : x.getChildIterator()) if (c->getStringAttribute ("id") == "link") c->setAttribute ("value", 1.0);    // Lead
+            for (auto* c : x.getChildIterator()) if (c->getStringAttribute ("id") == "run") c->setAttribute ("value", 1.0);
+        }, &legacy);
+        rig.add (48000.0, 512);
+        auto& fresh = *rig.inst[2];
+        fresh.p->setStateInformation (legacy.getData(), (int) legacy.getSize());
+        rig.run (3.0);
+        const auto role = pluginParamValue (fresh, "role"), link = pluginParamValue (fresh, "link");
+        std::set<int> ch; int ons = 0; for (auto& e : rig.midi[2]) if (e.m.isNoteOn()) { ++ons; ch.insert (e.m.getChannel()); }
+        const bool ok = role == "1" && link == "1" && ch.size() >= 3;
+        report ("roles", U ("2 estado de 1.0.4"), ok ? "PASS" : "FAIL", fmt ("rol %s (1 = Independent), Link %s (1 = Lead), %d notas en %d canales", role.toRawUTF8(), link.toRawUTF8(), ons, (int) ch.size()));
+    }
+    // 3. Satélites iguales al Main, nota por nota y muestra por muestra.
+    for (int mode = 0; mode < 3; ++mode)
+        for (int n : { 64, 512, 1024 })
+        {
+            if (mode == 2 && n != 512) continue;
+            Rig rig; rig.threads = mode == 2;
+            for (int i = 0; i < 4; ++i) rig.add (48000.0, n);
+            auto& M = *rig.inst[0];
+            setChoice (M, "Skip Satellite Lanes", 0, 2);                 // el Main manda todo, para comparar
+            setChoice (*rig.inst[3], "Satellite Lanes", 0x30, 256);         // un satélite con dos carriles (5 y 6)
+            M.p->setCurrentProgram (0);                                     // First Light: carriles 1, 2, 3, 5 y 6
+            setChoice (M, "Clock", mode == 0 ? 1 : 0, 2);
+            rig.playing = mode == 0;
+            rig.run (0.3);                                                  // se sincronizan con el Main parado
+            setChoice (M, "Play", 1, 2);
+            rig.run (20.0);
+            setChoice (M, "Density", 80, 101);                              // cambios en marcha
+            rig.run (10.0);
+            M.p->setCurrentProgram (1);                                     // otro preset en marcha (Tape Loops)
+            setChoice (M, "Play", 1, 2);
+            rig.run (20.0);
+            setChoice (M, "Play", 0, 2);
+            rig.run (2.0);
+            juce::String d; bool ok = true; int total = 0;
+            const std::vector<std::set<int>> chans { { 1 }, { 2 }, { 5, 6 } };
+            for (int s = 1; s < 4; ++s)
+            {
+                const auto want = onChannels (rig.midi[0], chans[(size_t) s - 1]);
+                const int r = sameMidi (want, rig.midi[(size_t) s]);
+                total += (int) want.size();
+                ok = ok && r == -1 && stuckNotes (rig.midi[(size_t) s]).empty() && want.size() > 20;
+                d << (r == -1 ? juce::String ((int) want.size()) + "/" + juce::String ((int) want.size()) : juce::String (r) + "/" + juce::String ((int) want.size())) << " ";
+            }
+            static const char* modeName[3] = { "host en marcha", "reloj propio", "reloj propio, hilos" };
+            report ("roles", fmt ("3 satélites = Main, %s, bloque %d", modeName[mode], n), ok ? "PASS" : "FAIL", U ("mensajes iguales por satélite: ") + d);
+        }
+    // 4. Skip: el Main no manda los carriles de sus satélites; 5. bypass de un satélite y del Main: sin notas colgadas.
+    {
+        Rig rig; for (int i = 0; i < 3; ++i) rig.add (48000.0, 256);
+        auto& M = *rig.inst[0];
+        setChoice (*rig.inst[1], "Satellite Lanes", 0x04, 256);         // la melodía (carril 3)
+        setChoice (*rig.inst[2], "Satellite Lanes", 0x10, 256);         // la nube (carril 5)
+        M.p->setCurrentProgram (0);
+        setChoice (M, "Clock", 0, 2);
+        rig.run (0.2);
+        setChoice (M, "Play", 1, 2);
+        rig.run (15.0);
+        std::map<int, int> perCh; for (auto& e : rig.midi[0]) if (e.m.isNoteOn()) perCh[e.m.getChannel()]++;
+        const bool skip = perCh[3] == 0 && perCh[5] == 0 && perCh[1] > 0 && perCh[2] > 0;
+        std::map<int, int> satCh; for (auto& e : rig.midi[1]) if (e.m.isNoteOn()) satCh[e.m.getChannel()]++;
+        report ("roles", U ("4 el Main salta los carriles de los satélites"), skip && satCh[3] > 0 ? "PASS" : "FAIL",
+                fmt ("notas del Main por canal: 1=%d 2=%d 3=%d 5=%d 6=%d; el satélite del carril 3: %d", perCh[1], perCh[2], perCh[3], perCh[5], perCh[6], satCh[3]));
+        auto onsBetween = [&] (int i, juce::int64 a, juce::int64 b) { int k = 0; for (auto& e : rig.midi[(size_t) i]) if (e.m.isNoteOn() && e.sample >= a && e.sample < b) ++k; return k; };
+        const juce::int64 b0 = rig.pos;
+        rig.bypassed[1] = 1; rig.run (3.0);
+        const juce::int64 b1 = rig.pos;
+        rig.bypassed[1] = 0; rig.run (6.0);
+        const juce::int64 b2 = rig.pos;
+        auto offs = [&] (int i, juce::int64 at) { int k = 0; for (auto& e : rig.midi[(size_t) i]) if (e.sample == at && (e.m.isNoteOff() || e.m.isAllNotesOff())) ++k; return k; };
+        report ("roles", U ("5 bypass de un satélite"), onsBetween (1, b0 + 256, b1) == 0 && onsBetween (1, b1, b2) > 0 ? "PASS" : "FAIL",
+                fmt ("%d note-off al entrar, %d notas en bypass, %d al volver", offs (1, b0), onsBetween (1, b0 + 256, b1), onsBetween (1, b1, b2)));
+        rig.bypassed[0] = 1; rig.run (3.0);
+        const juce::int64 b3 = rig.pos;
+        rig.bypassed[0] = 0; rig.run (15.0);
+        const juce::int64 b4 = rig.pos;
+        report ("roles", U ("5 bypass del Main: los satélites callan y vuelven"), onsBetween (1, b2 + 512, b3) + onsBetween (2, b2 + 512, b3) == 0 && onsBetween (1, b3, b4) + onsBetween (2, b3, b4) > 0 ? "PASS" : "FAIL",
+                fmt ("%d notas de satélites sin el Main, %d al volver (el Main: %d)", onsBetween (1, b2 + 512, b3) + onsBetween (2, b2 + 512, b3), onsBetween (1, b3, b4) + onsBetween (2, b3, b4), onsBetween (0, b3, b4)));
+        setChoice (M, "Play", 0, 2);
+        rig.run (2.0);
+        int stuck = 0; for (int i = 0; i < 3; ++i) stuck += (int) stuckNotes (rig.midi[(size_t) i]).size();
+        report ("roles", U ("5 al parar, nada colgado"), stuck == 0 ? "PASS" : "FAIL", fmt ("%d notas sin note-off en las tres", stuck));
+    }
+}
+
+// 6. Los carriles como puertos MIDI virtuales (macOS y Linux): se crean, dos instancias no chocan, se borran al cerrar.
+void testPorts()
+{
+    {
+        auto probe = load (pluginPath);
+        if (paramNamed (*probe, "Publish Lanes As MIDI Ports") == nullptr) return;
+    }
+    auto pump = [] (int ms) {
+       #if JUCE_MODAL_LOOPS_PERMITTED
+        juce::MessageManager::getInstance()->runDispatchLoopUntil (ms);
+       #else
+        juce::Thread::sleep (ms);
+       #endif
+    };
+    auto names = [] { juce::StringArray s; for (auto& d : juce::MidiInput::getAvailableDevices()) s.add (d.name); return s; };
+    auto count = [&] (const juce::String& prefix) { int k = 0; for (auto& n : names()) if (n.startsWith (prefix + " ")) ++k; return k; };
+    const int before = count ("Orrery");
+    {
+        auto a = load (pluginPath), b = load (pluginPath);
+        for (auto* p : { a.get(), b.get() }) { setChoice (*p, "Role", 1, 4); setChoice (*p, "Publish Lanes As MIDI Ports", 1, 2); p->p->releaseResources(); p->p->prepareToPlay (p->sr, p->block); }
+        pump (1500);
+        const int one = count ("Orrery") - count ("Orrery 2") - before, two = count ("Orrery 2");
+        auto r = render (*a, {}, S (0.5, a->sr));
+       #if JUCE_WINDOWS
+        report ("ports", U ("6 puertos virtuales"), one == 0 && two == 0 ? "PASS" : "FAIL", U ("Windows no tiene puertos virtuales propios (loopMIDI)"));
+       #else
+        if (one == 0 && two == 0) report ("ports", U ("6 puertos virtuales"), "WARN", U ("el sistema no creó puertos (¿sin servidor MIDI?)"));
+        else report ("ports", U ("6 puertos virtuales, dos instancias"), one == 8 && two == 8 ? "PASS" : "FAIL",
+                     fmt ("%d de la primera, %d de la segunda: ", one, two) + names().joinIntoString (", ").substring (0, 160));
+       #endif
+    }
+    pump (1500);
+    const int after = count ("Orrery") - before;
+    report ("ports", U ("6 puertos borrados al cerrar"), after == 0 ? "PASS" : "FAIL", fmt ("%d puertos de Orrery quedan", after));
+}
+
 void testMidiOut()
 {
     auto probe = load (pluginPath);
@@ -1049,13 +1339,36 @@ int main (int argc, char** argv)
 
     pluginPath = juce::File::getCurrentWorkingDirectory().getChildFile (args[0]).getFullPathName();
     plugName = juce::File (pluginPath).getFileNameWithoutExtension();
+    // Estado de cada programa tal como lo guarda un host VST3 (el flujo de IComponent::getState): <dir>/<n>.bin y
+    // <dir>/programs.txt. Sirve para armar sesiones de un DAW con los presets ya cargados (Ableton lo guarda en hex).
+    if (args.contains ("--dump-states"))
+    {
+        auto pl = load (pluginPath); auto& p = *pl->p;
+        juce::File dir (opt ("--dump-states", "states"));
+        dir.createDirectory();
+        juce::String list;
+        for (int k = 0; k < juce::jmax (1, p.getNumPrograms()); ++k)
+        {
+            if (p.getNumPrograms() > 0) p.setCurrentProgram (k);
+            juce::MemoryBlock mb; p.getStateInformation (mb);
+            auto xml = juce::AudioProcessor::getXmlFromBinary (mb.getData(), (int) mb.getSize());
+            juce::MemoryBlock comp;
+            if (xml != nullptr)
+                if (auto* c = xml->getChildByName ("IComponent")) comp.fromBase64Encoding (c->getAllSubText().trim());
+            dir.getChildFile (juce::String (k) + ".bin").replaceWithData (comp.getData(), comp.getSize());
+            list << k << "\t" << p.getProgramName (k) << "\t" << (int) comp.getSize() << "\n";
+        }
+        dir.getChildFile ("programs.txt").replaceWithText (list);
+        std::printf ("%d programas en %s\n", juce::jmax (1, p.getNumPrograms()), dir.getFullPathName().toRawUTF8());
+        return 0;
+    }
     if (args.contains ("--list-params"))
     {
         auto pl = load (pluginPath); int i = 0;
         for (auto* p : realParams (*pl)) std::printf ("%3d %s (%d pasos)\n", i++, p->getName (40).toRawUTF8(), p->getNumSteps());
         return 0;
     }
-    juce::StringArray tests = juce::StringArray::fromTokens (opt ("--tests", "info,programs,midi,rates,state,fuzz,params,cpu,reprepare,midiout,stopped,bypass,freeze"), ",", "");
+    juce::StringArray tests = juce::StringArray::fromTokens (opt ("--tests", "info,programs,midi,rates,state,fuzz,params,cpu,reprepare,midiout,stopped,bypass,freeze,roles,ports"), ",", "");
     std::printf ("%s\n", pluginPath.toRawUTF8());
     const auto t0 = Clock::now();
     for (auto& t : tests)
@@ -1074,6 +1387,8 @@ int main (int argc, char** argv)
         else if (t == "stopped") testStopped();
         else if (t == "bypass") testBypass();
         else if (t == "freeze") testFreezeState();
+        else if (t == "roles") testConstellation();
+        else if (t == "ports") testPorts();
     }
     writeJson();
     std::printf ("\n%s: %d FAIL, %d WARN en %.0f s\n", plugName.toRawUTF8(), fails, warns, std::chrono::duration<double> (Clock::now() - t0).count());

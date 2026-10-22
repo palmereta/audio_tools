@@ -1,0 +1,97 @@
+{
+ "name": "Occult Slowmo",
+ "category": "Witch house",
+ "description": "Half the tempo, double the room: everything in a long hall.",
+ "order": 52,
+ "params": {
+  "tempo": 66,
+  "swing": 50,
+  "swing_res": 1,
+  "bd_level": -1,
+  "sd_level": 0,
+  "cp_level": -2,
+  "rs_level": -5,
+  "rs_pan": -10,
+  "ch_level": -3,
+  "ch_pan": 20,
+  "oh_level": -4,
+  "oh_pan": 25,
+  "cy_level": -7,
+  "cy_pan": -30,
+  "rd_level": -6,
+  "rd_pan": -20,
+  "t1_level": -4,
+  "t1_pan": -40,
+  "t2_level": -4,
+  "t2_pan": -15,
+  "t3_level": -4,
+  "t3_pan": 15,
+  "t4_level": -4,
+  "t4_pan": 40,
+  "cb_level": -6,
+  "cb_pan": -15,
+  "cl_level": -5,
+  "cl_pan": 30,
+  "tb_level": -6,
+  "tb_pan": 35,
+  "fx_level": -7,
+  "bd_model": 4,
+  "bd_decay": 85,
+  "sd_model": 2,
+  "sd_senda": 60,
+  "oh_model": 1,
+  "oh_sendb": 40,
+  "ch_model": 1,
+  "rd_model": 2,
+  "a_type": 5,
+  "a_size": 90,
+  "a_return": -1,
+  "b_type": 1,
+  "b_time": 8,
+  "b_fb": 50,
+  "b_return": -8,
+  "m_tape": 1,
+  "autofill": 2,
+  "m_volume": 2.3
+ },
+ "patterns": [
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100",
+    "sd": ". . . . . . . . 100",
+    "ch": ". . 100 . . . 100 . . . 100 . . . 100 100r2",
+    "oh": ". . . . 100 . . . . . . . 100"
+   },
+   "group": 0,
+   "var": "A"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . . . . . 100",
+    "sd": ". . . . . . . . 100",
+    "ch": ". . 100 . . . 100 . . . 100 . . . 100 100r2",
+    "oh": ". . . . 100 . . . . . . . 100",
+    "rd": "100 . . . . . . . 100"
+   },
+   "group": 0,
+   "var": "B"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100",
+    "sd": ". . . . . . . . 100 . 100 . 100 100 100 100",
+    "ch": ". . 100 . . . 100",
+    "oh": ". . . . 100",
+    "t1": ". . . . . . . . . . . . 100 . . 100"
+   },
+   "group": 0,
+   "var": "Fill"
+  }
+ ]
+}

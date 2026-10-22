@@ -28,6 +28,8 @@ against the hardware and improve.
 | [Halation](plugins/halation/) | Original: delay and reverb in one space, with freeze, shimmer, reverse, grains and more | 1.0.1 | Released |
 | [Tarnish](plugins/tarnish/) | Original: tape, cassette, video, vinyl, AM radio and telephone, with magnetic hysteresis | 1.0.1 | Released |
 | [Plumb](plugins/plumb/) | Original: real-time pitch correction for voice, natural to hard, from 0.67 ms of latency | 1.0.0 | Released |
+| [Thrum](plugins/thrum/) | Original: electric guitar by physical modelling: six guitars with waveguide strings and real pickups, a guitarist that fingers, strums and plays the articulations, thirteen pedals, four amps and a cabinet with movable microphones | 1.0.0 | Released |
+| [Pallor](plugins/pallor/) | Original: drum machine for dark wave, coldwave, post-punk and EBM, analog and 80s digital engines, 80s/90s effects, step sequencer | 1.0.0 | Released |
 
 ## AT20V
 
@@ -349,6 +351,8 @@ plugins/lacquer/      Lacquer: mastering engine (JUCE-free), plugin with file mo
 plugins/halation/     Halation: delay/reverb engine (JUCE-free), room view, presets, renderer, tests, Blender scene
 plugins/tarnish/      Tarnish: tape and lo-fi engine (JUCE-free), machine view, presets, renderer, tests, Blender scene
 plugins/plumb/        Plumb: pitch correction engine (JUCE-free), slate and plumb bob view, presets, renderer, tests, Blender scene
+plugins/pallor/       Pallor: drum engine and sequencer (JUCE-free), effects, rendered editor, presets and pattern library, renderer, tests, manual
+plugins/thrum/        Thrum: guitar engine and guitarist (JUCE-free), pedals, amps, cabinet, rendered editor, presets, renderer, tests, Blender scene, manual
 shared/manual/        the in-plugin manual viewer, its Markdown subset and the CMake helper
 shared/dsp/           DSP shared by the instruments (oversampling, BLEP, delay, reverb, vocoder)
 shared/ui/            UI shared by the instruments (patch cable rope physics)

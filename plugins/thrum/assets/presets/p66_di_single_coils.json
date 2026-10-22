@@ -1,0 +1,23 @@
+{
+ "name": "DI Single Coils",
+ "category": "Direct",
+ "description": "The guitar alone, no amp or cabinet: record this and reamp it later (the DI output carries the same).",
+ "params": {
+  "g_type": "Solid body, three single coils",
+  "g_selector": "Bridge",
+  "g_volume": 10,
+  "g_tone": 10,
+  "amp_on": 0,
+  "cab_on": 0,
+  "p_mode": "Melody (poly)",
+  "p_legato": "Auto",
+  "p_legato_frets": 4,
+  "p_vib_auto": 1,
+  "p_vib_depth": 35,
+  "p_vib_delay": 450,
+  "out_level": 7.1
+ },
+ "demo_chords": "A",
+ "demo_bpm": 100,
+ "order": 66
+}

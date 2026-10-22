@@ -1,5 +1,5 @@
 # Orrery — generador de MIDI para ambient, drone y música tranquila: ocho carriles en órbita.
-set(ORRERY_VERSION 1.0.4)
+set(ORRERY_VERSION 1.0.5)
 
 if(APPLE)
     set(ORRERY_FORMATS VST3 AU Standalone)

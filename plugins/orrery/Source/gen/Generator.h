@@ -204,6 +204,40 @@ public:
     void resetSession() { ended = false; sessionSec = 0.0; sessionSamples = 0; anchorSession = 0; anchorBeat = beat; }
     bool isRunning() const { return running; }
 
+    // Satélites: una réplica toma todo el estado musical de la generadora del Main (no la captura) y desde
+    // ahí avanza igual, bloque a bloque. Los vectores reusan su capacidad (sin pedir memoria si alcanza).
+    void copyStateFrom (const Generator& o)
+    {
+        lanes = o.lanes; g = o.g; view = o.view; captureBpm = o.captureBpm;
+        following = o.following; external = o.external; resetRequest.store (o.resetRequest.load());
+        fs = o.fs; beat = o.beat; blockB0 = o.blockB0; blockLen = o.blockLen; curBpm = o.curBpm; blockN = o.blockN;
+        running = o.running; ended = o.ended; prevRun = o.prevRun; playedBeats = o.playedBeats;
+        sessionSec = o.sessionSec; fade = o.fade; sessionSamples = o.sessionSamples; anchorSession = o.anchorSession;
+        anchorBeat = o.anchorBeat; anchorBpm = o.anchorBpm; genT = o.genT;
+        for (int l = 0; l < kLanes; ++l)
+        {
+            auto& d = st[(size_t) l]; const auto& s = o.st[(size_t) l];
+            d.wasOn = s.wasOn; d.recording = s.recording; d.next = s.next; d.cycleStart = s.cycleStart; d.restUntil = s.restUntil;
+            d.orbitStart = s.orbitStart; d.lastNote = s.lastNote; d.phraseLeft = s.phraseLeft; d.step = s.step; d.arpIdx = s.arpIdx;
+            d.sounding = s.sounding; d.loopIdx = s.loopIdx; d.voicing.assign (s.voicing.begin(), s.voicing.end());
+            d.loopEvents.assign (s.loopEvents.begin(), s.loopEvents.end()); d.rng = s.rng; d.crng = s.crng;
+            d.ccPhase = s.ccPhase; d.ccWalk = s.ccWalk; d.drift = s.drift; d.driftTarget = s.driftTarget; d.lastCc = s.lastCc;
+            d.lastBend = s.lastBend; d.lastCc7 = s.lastCc7; d.lastCh = s.lastCh; d.prevLoop = s.prevLoop; d.swell = s.swell;
+        }
+        hrng = o.hrng; chord.degree = o.chord.degree; chord.rootPc = o.chord.rootPc; chord.pcs.assign (o.chord.pcs.begin(), o.chord.pcs.end()); chord.name = o.chord.name;
+        degree = o.degree; chordStart = o.chordStart; nextChordBeat = o.nextChordBeat; chordLen = o.chordLen;
+        pending.assign (o.pending.begin(), o.pending.end()); out.assign (o.out.begin(), o.out.end());
+        activeId = o.activeId; activeLane = o.activeLane; activeVel = o.activeVel; nextId = o.nextId;
+        serial = o.serial; seenSerial = o.seenSerial;
+    }
+    // Notas que suenan ahora (canal 0..15, nota, carril, velocidad): un satélite que se suma en marcha las ataca.
+    template <typename F> void forEachSounding (F&& f) const
+    {
+        for (int ch = 0; ch < 16; ++ch)
+            for (int n = 0; n < 128; ++n)
+                if (activeId[(size_t) ch][(size_t) n] != 0) f (ch, n, (int) activeLane[(size_t) ch][(size_t) n], (int) activeVel[(size_t) ch][(size_t) n]);
+    }
+
 private:
     struct Pending { double beat; uint8_t type; uint8_t ch, note, vel; int8_t lane; uint32_t id; };   // type 0 off, 1 on
     struct LoopEv { double off; int note; int vel; double dur; };
@@ -236,6 +270,7 @@ private:
     // Notas sonando por canal: id de la última nota-on (0 = apagada).
     std::array<std::array<uint32_t, 128>, 16> activeId {};
     std::array<std::array<int8_t, 128>, 16> activeLane {};
+    std::array<std::array<uint8_t, 128>, 16> activeVel {};      // sólo para los satélites (no cambia lo que sale)
     uint32_t nextId = 1;
 
     static float mfac (float macro) { return (float) dm::exp2 (2.0 * (double) (macro - 0.5f)); }      // 0..1 → ×0,5..×2
@@ -668,7 +703,7 @@ private:
                     if (pl >= 0) st[(size_t) pl].sounding = std::max (0, st[(size_t) pl].sounding - 1);
                 }
                 if (p.lane >= 0) st[(size_t) p.lane].sounding++;
-                id = p.id; activeLane[p.ch][p.note] = p.lane;
+                id = p.id; activeLane[p.ch][p.note] = p.lane; activeVel[p.ch][p.note] = (uint8_t) std::max<int> (1, p.vel);
                 push (off, 0x90 | p.ch, p.note, std::max<int> (1, p.vel), p.lane);
             }
             else if (id == p.id)

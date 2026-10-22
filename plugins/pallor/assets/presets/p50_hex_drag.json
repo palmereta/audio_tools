@@ -1,0 +1,94 @@
+{
+ "name": "Hex Drag",
+ "category": "Witch house",
+ "description": "Slow and heavy, hat rolls stuttering, the whole thing at 11 kHz.",
+ "order": 50,
+ "params": {
+  "tempo": 70,
+  "swing": 50,
+  "swing_res": 1,
+  "bd_level": -1,
+  "sd_level": 0,
+  "cp_level": -2,
+  "rs_level": -5,
+  "rs_pan": -10,
+  "ch_level": -3,
+  "ch_pan": 20,
+  "oh_level": -4,
+  "oh_pan": 25,
+  "cy_level": -7,
+  "cy_pan": -30,
+  "rd_level": -6,
+  "rd_pan": -20,
+  "t1_level": -4,
+  "t1_pan": -40,
+  "t2_level": -4,
+  "t2_pan": -15,
+  "t3_level": -4,
+  "t3_pan": 15,
+  "t4_level": -4,
+  "t4_pan": 40,
+  "cb_level": -6,
+  "cb_pan": -15,
+  "cl_level": -5,
+  "cl_pan": 30,
+  "tb_level": -6,
+  "tb_pan": 35,
+  "fx_level": -7,
+  "bd_model": 4,
+  "bd_decay": 70,
+  "bd_char2": 70,
+  "bd_drive": 30,
+  "sd_model": 4,
+  "sd_senda": 40,
+  "ch_model": 0,
+  "ch_decay": 30,
+  "fx_model": 3,
+  "fx_decay": 60,
+  "a_type": 2,
+  "a_gate": 400,
+  "a_return": -3,
+  "m_lofi": 4,
+  "m_lofi_mix": 45,
+  "m_tape": 1,
+  "m_tape_drive": 6,
+  "autofill": 2,
+  "m_volume": -2.3
+ },
+ "patterns": [
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . . . 100 . . 100",
+    "sd": ". . . . . . . . 127a",
+    "ch": "100 . 100 . 100 . 100 100r2 100 . 100 . 100 100r3 100"
+   },
+   "group": 0,
+   "var": "A"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . . . 100 . . 100",
+    "sd": ". . . . . . . . 127a",
+    "ch": "100 . 100 100r2 100 . 100 . 100 90r4 100 . 100 100r3 100",
+    "fx": ". . . . . . . . . . . . . . 100"
+   },
+   "group": 0,
+   "var": "B"
+  },
+  {
+   "length": 16,
+   "scale": 1,
+   "tracks": {
+    "bd": "100 . . . . . . . 100 . . 100",
+    "sd": ". . . . . . . . 127a . . . 100 100 100r3 90r4",
+    "ch": "100 . 100 . 100 . 100 100r2 100 . 100 . 100 100r3 100"
+   },
+   "group": 0,
+   "var": "Fill"
+  }
+ ]
+}

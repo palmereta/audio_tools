@@ -15,6 +15,7 @@ struct PDef
     juce::String choices;   // separadas por |
     juce::String unit;
     bool global = false;    // no lo pisan los presets
+    bool automatable = true;
 };
 
 inline juce::String scaleChoices() { juce::StringArray s; for (auto& x : scales()) s.add (x.name); return s.joinIntoString ("|"); }
@@ -103,6 +104,12 @@ inline const std::vector<PDef>& params()
             add ({ p + "cc_center", n + "CC Center", 0, 0, 1, 0.5f, "", "" });
             add ({ p + "drift", n + "Drift", 0, 0, 50, 0, "", " cents" });
         }
+        // 1.0.5: Main y satélites, y los carriles como puertos MIDI. Al final, para no mover los anteriores; no se
+        // automatizan (son el cableado de la sesión, como los puertos directos).
+        add ({ "role", "Role", 4, 0, 3, 0, "Auto|Independent|Main|Satellite", "", true, false });
+        add ({ "sat_lanes", "Satellite Lanes", 256, 0, 255, 0, "", "", true, false });
+        add ({ "skip_sat", "Skip Satellite Lanes", 2, 0, 1, 1, "Off|On", "", true, false });
+        add ({ "midi_ports", "Publish Lanes As MIDI Ports", 2, 0, 1, 0, "Off|On", "", true, false });
         return v;
     }();
     return all;
@@ -120,6 +127,13 @@ inline juce::String formatParam (const PDef& d, float v)
     if (d.choices.isNotEmpty()) return juce::StringArray::fromTokens (d.choices, "|", "")[juce::jlimit (0, d.steps - 1, (int) std::lround (v - d.lo))];
     if (d.id.endsWith ("_cc") || d.id.endsWith ("cc")) { const int c = (int) std::lround (v); return c < 0 ? juce::String ("Off") : "CC " + juce::String (c); }
     if (d.id == "session") { const int m = (int) std::lround (v); return m == 0 ? juce::String ("Endless") : juce::String (m) + " min"; }
+    if (d.id == "sat_lanes")
+    {
+        const int m = (int) std::lround (v);
+        if (m == 0) return "Auto";
+        juce::StringArray s; for (int l = 0; l < kLanes; ++l) if ((m >> l) & 1) s.add (juce::String (l + 1));
+        return s.joinIntoString ("+");
+    }
     if (d.id == "breath") { const int b = (int) std::lround (v); return b == 0 ? juce::String ("Off") : juce::String (b) + " /min"; }
     if (d.id.endsWith ("octave")) { const int o = (int) std::lround (v); return (o > 0 ? "+" : "") + juce::String (o); }
     if (d.steps > 0) return juce::String ((int) std::lround (v)) + d.unit;
@@ -131,7 +145,8 @@ inline juce::String formatParam (const PDef& d, float v)
 struct Ix
 {
     int run, clock, runStopped, tempo, key, scale, density, motion, space, brightness, tension, chordBeats, color, progression, seed,
-        breath, session, fadeIn, fadeOut, gentle, fadeCC7, humanize, level, refPitch, tuneBend, bendRange, preview, previewVol, previewRev, clockOut, link;
+        breath, session, fadeIn, fadeOut, gentle, fadeCC7, humanize, level, refPitch, tuneBend, bendRange, preview, previewVol, previewRev, clockOut, link,
+        role, satLanes, skipSat, midiPorts;
     struct Lane { int on, role, channel, octave, range, density, length, velocity, velRand, prob, loop, loopBeats, mutate, rate, euSteps, euPulses, euRot,
                   arp, echoes, echoTime, echoDecay, follow, voices, cc, ccShape, ccBeats, ccDepth, ccCenter, drift; };
     std::array<Lane, kLanes> lane {};
@@ -146,6 +161,7 @@ private:
         session = f ("session"); fadeIn = f ("fade_in"); fadeOut = f ("fade_out"); gentle = f ("gentle"); fadeCC7 = f ("fade_cc7");
         humanize = f ("humanize"); level = f ("level"); refPitch = f ("ref_pitch"); tuneBend = f ("tune_bend"); bendRange = f ("bend_range");
         preview = f ("preview"); previewVol = f ("preview_vol"); previewRev = f ("preview_rev"); clockOut = f ("clock_out"); link = f ("link");
+        role = f ("role"); satLanes = f ("sat_lanes"); skipSat = f ("skip_sat"); midiPorts = f ("midi_ports");
         for (int l = 0; l < kLanes; ++l)
         {
             const juce::String p = "l" + juce::String (l + 1) + "_";
@@ -161,12 +177,11 @@ private:
     }
 };
 
-// Vuelca los valores (en el orden de params()) en el generador.
-inline void applyParams (const float* v, Generator& gen)
+// Vuelca los valores (en el orden de params()) en los ajustes del generador.
+inline void applyParams (const float* v, GlobalParams& g, std::array<LaneParams, kLanes>& lanes)
 {
     const auto& x = Ix::get();
     auto i = [v] (int k) { return (int) std::lround (v[k]); };
-    auto& g = gen.g;
     g.run = i (x.run) != 0; g.hostClock = i (x.clock) != 0; g.runWhenStopped = i (x.runStopped) != 0;
     g.tempo = v[x.tempo]; g.key = i (x.key); g.scale = i (x.scale);
     g.density = v[x.density]; g.motion = v[x.motion]; g.space = v[x.space]; g.brightness = v[x.brightness]; g.tension = v[x.tension];
@@ -178,7 +193,7 @@ inline void applyParams (const float* v, Generator& gen)
     for (int l = 0; l < kLanes; ++l)
     {
         const auto& k = x.lane[(size_t) l];
-        auto& L = gen.lanes[(size_t) l];
+        auto& L = lanes[(size_t) l];
         L.on = i (k.on) != 0; L.role = i (k.role); L.channel = i (k.channel); L.octave = i (k.octave); L.range = i (k.range);
         L.density = v[k.density]; L.length = v[k.length]; L.velocity = v[k.velocity]; L.velRand = v[k.velRand];
         L.probability = v[k.prob]; L.loop = i (k.loop) != 0; L.loopBeats = v[k.loopBeats]; L.mutate = v[k.mutate];
@@ -188,5 +203,7 @@ inline void applyParams (const float* v, Generator& gen)
         L.ccBeats = v[k.ccBeats]; L.ccDepth = v[k.ccDepth]; L.ccCenter = v[k.ccCenter]; L.driftCents = v[k.drift];
     }
 }
+
+inline void applyParams (const float* v, Generator& gen) { applyParams (v, gen.g, gen.lanes); }
 
 } // namespace dh::orr

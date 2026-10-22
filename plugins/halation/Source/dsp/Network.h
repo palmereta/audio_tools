@@ -78,10 +78,11 @@ public:
     static constexpr float kMaxMs = 12000.0f;      // 8 s de retardo sincronizado (2 compases a 60 BPM) por 1,5 del patrón
     static constexpr float kF1 = 250.0f, kF2 = 2500.0f;     // cortes de las tres bandas de absorción
 
-    void prepare (float sampleRate, uint32_t seed = 1)
+    // maxMs: el retardo más largo que se va a pedir (Pallor usa la red como sala y eco corto, sin los 12 s).
+    void prepare (float sampleRate, uint32_t seed = 1, float maxMs = kMaxMs)
     {
         fs = sampleRate;
-        for (auto& l : line) l.prepare ((int) (kMaxMs * 1e-3f * fs * 1.05f));
+        for (auto& l : line) l.prepare ((int) (maxMs * 1e-3f * fs * 1.05f));
         diffL.prepare (fs); diffR.prepare (fs);
         seed0 = seed;
         b1 = std::exp (-2.0f * kPi * kF1 / fs); b2 = std::exp (-2.0f * kPi * kF2 / fs);
