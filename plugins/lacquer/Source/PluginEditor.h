@@ -53,6 +53,7 @@ private:
     juce::TooltipWindow tips { this, 600 };
     juce::String hoverHelp;
     float spin = 0.0f;
+    int hiddenTicks = 0;                      // ticks con la ventana escondida (ver timerCallback)
     bool dragOver = false;
     juce::Rectangle<int> statusR, underDiscR, turnDownR;
 

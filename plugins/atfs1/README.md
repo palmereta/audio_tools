@@ -3,7 +3,7 @@
 Formant and FM synthesizer based on the Yamaha FS1R (1998): 8 voiced and 8 unvoiced (noise-formant)
 operators per voice, the 88 algorithms, Formant Sequences, a per-voice filter and insertion,
 variation and reverb effects, with a full-screen editor under a working 1U front panel.
-VST3, Audio Unit (macOS) and standalone. Version 1.0.4.
+VST3, Audio Unit (macOS) and standalone. Version 1.0.5.
 
 What the engine implements, and where each law comes from: [`docs/hardware-spec.md`](docs/hardware-spec.md).
 Sources and licences: [`docs/ref/CREDITS.md`](docs/ref/CREDITS.md).
@@ -42,6 +42,7 @@ atfs1render --analyze speech.wav out.json "Name"
 python3 plugins/atfs1/tools/fseqlib.py --tts <folder with the espeak-ng WAVs>
 python3 plugins/atfs1/tools/presetsfs1.py
 python3 plugins/atfs1/tools/level_presets.py build/plugins/atfs1/atfs1render_artefacts/Release/atfs1render
+python3 plugins/atfs1/tools/headroom.py build/plugins/atfs1/atfs1render_artefacts/Release/atfs1render --apply   # margen con el material MIDI de la QA en DAWs
 
 # Front panel: layout + silkscreen, Blender (pc50-wsl, CUDA), packing
 python3 plugins/atfs1/tools/panelfs1.py
@@ -64,6 +65,11 @@ The editor can save a snapshot without a screen grab:
 | WAV → Fseq | synthetic /a/ at 120 Hz: pitch 120 Hz, F1/F2/F3 731/1102/2454 Hz (targets 730/1090/2440) |
 | speech resynthesis | F1 and F2 tracks correlate 0.82 and 0.74 with the analyzed phrase |
 | sysex | voice 619 bytes with checksum, every field round-trips; Fseq frequencies within 1.7 cents |
+| reproducible (athosttest repro, 1.0.5) | an instance that already played and is prepared again renders identical to a fresh one (1.0.4: +3.8 dB apart, the REAPER "fresh instances don't null" finding) |
+| host values round-trip (athosttest statebytes, 1.0.5) | random values on all 63 parameters come back exactly after a reopen (1.0.4: 34 integer ones came back rounded, e.g. Cutoff 0.6739 → 0.6772) |
+| block size (athosttest repro, 1.0.5) | random blocks of 1-512 samples render identical to 512-sample blocks, VST3 and AU (1.0.4: about -2 dB apart; control now runs on a fixed 16-sample grid instead of restarting at every host block) |
+| headroom (tools/headroom.py, 1.0.5) | the 12 presets that reached 0 dBFS on the DAW-QA MIDI material peak at -0.8 to -1.4 dBFS (only their volume changed) |
+| host gap (athosttest hostgap, 1.0.5) | notes released when the host stops calling and comes back (REAPER bypass) |
 | CPU, Apple M4 / Ryzen 9 5900XT | speech 0.4 / 0.7 %, 16-voice choir 6.8 / 13.9 %, 32 voices 8.7 / 21.9 % of a core |
 
 ## Pitfalls

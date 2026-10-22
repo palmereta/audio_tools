@@ -83,6 +83,8 @@ The window can be resized from its lower-right corner.
 
 A style is not a fixed preset of knob positions. It changes the target the analysis aims for, so the same style does different things to a dark mix and to a bright one.
 
+The host's program (preset) list shows the six styles: choosing one there is the same as choosing it here.
+
 ![Style, Intensity, Loudness target and Ceiling: the four decisions Lacquer leaves to you.](img/controls.jpg)
 
 ## Intensity

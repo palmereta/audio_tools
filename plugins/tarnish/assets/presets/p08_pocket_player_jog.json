@@ -10,7 +10,8 @@
   "flutter": 0.2,
   "wear": 30,
   "highcut": 10000,
-  "wobble": 1
+  "wobble": 1,
+  "out": -1.0
  },
  "order": 8
 }

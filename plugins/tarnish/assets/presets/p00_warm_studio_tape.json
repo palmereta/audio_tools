@@ -10,7 +10,8 @@
   "saturation": 55,
   "wow": 0.03,
   "flutter": 0.02,
-  "scrape": 15
+  "scrape": 15,
+  "out": -1.5
  },
  "order": 0
 }

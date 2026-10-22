@@ -6,6 +6,8 @@
 #include "../../../shared/tools/LatencyReporter.h"
 #include "../../../shared/tools/PresetTracker.h"
 #include "../../../shared/tools/AutoGesture.h"
+#include "../../../shared/tools/HostGap.h"
+#include "../../../shared/tools/MidiOutDelay.h"
 #include "ExtParams101.h"
 #include "Preset101.h"
 
@@ -17,6 +19,7 @@ public:
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override {}
+    void reset() override;
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
@@ -99,6 +102,10 @@ private:
     std::vector<std::atomic<float>*> extRaw;
     std::atomic<float>* pQuality = nullptr; std::atomic<float>* pMidiOut = nullptr;
     double freePpq = 0.0;
+    dh::PanelValues rampFrom {}, rampTo {};   // parámetros del panel: rampa lineal a lo largo del bloque del host (B1)
+    dh::HostGap hostGap;                      // REAPER no llama al plugin en bypass: al volver se sueltan las notas (X1)
+    dh::MidiOutDelay midiOutDelay;            // el MIDI de salida sale atrasado la latencia, como el audio
+    int latencyNow() const { return (int) std::lround (dh::halfbandChainDelay (engine.oversampling())); }
     double currentSr = 48000.0;
     int currentBlock = 512;
     std::vector<float> outL, outR;

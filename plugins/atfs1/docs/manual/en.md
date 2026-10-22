@@ -45,6 +45,8 @@ The ATFS1 is an instrument with a stereo output (a mono output works too). Inser
 
 Your DAW saves the whole state with the project: the voice, the Formant Sequence, the part and the effects. The presets also appear in the DAW's program list.
 
+In Ableton Live, the factory presets appear in Live's browser under Plug-Ins → Audio Tools ATFS1 (expand the plugin), installed by the launcher or from the zip's Presets folder. Live doesn't show the plugin's own program list; the preset list in the editor has them all.
+
 The standalone opens the same editor in its own window; choose the audio interface and MIDI input in its Options. Without a MIDI keyboard, play the keyboard strip at the bottom of the editor.
 
 ### Your first sound
@@ -434,7 +436,7 @@ The Perform page holds the part. Every control is a DAW parameter and is saved i
 - **V/N balance**: -64 to +63. Positive lowers the voiced operators (only noise at +63), negative the unvoiced ones.
 - **Note shift**: -24 to +24 semitones, added to the voice's.
 - **Detune**: -64 to +63, about 50 cents either way.
-- **Attack**, **Decay** and **Release**: -64 to +63, added to T1, T2 and T3, and T4 of every operator. Positive is slower.
+- **Attack**, **Decay** and **Release**: -64 to +63, added to T1, T2 and T3, and T4 of every operator. Positive is slower. Attack and Decay apply when a note starts; Release applies when you let go of it, so turning it down also shortens notes already held.
 - **Formant** and **FM**: -64 to +63, turn the voice's knobs (the front panel knobs).
 - **Cutoff**, **Resonance** and **Filter EG**: added to the filter cutoff, resonance and envelope depth.
 - **LFO1 rate**, **LFO1 pitch**, **LFO1 delay**, **LFO2 rate** and **LFO2 depth**: added to the LFO speeds, LFO1 pitch depth and delay, and LFO2 filter depth.

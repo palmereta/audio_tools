@@ -1,5 +1,5 @@
 # AT303 — bajo de un oscilador con escalera de diodos, secuenciador de dos listas y generador ácido (docs/research.md).
-set(AT303_VERSION 1.0.2)
+set(AT303_VERSION 1.0.3)
 
 if(APPLE)
     set(AT303_FORMATS VST3 AU Standalone)
@@ -38,16 +38,24 @@ target_sources(AT303 PRIVATE ${AT303_SOURCES})
 target_include_directories(AT303 PRIVATE Source Source/dsp ${CMAKE_SOURCE_DIR}/shared/dsp)
 target_compile_definitions(AT303 PUBLIC
     AT303_VERSION="${AT303_VERSION}"
+    # JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS queda prendido aunque el AT303 no lea CC ni pitch bend: sin él un
+    # VST3 no recibe All Notes Off / All Sound Off (CC 123/120, los que manda el host al parar) y athosttest deja
+    # notas sonando (QA en DAWs 2026-10-22, X4: los ~2.080 "MIDI CC n|m" de REAPER son el precio).
     JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_DISPLAY_SPLASH_SCREEN=0 _USE_MATH_DEFINES=1)
 target_link_libraries(AT303
     PRIVATE At303Assets juce::juce_audio_utils
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_lto_flags juce::juce_recommended_warning_flags)
 dh_add_manual(AT303 ${CMAKE_CURRENT_SOURCE_DIR}/docs/manual)
 
-# Pruebas del motor (sin JUCE).
-add_executable(at303test tools/at303test.cpp)
-target_include_directories(at303test PRIVATE Source/dsp ${CMAKE_SOURCE_DIR}/shared/dsp)
-target_compile_definitions(at303test PRIVATE _USE_MATH_DEFINES=1)
+# Pruebas del motor (T1-T8) y del procesador completo, sin host (T9-T11: hueco del host, programa 0, DC y nivel de
+# los presets).
+juce_add_console_app(at303test VERSION ${AT303_VERSION} PRODUCT_NAME "at303test")
+juce_generate_juce_header(at303test)
+target_sources(at303test PRIVATE tools/at303test.cpp Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+target_include_directories(at303test PRIVATE Source Source/dsp ${CMAKE_SOURCE_DIR}/shared/dsp ${CMAKE_SOURCE_DIR}/shared/manual)
+target_compile_definitions(at303test PRIVATE JucePlugin_Build_Standalone=0 DH_HAS_MANUAL=0 JucePlugin_Name="AT303"
+    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 _USE_MATH_DEFINES=1)
+target_link_libraries(at303test PRIVATE At303Assets juce::juce_audio_utils PUBLIC juce::juce_recommended_config_flags)
 if(NOT MSVC)
     target_compile_options(at303test PRIVATE -ffp-contract=off)
 endif()

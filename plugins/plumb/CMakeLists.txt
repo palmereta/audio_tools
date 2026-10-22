@@ -1,5 +1,5 @@
 # Plumb — corrección de altura en tiempo real con latencia muy baja (docs/research.md).
-set(PLUMB_VERSION 1.0.1)
+set(PLUMB_VERSION 1.0.2)
 
 if(APPLE)
     set(PLUMB_FORMATS VST3 AU Standalone)

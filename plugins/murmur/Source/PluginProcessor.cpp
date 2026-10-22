@@ -26,6 +26,11 @@ MurmurProcessor::MurmurProcessor()
         }
     }
     { juce::StringArray g; for (auto& e : params()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
+    // Una instancia nueva es el programa 0 que informa al host (QA en REAPER 2026-10-22, X2: el VST3 decía "First
+    // Murmur" pero sonaba con los valores por defecto). Así la foto del preset tampoco queda vacía hasta reabrir (QA
+    // en Live, H4: el estado guardado cambiaba sin que nadie tocara nada).
+    if (! presets.empty()) loadPreset (0);
+    else tracker.capture (*this);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout MurmurProcessor::createLayout()

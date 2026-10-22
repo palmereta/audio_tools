@@ -22,8 +22,22 @@ function Package-Plugin([string]$dir, [string]$product) {
     Get-ChildItem "$r\*_artefacts\Release\VST3\*.vst3" | ForEach-Object { Copy-Item -Recurse $_.FullName $out }
     Get-ChildItem "$r\*_artefacts\Release\Standalone\*.exe" | ForEach-Object { Copy-Item $_.FullName $out }
     # Herramientas de línea de comandos del producto (p. ej. lacquerrender).
-    foreach ($t in @("lacquerrender", "halationrender", "tarnishrender", "at303render", "plumbrender", "thrumrender")) {
+    foreach ($t in @("lacquerrender", "halationrender", "tarnishrender", "at303render", "plumbrender", "thrumrender", "pallorrender")) {
         foreach ($f in @("$r\$t.exe", "$r\${t}_artefacts\Release\$t.exe")) { if (Test-Path $f) { Copy-Item $f $out; break } }
+    }
+    # Presets como archivos (.vstpreset) para los hosts que no muestran la lista de programas del VST3 (Ableton Live):
+    # atvstpresets (tools/hosttest) los escribe desde los .vst3 recién empaquetados y verifica cada uno cargándolo.
+    $presetsEn = ""; $presetsEs = ""
+    if (Test-Path "plugins\$dir\assets\presets") {
+        $gen = "build\tools\hosttest\atvstpresets_artefacts\Release\atvstpresets.exe"
+        Get-ChildItem "$out\*.vst3" | ForEach-Object {
+            & $gen $_.FullName --out "$out\Presets" --factory "plugins\$dir\assets\presets" --clean
+            if ($LASTEXITCODE -ne 0) { throw "atvstpresets failed for $($_.Name)" }
+        }
+        $presetsEn = "3. Factory presets as files, for Ableton Live and other hosts that list preset files: copy the folders`r`n" +
+                     "   inside Presets\ to %USERPROFILE%\Documents\VST3 Presets\Audio Tools\ (the launcher does this for you).`r`n"
+        $presetsEs = "3. Presets de fábrica como archivos (Ableton Live y otros): copiar las carpetas de Presets\ a`r`n" +
+                     "   %USERPROFILE%\Documents\VST3 Presets\Audio Tools\`r`n"
     }
     Copy-Item LICENSE "$out\LICENSE.txt"
 @"
@@ -31,14 +45,14 @@ $product $ver by Audio Tools - Windows 10/11 x64
 
 1. Copy the .vst3 folders to C:\Program Files\Common Files\VST3\ (requires administrator rights).
 2. Rescan plugins in your DAW (Ableton Live: Settings > Plug-Ins > Rescan).
-$product.exe is the standalone version.
+$presetsEn$product.exe is the standalone version.
 
 The binaries are not code-signed: Windows SmartScreen may ask for confirmation the first time.
 
 --- Español ---
 1. Copiar los .vst3 a C:\Program Files\Common Files\VST3\ (pide permisos de administrador).
 2. Reescanear los plugins en el DAW. $product.exe es la versión standalone.
-
+$presetsEs
 Free and open source software under the GNU AGPL v3 (see LICENSE.txt).
 "@ | Set-Content -Encoding UTF8 "$out\INSTALL.txt"
     # Notas propias del producto (p. ej. Orrery: cómo rutear su MIDI).
@@ -64,6 +78,7 @@ Package-Plugin "halation" "Halation"
 Package-Plugin "tarnish" "Tarnish"
 Package-Plugin "at303" "AT303"
 Package-Plugin "plumb" "Plumb"
+Package-Plugin "pallor" "Pallor"
 Package-Plugin "thrum" "Thrum"
 
 # The launcher (tools/launcher): one .exe that installs and updates the plugins from web/downloads/manifest.json.
@@ -82,7 +97,8 @@ Audio Tools Launcher $ver - Windows 10/11 x64
 2. The binary is not code-signed: Windows SmartScreen may ask the first time (More info > Run anyway).
 3. Pick the plugins and press Install. VST3 goes to %LOCALAPPDATA%\Programs\Common\VST3 (or, if you choose
    all users in Settings, to C:\Program Files\Common Files\VST3, which needs administrator rights);
-   standalone apps go to %LOCALAPPDATA%\Programs\Audio Tools.
+   standalone apps go to %LOCALAPPDATA%\Programs\Audio Tools, the factory presets (for Ableton Live's
+   browser) to Documents\VST3 Presets\Audio Tools.
 
 No account and nothing to sign up for. The launcher only downloads the list of plugins
 (https://audiotools.com.ar/downloads/manifest.json), the images and demos it shows, and the plugins you choose.

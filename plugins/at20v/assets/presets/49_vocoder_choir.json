@@ -1,5 +1,5 @@
 {
- "name": "Vocoder Choir",
+ "name": "Vocoder Choir (Audio In)",
  "category": "Vocoder",
  "knobs": {
   "vco1_wave": 1,

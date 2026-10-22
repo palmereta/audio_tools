@@ -27,6 +27,10 @@ AtmdProcessor::AtmdProcessor()
     loadFactory();
     rescanUserPresets();
     { juce::StringArray g; for (auto& e : params()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
+    // Una instancia nueva es el programa 0 (Init) con su foto tomada: el primer estado guardado ya trae la foto y
+    // guardar → cargar → guardar da los mismos bytes (QA en DAWs 2026-10-22, X2 y H4).
+    if (! presets.empty()) loadPreset (0);
+    else tracker.capture (*this);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout AtmdProcessor::createLayout()
@@ -37,16 +41,19 @@ juce::AudioProcessorValueTreeState::ParameterLayout AtmdProcessor::createLayout(
         const juce::ParameterID pid { e.id, 1 };
         const auto* ep = &e;
         if (e.choices.isNotEmpty())
-            layout.add (std::make_unique<juce::AudioParameterChoice> (pid, e.name, juce::StringArray::fromTokens (e.choices, "|", ""), (int) (e.def - e.lo)));
+            layout.add (std::make_unique<juce::AudioParameterChoice> (pid, e.name, juce::StringArray::fromTokens (e.choices, "|", ""), (int) (e.def - e.lo),
+                juce::AudioParameterChoiceAttributes().withAutomatable (e.automatable)));
         else if (e.steps > 0)
             layout.add (std::make_unique<juce::AudioParameterInt> (pid, e.name, (int) e.lo, (int) e.hi, (int) e.def,
-                juce::AudioParameterIntAttributes().withStringFromValueFunction ([ep] (int v, int) { return formatParam (*ep, (float) v); })));
+                juce::AudioParameterIntAttributes().withStringFromValueFunction ([ep] (int v, int) { return formatParam (*ep, (float) v); })
+                                                   .withAutomatable (e.automatable)));
         else
         {
             juce::NormalisableRange<float> range (e.lo, e.hi);
             if (e.skew != 1.0f) range.setSkewForCentre (e.lo + (e.hi - e.lo) * std::pow (0.5f, 1.0f / e.skew));
             layout.add (std::make_unique<juce::AudioParameterFloat> (pid, e.name, range, e.def,
-                juce::AudioParameterFloatAttributes().withStringFromValueFunction ([ep] (float v, int) { return formatParam (*ep, v); })));
+                juce::AudioParameterFloatAttributes().withStringFromValueFunction ([ep] (float v, int) { return formatParam (*ep, v); })
+                                                     .withAutomatable (e.automatable)));
         }
     }
     return layout;
@@ -75,6 +82,7 @@ void AtmdProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     extBuf.assign ((size_t) maxBlock + 64, 0.0f);
     tmpR.assign ((size_t) maxBlock + 64, 0.0f);
     keyboardState.reset();
+    hostGap.prepare (sampleRate);
 }
 
 void AtmdProcessor::handleMidi (const juce::MidiMessage& m)
@@ -102,12 +110,20 @@ void AtmdProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     if (n <= 0) return;
     wasBypassed = false;
     const double t0 = juce::Time::getMillisecondCounterHiRes();
+    // El host dejó de llamar (REAPER con el plugin en bypass) y vuelve: el note-off pudo perderse en el hueco. Se
+    // sueltan las notas antes del MIDI de este bloque, como al entrar en bypass (QA en DAWs 2026-10-22, X1).
+    if (hostGap.check (getPlayHead(), n, isNonRealtime()))
+    {
+        eng.allNotesOff (false);
+        keyboardState.allNotesOff (0);     // las teclas en pantalla también (su note-off es inofensivo para el motor)
+    }
     for (size_t k = 0; k < raw.size(); ++k) vals[k] = raw[k]->load();
 
     // El sobremuestreo cambia el motor entero: se prepara de nuevo (corta las notas, es un ajuste de sistema).
     const int os = oversamplingFactor (vals[(size_t) Ix::get().oversampling]);
     if (os != osNow) { osNow = os; eng.prepare (sr, std::max (maxBlock, n), osNow); latency.request ((int) std::lround (dh::halfbandChainDelay (osNow))); }
     applyParams (vals.data(), eng);
+    eng.setRampLength (n);                 // corte y énfasis van en rampa a lo largo de este bloque (E1)
     if (auto* ph = getPlayHead())
         if (auto pos = ph->getPosition())
             if (auto b = pos->getBpm()) eng.bpm = *b;

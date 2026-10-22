@@ -291,7 +291,9 @@ GM is the map of most drum controllers and of the drum racks of DAWs. Chromatic 
 
 With **Send the sequencer as MIDI** on, Pallor sends every step it plays as a note, with the same note map, on the chosen **Channel** (10 by default). Accented steps are sent at velocity 127. **Gate** sets how long each note lasts, 2 to 1000 ms (30 ms by default); a note always ends before the same note plays again. When the transport stops or jumps, every note that is still on is ended. Use it to play another drum machine or a sampler with Pallor's sequencer, or to record the pattern as MIDI.
 
-In Ableton Live, use the VST3 version for MIDI out: Live does not take MIDI from Audio Units.
+The notes leave Pallor as late as its audio (its latency, 78 samples at 48 kHz with Tape on), which the host compensates for the audio only, so a synth or a MIDI recording fed from Pallor lines up with Pallor's own sound.
+
+In Ableton Live and in REAPER, use the VST3 version for MIDI out: neither takes the MIDI that Audio Unit plugins produce.
 
 ### Drag MIDI
 
@@ -325,6 +327,12 @@ Choose what a click loads: **SOUND + PATTERNS** (everything), **SOUND ONLY** (th
 
 Every preset is levelled to about −18 LUFS, so you can compare them without the louder one winning.
 
+### In Ableton Live
+
+Live does not show plugins' factory presets (it ignores VST3 program lists). The PRESETS page works as everywhere, and the factory presets also appear in Live's browser under Plug-Ins → Audio Tools Pallor (expand the plugin), installed by the launcher or by copying the Presets folder from the zip.
+
+Pallor has 463 parameters and Live keeps at most 128 of a device for automation and its panel, and fills the panel by itself only when a plugin has 64 or fewer. Click **Configure** on Pallor's device in Live and move the controls you want to automate or map: they are added in that order. A good set for a live performance: **Pattern**, **Fill**, **Swing**, **Volume**, **Space Return**, **Echo Return**, **Tape Drive** and **Glue Mix**, plus **Level**, **Tune**, **Decay** and **Cutoff** of the three or four voices you play with (Kick, Snare, Closed Hat...). Everything else stays in Pallor's own panel and is saved with the set.
+
 ## Setup
 
 ![The SETUP page: clock, swing, accent and chance, outputs and MIDI.](img/setup.jpg)
@@ -357,7 +365,8 @@ Every preset is levelled to about −18 LUFS, so you can compare them without th
 - **Nothing plays when I press play in the DAW.** Check that Follow host is on (SETUP) and that the play mode is not SONG with an empty chain (Pallor then plays A).
 - **The hats sound thin when the open hat is cut.** The closed and open hats are in choke group 1; set the open hat's Choke to NONE to let them ring together.
 - **A pattern change does not happen at once.** It lands at the end of the pass that is playing, to stay on the bar.
-- **No MIDI comes out in Ableton Live.** Use the VST3 version, and in the receiving track set MIDI From to the Pallor track.
+- **No MIDI comes out in Ableton Live or REAPER.** Use the VST3 version, and in the receiving track set MIDI From to the Pallor track (in REAPER, a send with MIDI).
+- **Live's device panel for Pallor is empty.** Click Configure and touch the controls you want there (see Presets, In Ableton Live).
 - **My sample is missing when I reopen the project.** Only 8 MB of samples travel inside the project; the rest are saved by their path. Keep the files where they were, or save the project with fewer or shorter samples.
 - **The probability always plays the same thing.** That is by design: a render is repeatable. Change the Chance seed for other choices.
 

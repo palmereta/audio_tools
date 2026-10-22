@@ -5,6 +5,7 @@
 #include "../../../shared/tools/SafeString.h"
 #include "../../../shared/tools/LatencyReporter.h"
 #include "../../../shared/tools/PresetTracker.h"
+#include "../../../shared/tools/HostGap.h"
 
 class AtmdProcessor : public juce::AudioProcessor
 {
@@ -69,6 +70,7 @@ private:
     double sr = 48000.0;
     int maxBlock = 512, osNow = 0, overloadHold = 0;
     bool wasBypassed = false;
+    dh::HostGap hostGap;               // REAPER no llama al plugin en bypass: al volver se sueltan las notas (X1)
     std::vector<PresetEntry> presets;
     int currentProgram = 0;
     void loadFactory();

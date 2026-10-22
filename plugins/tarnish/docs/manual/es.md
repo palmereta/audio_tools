@@ -129,7 +129,7 @@ Los ajustes de la máquina elegida:
 ## More
 
 - **Output**, después de la máquina.
-- **Auto gain** deshace el cambio de nivel de Drive.
+- **Auto gain** deshace el cambio de nivel de Drive y de Bias (con poco bias la cinta suena más fuerte).
 - **Stereo wobble**: cada canal se mueve por su cuenta. Las máquinas reales mueven los dos canales juntos; esto no es físico, pero es ancho.
 - **Lock to timeline**: las caídas, el crujido, la estática y la deriva lenta siguen la posición de la canción. Prendido, un bounce es idéntico a la reproducción, y el compás 17 suena igual si empezás en el 1 o en el 16. Apagado, cada pasada es distinta, como una cinta gastada de verdad.
 - **Quality**: **Eco** gasta la mitad de CPU en el modelo magnético, con un lazo menos exacto con mucho drive.
@@ -155,6 +155,10 @@ Treinta y tres presets en seis grupos:
 - **Radio and phone.** Old Radio, Distant Station, Telephone, Mobile Call Breakup, Intercom.
 - **Lo-fi and effects.** Tape Stop Drop, Half-Speed Dream, 12-bit Sampler, Toy Sampler.
 
+Los presets están nivelados cerca del nivel de lo que entra: una mezcla con picos de -3 dBFS sale por debajo de 0 dBFS con cualquiera de ellos. Las máquinas igual mueven los picos de una mezcla uno o dos dB (el golpe de cabeza, las curvas de grabación y reproducción), así que un master a -14 LUFS puede llegar a 0 dBFS: bajá **Output** o poné un limitador después de Tarnish.
+
+En Ableton Live, que no muestra la lista de programas propia de un plugin, los presets de fábrica aparecen en el navegador de Live en **Plug-Ins**, **Audio Tools Tarnish** (desplegá el plugin). Los instala el launcher; con el zip, copiá las carpetas de su carpeta **Presets** a `~/Library/Audio/Presets/Audio Tools/` (macOS).
+
 ## El renderizador de línea de comandos
 
 `tarnishrender` pasa un archivo por el efecto completo:
@@ -165,10 +169,11 @@ tarnishrender in.wav out.wav --preset "Tape Stop Drop" --bpm 96 --at 8 stop=1 --
 tarnishrender in.wav out.wav --set machine=3 --set crackle=50 --set scratches=2
 ```
 
-- `--preset` carga un preset por nombre. Sin él, los valores por defecto.
+- `--preset` carga un preset por nombre. Sin él, el primero (Warm Studio Tape), como una instancia nueva en un DAW.
 - `--tail` agrega segundos de silencio al final (6 por defecto).
 - `--bpm` es el tempo para un stop sincronizado (120 por defecto).
 - `--set id=valor` fija un parámetro antes de empezar; `--at segundos id=valor` lo cambia en ese momento.
+- `--float` escribe en coma flotante de 32 bits, así se conservan los picos por encima de 0 dBFS (24 bits por defecto).
 
 ## Cómo sacarle el jugo
 

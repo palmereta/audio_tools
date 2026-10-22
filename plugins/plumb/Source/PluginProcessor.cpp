@@ -10,6 +10,9 @@ PlumbProcessor::PlumbProcessor()
     loadFactory();
     tracker.capture (*this);
     for (int i = 0; i < 12; ++i) degPtr[(size_t) i] = apvts.getRawParameterValue ("deg" + juce::String (i));
+    // Una instancia nueva es el programa 0 que informa al host (QA en REAPER 2026-10-22, X2: el VST3 decía "Natural
+    // Lead" pero sonaba con los valores por defecto, y elegir el programa 0 no cambiaba nada).
+    if (! presets.empty()) loadPreset (0);
 }
 
 bool PlumbProcessor::isBusesLayoutSupported (const BusesLayout& l) const
@@ -185,6 +188,9 @@ void PlumbProcessor::getStateInformation (juce::MemoryBlock& destData)
     state.setProperty ("preset", currentPresetName.get(), nullptr);
     state.setProperty ("program", currentProgram, nullptr);
     state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
+    juce::String ses;                                    // "id valor-del-preset valor-de-antes" por ajuste
+    for (auto& [id, v] : presetSessionValues) ses << id << ' ' << juce::String (v.set, 6) << ' ' << juce::String (v.before, 6) << ' ';
+    state.setProperty ("presetSession", ses.trimEnd(), nullptr);
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
 
@@ -202,6 +208,11 @@ void PlumbProcessor::setStateInformation (const void* data, int sizeInBytes)
     currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
     if (state.hasProperty ("presetSnapshot")) tracker.fromString (*this, state.getProperty ("presetSnapshot").toString());
     else tracker.capture (*this);
+    presetSessionValues.clear();
+    {
+        juce::StringArray t; t.addTokens (state.getProperty ("presetSession", "").toString(), " ", ""); t.removeEmptyStrings();
+        for (int i = 0; i + 2 < t.size(); i += 3) presetSessionValues[t[i]] = { t[i + 1].getFloatValue(), t[i + 2].getFloatValue() };
+    }
     // La latencia del modo restaurado se informa ya: el host la lee al cargar la sesión (Logic restaura el estado
     // después de prepareToPlay) y una exportación que empiece antes del primer bloque compensaría mal.
     setLatencySamples (engine.latencyForMode ((Mode) juce::jlimit (0, 2, (int) value ("mode"))));
@@ -235,15 +246,27 @@ void PlumbProcessor::loadPreset (int index)
     const auto pv = pr.data.getProperty ("params", {});
     static const juce::StringArray keep { "key", "scale", "mode", "ref_a", "gate", "midi_mode", "voice", "mix", "output",
                                           "deg0", "deg1", "deg2", "deg3", "deg4", "deg5", "deg6", "deg7", "deg8", "deg9", "deg10", "deg11" };
+    // Un ajuste de sesión que puso el preset anterior (el modo Live de "Stage Natural", la voz de "Low Voice", el
+    // Note lock de "MIDI Note Lock") vuelve al valor que tenía antes de ese preset si nadie lo movió después: un
+    // preset suena igual venga de donde venga, y lo que el usuario eligió a mano (su modo de latencia) se respeta.
+    std::map<juce::String, SessionValue> next;
     for (auto* param : getParameters())
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (param))
         {
             const auto id = rp->getParameterID();
-            if (keep.contains (id) && ! pv.hasProperty (id)) continue;
-            rp->setValueNotifyingHost (rp->getDefaultValue());
+            if (! keep.contains (id)) { rp->setValueNotifyingHost (rp->getDefaultValue()); continue; }
+            const auto it = presetSessionValues.find (id);
+            const bool untouched = it != presetSessionValues.end() && std::abs (rp->getValue() - it->second.set) < 1.0e-4f;
+            if (pv.hasProperty (id))
+                next[id] = { 0.0f, untouched ? it->second.before : rp->getValue() };    // el valor de antes, el del usuario
+            else if (untouched)
+                rp->setValueNotifyingHost (it->second.before);
         }
     if (auto* obj = pv.getDynamicObject())
         for (auto& kv : obj->getProperties()) setValue (kv.name.toString(), (float) kv.value);
+    for (auto& [id, v] : next)
+        if (auto* rp = apvts.getParameter (id)) v.set = rp->getValue();
+    presetSessionValues = std::move (next);
     currentProgram = index; currentPresetName = pr.name;
     tracker.capture (*this);
     presetDirty = true; triggerAsyncUpdate();

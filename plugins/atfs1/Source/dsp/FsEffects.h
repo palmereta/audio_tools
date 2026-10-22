@@ -41,6 +41,14 @@ public:
         // se pasan a esta frecuencia para que suenen igual a 44,1, 96 o 192 kHz.
         auto at48 = [this] (float c) { return 1.0f - std::pow (1.0f - c, 48000.0f / fs); };
         kWahAtk = at48 (0.01f); kWahRel = at48 (0.0006f); kRotLp = at48 (0.06f); kCompAtk = at48 (0.02f); kCompRel = at48 (0.0004f);
+        // Las líneas, la reverb (su LFO no vuelve a cero en reset()) y los filtros se rehacen, y los LFO de los efectos
+        // arrancan en su fase inicial: el estado no depende de cuánto procesó la instancia antes (D1).
+        mdL = mdR = rotL = rotR = ModDelay {};
+        dlyL = dlyR = DelayLine {};
+        reverb = PlateReverb {};
+        lowL = lowR = highL = highR = OnePoleLP {};
+        dcL = dcR = DcBlocker {};
+        lfoA = 0.0f; lfoB = 0.25f; rotPhase = 0.0f; rotLow = 0.0f; toneL = toneR = 0.0f;
         for (auto* m : { &mdL, &mdR }) m->prepare (fs, 0.06f);
         for (auto* m : { &rotL, &rotR }) m->prepare (fs, 0.02f);
         dlyL.prepare ((int) (fs * 2.1f)); dlyR.prepare ((int) (fs * 2.1f));

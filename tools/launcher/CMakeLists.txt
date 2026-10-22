@@ -1,6 +1,6 @@
 # Audio Tools Launcher: installs and updates the plugins from web/downloads/manifest.json.
 # scripts/build-web.py reads LAUNCHER_VERSION from here for the manifest and the website.
-set(LAUNCHER_VERSION 1.0.2)
+set(LAUNCHER_VERSION 1.0.3)
 
 # Linux: sin libcurl, juce::URL no habla HTTPS. Se carga al primer pedido (JUCE_LOAD_CURL_SYMBOLS_LAZILY), así el
 # binario no queda atado a una versión de libcurl. En macOS y Windows la red es la del sistema.

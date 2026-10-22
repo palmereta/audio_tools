@@ -61,7 +61,9 @@ done
 for t in pallor/pallortest thrum/thrumtest plumb/plumbtest tarnish/tarnishtest at303/at303test halation/halationtest lacquer/lacquertest; do
     d=${t%/*}; n=${t#*/}
     [ -z "$ONLY" ] || [ "$ONLY" = "$d" ] || continue
-    (cd "$B/plugins/$d" && "./$n") > "$Q/unit/$n.txt" 2>&1
+    # juce_add_console_app deja el ejecutable en <n>_artefacts/Release/ (algunos CMakeLists lo sacan a la carpeta del plugin).
+    exe="$B/plugins/$d/$n"; [ -x "$exe" ] || exe="$B/plugins/$d/${n}_artefacts/Release/$n"
+    (cd "$B/plugins/$d" && "$exe") > "$Q/unit/$n.txt" 2>&1
     rc=$?; [ $rc -ne 0 ] && BAD=1
     say "$n: $([ $rc -eq 0 ] && echo PASS || echo "FAIL ($rc)") ($(tail -1 "$Q/unit/$n.txt"))"
 done

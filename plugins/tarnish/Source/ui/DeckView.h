@@ -16,6 +16,15 @@ class DeckView : public juce::Component
 public:
     explicit DeckView (TarnishProcessor& p) : proc (p) {}
 
+    // Con la ventana escondida no se anima: sólo se vacía la cola de eventos (si no, al volver destellaban todos los
+    // viejos) y el reloj vuelve a empezar.
+    void idle()
+    {
+        auto& v = proc.view;
+        v.eventFifo.finishedRead (v.eventFifo.getNumReady());
+        flashes.clear(); lastT = 0;
+    }
+
     void tick()
     {
         const double now = juce::Time::getMillisecondCounterHiRes() * 0.001;

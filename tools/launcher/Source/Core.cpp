@@ -28,6 +28,7 @@ int compareVersions (const String& a, const String& b)
 Format formatOf (const String& itemName)
 {
     const auto n = itemName.toLowerCase();
+    if (n == "presets")            return Format::other;    // the factory .vstpreset files, installed apart
     if (n.endsWith (".vst3"))      return Format::vst3;
     if (n.endsWith (".component")) return Format::au;
     if (n.endsWith (".lv2"))       return Format::lv2;
@@ -243,6 +244,7 @@ Paths Paths::current()
         p.au = r.getChildFile ("Components");
         p.lv2 = r.getChildFile ("LV2");
         p.apps = r.getChildFile ("Applications");
+        p.presets = r.getChildFile ("Presets");
        #if JUCE_LINUX
         p.desktopEntries = r.getChildFile ("applications");
        #endif
@@ -257,6 +259,8 @@ Paths Paths::current()
     p.vst3User = local.getChildFile ("Programs\\Common\\VST3");
     p.vst3System = File (juce::SystemStats::getEnvironmentVariable ("CommonProgramFiles", "C:\\Program Files\\Common Files")).getChildFile ("VST3");
     p.apps = local.getChildFile ("Programs\\Audio Tools");
+    // Documents as the shell resolves it (also when it is redirected to OneDrive), as the VST3 hosts do.
+    p.presets = File::getSpecialLocation (File::userDocumentsDirectory).getChildFile ("VST3 Presets\\Audio Tools");
     p.data = File::getSpecialLocation (File::userApplicationDataDirectory).getChildFile ("Audio Tools\\Launcher");
     p.vst3Extra.add (p.vst3System);
    #elif JUCE_LINUX
@@ -266,6 +270,7 @@ Paths Paths::current()
     p.vst3User = home.getChildFile (".vst3");
     p.vst3System = p.vst3User;
     p.lv2 = home.getChildFile (".lv2");
+    p.presets = home.getChildFile (".vst3/presets/Audio Tools");
     p.apps = home.getChildFile (".local/opt/audio-tools");
     p.desktopEntries = home.getChildFile (".local/share/applications");
     p.data = File::getSpecialLocation (File::userApplicationDataDirectory).getChildFile ("Audio Tools Launcher");   // ~/.config
@@ -276,6 +281,7 @@ Paths Paths::current()
     p.vst3User = home.getChildFile ("Library/Audio/Plug-Ins/VST3");
     p.vst3System = p.vst3User;      // macOS installs per user; the system folder is only searched
     p.au = home.getChildFile ("Library/Audio/Plug-Ins/Components");
+    p.presets = home.getChildFile ("Library/Audio/Presets/Audio Tools");
     p.apps = home.getChildFile ("Applications");
     p.data = home.getChildFile ("Library/Application Support/Audio Tools Launcher");
     p.vst3Extra.add (File ("/Library/Audio/Plug-Ins/VST3"));
@@ -341,6 +347,7 @@ void InstalledDb::load (const File& f)
             r.version = prop.value["version"].toString();
             r.installedAt = prop.value["installed_at"].toString();
             r.paths = toStrings (prop.value["paths"]);
+            r.presetFiles = toStrings (prop.value["presets"]);
             records[prop.name.toString()] = r;
         }
 }
@@ -356,6 +363,12 @@ bool InstalledDb::save() const
         juce::Array<var> paths;
         for (auto& s : r.paths) paths.add (s);
         o->setProperty ("paths", paths);
+        if (! r.presetFiles.isEmpty())
+        {
+            juce::Array<var> presets;
+            for (auto& s : r.presetFiles) presets.add (s);
+            o->setProperty ("presets", presets);
+        }
         prods->setProperty (id, var (o));
     }
     auto* root = new juce::DynamicObject();
@@ -578,6 +591,51 @@ static String writeHint (const File& dir)
     return {};
 }
 
+/** Deletes factory preset files the launcher installed, then the folders they leave empty (up to, not including,
+    Paths::presets). Returns the files that could not be deleted. */
+static StringArray removePresetFiles (const StringArray& files, const Paths& paths)
+{
+    StringArray failed;
+    for (auto& s : files)
+    {
+        const File f (s);
+        if (f.existsAsFile() && ! f.deleteFile()) { failed.add (s); continue; }
+        if (paths.presets == File()) continue;
+        for (auto d = f.getParentDirectory(); d.isAChildOf (paths.presets); d = d.getParentDirectory())
+            if (! d.isDirectory() || d.getNumberOfChildFiles (File::findFilesAndDirectories) > 0 || ! d.deleteFile()) break;
+    }
+    return failed;
+}
+
+/** The zip's Presets/<plugin name>/[<category>/]<preset>.vstpreset into Paths::presets. Files of a previous install that
+    this one does not bring are deleted; anything else in those folders (presets the user saved) is not touched.
+    Returns the files now installed. */
+static StringArray installPresets (const File& zipPresets, const Paths& paths, const StringArray& previous, StringArray& notes)
+{
+    StringArray placed, failed;
+    if (paths.presets != File() && zipPresets.isDirectory())
+    {
+        for (const auto& e : juce::RangedDirectoryIterator (zipPresets, true, "*.vstpreset", File::findFiles))
+        {
+            const auto rel = e.getFile().getRelativePathFrom (zipPresets);
+            const auto dest = paths.presets.getChildFile (rel);
+            if (dest.getParentDirectory().createDirectory() && e.getFile().copyFileTo (dest))
+                placed.add (dest.getFullPathName());
+            else
+                failed.add (dest.getFullPathName());
+        }
+    }
+    StringArray stale;
+    for (auto& s : previous)
+        if (! placed.contains (s)) stale.add (s);
+    failed.addArray (removePresetFiles (stale, paths));
+    if (! failed.isEmpty())
+        notes.add ("Some preset files could not be written or replaced in " + paths.presets.getFullPathName() + " (" + failed[0]
+                   + (failed.size() > 1 ? " and " + String (failed.size() - 1) + " more" : String()) + ").");
+    placed.sort (true);
+    return placed;
+}
+
 Result install (const Product& p, const File& zip, const Paths& paths, const Settings& settings, InstalledDb& db, StringArray& notes)
 {
     const auto work = paths.workDir().getChildFile (p.id + "-staging");
@@ -668,6 +726,10 @@ Result install (const Product& p, const File& zip, const Paths& paths, const Set
     for (auto& s : steps)
         if (s.aside.exists() && ! s.aside.deleteRecursively())
             notes.add ("Could not delete the old copy " + s.aside.getFullPathName() + "; it is safe to delete it by hand.");
+    // The factory presets go with the VST3 (hosts such as Ableton Live list these files, not the plugin's programs).
+    const bool gotVst3 = std::any_of (steps.begin(), steps.end(), [] (const Step& s) { return s.f == Format::vst3; });
+    const auto presetFiles = installPresets (gotVst3 ? root.getChildFile ("Presets") : File(), paths,
+                                             prev != nullptr ? prev->presetFiles : StringArray(), notes);
     work.deleteRecursively();
 
     if (installed.isEmpty())
@@ -688,6 +750,7 @@ Result install (const Product& p, const File& zip, const Paths& paths, const Set
     rec.version = p.version;
     rec.installedAt = juce::Time::getCurrentTime().toISO8601 (true);
     rec.paths = installed;
+    rec.presetFiles = presetFiles;
     db.set (p.id, rec);
     if (! db.save())
         notes.add ("The install worked, but the launcher could not save its record.");
@@ -706,6 +769,8 @@ Result remove (const Product& p, const Paths& paths, InstalledDb& db)
         const File f (s);
         if (f.exists() && ! f.deleteRecursively()) failed.add (s);
     }
+    if (auto* r = db.get (p.id))
+        failed.addArray (removePresetFiles (r->presetFiles, paths));
     db.remove (p.id);
     db.save();
     if (! failed.isEmpty())

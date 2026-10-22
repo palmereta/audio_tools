@@ -6,6 +6,7 @@
 // todo / sólo con voz / sólo sin voz. El LCD muestra el preset y lo último que se tocó.
 
 #include <JuceHeader.h>
+#include "../../../../shared/ui/Showing.h"
 #include "AssetsFs.h"
 #include "Widgets.h"
 
@@ -117,7 +118,7 @@ public:
         }
         if (auto* prm = proc.apvts.getParameter (dragKnob->param))
         {
-            prm->setValueNotifyingHost (juce::jlimit (0.0f, 1.0f, dragStart + dy / (e.mods.isShiftDown() ? 900.0f : 220.0f)));
+            prm->setValueNotifyingHost (snapNorm (*prm, juce::jlimit (0.0f, 1.0f, dragStart + dy / (e.mods.isShiftDown() ? 900.0f : 220.0f))));
             flash (prm->getName (20), prm->getCurrentValueAsText());
             repaint();
         }
@@ -235,8 +236,11 @@ private:
             g.setColour (on ? col::ink : col::ink.withAlpha (0.07f)); g.fillPath (t);
         }
     }
+    bool hiddenNow = false;
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) { hiddenNow = true; return; }   // ventana escondida (Live): nada que hacer (H3)
+        if (hiddenNow) { hiddenNow = false; repaint(); }                  // vuelve a la vista con lo que cambió mientras tanto
         const bool m = proc.midiInFlash.exchange (false);
         bool need = m != midiLit;
         midiLit = m;

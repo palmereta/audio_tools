@@ -4,6 +4,9 @@
 #   sh scripts/package-macos.sh at101v     # only one
 #   sh scripts/package-macos.sh launcher   # only the launcher
 # BUILD=<dir> reads the binaries from another build folder (default: build).
+# Each plugin zip carries Presets/<VST3 name>/: one .vstpreset per factory preset, written by atvstpresets
+# (tools/hosttest) from the bundles just packaged and checked by loading every file back. Ableton Live ignores
+# VST3 program lists, so without them Live only shows "Default".
 set -e
 cd "$(dirname "$0")/.."
 
@@ -23,6 +26,21 @@ package() {
     for t in lacquerrender halationrender tarnishrender at303render plumbrender thrumrender pallorrender; do
         for f in "$R/$t" "$R/${t}_artefacts/Release/$t"; do [ -x "$f" ] && cp "$f" "$OUT/" && break; done
     done
+    # Presets como archivos (.vstpreset) para los hosts que no muestran la lista de programas del VST3 (Live).
+    PRESETS_EN=""; PRESETS_ES=""
+    if [ -d "plugins/$DIR/assets/presets" ]; then
+        for f in "$OUT"/*.vst3; do
+            "${BUILD:-build}/tools/hosttest/atvstpresets_artefacts/Release/atvstpresets" "$f" --out "$OUT/Presets" \
+                --factory "plugins/$DIR/assets/presets" --clean
+        done
+        PRESETS_EN="4. Factory presets as files, for Ableton Live and other hosts that list preset files: copy the
+   folders inside Presets/ to ~/Library/Audio/Presets/Audio Tools/
+   (In Live: Browser > Plug-Ins, unfold \"Audio Tools $PRODUCT\" to see them; the launcher does this for you.)
+"
+        PRESETS_ES="4. Presets de fábrica como archivos (Ableton Live y otros): copiar las carpetas de Presets/ a
+   ~/Library/Audio/Presets/Audio Tools/
+"
+    fi
     cp LICENSE "$OUT/LICENSE.txt"
     cat > "$OUT/INSTALL.txt" <<TXT
 $PRODUCT $VER by Audio Tools - macOS 11+ (Apple Silicon and Intel)
@@ -30,7 +48,7 @@ $PRODUCT $VER by Audio Tools - macOS 11+ (Apple Silicon and Intel)
 1. Copy the .vst3 bundles to ~/Library/Audio/Plug-Ins/VST3/
 2. Copy the .component bundles to ~/Library/Audio/Plug-Ins/Components/
 3. Rescan plugins in your DAW (Ableton Live: Settings > Plug-Ins > Rescan).
-$PRODUCT.app is the standalone version.
+${PRESETS_EN}$PRODUCT.app is the standalone version.
 
 The binaries are ad-hoc signed and not notarized. If macOS blocks them, run:
   xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/$PRODUCT*.vst3 ~/Library/Audio/Plug-Ins/Components/$PRODUCT*.component
@@ -39,7 +57,7 @@ The binaries are ad-hoc signed and not notarized. If macOS blocks them, run:
 1. Copiar los .vst3 a ~/Library/Audio/Plug-Ins/VST3/
 2. Copiar los .component a ~/Library/Audio/Plug-Ins/Components/
 3. Reescanear los plugins en el DAW. Si macOS los bloquea, usar el comando xattr de arriba.
-
+${PRESETS_ES}
 Free and open source software under the GNU AGPL v3 (see LICENSE.txt).
 TXT
     # Notas propias del producto (p. ej. Orrery: cómo rutear su MIDI).
@@ -64,7 +82,8 @@ Audio Tools Launcher $VER - macOS 11+ (Apple Silicon and Intel)
 2. The first time, right-click it and choose Open (it is ad-hoc signed and not notarized).
    Or run: xattr -dr com.apple.quarantine "/Applications/Audio Tools Launcher.app"
 3. Pick the plugins and press Install. VST3 and Audio Units go to ~/Library/Audio/Plug-Ins,
-   standalone apps to ~/Applications.
+   standalone apps to ~/Applications, the factory presets (for Ableton Live's browser) to
+   ~/Library/Audio/Presets/Audio Tools.
 
 No account and nothing to sign up for. The launcher only downloads the list of plugins
 (https://audiotools.com.ar/downloads/manifest.json), the images and demos it shows, and the plugins you choose.

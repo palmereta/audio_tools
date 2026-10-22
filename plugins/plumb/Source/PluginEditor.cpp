@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include "../../../shared/ui/Showing.h"
 
 using namespace dh::pl;
 
@@ -541,6 +542,9 @@ void PlumbEditor::showManual (bool on)
 
 void PlumbEditor::timerCallback()
 {
+    // Live crea el editor al insertar y después sólo esconde la ventana: escondido no se anima ni se repinta (QA en
+    // Live 2026-10-22, H3).
+    if (! dh::reallyShowing (*this)) return;
     bob->tick (1.0f / 60.0f);
     notes->tick();
     const int m = (int) proc.value ("mode");

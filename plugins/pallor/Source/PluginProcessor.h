@@ -11,6 +11,7 @@
 #include "../../../shared/tools/SafeString.h"
 #include "../../../shared/tools/PresetTracker.h"
 #include "../../../shared/tools/LatencyReporter.h"
+#include "../../../shared/tools/MidiOutDelay.h"
 
 #ifndef PALLOR_VERSION
  #define PALLOR_VERSION "1.0.0"
@@ -122,6 +123,9 @@ private:
     std::vector<PresetEntry> presets; int currentProgram = 0;
     std::vector<PatternSet> library;
     double freeClock = 0; bool wasBypassed = false;
+    // El MIDI de salida, atrasado la latencia que el host compensa en el audio (QA en Live 2026-10-22, P1: salía
+    // 78 muestras antes que el audio con Tape encendido).
+    dh::MidiOutDelay midiDelay;
     dh::LatencyReporter latency { *this };
     std::vector<dh::pal::MidiIn> midiIn; std::vector<dh::pal::MidiOut> midiOut;
     std::array<float*, 2 * dh::pal::kBuses> outPtr {};

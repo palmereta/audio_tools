@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include "../../../shared/ui/Showing.h"
 
 using namespace dh::lq;
 using namespace dh::lq::ui;
@@ -197,6 +198,15 @@ void LacquerEditor::refreshPlan()
 
 void LacquerEditor::timerCallback()
 {
+    // Live crea el editor al insertar y después sólo esconde la ventana: escondido no se anima ni se repinta (QA en
+    // Live 2026-10-22, H3). La sonoridad integrada se calcula de este lado con la cola del medidor (102 s de bloques):
+    // escondido se vacía cada 5 s para no perder bloques.
+    if (! dh::reallyShowing (*this))
+    {
+        if (++hiddenTicks >= 150) { hiddenTicks = 0; proc.inMeter.updateUi(); proc.outMeter.updateUi(); }
+        return;
+    }
+    hiddenTicks = 0;
     proc.inMeter.updateUi(); proc.outMeter.updateUi();
     const auto ls = proc.learnState.load();
     const auto fs = proc.fileState.load();

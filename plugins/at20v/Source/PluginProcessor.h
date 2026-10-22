@@ -5,6 +5,8 @@
 #include "../../../shared/tools/SafeString.h"
 #include "../../../shared/tools/LatencyReporter.h"
 #include "../../../shared/tools/PresetTracker.h"
+#include "../../../shared/tools/HostGap.h"
+#include "../../../shared/tools/MidiOutDelay.h"
 #include "Preset.h"
 #include "ParamInfo.h"
 #include "ExtParams.h"
@@ -100,6 +102,9 @@ private:
     double freePpq = 0.0;
     int patchNote = -1, pendingPatchOff = -1;     // nota de MIDI out (modo Patch); la que quedó al re-preparar
     bool wasBypassed = false;
+    dh::HostGap hostGap;               // REAPER no llama al plugin en bypass: al volver se sueltan las notas (X1)
+    dh::MidiOutDelay midiOutDelay;     // el MIDI de salida sale atrasado la latencia que el host compensa en el audio
+    int latencyNow() const { return (int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * (AT20V_IS_FX ? 2.0 : 1.0)); }
     std::array<std::bitset<128>, 16> thruOn;     // notas reenviadas en Thru que todavía no recibieron su note-off
     void forwardThru (const juce::MidiBuffer& in, juce::MidiBuffer& out, int n, bool thru);
     float modWheel = 0.0f, bendWheel = 0.0f;     // CC1 y pitch bend mueven la misma rueda: se suman

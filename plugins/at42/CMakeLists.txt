@@ -1,5 +1,5 @@
 # AT42 — máquina de drones basada en la familia Elta SOLAR 42 (2023-2025), superset 42N.
-set(AT42_VERSION 1.0.5)
+set(AT42_VERSION 1.0.6)
 
 if(APPLE)
     set(AT42_FORMATS VST3 AU Standalone)
@@ -54,3 +54,14 @@ target_include_directories(at42render PRIVATE Source Source/dsp ${CMAKE_SOURCE_D
 target_compile_definitions(at42render PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 _USE_MATH_DEFINES=1)
 target_link_libraries(at42render PRIVATE juce::juce_audio_formats
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_lto_flags)
+
+# Pruebas del procesador completo sin host (tools/proctest.cpp): estado byte a byte, instancia nueva = programa 0,
+# hueco del host con una nota colgada. `at42proctest` → 0 si todo pasa.
+juce_add_console_app(at42proctest VERSION ${AT42_VERSION} PRODUCT_NAME "at42proctest")
+juce_generate_juce_header(at42proctest)
+target_sources(at42proctest PRIVATE tools/proctest.cpp Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+target_include_directories(at42proctest PRIVATE Source Source/dsp ${CMAKE_SOURCE_DIR}/shared/dsp ${CMAKE_SOURCE_DIR}/shared/ui ${CMAKE_SOURCE_DIR}/shared/manual)
+target_compile_definitions(at42proctest PRIVATE AT42_HAS_ASSETS=1 JucePlugin_Build_Standalone=0 DH_HAS_MANUAL=0 JucePlugin_Name="AT42"
+    JucePlugin_VersionString="${AT42_VERSION}" JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 _USE_MATH_DEFINES=1)
+target_link_libraries(at42proctest PRIVATE AT42Assets juce::juce_audio_utils juce::juce_dsp
+    PUBLIC juce::juce_recommended_config_flags)

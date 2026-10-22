@@ -2,7 +2,8 @@
 //   tarnishrender in.wav out.wav --preset "Dusty Cassette" [--tail 8] [--bpm 100] [--set id=valor ...]
 //                  [--at segundos id=valor ...]
 // --at cambia un parámetro en ese momento (por ejemplo parar la cinta a mitad del clip: --at 6 stop=1).
-// Imprime la CPU (porcentaje de un núcleo). Sin --preset usa los valores por defecto.
+// Imprime la CPU (porcentaje de un núcleo). Sin --preset, el preset 0 (como una instancia nueva). --float escribe en coma flotante
+// de 32 bits (sin recortar lo que pase de 0 dBFS, para medir niveles).
 #include "PluginProcessor.h"
 
 class HostClock : public juce::AudioPlayHead
@@ -19,7 +20,7 @@ public:
 int main (int argc, char** argv)
 {
     juce::ScopedJuceInitialiser_GUI init;
-    if (argc < 3) { std::printf ("uso: tarnishrender in.wav out.wav [--preset nombre] [--tail s] [--bpm n] [--set id=valor ...] [--at s id=valor ...]\n"); return 1; }
+    if (argc < 3) { std::printf ("uso: tarnishrender in.wav out.wav [--preset nombre] [--tail s] [--bpm n] [--set id=valor ...] [--at s id=valor ...] [--float]\n"); return 1; }
     juce::StringArray args; for (int i = 1; i < argc; ++i) args.add (juce::String::fromUTF8 (argv[i]));
     auto opt = [&] (const char* n, juce::String d) { const int i = args.indexOf (n); return i >= 0 && i + 1 < args.size() ? args[i + 1] : d; };
     const auto cwd = juce::File::getCurrentWorkingDirectory();
@@ -59,7 +60,7 @@ int main (int argc, char** argv)
     juce::File out = cwd.getChildFile (args[1]); out.deleteFile();
     std::unique_ptr<juce::OutputStream> os (out.createOutputStream());
     juce::WavAudioFormat wav;
-    auto w = wav.createWriterFor (os, juce::AudioFormatWriterOptions().withSampleRate (sr).withNumChannels (2).withBitsPerSample (24));
+    auto w = wav.createWriterFor (os, juce::AudioFormatWriterOptions().withSampleRate (sr).withNumChannels (2).withBitsPerSample (args.contains ("--float") ? 32 : 24));
     if (! w || ! w->writeFromAudioSampleBuffer (buf, 0, total)) { std::printf ("no se puede escribir\n"); return 4; }
     std::printf ("%s: %.1f s, CPU %.2f %% de un núcleo\n", out.getFileName().toRawUTF8(), total / sr, 100.0 * secs / (total / sr));
     return 0;

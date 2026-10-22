@@ -1,7 +1,10 @@
 // Pruebas del motor del ATMD sin JUCE:
 //   clang++ -std=c++20 -O2 -I plugins/atmd/Source/dsp -I shared/dsp plugins/atmd/tools/dsptest.cpp -o /tmp/atmd_dsptest && /tmp/atmd_dsptest
+// Con -DATMD_OLD_ENGINE y -I a una copia de Source/dsp de 1.0.2 mide el motor viejo (15: el zipper, 16: reproducible).
 #include "EngineMd.h"
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 
 using namespace dh::md;
@@ -57,6 +60,52 @@ static float f0 (const std::vector<float>& v, double a, double b, double sr = 48
     return (float) (sr / (bestLag + d));
 }
 static float cents (float f, float ref) { return 1200.0f * std::log2 (f / ref); }
+
+// Zipper de una automatización (QA en REAPER 2026-10-22, E1: la banda alta latía a la frecuencia de bloque, 17-18 dB
+// sobre la versión estática). El corte sube de −3 a +3 en 2 s y llega del host una vez por bloque de 512 muestras;
+// se compara con una referencia que lo recibe cada 8 muestras (casi continua) con el mismo atraso de un bloque que
+// tiene la rampa. Devuelve el residuo de la diferencia arriba de 2 kHz, en dB relativos a la referencia: con la
+// rampa por muestra la versión por bloques se parece a la continua; con escalones por bloque, no.
+static std::vector<float> cutoffSweep (int block, int lag, double sr = 48000.0)
+{
+    Engine e; e.prepare (sr, 512, 2);
+    e.p.cutoff = -3.0f; e.p.emphasis = 3.0f; e.p.contourAmt = 0.0f; e.p.lS = 10.0f; e.p.lA = 0.0f; e.p.volume = 7.0f;
+    e.p.on[1] = e.p.on[2] = true; e.p.level[1] = e.p.level[2] = 7.0f;
+    e.noteOn (36, 0.8f);
+    std::vector<float> l ((size_t) block), r ((size_t) block), out;
+    const int total = (int) (3.0 * sr), r0 = (int) (0.5 * sr), r1 = (int) (2.5 * sr);
+    for (int pos = 0; pos < total; pos += block)
+    {
+        const float t = std::clamp ((float) (pos - lag - r0) / (float) (r1 - r0), 0.0f, 1.0f);
+        e.p.cutoff = -3.0f + 6.0f * t;
+       #ifndef ATMD_OLD_ENGINE
+        e.setRampLength (block);
+       #endif
+        e.process (nullptr, l.data(), r.data(), block);
+        out.insert (out.end(), l.begin(), l.end());
+    }
+    return out;
+}
+static double zipperResidual()
+{
+    const double sr = 48000.0;
+   #ifdef ATMD_OLD_ENGINE
+    const auto a = cutoffSweep (512, 0), ref = cutoffSweep (8, 0);     // 1.0.2: escalón al principio de cada bloque, sin atraso
+   #else
+    const auto a = cutoffSweep (512, 0), ref = cutoffSweep (8, 512);
+   #endif
+    auto hp = [sr] (const std::vector<float>& x) {
+        const double w = 2.0 * M_PI * 2000.0 / sr, al = std::sin (w) / (2 * 0.707), cw = std::cos (w);
+        const double b0 = (1 + cw) / 2, b1 = -(1 + cw), b2 = (1 + cw) / 2, a0 = 1 + al, a1 = -2 * cw, a2 = 1 - al;
+        double x1 = 0, x2 = 0, y1 = 0, y2 = 0; std::vector<double> y (x.size());
+        for (size_t i = 0; i < x.size(); ++i) { const double v = (b0 * x[i] + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2) / a0; x2 = x1; x1 = x[i]; y2 = y1; y1 = v; y[i] = v; }
+        return y;
+    };
+    std::vector<float> d (a.size()); for (size_t i = 0; i < a.size(); ++i) d[i] = a[i] - ref[i];
+    const auto hd = hp (d), hr = hp (ref);
+    double ed = 0, er = 0; for (size_t i = (size_t) (0.6 * sr); i < (size_t) (2.5 * sr); ++i) { ed += hd[i] * hd[i]; er += hr[i] * hr[i]; }
+    return 10.0 * std::log10 (ed / er + 1e-30);
+}
 
 static Engine fresh (int os = 2, double sr = 48000.0)
 {
@@ -266,6 +315,29 @@ int main()
         Engine f = fresh(); f.p.decayOn = false; f.noteOn (60, 0.8f); run (f, 0.1); f.noteOn (60, 0.8f); run (f, 0.1); f.noteOff (60);
         auto q = run (f, 0.5);
         check (rms (q.L, 0.3, 0.5) < 1e-3f, "dos note-on de la misma nota y un note-off: se suelta (sin notas colgadas)");
+    }
+
+    std::printf ("15. Automatización del corte sin zipper (E1): por bloques de 512 suena como casi continua\n");
+    {
+        const double res = zipperResidual();
+        std::printf ("  residuo arriba de 2 kHz contra la referencia cada 8 muestras: %.1f dB\n", res);
+       #ifndef ATMD_OLD_ENGINE
+        check (res < -40.0, "residuo debajo de -40 dB");
+       #endif
+    }
+
+    std::printf ("16. Reproducible: dos motores preparados igual suenan igual aunque uno haya procesado antes\n");
+    {
+        Engine a = fresh(); a.noteOn (48, 0.8f); run (a, 1.3); a.prepare (48000.0, 512, 2);
+        a.p.cutoff = 5.0f; a.p.emphasis = 0.0f; a.p.contourAmt = 0.0f; a.p.lS = 10.0f; a.p.lA = 0.0f; a.p.volume = 7.0f;
+        Engine b = fresh();
+        a.noteOn (60, 0.8f); b.noteOn (60, 0.8f);
+        auto oa = run (a, 1.0), ob = run (b, 1.0);
+        double d = 0; for (size_t i = 0; i < oa.L.size(); ++i) d = std::max (d, (double) std::fabs (oa.L[i] - ob.L[i]));
+        std::printf ("  diferencia máxima %.3g\n", d);
+       #ifndef ATMD_OLD_ENGINE
+        check (d == 0.0, "idénticos muestra a muestra");
+       #endif
     }
 
     std::printf (fails ? "\n%d FALLAS\n" : "\nTODO OK (0 fallas)\n", fails);

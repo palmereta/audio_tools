@@ -10,7 +10,8 @@
   "flutter": 0.4,
   "dropouts": 70,
   "wear": 80,
-  "scrape": 50
+  "scrape": 50,
+  "out": -1.0
  },
  "order": 11
 }

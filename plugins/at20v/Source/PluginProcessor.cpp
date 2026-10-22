@@ -12,6 +12,25 @@ bool isPresetScoped (const juce::String& id)
     return id != "quality" && id != "output" && id != "midi_out" && id != "bend_range";
 }
 
+// Ableton Live llena el panel del dispositivo solo con hasta 64 parámetros automatizables (QA en Live 2026-10-22,
+// H2: el AT20V tenía 68). Cinco ajustes que no se automatizan dejan de ofrecerse al host; siguen en la página de
+// extensiones, en los presets y en las sesiones, con los mismos ids.
+bool isAutomatableExt (const juce::String& id)
+{
+    return id != "quality" && id != "midi_out" && id != "bend_range" && id != "voc_bands" && id != "priority";
+}
+
+// AT20V FX: sólo los presets que trabajan con la entrada (efectos, vocoder, guitar synth) y los que tocan solos; los
+// de sinte necesitan notas y como efecto callaban la pista (QA en REAPER 2026-10-22, A1: 38 de 55 en silencio).
+// Los efectos primero: el programa 0 es Filter FX, lo mismo que una instancia nueva.
+int fxOrder (const juce::String& name, const juce::String& category)
+{
+    if (category == "Effect") return 0;
+    if (category == "Vocoder" || name.endsWith ("(Audio In)")) return 1;
+    if (category == "Self-Playing") return 2;
+    return -1;
+}
+
 }
 
 juce::AudioProcessor::BusesProperties AT20VProcessor::makeBuses()
@@ -43,12 +62,9 @@ AT20VProcessor::AT20VProcessor()
     for (auto& a : patchAtomic) a.store (-1);
     loadFactoryPresets();
     rescanUserPresets();
+    // Una instancia nueva es el programa 0. En AT20V FX el programa 0 es Filter FX (la pista pasa por los filtros sin
+    // MIDI; con "Init" no sonaba nada hasta tocar notas).
     if (! presets.empty()) loadPreset (0);
-   #if AT20V_IS_FX
-    // La variante efecto arranca con un patch de efecto (la pista pasa por los filtros sin MIDI); con "Init" no sonaba
-    // nada hasta tocar notas (sólo era vocoder).
-    for (int i = 0; i < (int) presets.size(); ++i) if (presets[(size_t) i].name == "Filter FX") { loadPreset (i); break; }
-   #endif
 }
 
 AT20VProcessor::~AT20VProcessor()
@@ -75,11 +91,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout AT20VProcessor::createLayout
     for (auto& e : extParams())
     {
         if (e.steps > 0)
-            layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { e.id, 1 }, e.name, extChoices (e), (int) e.def));
+            layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { e.id, 1 }, e.name, extChoices (e), (int) e.def,
+                juce::AudioParameterChoiceAttributes().withAutomatable (isAutomatableExt (e.id))));
         else
             layout.add (std::make_unique<juce::AudioParameterFloat> (
                 juce::ParameterID { e.id, 1 }, e.name, juce::NormalisableRange<float> (e.lo, e.hi), e.def,
-                juce::AudioParameterFloatAttributes().withStringFromValueFunction ([&e] (float v, int) { return formatExt (e, v); })));
+                juce::AudioParameterFloatAttributes().withStringFromValueFunction ([&e] (float v, int) { return formatExt (e, v); })
+                                                     .withAutomatable (isAutomatableExt (e.id))));
     }
     return layout;
 }
@@ -100,6 +118,8 @@ void AT20VProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     currentBlock = std::max (samplesPerBlock, 64);
     engine.prepare (sampleRate, 64, (int) pQuality->load() == 1 ? 8 : 4);
     latency.setNow ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * (AT20V_IS_FX ? 2.0 : 1.0)));      // el retardo de los filtros del sobremuestreo, para que el host lo compense
+    hostGap.prepare (sampleRate);
+    midiOutDelay.prepare(); midiOutDelay.setDelay (latencyNow());
     if (patchNote >= 0) pendingPatchOff = patchNote;     // su note-off sale en el próximo bloque
     patchNote = -1;
     for (int i = 0; i < kNumKnobs; ++i) smoothed[(size_t) i] = knobParams[(size_t) i]->load();
@@ -140,6 +160,18 @@ void AT20VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     if (n <= 0) return;
     wasBypassed = false;
     auto out = getBusBuffer (buffer, false, 0);
+
+    // El host dejó de llamar (REAPER con el plugin en bypass) y vuelve: un note-off pudo perderse en el hueco. Se
+    // sueltan las voces y las teclas en pantalla, y el MIDI de salida cierra sus notas (QA en DAWs 2026-10-22, X1).
+    const bool gap = hostGap.check (getPlayHead(), n, isNonRealtime());
+    juce::MidiBuffer gapOffs;
+    if (gap)
+    {
+        engine.allNotesOff();
+        keyboardState.reset();
+        if (patchNote >= 0) { pendingPatchOff = patchNote; patchNote = -1; }
+        midiOutDelay.flushNoteOffs (gapOffs);
+    }
 
     const int wantOs = (int) pQuality->load() == 1 ? 8 : 4;
     { if (wantOs != engine.oversampling()) engine.prepare (currentSr, 64, wantOs, true); latency.request ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * (AT20V_IS_FX ? 2.0 : 1.0))); }
@@ -194,6 +226,7 @@ void AT20VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     const int midiMode = juce::jlimit (0, 3, (int) pMidiOut->load());
     juce::MidiBuffer outMidi;
     if (pendingPatchOff >= 0) { outMidi.addEvent (juce::MidiMessage::noteOff (1, pendingPatchOff), 0); pendingPatchOff = -1; }
+    if (gap) { const juce::MidiBuffer none; forwardThru (none, outMidi, n, false); }   // lo que pasó en Thru se cierra
     forwardThru (midi, outMidi, n, midiMode == 1 || midiMode == 3);
 
     auto it = midi.cbegin();
@@ -238,6 +271,11 @@ void AT20VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     while (it != midi.cend()) { handleMidi ((*it).getMessage()); ++it; }
     if (midiMode < 2 && patchNote >= 0) { outMidi.addEvent (juce::MidiMessage::noteOff (1, patchNote), 0); patchNote = -1; }
     midi.swapWith (outMidi);
+    // El audio sale atrasado la latencia del sobremuestreo y el host lo compensa; el MIDI de salida no lo compensa
+    // nadie, así que sale atrasado lo mismo (si no, una pista que dobla por MIDI From quedaba adelantada 27 muestras).
+    midiOutDelay.setDelay (latencyNow());
+    midiOutDelay.process (midi, n);
+    for (const auto md : gapOffs) midi.addEvent (md.getMessage(), 0);
     if (! midi.isEmpty()) midiOutFlash.store (true);
 
     if (out.getNumChannels() >= 2) { out.copyFrom (0, 0, monoOut.data(), n); out.copyFrom (1, 0, rightOut.data(), n); }
@@ -289,6 +327,7 @@ void AT20VProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, juc
         engine.allNotesOff();
         if (patchNote >= 0) { outMidi.addEvent (juce::MidiMessage::noteOff (1, patchNote), 0); patchNote = -1; }
         if (pendingPatchOff >= 0) { outMidi.addEvent (juce::MidiMessage::noteOff (1, pendingPatchOff), 0); pendingPatchOff = -1; }
+        midiOutDelay.flushNoteOffs (outMidi);
         wasBypassed = true;
     }
     const int midiMode = juce::jlimit (0, 3, (int) pMidiOut->load());
@@ -360,6 +399,10 @@ void AT20VProcessor::loadFactoryPresets()
         const auto v = juce::JSON::parse (juce::String::fromUTF8 (data, size));
         presets.push_back ({ v.getProperty ("name", nm).toString(), v.getProperty ("category", "").toString(), v, true, {} });
     }
+   #if AT20V_IS_FX
+    presets.erase (std::remove_if (presets.begin(), presets.end(), [] (auto& p) { return fxOrder (p.name, p.category) < 0; }), presets.end());
+    std::stable_sort (presets.begin(), presets.end(), [] (auto& a, auto& b) { return fxOrder (a.name, a.category) < fxOrder (b.name, b.category); });
+   #endif
    #endif
 }
 
@@ -484,7 +527,15 @@ void AT20VProcessor::setStateInformation (const void* data, int sizeInBytes)
         auto* o = new juce::DynamicObject();
         o->setProperty ("cables", cablesJson);
         setCables (presetFromJson (juce::var (o)).cables);
+        // El programa se busca por nombre: la lista de AT20V FX cambió en 1.0.7 y los nombres de los presets de audio in
+        // llevan "(Audio In)"; el número guardado queda para nombres repetidos o desconocidos.
         currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
+        {
+            const auto nm = currentPresetName.get();
+            if (! juce::isPositiveAndBelow (currentProgram, (int) presets.size()) || presets[(size_t) currentProgram].name != nm)
+                for (int i = 0; i < (int) presets.size(); ++i)
+                    if (presets[(size_t) i].name == nm || presets[(size_t) i].name == nm + " (Audio In)") { currentProgram = i; break; }
+        }
         if (state.hasProperty ("presetSnapshot")) tracker.fromString (*this, state.getProperty ("presetSnapshot").toString());
         else tracker.capture (*this);           // sesión anterior a la marca: el nombre sin "*"
         notifyUi (onPresetChanged);

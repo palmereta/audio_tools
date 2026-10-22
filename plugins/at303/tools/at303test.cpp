@@ -1,5 +1,8 @@
-// at303test: pruebas del motor del AT303 sin JUCE (docs/research.md §7). Imprime lo medido y [ok] o [FALLA].
+// at303test: pruebas del motor del AT303 (docs/research.md §7; T1-T8 sólo el motor) y del procesador completo sin
+// host (T9-T11). Imprime lo medido y [ok] o [FALLA].
+#include "PluginProcessor.h"
 #include "Engine303.h"
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -36,8 +39,46 @@ static std::vector<float> renderSeq (const Pattern& pat, EngineParams ep, double
     return L;
 }
 
+// Un host de mentira para el procesador: transporte, posición y tempo.
+struct TestHead : public juce::AudioPlayHead
+{
+    bool playing = false; juce::int64 pos = 0; double bpm = 120.0, sr = 48000.0;
+    juce::Optional<PositionInfo> getPosition() const override
+    {
+        PositionInfo p; p.setBpm (bpm); p.setIsPlaying (playing); p.setTimeInSamples (pos); p.setPpqPosition ((double) pos / sr * bpm / 60.0);
+        return p;
+    }
+};
+
+static double rmsDb (const std::vector<float>& x, size_t a, size_t b)
+{
+    double e = 0; b = std::min (b, x.size());
+    for (size_t i = a; i < b; ++i) e += (double) x[i] * x[i];
+    return 10.0 * std::log10 (e / (double) std::max<size_t> (1, b - a) + 1e-30);
+}
+
+// Renderiza el procesador con el reloj del host andando (el patrón del preset), canal izquierdo.
+static std::vector<float> renderProc (At303Processor& p, double secs, double fs = 48000.0)
+{
+    TestHead h; h.playing = true; h.sr = fs; h.bpm = p.value ("tempo");
+    p.setPlayHead (&h); p.setPlayConfigDetails (0, 2, fs, 512); p.prepareToPlay (fs, 512);
+    p.setValue ("sync", 1.0f); p.setValue ("mode", 0.0f);
+    const int total = (int) (secs * fs);
+    std::vector<float> out; out.reserve ((size_t) total);
+    juce::AudioBuffer<float> buf (2, 512); juce::MidiBuffer mb;
+    for (int pos = 0; pos < total; pos += 512)
+    {
+        h.pos = pos; buf.clear(); mb.clear();
+        p.processBlock (buf, mb);
+        out.insert (out.end(), buf.getReadPointer (0), buf.getReadPointer (0) + std::min (512, total - pos));
+    }
+    p.setPlayHead (nullptr);
+    return out;
+}
+
 int main()
 {
+    juce::ScopedJuceInitialiser_GUI juceInit;
     std::setvbuf (stdout, nullptr, _IONBF, 0);
     const double fs = 48000;
 
@@ -245,6 +286,144 @@ int main()
         EngineParams d; bench (d, "sonido por defecto, ×4");
         EngineParams w = d; w.voice.square = true; w.driveType = 1; w.delayMix = 0.3f; w.voice.filterFm = 0.3f; bench (w, "cuadrada, distorsión, delay, FM del filtro");
         EngineParams h = d; h.oversample = 8; bench (h, "×8");
+    }
+
+    std::printf ("\nT9 Hueco del host: el note-off perdido mientras el host no llamaba (bypass de REAPER) no deja la nota colgada\n");
+    {
+        // Nota de 0,5 a 1,5 s; el host deja de llamar de 1,0 a 2,0 s (con el transporte andando la posición avanza;
+        // parado, pasan 600 ms de reloj sin llamadas). Mide la nota y el final, y la compuerta al terminar.
+        struct R { double note, end; bool gate; };
+        auto run = [&] (bool gap, bool playing, bool midiMode, bool sendOff = true) -> R {
+            At303Processor p; TestHead h; h.playing = playing;
+            p.setPlayHead (&h); p.setPlayConfigDetails (0, 2, fs, 512); p.prepareToPlay (fs, 512);
+            p.setValue ("mode", midiMode ? 1.0f : 0.0f); p.setValue ("sync", 1.0f); p.setValue ("run", 0.0f);
+            const juce::int64 n = 512, tOn = 24000, tOff = 72000, g0 = 48000, g1 = 96000, end = 168000;
+            std::vector<float> o; juce::AudioBuffer<float> buf (2, (int) n); juce::MidiBuffer mb; bool slept = false;
+            for (juce::int64 pos = 0; pos < end; pos += n)
+            {
+                buf.clear();
+                if (! (gap && pos >= g0 && pos < g1))
+                {
+                    if (gap && ! playing && pos >= g1 && ! slept) { juce::Thread::sleep (600); slept = true; }
+                    mb.clear();
+                    if (tOn >= pos && tOn < pos + n) mb.addEvent (juce::MidiMessage::noteOn (1, 36, (juce::uint8) 90), (int) (tOn - pos));
+                    if (sendOff && tOff >= pos && tOff < pos + n) mb.addEvent (juce::MidiMessage::noteOff (1, 36), (int) (tOff - pos));
+                    h.pos = playing ? pos : 0;
+                    p.processBlock (buf, mb);
+                }
+                o.insert (o.end(), buf.getReadPointer (0), buf.getReadPointer (0) + n);
+            }
+            return { rmsDb (o, 28800, 45600), rmsDb (o, 144000, 168000), p.view.gate.load() };
+        };
+        struct Case { const char* what; bool playing, midiMode; };
+        for (auto c : { Case { "transporte andando, modo MIDI (se saltan bloques y la posición avanza)", true, true },
+                        Case { "transporte parado, teclas del instrumento (600 ms de reloj sin llamadas)", false, false },
+                        Case { "transporte parado, modo MIDI", false, true } })
+        {
+            const R ctl = run (false, c.playing, c.midiMode), gp = run (true, c.playing, c.midiMode);
+            std::printf ("  %s: nota %.0f dB; al final %.0f dB con el note-off perdido (compuerta %s), %.0f dB con el note-off\n",
+                         c.what, ctl.note, gp.end, gp.gate ? "abierta" : "cerrada", ctl.end);
+            check (ctl.note > -40.0 && ! gp.gate && gp.end <= std::max (ctl.end + 6.0, -70.0), "la nota se suelta al volver el host");
+        }
+        // Sin hueco no se suelta nada: una nota sostenida sin note-off sigue con la compuerta abierta.
+        const R held = run (false, false, false, false), heldPlay = run (false, true, true, false);
+        check (held.gate && heldPlay.gate, "sin hueco (parado y andando) una nota sostenida sigue sonando: ninguna falsa alarma");
+        // Secuenciador con el host andando: después del hueco el patrón sigue sonando en su lugar.
+        {
+            auto seqRun = [&] (bool gap) {
+                At303Processor p; TestHead h; h.playing = true; h.bpm = 125;
+                p.setPlayHead (&h); p.setPlayConfigDetails (0, 2, fs, 512); p.prepareToPlay (fs, 512);
+                p.setValue ("sync", 1.0f);
+                std::vector<float> o; juce::AudioBuffer<float> buf (2, 512); juce::MidiBuffer mb;
+                for (juce::int64 pos = 0; pos < 192000; pos += 512)
+                {
+                    buf.clear(); mb.clear();
+                    if (! (gap && pos >= 48000 && pos < 96000)) { h.pos = pos; p.processBlock (buf, mb); }
+                    o.insert (o.end(), buf.getReadPointer (0), buf.getReadPointer (0) + 512);
+                }
+                return o;
+            };
+            const auto a = seqRun (false), b = seqRun (true);
+            const double la = rmsDb (a, 120000, 192000), lb = rmsDb (b, 120000, 192000);
+            std::printf ("  secuenciador con el host andando: después del hueco %.1f dB, sin hueco %.1f dB\n", lb, la);
+            check (std::abs (la - lb) < 1.5, "el secuenciador sigue el patrón después del hueco");
+        }
+    }
+
+    std::printf ("\nT10 Programa 0: un plugin recién insertado es el preset 0 que informa al host\n");
+    {
+        At303Processor fresh;
+        At303Processor viaProgram; viaProgram.setCurrentProgram (0);
+        juce::MemoryBlock sf, sp; fresh.getStateInformation (sf); viaProgram.getStateInformation (sp);
+        const auto& p0 = fresh.getPresets().front();
+        const auto name = fresh.getProgramName (fresh.getCurrentProgram());
+        std::printf ("  programa %d \"%s\"; el editor muestra \"%s\"; Cutoff %.0f (preset %.0f); estado %d bytes\n",
+                     fresh.getCurrentProgram(), name.toRawUTF8(), fresh.presetDisplayName().toRawUTF8(), fresh.value ("cutoff"),
+                     (double) p0.data.getProperty ("params", {}).getProperty ("cutoff", -1), (int) sf.getSize());
+        check (name == p0.name && fresh.presetDisplayName() == p0.name, "el host y el editor dicen el mismo nombre: el del preset 0");
+        check (std::abs (fresh.value ("cutoff") - (float) (double) p0.data.getProperty ("params", {}).getProperty ("cutoff", -1)) < 1e-3f
+                   && std::abs (fresh.value ("tempo") - (float) (double) p0.data.getProperty ("params", {}).getProperty ("tempo", -1)) < 1e-3f,
+               "los valores son los del preset 0, no los por defecto");
+        check (sf == sp, "estado recién insertado == estado después de setCurrentProgram (0), byte a byte");
+        At303Processor r1, r2; r2.setCurrentProgram (0);
+        const auto a = renderProc (r1, 3.0), b = renderProc (r2, 3.0);
+        check (a.size() == b.size() && std::memcmp (a.data(), b.data(), a.size() * 4) == 0, "suena igual que después de elegir el programa 0 (bit a bit)");
+        // Una sesión guardada manda: el preset del constructor no la pisa.
+        At303Processor saved; saved.setCurrentProgram (5); saved.setValue ("cutoff", 77.0f);
+        { auto pt = saved.getPattern (0); pt.length = 11; saved.setPattern (0, pt); }
+        juce::MemoryBlock ss; saved.getStateInformation (ss);
+        At303Processor restored; restored.setStateInformation (ss.getData(), (int) ss.getSize());
+        juce::MemoryBlock sr2; restored.getStateInformation (sr2);
+        check (sr2 == ss && restored.getCurrentProgram() == 5 && std::abs (restored.value ("cutoff") - 77.0f) < 1e-3f && restored.getPattern (0).length == 11,
+               "una sesión guardada se restaura con su programa, sus valores y sus patrones");
+        // Una sesión de 1.0.2 guardada sin tocar nada ("Init", valores por defecto) vuelve como estaba.
+        At303Processor old;
+        for (auto* prm : old.getParameters())
+            if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (prm))
+                if (rp->getParameterID() != "sync" && rp->getParameterID() != "run") rp->setValueNotifyingHost (rp->getDefaultValue());
+        old.currentPresetName = juce::String ("Init"); old.setPattern (0, Pattern());
+        juce::MemoryBlock so; old.getStateInformation (so);
+        At303Processor back; back.setStateInformation (so.getData(), (int) so.getSize());
+        check (back.currentPresetName.get() == "Init" && std::abs (back.value ("cutoff") - old.value ("cutoff")) < 1e-3f, "una sesión vieja con Init vuelve con Init y sus valores");
+    }
+
+    std::printf ("\nT11 DC y nivel: el techo de salida no corre el promedio; ningún preset muy por encima del resto\n");
+    {
+        // La escalera saturada a todo volumen (lo que hacía Overdriven Ladder): recorta en el techo.
+        EngineParams ep; ep.voice.cutoff = 0.42f; ep.voice.resonance = 0.8f; ep.voice.envMod = 0.6f; ep.voice.overdrive = 1.0f + 65.6f;
+        ep.volume = 1.0f;
+        const auto o = renderSeq (basicPattern(), ep, 130, 6.0, 512);
+        double dc = 0; float pk = 0; for (size_t i = 48000; i < o.size(); ++i) { dc += o[i]; pk = std::max (pk, std::fabs (o[i])); }
+        dc /= (double) (o.size() - 48000);
+        std::printf ("  Overdrive al máximo, Volume al máximo: DC %.5f, pico %.3f\n", dc, pk);
+        // Golpeando el techo todo el tiempo queda algo (el límite final de ±1 vuelve a recortar lo que el pasa altos
+        // corrió), bastante menos que el 0,037 que daba Overdriven Ladder.
+        check (std::abs (dc) < 0.01 && pk <= 1.0f, "recortando en el techo: DC < 0,01 (el preset Overdriven Ladder daba 0,037) y pico <= 1");
+        // Debajo del techo la etapa no toca nada: con la mitad del volumen la salida es exactamente la mitad.
+        EngineParams q; q.volume = 0.4f; EngineParams h = q; h.volume = 0.2f;
+        const auto a = renderSeq (basicPattern(), q, 128, 3.0, 512), b = renderSeq (basicPattern(), h, 128, 3.0, 512);
+        bool exact = true; float pa = 0; for (size_t i = 0; i < a.size(); ++i) { exact &= a[i] == 2.0f * b[i]; pa = std::max (pa, std::fabs (a[i])); }
+        std::printf ("  sonido por defecto con Volume 40 (pico %.2f) y 20\n", pa);
+        check (pa < 0.9f && exact, "debajo del techo la salida es lineal bit a bit (el pasa altos no actúa)");
+        // Todos los presets por el procesador completo, con su patrón.
+        At303Processor probe; const int np = (int) probe.getPresets().size();
+        std::vector<double> lv; double worstDc = 0; float worstPk = 0; std::string worstDcName;
+        for (int i = 0; i < np; ++i)
+        {
+            At303Processor p; p.setCurrentProgram (i);
+            const auto x = renderProc (p, 6.0);
+            double m = 0; for (size_t k = 96000; k < x.size(); ++k) { m += x[k]; worstPk = std::max (worstPk, std::fabs (x[k])); }
+            m /= (double) (x.size() - 96000);
+            if (std::abs (m) > std::abs (worstDc)) { worstDc = m; worstDcName = p.getPresets()[(size_t) i].name.toStdString(); }
+            lv.push_back (rmsDb (x, 96000, x.size()));
+        }
+        auto sorted = lv; std::sort (sorted.begin(), sorted.end());
+        const double med = sorted[sorted.size() / 2];
+        int loudest = (int) (std::max_element (lv.begin(), lv.end()) - lv.begin());
+        std::printf ("  %d presets: mediana %.1f dBFS RMS; el más fuerte %s %.1f dB (+%.1f); peor DC %.4f (%s); pico %.3f\n", np, med,
+                     probe.getPresets()[(size_t) loudest].name.toRawUTF8(), lv[(size_t) loudest], lv[(size_t) loudest] - med, worstDc, worstDcName.c_str(), worstPk);
+        check (std::abs (worstDc) < 0.002 && worstPk <= 1.0f, "ningún preset con DC (< 0,002) ni pasado de 0 dBFS");
+        check (lv[(size_t) loudest] - med <= 8.0, "ningún preset más de 8 dB por encima de la mediana");
     }
 
     std::printf ("\n%s (%d fallas)\n", fails ? "HAY FALLAS" : "TODO OK", fails);

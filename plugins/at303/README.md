@@ -2,7 +2,7 @@
 
 A bass line synthesizer with its own step sequencer, modelled on the published circuit of a classic 1981 bass
 line synthesizer. VST3 instrument, Audio Unit (macOS), standalone app, and `at303render`, a command-line renderer.
-Version 1.0.2.
+Version 1.0.3.
 
 The research behind it (the circuit, block by block, from the service notes and the open reproductions; the
 sequencer's memory and write modes; what users ask of the software versions; the test plan) is in
@@ -40,15 +40,25 @@ from a second render. Inspect draws the circuit live from the engine's state. On
 
 ## Tests
 
-`at303test` (no JUCE):
+`at303test` (T1-T8 the engine alone, T9-T11 the whole processor without a host):
 
 - T1 compile: time list against pitch list, ties, rests, and editing the rhythm moves the pitches along.
 - T2 gate at 3.5/6 and slide without retrigger; T2b the host clock block by block at five tempos and three block
   sizes: every step and every gate-off arrives.
 - T3 calibration ring (cutoff at half, resonance full) near 460-500 Hz; T4 accent climb on C13; T5 slide time.
 - T6 determinism; T7 no NaN and a bounded output under random parameters; T8 CPU.
+- T9 host gap (REAPER calls nothing while a plugin is bypassed, so a note-off can be lost): with the transport
+  running (blocks skipped while the position advances) and stopped (600 ms of wall clock without calls), in MIDI
+  mode and from the keys, the note is released when the host comes back; no false alarm without a gap; the
+  sequencer keeps its place.
+- T10 a fresh instance is program 0 (First Squelch) for the host and the editor, bit-identical to choosing program 0;
+  a saved session (and a 1.0.2 one saved as Init) still restores its own program, values and patterns.
+- T11 DC and level: the output ceiling no longer shifts the average (Overdriven Ladder had DC 0.037, now 0.0000);
+  every preset under 0.002 DC, at or under 0 dBFS and within 8 dB of the median (the four Driven presets have their
+  own Volume now; the other 30 render bit-identical to 1.0.2).
 
-`athosttest` (0 FAIL on macOS and Windows; the three state warnings come from the free-running oscillator phase),
+`athosttest` (0 FAIL on macOS and Windows, VST3 and AU, including `hostgap`; the three state warnings come from the
+free-running oscillator phase),
 pluginval at strictness 10 (macOS and Windows) and auval.
 
 ## CPU

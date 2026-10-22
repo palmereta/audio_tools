@@ -22,7 +22,9 @@ namespace dh::gt {
 
 // ── MIDI crudo ──
 struct MidiMsg { int offset = 0; uint8_t status = 0, d1 = 0, d2 = 0; };
-struct HostTime { bool playing = false; double ppq = 0.0, bpm = 120.0; };
+// looping, loopStart, loopEnd: el loop del host (ppq), si lo informa: el patrón sigue del final al principio sin saltear
+// ni repetir golpes (QA en REAPER 2026-10-22, G1).
+struct HostTime { bool playing = false; double ppq = 0.0, bpm = 120.0; bool looping = false; double loopStart = 0.0, loopEnd = 0.0; };
 
 // ── Patrones ──
 // Rasgueo, un carácter por paso: D/U abajo/arriba, d/u sólo las cuerdas agudas, M/m con la palma, X/x muerto (la mano
@@ -212,7 +214,8 @@ public:
             if (! hostWasPlaying) win0 = -1.0;
             hostWasPlaying = true; seqRunning = false;
             lastBpm = h.bpm;
-            if (pattern) schedule (h.ppq, h.bpm, absStart, n);
+            const bool loop = h.looping && h.loopEnd > h.loopStart + 1e-6 && h.ppq < h.loopEnd + 1e-9;
+            if (pattern) schedule (h.ppq, h.bpm, absStart, n, loop ? h.loopStart : 0.0, loop ? h.loopEnd : -1.0);
             return;
         }
         // Sin transporte: un reloj propio que arranca en la muestra de la primera tecla (noteOn) y sigue mientras haya
@@ -228,15 +231,46 @@ public:
 
     // Agenda los pasos que caen en [ventana anterior, fin del bloque + anticipación) en ppq; la ventana nueva empieza
     // donde terminó la anterior si la posición es continua (la rendija de redondeo de un host no pierde ni repite pasos).
-    void schedule (double ppq0, double bpm, int64_t absStart, int n)
+    // Con el loop del host (loopEnd > loopStart), lo que la ventana pasa del final del loop se agenda desde su principio,
+    // así la vuelta siguiente sigue la ventana sin repetir ni perder el primer golpe (el rasgueo centrado se resuelve
+    // antes del tiempo, todavía en la vuelta anterior). Un salto (otra posición, un loop que el host no informa): los
+    // pasos agendados para la posición vieja que todavía no se resolvieron se descartan y la ventana arranca acá.
+    void schedule (double ppq0, double bpm, int64_t absStart, int n, double loopStart = 0.0, double loopEnd = -1.0)
     {
         const double spb = fs * 60.0 / std::max (20.0, bpm);           // muestras por negra
         const double ppq1 = ppq0 + (double) n / spb;
         const double ahead = 0.06 * fs / spb;                           // 60 ms en negras
         double w0 = ppq0;
-        if (win0 >= 0.0 && std::fabs (ppq0 + ahead - win0) < 0.002 * bpm / 60.0) w0 = win0;      // continuo (±2 ms)
-        const double w1 = ppq1 + ahead;
+        const double expected = win0 - ahead;                           // donde tendría que empezar este bloque
+        if (win0 >= 0.0 && std::fabs (ppq0 - expected) < 0.002 * bpm / 60.0) w0 = win0;      // continuo (±2 ms)
+        else if (win0 >= 0.0) dropSteps (absStart);
+        double w1 = ppq1 + ahead;
+        if (loopEnd > loopStart && w1 > loopEnd && w0 < loopEnd)
+        {
+            // Hasta el final del loop acá; el resto, desde el principio, en las muestras que siguen al final.
+            const int64_t wrapAt = absStart + (int64_t) std::llround ((loopEnd - ppq0) * spb);
+            const double rest = std::min (w1 - loopEnd, loopEnd - loopStart);
+            scheduleRange (w0, loopEnd, ppq0, absStart, spb);
+            scheduleRange (loopStart, loopStart + rest, loopStart, wrapAt, spb);
+            win0 = loopStart + rest;
+            return;
+        }
+        if (loopEnd > loopStart && w0 >= loopEnd) w0 = w1;              // (ya agendado desde el principio del loop)
         win0 = w1;
+        if (w1 > w0) scheduleRange (w0, w1, ppq0, absStart, spb);
+    }
+    // Saca de la cola los pasos del patrón que todavía no se resolvieron (de la posición vieja, antes de un salto).
+    void dropSteps (int64_t from)
+    {
+        int w = 0;
+        for (int r = 0; r < nq; ++r) if (! (q[(size_t) r].kind == Ev::step && q[(size_t) r].s == -1 && q[(size_t) r].t >= from)) q[(size_t) w++] = q[(size_t) r];
+        nq = w;
+        lastStepT = -1; replayDone = true;
+    }
+    // Los pasos con tiempo en [w0, w1) (ppq); ppqAt es el ppq de la muestra absAt.
+    void scheduleRange (double w0, double w1, double ppqAt, int64_t absAt, double spb)
+    {
+        const double ppq0 = ppqAt; const int64_t absStart = absAt;
         const double stepB = P.mode == kModeStrum ? divisionBeats (strum.div) : divisionBeats (arp.div);
         const int len = P.mode == kModeStrum ? strum.len : arp.len;
         const float swing = P.mode == kModeStrum ? strum.swing : arp.swing;

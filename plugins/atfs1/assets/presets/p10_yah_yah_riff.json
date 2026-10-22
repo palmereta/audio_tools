@@ -431,7 +431,8 @@
   "var_type": 8,
   "var_send": 0.25,
   "var_rate": 0.45,
-  "rev_send": 0.12
+  "rev_send": 0.12,
+  "volume": 0.62
  },
  "fseq": "Yah Yah",
  "demoNotes": "45:1.5,48:1.5,43:1.5"

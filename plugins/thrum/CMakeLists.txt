@@ -3,7 +3,7 @@
 # El nombre del producto está sólo acá: cambiarlo es cambiar THRUM_NAME (los artefactos y las herramientas toman el
 # nombre en minúsculas; los ids de los parámetros, los presets y el estado no dependen de él).
 set(THRUM_NAME "Thrum")
-set(THRUM_VERSION 1.0.0)
+set(THRUM_VERSION 1.0.1)
 string(TOLOWER "${THRUM_NAME}" THRUM_LOWER)
 
 if(APPLE)

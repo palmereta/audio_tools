@@ -62,7 +62,9 @@ def preset(name, cat, panel=None, settings=None, cables=None, keyseq=None, demo_
     presets.append(d)
 
 # ───────── Init ─────────
-preset("Init", "Init", [mix(d1=0.6, d2=0.6)], demo_keys="1")
+# El teclado toca VCO A por su camino normalizado (CV y EG A sin cables): con sólo los drones en el mezclador, Init
+# quedaba mudo con MIDI (QA en DAWs 2026-10-22, C1).
+preset("Init", "Init", [mix(d1=0.6, d2=0.6, vcoa=0.6)], demo_keys="1")
 
 # ───────── Drones ─────────
 preset("Cathedral of A", "Drone",

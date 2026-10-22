@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <functional>
 #include <random>
+#include <string>
 #include <vector>
 
 using namespace dh::pl;
@@ -476,6 +477,49 @@ int main()
             worst = std::max (worst, std::abs (err));
         }
         check (worst < 10, "el centro de cada nota queda a menos de 10 cents del objetivo");
+    }
+
+    std::printf ("\nT16 Ráfagas desafinadas (1 kHz, 20 ms cada 250 ms): cada una sale con la latencia informada, a 44,1/48/88,2/96 kHz\n");
+    {
+        // QA en REAPER 2026-10-22 (P2): a 44,1 kHz el retardo crecía 0 → 9 → 18 → 26 → 33 muestras de ráfaga en
+        // ráfaga: el resto de cada corrección no volvía a la base en el silencio. El retardo de cada ráfaga es la
+        // diferencia entre el instante en que su energía acumulada llega al 5 % en la salida y en la entrada.
+        bool ok = true;
+        for (double sr : { 44100.0, 48000.0, 88200.0, 96000.0 })
+            for (Mode m : { Mode::live, Mode::tight, Mode::studio })
+                for (int hard = 0; hard < 2; ++hard)
+                {
+                    Engine e; e.prepare (sr, m); e.set (hard ? hardParams() : EngineParams());
+                    const int nB = 8, period = (int) (0.25 * sr), len = (int) (0.02 * sr);
+                    std::vector<float> x ((size_t) (period * nB + sr * 0.2), 0.0f);
+                    for (int b = 0; b < nB; ++b)
+                        for (int i = 0; i < len; ++i)
+                        {
+                            const double w = std::min ({ 1.0, i / (0.001 * sr), (len - i) / (0.001 * sr) });
+                            x[(size_t) (b * period + (int) (0.05 * sr) + i)] = (float) (0.5 * w * std::sin (2 * kPi * 1000.0 * i / sr));
+                        }
+                    auto y = run (e, x);
+                    int worst = 0; double first4 = 0, last4 = 0; std::string lags;
+                    for (int b = 0; b < nB; ++b)
+                    {
+                        // El instante en que la energía acumulada de la ráfaga llega al 5 %, en la entrada y en la salida.
+                        const int s0 = b * period + (int) (0.05 * sr) - (int) (0.01 * sr), w = (int) (0.12 * sr);
+                        auto at5 = [&] (const std::vector<float>& v, int from) {
+                            double tot = 0; for (int i = 0; i < w; ++i) tot += (double) v[(size_t) (from + i)] * v[(size_t) (from + i)];
+                            double acc = 0; for (int i = 0; i < w; ++i) { acc += (double) v[(size_t) (from + i)] * v[(size_t) (from + i)]; if (acc >= 0.05 * tot) return i; }
+                            return w; };
+                        const int best = s0 + at5 (y, s0) - (s0 + at5 (x, s0));
+                        worst = std::max (worst, std::abs (best - e.latencySamples()));
+                        (b < 4 ? first4 : last4) += (best - e.latencySamples()) / 4.0;
+                        lags += std::to_string (best - e.latencySamples()) + ' ';
+                    }
+                    std::printf ("  %5.1f kHz %-6s %-7s retardo de cada ráfaga menos la latencia: %s\n", sr / 1000, m == Mode::live ? "Live" : m == Mode::tight ? "Tight" : "Studio",
+                                 hard ? "Hard" : "Natural", lags.c_str());
+                    // Sin acumularse. Natural: la latencia (±0,1 período). Hard corrige desde el primer período y el empalme
+                    // cae en otra fase del análisis en cada ráfaga: un corrimiento fijo menor a medio período.
+                    ok &= std::abs (last4 - first4) <= 2.0 && worst < (hard ? 0.5 : 0.1) * sr / 1000.0 + 1;
+                }
+        check (ok, "sin acumulación: Natural sale con la latencia informada (±0,1 período) y Hard con un corrimiento fijo menor a medio período");
     }
 
     std::printf ("\nT12 CPU (48 kHz, mono)\n");

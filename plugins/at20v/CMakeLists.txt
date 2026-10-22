@@ -1,5 +1,5 @@
 # AT20V — semimodular basado en el Korg MS-20 (1978).
-set(AT20V_VERSION 1.0.6)
+set(AT20V_VERSION 1.0.7)
 
 if(APPLE)
     set(AT20V_FORMATS VST3 AU Standalone)

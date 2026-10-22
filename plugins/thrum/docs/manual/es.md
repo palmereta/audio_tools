@@ -162,6 +162,8 @@ Cada ruido tiene su nivel (0 a 100 %):
 - **Picking pattern**: el patrón de fingerpicking, de una biblioteca de 11 (Travis, bajo alternado, rolls, p-i-m-a, arpegios de balada y más).
 - **Tempo (host stopped)**: con el DAW parado, los patrones siguen este tempo y arrancan con la primera tecla.
 
+Con el DAW en marcha, los patrones siguen su posición, y cuando hace loop cada vuelta rasguea igual que la primera: el final del loop pasa a su principio sin perder ni repetir un golpe.
+
 > Con Centred on the beat, un acorde que cambia justo en el tiempo en tu clip MIDI se toma unos milisegundos tarde: las cuerdas del acorde viejo que todavía no se habían tocado se saltean y el nuevo se rasguea enseguida. Para cambios bien justos, adelantá las notas del acorde nuevo una fusa (1/64), como la mano del guitarrista que se mueve antes del tiempo, o elegí Starts on the beat.
 
 ### El lenguaje de los patrones de rasgueo
@@ -282,6 +284,8 @@ Sesenta y nueve presets en nueve categorías:
 
 Un preset define la guitarra, la forma de tocar y toda la cadena. Los ajustes MIDI, el tempo para cuando el host está parado, la salida DI y la calidad del amplificador son de tu sesión y se conservan al cambiar de preset.
 
+Ableton Live no muestra los presets de fábrica de los plugins (ignora las listas de programas de VST3). El menú de presets de Thrum funciona en todos lados, y los presets de fábrica aparecen además en el navegador de Live en Plug-Ins → Audio Tools Thrum (desplegá el plugin), instalados por el launcher o copiando la carpeta Presets del zip. Thrum tiene 182 parámetros y Live guarda como mucho 128 de un dispositivo para automatizar: hacé clic en **Configure** en el dispositivo de Thrum y mové los controles que quieras ahí. En la lista de parámetros de un host, los interruptores del amplificador y de la caja son **Amp On** y **Cabinet On** (**Amp** y **Cabinet** son el modelo y la caja).
+
 ## MIDI
 
 ![La página Settings: entrada y salida MIDI, las salidas, y los keyswitches y controladores con los nombres reales de las notas.](img/settings.jpg)
@@ -333,6 +337,10 @@ La velocity es la fuerza de la púa y, con **Dead notes below velocity** y **Pin
 Con **MIDI out** encendido, Thrum manda lo que la guitarra tocó de verdad: cada cuerda de cada rasgueo, cada nota digitada, ligados y slides, en el momento en que suenan. Grabalo en otra pista para editar un rasgueo nota por nota, o mandalo a otro instrumento para doblar la guitarra. **MIDI out channel** elige el canal, o **MIDI out channel per string** manda cada cuerda por su canal (el 1 la más aguda), listo para un instrumento tipo guitarra.
 
 > Los rasgueos muertos y las cuerdas apagadas dentro de un rasgueo se tocan pero no salen como notas: no tienen altura.
+
+Las notas salen de Thrum tan tarde como su audio (su latencia, 55 muestras con calidad 4x), que el host compensa sólo para el audio, así que un instrumento que dobla o una grabación quedan a tiempo con la guitarra.
+
+En Ableton Live y en REAPER usá el VST3 para la salida MIDI: ninguno de los dos toma el MIDI que producen los plugins Audio Unit. En Live poné MIDI From de la pista que recibe en la pista de Thrum; en REAPER usá un envío con MIDI.
 
 En la página Play, **Export pattern** guarda el patrón de rasgueo o de punteo actual como archivo `.mid`, tocado sobre el acorde que mantenés (o Do mayor), y **Export played** guarda todo lo que tocó Thrum desde la última vez que apretaste **Clear**.
 

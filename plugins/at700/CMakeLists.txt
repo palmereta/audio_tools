@@ -1,5 +1,5 @@
 # AT700 — consola modular basada en el Roland System-700 (1976), teclado 701A y secuenciador 717A.
-set(AT700_VERSION 1.0.4)
+set(AT700_VERSION 1.0.5)
 
 if(APPLE)
     set(AT700_FORMATS VST3 AU Standalone)
@@ -53,3 +53,14 @@ target_include_directories(at700render PRIVATE Source Source/dsp ${CMAKE_SOURCE_
 target_compile_definitions(at700render PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 _USE_MATH_DEFINES=1)
 target_link_libraries(at700render PRIVATE juce::juce_audio_formats
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_lto_flags)
+
+# Pruebas del procesador completo sin host (tools/proctest.cpp): estado byte a byte, instancia nueva = programa 0,
+# hueco del host con una nota colgada. `at700proctest` → 0 si todo pasa.
+juce_add_console_app(at700proctest VERSION ${AT700_VERSION} PRODUCT_NAME "at700proctest")
+juce_generate_juce_header(at700proctest)
+target_sources(at700proctest PRIVATE tools/proctest.cpp Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+target_include_directories(at700proctest PRIVATE Source Source/dsp ${CMAKE_SOURCE_DIR}/shared/dsp ${CMAKE_SOURCE_DIR}/shared/ui ${CMAKE_SOURCE_DIR}/shared/manual)
+target_compile_definitions(at700proctest PRIVATE AT700_HAS_ASSETS=1 JucePlugin_Build_Standalone=0 DH_HAS_MANUAL=0 JucePlugin_Name="AT700"
+    JucePlugin_VersionString="${AT700_VERSION}" JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 _USE_MATH_DEFINES=1)
+target_link_libraries(at700proctest PRIVATE AT700Assets juce::juce_audio_utils juce::juce_dsp
+    PUBLIC juce::juce_recommended_config_flags)

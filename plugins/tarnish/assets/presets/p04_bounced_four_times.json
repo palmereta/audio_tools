@@ -12,7 +12,8 @@
   "azimuth": 20,
   "wow": 0.1,
   "flutter": 0.06,
-  "scrape": 30
+  "scrape": 30,
+  "out": -1.5
  },
  "order": 4
 }

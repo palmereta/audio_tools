@@ -1,5 +1,5 @@
 {
- "name": "Classic Robot Voice",
+ "name": "Classic Robot Voice (Audio In)",
  "category": "Vocoder",
  "knobs": {
   "vco1_wave": 1,

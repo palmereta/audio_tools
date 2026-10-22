@@ -427,7 +427,8 @@
   "mw_dest": 10,
   "mw_depth": 63,
   "rev_send": 0.15,
-  "var_type": 0
+  "var_type": 0,
+  "volume": 0.672
  },
  "fseq": "One Two",
  "demoNotes": "48:3"

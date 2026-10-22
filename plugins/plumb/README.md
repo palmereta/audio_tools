@@ -2,7 +2,7 @@
 
 Real-time pitch correction for voice and monophonic instruments, built for latency first: an original design, not a
 recreation of any product. VST3, Audio Unit (macOS, a music effect with MIDI input), standalone app, and
-`plumbrender`, a command-line renderer. Version 1.0.1.
+`plumbrender`, a command-line renderer. Version 1.0.2.
 
 The research behind it (what the note editors and the real-time correctors on the market do and what users ask of
 them, pitch detection at low latency, pitch shifting with near-zero added delay, the correction logic, the visual
@@ -55,7 +55,8 @@ correction that keeps the vibrato; note steps; content delay within bounds; form
 and with Throat against an ideal voice; key detection; random parameters with noise, silence, impulses and
 clipping (no NaN, bounded); bit-identical output across block sizes; splices without clicks; no correction spikes
 on large note jumps; hard tuning that does not flip on vibrato near a midpoint (and does with hysteresis 0); the MIDI
-modes; natural correction of notes that start with a scoop; CPU. Plus pluginval at strictness 10, auval
+modes; natural correction of notes that start with a scoop; off-key bursts that come out at the reported latency
+without accumulating at 44.1, 48, 88.2 and 96 kHz (T16); CPU. Plus pluginval at strictness 10, auval
 (`aumf Plmb Atls`) and `athosttest`.
 
 ## Web and film

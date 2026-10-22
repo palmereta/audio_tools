@@ -11,7 +11,8 @@
   "crush_mode": 1,
   "jitter": 20,
   "wow": 0.3,
-  "flutter": 0.1
+  "flutter": 0.1,
+  "out": -1.0
  },
  "order": 32
 }

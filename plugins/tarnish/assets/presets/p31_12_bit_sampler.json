@@ -7,7 +7,8 @@
   "speed": 0,
   "bits": 12,
   "rate": 26000,
-  "drive": 3
+  "drive": 3,
+  "out": -1.5
  },
  "order": 31
 }

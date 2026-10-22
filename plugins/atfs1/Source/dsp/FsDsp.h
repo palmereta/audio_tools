@@ -118,6 +118,14 @@ struct AmpEg
             target[(size_t) i] = levelDb (d.level[(size_t) i]) + egBiasDb;
         }
         holdTime = d.hold <= 0 ? 0.0f : traverseSeconds (rateOf (d.hold) + 4) * 0.25f + 0.002f;
+        relTime = d.time[3]; relAdd = add;
+    }
+    // El desvío de RELEASE de la parte que vale al soltar la tecla (no el que valía al tocarla): una nota tocada
+    // con RELEASE al máximo y soltada después de bajarlo quedaba sonando minutos.
+    void setReleaseOfs (int releaseOfs)
+    {
+        const float tr = traverseSeconds (rateOf (relTime - releaseOfs) + relAdd);
+        rateDb[3] = 96.0f / tr; tau[3] = tr / 16.0f;
     }
     void keyOn (bool legato)
     {
@@ -153,6 +161,7 @@ struct AmpEg
 
 private:
     float holdTime = 0.0f;
+    int relTime = 0, relAdd = 0;
     void advance() { if (stage == 1 || stage == 2) ++stage; else if (stage == 4 && db <= -95.0f) stage = 5; }   // en 3 sostiene
 };
 

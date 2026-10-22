@@ -431,7 +431,7 @@
   "var_type": 4,
   "var_send": 0.25,
   "rev_send": 0.1,
-  "volume": 1.0
+  "volume": 0.634
  },
  "fseq": "I Am A Robot",
  "demoNotes": "45:2.0,40:2.0"

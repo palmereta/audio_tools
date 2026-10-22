@@ -54,6 +54,14 @@ The plugins are in Browser, Plug-Ins, Audio Tools. If they are missing, check in
 
 > AT20V FX replaces the audio of its track with the sound of the synth. To keep hearing the dry vocal, duplicate the track or send it to a return track.
 
+Factory presets appear in Live's browser under Plug-Ins → Audio Tools AT20V (and Audio Tools AT20V FX): expand the plugin. They are installed by the launcher or from the zip's Presets folder. Live doesn't show a plugin's own program list; the preset menu in the editor always has them all.
+
+AT20V FX only lists the presets that work on an audio track: the four Effect presets, the vocoder and guitar synth ones (their names end in "(Audio In)") and the Self-Playing ones. The other synth presets need notes; play them in AT20V.
+
+Live fills the device panel by itself only for plugins with up to 64 automatable parameters, so five settings are not offered for automation: Oversampling, MIDI Out, Bend Range, Vocoder Bands and Note Priority. They stay on the EXTENSIONS page and in presets and projects. Configure adds any parameter to the device panel.
+
+Live (and REAPER) don't take MIDI out of an Audio Unit: to send AT20V's MIDI OUT to another track, use the VST3.
+
 ### Other hosts and the standalone app
 
 In AT20V the audio input is a sidechain bus named Audio In (Vocoder / ESP); route it in your host to use the vocoder or the External Signal Processor.
@@ -434,7 +442,7 @@ A preset stores every knob of the SYNTH page, every cable with its color, and th
 
 | Category | Presets |
 |---|---|
-| Factory | Synthe Bass, Hammond Organ, Parallel Fifths, Voice, Pitch Bend, Steam Locomotive, UFO, Horn, Violin, Sample & Hold, Guitar Synth I, Guitar Synth II, Trumpet, Clarinet |
+| Factory | Synthe Bass, Hammond Organ, Parallel Fifths, Voice, Pitch Bend, Steam Locomotive, UFO, Horn, Violin, Sample & Hold, Guitar Synth I (Audio In), Guitar Synth II (Audio In), Trumpet, Clarinet |
 | Bass | Acid Bass, Fat Saw Bass, Hoover Square |
 | Lead | Scream Lead, Reso Pluck, Delayed Vibrato Lead |
 | Keys | Ring Bells |
@@ -442,7 +450,7 @@ A preset stores every knob of the SYNTH page, every cable with its color, and th
 | FX | Howling Wind, Random Bloops, Laser Zap |
 | Self-Playing | Random Bleeps, Robot Talk, Drip Cave, Morse Station, Chaos Arp, Pulse Train Bass, Wind Chimes, Clockwork Toy, Bubbling Swamp, Endless Drift, Space Telemetry |
 | Ambient | Glass Cathedral, Analog Fog, Frozen Horizon, Deep Ocean Drone, Aurora, Distant Choir, Tape Memories, Breathing Strings, Lunar Bells |
-| Vocoder | Classic Robot Voice, Vocoder Choir, Whisper Machine, Talk Box Lead |
+| Vocoder | Classic Robot Voice (Audio In), Vocoder Choir (Audio In), Whisper Machine (Audio In), Talk Box Lead (Audio In) |
 | Effect | Filter FX, Auto-Wah FX, Screaming Filter FX, Envelope Gate FX |
 
 - **Factory**: 14 patches transcribed from the setting charts of the original owner's manual. Synthe Bass, Voice, Pitch Bend and Steam Locomotive use the control wheel; the Guitar Synth patches need a guitar at the audio input.
@@ -450,6 +458,8 @@ A preset stores every knob of the SYNTH page, every cable with its color, and th
 - **Self-Playing**: 11 patterns where the MG in TEMPO mode fires the envelopes and the sample and hold, in time with your DAW. Hold a key to transpose.
 - **Ambient**: 9 slow polyphonic pads with delay and reverb.
 - **Vocoder**: 4 presets that stay silent until a voice reaches the audio input.
+Presets whose name ends in "(Audio In)", and the Effect ones, need audio at the input (in AT20V, the sidechain): without it they are silent.
+
 - **Effect**: 4 patches for AT20V FX that process the audio input with no MIDI: the External Signal Processor feeds the filters (EXT SIGNAL IN) and its trigger opens the VCA (KBD TRIG IN). Auto-Wah FX also sends the input envelope to the low-pass cutoff.
 
 ## MIDI and sync
@@ -471,7 +481,9 @@ Set with MIDI OUT on the EXTENSIONS page:
 - **PATCH** turns every trigger of the keyboard bus into a note, including triggers made by the patch bay (for example MG RECTANGLE into TRIG IN), with the pitch VCO 1 is playing, on channel 1. A self-playing preset can then play another instrument.
 - **BOTH** does both; **OFF** sends nothing.
 
-In Ableton Live, create a MIDI track with another instrument, set its MIDI From to the AT20V track (and the chooser below to AT20V), and set Monitor to In. When bypassed, AT20V is silent and passes MIDI only in THRU or BOTH.
+In Ableton Live, create a MIDI track with another instrument, set its MIDI From to the AT20V track (and the chooser below to AT20V), and set Monitor to In. When bypassed, AT20V is silent and passes MIDI only in THRU or BOTH. Live and REAPER take MIDI out only from the VST3, not from the Audio Unit.
+
+MIDI out leaves as late as the plugin's latency (27 samples, the oversampling filters), the same delay as its audio: the host compensates the audio, so notes played by another track through MIDI From land together with AT20V instead of 0.6 ms early.
 
 ### Host tempo
 
@@ -479,7 +491,7 @@ The MG in TEMPO mode and the delay follow the DAW tempo, or 120 BPM if the host 
 
 ### Automation and MIDI control
 
-Every knob and setting can be automated; the cables cannot. AT20V has no MIDI learn of its own: map a hardware controller to its parameters with the MIDI mapping of your DAW. In the host, names combine section and knob (HPF Cutoff, EG2 Hold), and a few settings read differently: MG CLOCK is MG Tempo Sync, FILTER is Filter Revision, INPUT LEVEL is Vocoder Input, RESONANCE is Vocoder Q.
+Every knob and setting can be automated except Oversampling, MIDI Out, Bend Range, Vocoder Bands and Note Priority (see Ableton Live); the cables cannot. AT20V has no MIDI learn of its own: map a hardware controller to its parameters with the MIDI mapping of your DAW. In the host, names combine section and knob (HPF Cutoff, EG2 Hold), and a few settings read differently: MG CLOCK is MG Tempo Sync, FILTER is Filter Revision, INPUT LEVEL is Vocoder Input, RESONANCE is Vocoder Q.
 
 ## Recipes
 

@@ -28,6 +28,7 @@ tools/pack_assets101.py    renders → assets/ui (JPEG backgrounds, filmstrips, 
 tools/presets101.py        factory presets → assets/presets/*.json
 tools/level_presets.py     renders each preset and sets VOLUME so all sit at about −17 dBFS RMS
 tools/dsptest.cpp          filter response, self-oscillation, arp/seq order, fuzz
+tools/hostcheck.cpp        at101vhostcheck <AT101V.vst3|.component>: the built plugin as a DAW loads it (DAW QA 2026-10-22: program 0, reset, buffer sizes, state, host gap, MIDI-out latency, zipper WAVs)
 ```
 
 ## Pipelines
@@ -58,6 +59,7 @@ AT101V_BODY=0|1|2 AT101V_HOLD=note` on the standalone writes a 2x image of the e
 | Levels | saw at 10, filter open, VOLUME 7.5: −8.8 dBFS peak; presets leveled to ≈ −17 dBFS RMS |
 | CPU (offline, M-series, 4x) | ≈ 1 % of a core mono, 3 % with 4-voice unison, 6 % for a 6-voice pad |
 | Validation | pluginval strictness 8 (VST3 + AU on macOS, VST3 with GUI on Windows), auval |
+| DAW QA fixes (1.0.6) | `at101vhostcheck` T1-T6 pass on the VST3: fresh = program 0; a reset or re-prepared instance renders bit-identical to a fresh one (B3); Acid Line with the host clock is bit-identical, audio and MIDI out, at 64/333/512/768/1024 and random blocks (B2); state byte-stable (H4); notes released after a host gap (X1); MIDI out 27 samples after the input = the latency. Mixer Saw / Pulse automated per 512-sample block: the 93.75 Hz line in the >6 kHz envelope is +3.0 / +0.9 dB over static (1.0.5: +25.3 / +15.2) |
 
 ## Trampas
 

@@ -2,6 +2,7 @@
 // Páginas del editor. Cada una arma sus controles en resized() y responde a refresh() cuando cambia la
 // voz (preset nuevo, sysex importado, edición desde otra página o desde el frente).
 
+#include "../../../../shared/ui/Showing.h"
 #include "Graphs.h"
 #include "Fields.h"
 
@@ -198,8 +199,11 @@ private:
             rebuild();
         }), true);
     }
+    bool hiddenNow = false;
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) { hiddenNow = true; return; }   // ventana escondida (Live): nada que hacer (H3)
+        if (hiddenNow) { hiddenNow = false; repaint(); }                  // vuelve a la vista con lo que cambió mientras tanto
         bool ch = false;
         for (int k = 0; k < 16; ++k) { const float m = proc.live.opMeter[(size_t) k].load(); if (std::abs (m - meters[(size_t) k]) > 0.003f) { meters[(size_t) k] = m; ch = true; } }
         if (ch) for (auto& c : cards) repaint (c);
@@ -691,8 +695,11 @@ public:
         cols.push_back ({ "Reverb", box ("rev_type", "Type"), { knob ("rev_time", "Time"), knob ("rev_send", "Send") }, {} });
         cols.push_back ({ "EQ and output", nullptr, { knob ("eq_low", "Low"), knob ("eq_high", "High"), knob ("volume", "Volume") }, {} });
     }
+    bool hiddenNow = false;
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) { hiddenNow = true; return; }   // ventana escondida (Live): nada que hacer (H3)
+        if (hiddenNow) { hiddenNow = false; repaint(); }                  // vuelve a la vista con lo que cambió mientras tanto
         const int sig = (int) proc.value ("ins_type") * 10000 + (int) proc.value ("var_type") * 100 + (int) proc.value ("rev_type");
         if (sig != shownTypes) { shownTypes = sig; repaint (flow); }
     }

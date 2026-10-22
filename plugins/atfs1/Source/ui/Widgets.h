@@ -5,6 +5,7 @@
 
 #include <JuceHeader.h>
 #include "../../../../shared/ui/Wheel.h"
+#include "../../../../shared/ui/Showing.h"
 #include "../../../../shared/ui/HelpRouter.h"
 #include "LookFs.h"
 #include "../PluginProcessor.h"
@@ -69,7 +70,7 @@ public:
         if (param == nullptr || e.mods.isPopupMenu()) return;
         const float sens = e.mods.isShiftDown() ? 1200.0f : 240.0f;
         const float nv = juce::jlimit (0.0f, 1.0f, startValue - (float) e.getDistanceFromDragStartY() / sens + (float) e.getDistanceFromDragStartX() / (sens * 2.0f));
-        attach->setValueAsPartOfGesture (param->convertFrom0to1 (nv));
+        attach->setValueAsPartOfGesture (snapReal (*param, param->convertFrom0to1 (nv)));
         showLcd (text, param->getCurrentValueAsText());
     }
     void mouseUp (const juce::MouseEvent& e) override { if (param != nullptr && ! e.mods.isPopupMenu()) attach->endGesture(); }
@@ -83,7 +84,7 @@ public:
         const int k = stepped ? wheelSteps.take (w) : 0;
         if (stepped && k == 0) return;
         const float nv = juce::jlimit (0.0f, 1.0f, param->getValue() + (stepped ? (float) k / (float) (steps - 1) : dh::wheelAmount (w)));
-        attach->setValueAsCompleteGesture (param->convertFrom0to1 (nv));
+        attach->setValueAsCompleteGesture (snapReal (*param, param->convertFrom0to1 (nv)));
         showLcd (text, param->getCurrentValueAsText());
     }
     void mouseEnter (const juce::MouseEvent&) override { showHelp (text + (help.isNotEmpty() ? ": " + help : juce::String()) + "  (drag; double-click resets)"); }
@@ -96,7 +97,7 @@ private:
     juce::RangedAudioParameter* param = nullptr;
     std::unique_ptr<juce::ParameterAttachment> attach;
     float startValue = 0.0f, last = -1.0f;
-    void timerCallback() override { if (param != nullptr && std::abs (param->getValue() - last) > 1e-5f) { last = param->getValue(); repaint(); } }
+    void timerCallback() override { if (param != nullptr && dh::reallyShowing (*this) && std::abs (param->getValue() - last) > 1e-5f) { last = param->getValue(); repaint(); } }
     void menu()
     {
         juce::PopupMenu m;
@@ -164,7 +165,7 @@ public:
         const int steps = std::max (2, param->getNumSteps());
         const float px = e.mods.isShiftDown() ? 16.0f : 4.0f;
         const float nv = juce::jlimit (0.0f, 1.0f, startValue - (float) e.getDistanceFromDragStartY() / px / (float) (steps - 1));
-        attach->setValueAsPartOfGesture (param->convertFrom0to1 (nv));
+        attach->setValueAsPartOfGesture (snapReal (*param, param->convertFrom0to1 (nv)));
         showLcd (text, param->getCurrentValueAsText());
     }
     void mouseUp (const juce::MouseEvent&) override { if (param != nullptr && ! choice && ! isToggle()) attach->endGesture(); }
@@ -176,7 +177,7 @@ public:
         const int k = wheelSteps.take (w);
         if (k == 0) return;
         const float nv = juce::jlimit (0.0f, 1.0f, param->getValue() + (float) k / (float) (steps - 1));
-        attach->setValueAsCompleteGesture (param->convertFrom0to1 (nv));
+        attach->setValueAsCompleteGesture (snapReal (*param, param->convertFrom0to1 (nv)));
         showLcd (text, param->getCurrentValueAsText());
     }
     void mouseEnter (const juce::MouseEvent&) override { showHelp (text + (help.isNotEmpty() ? ": " + help : juce::String())); }
@@ -190,7 +191,7 @@ private:
     bool choice = false;
     float startValue = 0.0f, last = -1.0f;
     bool isToggle() const { auto* c = dynamic_cast<juce::AudioParameterChoice*> (param); return c != nullptr && c->choices.size() == 2; }
-    void timerCallback() override { if (param != nullptr && std::abs (param->getValue() - last) > 1e-5f) { last = param->getValue(); repaint(); } }
+    void timerCallback() override { if (param != nullptr && dh::reallyShowing (*this) && std::abs (param->getValue() - last) > 1e-5f) { last = param->getValue(); repaint(); } }
 };
 
 // ───────── campo de la voz ─────────

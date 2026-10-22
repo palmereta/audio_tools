@@ -1,5 +1,5 @@
 # Tarnish — cinta, casete, video, vinilo, radio AM y teléfono, con histéresis magnética (docs/research.md).
-set(TARNISH_VERSION 1.0.2)
+set(TARNISH_VERSION 1.0.3)
 
 if(APPLE)
     set(TARNISH_FORMATS VST3 AU Standalone)
@@ -40,7 +40,7 @@ target_sources(Tarnish PRIVATE ${TARNISH_SOURCES})
 target_include_directories(Tarnish PRIVATE Source Source/dsp ${CMAKE_SOURCE_DIR}/plugins/lacquer/Source/dsp)
 target_compile_definitions(Tarnish PUBLIC
     TARNISH_HAS_ASSETS=1 TARNISH_VERSION="${TARNISH_VERSION}"
-    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_DISPLAY_SPLASH_SCREEN=0 _USE_MATH_DEFINES=1)
+    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS=0 JUCE_DISPLAY_SPLASH_SCREEN=0 _USE_MATH_DEFINES=1)
 target_link_libraries(Tarnish
     PRIVATE TarnishAssets juce::juce_audio_utils
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_lto_flags juce::juce_recommended_warning_flags)

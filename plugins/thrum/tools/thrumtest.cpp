@@ -816,6 +816,96 @@ static void t12()
     check (true, "medido");
 }
 
+
+// ── T15: loops del host (QA en REAPER 2026-10-22, G1) ──
+// Acorde sostenido, loop de 0 a 2 s a 120 BPM. En cada vuelta REAPER manda los note-off del acorde al final del loop y
+// los note-on otra vez al principio. Cada pasada tiene que tocar los mismos golpes en los mismos lugares (antes la
+// segunda arrancaba en 0,44 s: faltaban los golpes de 0,02 y 0,19 s). split: el host corta el bloque en el borde del
+// loop; si no, el bloque que cruza el borde informa la posición de su comienzo y el siguiente ya está en la vuelta nueva.
+static std::vector<std::vector<int64_t>> loopPasses (int block, bool split, bool centred, bool loopInfo = true)
+{
+    Engine e; e.setSyncCab (true); e.prepare (kFs, 4096);
+    auto p = dryParams(); p.perf.mode = kModeStrum; p.perf.midiOut = true; p.perf.midiOutPerString = false;
+    p.perf.strumCentred = centred; p.perf.humanTime = 0.0f;
+    e.set (p); e.reset();
+    e.performer().setStrumPattern (parseStrum ("D.DU.UDU", "20001010", kDiv8, 0.5f));
+    const int64_t loop = (int64_t) (2.0 * kFs); const int passes = 4;
+    const double bpm = 120.0, spb = kFs * 60.0 / bpm;
+    std::vector<MidiOutEv> out; std::vector<MidiMsg> blk;
+    std::vector<std::vector<int64_t>> per ((size_t) passes);
+    std::vector<float> L (4096), R (4096), D (4096);
+    for (int64_t abs = 0; abs < passes * loop;)
+    {
+        int b = (int) std::min<int64_t> (block, passes * loop - abs);
+        if (split) b = (int) std::min<int64_t> (b, loop - abs % loop);          // el host corta en el borde del loop
+        blk.clear();
+        // Cada vuelta: note-off del acorde en la última muestra y note-on otra vez en la primera (como REAPER).
+        for (int64_t k = abs / loop; k <= (abs + b) / loop; ++k)
+        {
+            const int64_t offAt = k * loop - 1, onAt = k * loop;
+            if (k > 0 && offAt >= abs && offAt < abs + b) for (int n : { 48, 52, 55 }) blk.push_back (off ((int) (offAt - abs), n));
+            if (onAt >= abs && onAt < abs + b) for (int n : { 48, 52, 55 }) blk.push_back (on ((int) (onAt - abs), n));
+        }
+        std::stable_sort (blk.begin(), blk.end(), [] (const MidiMsg& x, const MidiMsg& y) { return x.offset < y.offset; });
+        HostTime h; h.playing = true; h.bpm = bpm; h.ppq = (double) (abs % loop) / spb;
+        if (loopInfo) { h.looping = true; h.loopStart = 0.0; h.loopEnd = (double) loop / spb; }
+        out.clear();
+        e.process (L.data(), R.data(), D.data(), b, h, blk.data(), (int) blk.size(), &out);
+        for (auto& m : out) if ((m.status & 0xF0) == 0x90 && m.d2 > 0) { const int64_t t = abs + m.t; per[(size_t) (t / loop)].push_back (t % loop); }
+        abs += b;
+    }
+    for (auto& v : per) { std::sort (v.begin(), v.end()); v.erase (std::unique (v.begin(), v.end()), v.end()); }
+    return per;
+}
+static void t15()
+{
+    std::printf ("T15 loop del host: cada pasada rasguea lo mismo (G1)\n");
+    bool all = true;
+    for (bool centred : { true, false })
+        for (int blk : { 64, 333, 512, 1024 })
+            for (bool split : { true, false })
+            {
+                const auto per = loopPasses (blk, split, centred);
+                bool same = ! per[0].empty();
+                for (size_t k = 1; k < per.size(); ++k) same &= per[k] == per[0];
+                if (! same || blk == 512)
+                {
+                    std::printf ("    %s, bloque %4d, %s: golpes por pasada", centred ? "centrado" : "desde el tiempo", blk, split ? "corta en el borde" : "cruza el borde");
+                    for (auto& v : per) std::printf (" %zu", v.size());
+                    if (! same)
+                    {
+                        // Los golpes que difieren entre la primera y la segunda pasada.
+                        std::printf (" (sólo en la 1.ª:");
+                        for (auto t : per[0]) if (! std::binary_search (per[1].begin(), per[1].end(), t)) std::printf (" %.4f", t / kFs);
+                        std::printf ("; sólo en la 2.ª:");
+                        for (auto t : per[1]) if (! std::binary_search (per[0].begin(), per[0].end(), t)) std::printf (" %.4f", t / kFs);
+                        std::printf (")");
+                    }
+                    std::printf ("\n");
+                }
+                all &= same;
+            }
+    check (all, "cada vuelta del loop toca las mismas notas en las mismas muestras, con bloques de 64 a 1024, cortados o no en el borde");
+    // Un host que no informa el loop: la posición salta atrás. Ninguna vuelta pierde golpes de la primera.
+    bool none = true;
+    for (int blk : { 64, 512, 1024 })
+        for (bool split : { true, false })
+        {
+            const auto per = loopPasses (blk, split, true, false);
+            int missing = 0;
+            for (size_t k = 1; k < per.size(); ++k)
+                for (auto t : per[0])
+                {
+                    bool near = false;
+                    for (auto u : per[k]) if (std::llabs (u - t) <= (int64_t) (0.03 * kFs)) { near = true; break; }
+                    missing += ! near;
+                }
+            if (missing > 0 || blk == 512) std::printf ("    sin informar el loop, bloque %4d, %s: %d golpes de la 1.ª pasada faltan después\n", blk, split ? "corta en el borde" : "cruza el borde", missing);
+            none &= missing == 0;
+        }
+    check (none, "sin la información del loop (sólo el salto atrás) ninguna vuelta pierde golpes");
+}
+
 int main (int argc, char** argv)
 {
 #if defined(__aarch64__)
@@ -871,6 +961,7 @@ int main (int argc, char** argv)
     if (want (11)) t11();
     if (want (13)) t13();
     if (want (14)) t14();
+    if (want (15)) t15();
     if (want (12)) t12();
     std::printf ("\n%s: %d falla(s)\n", fails ? "FALLA" : "ok", fails);
     return fails ? 1 : 0;

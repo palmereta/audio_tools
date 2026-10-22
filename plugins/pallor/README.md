@@ -77,7 +77,11 @@ Everything is in `Source/dsp/`, without JUCE, per sample:
    MIDI in with the GM drum map (36 kick, 38 snare, 39 clap, 37 rim, 42/46 hats, 49 crash, 51 ride, 41/45/48/50
    toms, 56 cowbell, 75 clave, 54 tambourine, 52 FX, with aliases) or chromatic 36-51; MIDI out of what the
    sequencer plays with the same map, note-off after 30 ms or before the next hit of the same note, all flushed on
-   stop, jump and bypass.
+   stop, jump and bypass. The MIDI leaves delayed by the latency the host knows (`shared/tools/MidiOutDelay.h`): the
+   host compensates the audio, not the MIDI out, and in Live the notes were 78 samples (1.6 ms) early (DAW QA
+   2026-10-22, P1). athosttest `midisync`: first note at 78, audio from 78 (1.0.0: note at 0). In REAPER bypass
+   (REAPER does not call a bypassed plugin) nothing hangs: voices are one-shots and MIDI-out note-offs are timed
+   in processed samples, so they still go out when processing resumes.
 
 `PluginProcessor` keeps the pattern bank and the song chain (the editor edits them on the message thread; the audio
 thread copies only the pattern that changed, without blocking), user samples (loaded on the message thread,

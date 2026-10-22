@@ -139,7 +139,9 @@ OrreryProcessor::OrreryProcessor()
     loadFactory();
     rescanUserPresets();
     { juce::StringArray g; for (auto& e : params()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
-    tracker.capture (*this);
+    // Una instancia nueva es su programa 0 (lo que el host informa como programa actual; QA en REAPER, X2).
+    if (! presets.empty()) loadPreset (0); else tracker.capture (*this);
+    instanceId = juce::Uuid().toString();
     genEvents.reserve (8192);
     regSlot = Constellation::get().join();
     { const std::lock_guard<std::mutex> lk (Constellation::get().lock); allInstances().push_back (this); }
@@ -371,14 +373,12 @@ std::vector<OrreryProcessor::SatInfo> OrreryProcessor::satellites() const
         if (i != regSlot && m.used.load() && m.role.load() == RoleSatellite && (m.follows.load() == b || m.follows.load() == nullptr)) order.push_back ({ m.order.load(), i });
     }
     std::sort (order.begin(), order.end());
-    int k = 0;
     for (auto& [o, i] : order)
     {
         const auto& m = reg.members[(size_t) i];
         SatInfo s; s.lanes = m.lanes.load(); s.sync = m.sync.load();
         s.alive = m.follows.load() == b && now - m.seenMs.load() < 1500.0;
-        s.name = juce::String::fromUTF8 (m.name);
-        if (s.name.isEmpty()) s.name = "satellite " + juce::String (++k); else ++k;
+        s.name = juce::String::fromUTF8 (m.name);      // vacío si el host no lo dijo (Live sólo avisa al renombrar la pista)
         v.push_back (s);
     }
     return v;
@@ -448,6 +448,11 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     updateRole (false);
     const int role = effRole.load();
     auto& reg = Constellation::get();
+    // Play y Stop: cada cambio del parámetro (botón, automatización, estado cargado) es una orden para la generadora.
+    // Lo que hace el transporte (con el reloj del host, arrancarlo es Play y pararlo es Stop) lo hace la generadora
+    // misma, en el bloque en que pasa, y se refleja en el parámetro (mirrorRun) sin que ese eco vuelva como orden.
+    int runCmd = 0;
+    if (const bool rp = vals[(size_t) X.run] > 0.5f; rp != lastRunParam) { runCmd = rp ? 1 : 2; lastRunParam = rp; }
 
     bool playing = false; double ppq = 0.0, bpm = 120.0;
     Stamp stamp;
@@ -485,7 +490,7 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         auto& m = reg.members[(size_t) regSlot];
         MainBus* b = reg.mainBus();
         m.follows.store (b); m.seenMs.store (blockStartMs);
-        sat.process (b, n, sr, stamp, playing, ppq, bpm, effLanes.load(), genEvents);
+        sat.process (b, n, sr, stamp, playing, ppq, bpm, effLanes.load(), genEvents, isNonRealtime() ? -1.0 : blockStartMs);
         m.sync.store (sat.state.load());
         resetPending.store (false);
         if (panicRequest.exchange (false))
@@ -504,6 +509,7 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     {
         Controls rawc;
         applyParams (vals.data(), rawc.g, rawc.lanes);
+        rawc.g.cmdMode = true; rawc.g.runCmd = runCmd;
         rawc.reset = resetPending.exchange (false);
         rawc.panic = panicRequest.exchange (false);
         MainBus* b = reg.members[(size_t) regSlot].bus.load();
@@ -513,7 +519,8 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         if (c.reset) gen.resetRequest.store (true);
         if (c.panic) { gen.panic (genEvents); preview.reset(); }
         else gen.process (n, playing, ppq, bpm, genEvents);
-        mainCore.end (n, stamp, genEvents, gen);
+        if (gen.lastHostEdge() != 0) mirrorRun (gen.lastHostEdge() > 0);
+        mainCore.end (n, stamp, genEvents, gen, isNonRealtime() ? -1.0 : blockStartMs);
         uint32_t on = 0; for (int l = 0; l < kLanes; ++l) if (c.lanes[(size_t) l].on) on |= 1u << l;
         reg.members[(size_t) regSlot].laneOn.store (on);
         if (linkMode == 1) LinkHub::get().publish (gen.published());
@@ -523,6 +530,7 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     else if (role == RoleIndependent)
     {
         applyParams (vals.data(), gen);
+        gen.g.cmdMode = true; gen.g.runCmd = runCmd;
         gen.following = false;
         if (linkMode == 2 && LinkHub::get().leaders.load() > 0)
         {
@@ -532,6 +540,7 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         if (resetPending.exchange (false)) gen.resetRequest.store (true);
         if (panicRequest.exchange (false)) { gen.panic (genEvents); preview.reset(); }
         else gen.process (n, playing, ppq, bpm, genEvents);
+        if (gen.lastHostEdge() != 0) mirrorRun (gen.lastHostEdge() > 0);
         if (linkMode == 1) LinkHub::get().publish (gen.published());
     }
     // Un carril que un satélite acaba de tomar: lo que sonaba acá se suelta (si no, su note-off ya no saldría).
@@ -612,6 +621,14 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     flushDirect();
     for (int l = 0; l < kLanes; ++l) direct.setLaneChannel (l, G.lanes[(size_t) l].channel);
     for (auto& d : demoAfter) runDemo (d, n);
+}
+
+// El transporte arrancó o paró a la generadora: el botón Play (y el host) lo muestran. Desde el hilo de audio, en el
+// mismo bloque, así el valor nuevo ya no se lee como un cambio (una orden) en el bloque siguiente.
+void OrreryProcessor::mirrorRun (bool on)
+{
+    lastRunParam = on;
+    if (auto* p = apvts.getParameter ("run"); p != nullptr && (p->getValue() > 0.5f) != on) p->setValueNotifyingHost (on ? 1.0f : 0.0f);
 }
 
 void OrreryProcessor::runDemo (std::atomic<OrreryProcessor*>& which, int n)
@@ -780,6 +797,8 @@ void OrreryProcessor::getStateInformation (juce::MemoryBlock& destData)
     // Lo que Auto resolvió: al reabrir el proyecto, el Main sigue siendo Main y cada satélite su carril.
     state.setProperty ("autoRole", autoRole.load(), nullptr);
     state.setProperty ("autoLanes", (int) autoLanes.load(), nullptr);
+    // Para reconocer una copia (Duplicate Track en Live copia el estado a una instancia nueva): ver setStateInformation.
+    { const std::lock_guard<std::mutex> lk (Constellation::get().lock); state.setProperty ("instanceId", instanceId, nullptr); }
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
 
@@ -797,12 +816,42 @@ void OrreryProcessor::setStateInformation (const void* data, int sizeInBytes)
     const bool legacy = ! state.getChildWithProperty ("id", "role").isValid();
     const int savedAutoRole = state.getProperty ("autoRole", 0);
     const int savedAutoLanes = state.getProperty ("autoLanes", 0);
-    for (auto id : { "presetName", "program", "ports", "presetSnapshot", "autoRole", "autoLanes" }) state.removeProperty (id, nullptr);
+    const juce::String savedId = state.getProperty ("instanceId").toString();
+    // Un archivo de preset (.vstpreset, para el navegador de Live, que no muestra las listas de programas de VST3):
+    // el estado de un programa sin autoRole/autoLanes/instanceId (las herramientas que los escriben los sacan). Se
+    // aplica como un preset del menú: cambia la música y no toca Play, Clock, el rol, los puertos ni nada global.
+    if (! legacy && ! state.hasProperty ("autoRole"))
+    {
+        for (auto& e : params())
+        {
+            if (e.global) continue;
+            const auto c = state.getChildWithProperty ("id", e.id);
+            setValue (e.id, c.isValid() ? (float) c.getProperty ("value", e.def) : e.def);
+        }
+        tracker.capture (*this);
+        resetPending.store (true);
+        notifyUi (onPresetChanged);
+        return;
+    }
+    for (auto id : { "presetName", "program", "ports", "presetSnapshot", "autoRole", "autoLanes", "instanceId" }) state.removeProperty (id, nullptr);
+    // ¿Es una copia? Si otra Orrery viva ya tiene ese id, este estado se copió de ella (Duplicate Track en Live, copiar
+    // la pista o el efecto en REAPER): la copia no hereda su rol, vuelve a resolver Auto (satélite en el próximo carril
+    // libre). Si no, es la misma instancia (deshacer) o un proyecto que se abre: se queda con su id y su rol.
+    bool copy = false;
+    {
+        const std::lock_guard<std::mutex> lk (Constellation::get().lock);
+        if (savedId.isNotEmpty())
+            for (auto* p : allInstances()) if (p != this && p->instanceId == savedId) copy = true;
+        if (savedId.isNotEmpty() && ! copy) instanceId = savedId;
+        else if (copy) instanceId = juce::Uuid().toString();
+    }
     restoring.store (true);
     apvts.replaceState (state);
-    autoRole.store (legacy ? 0 : juce::jlimit (0, 3, savedAutoRole));
-    autoLanes.store ((uint32_t) juce::jlimit (0, 255, savedAutoLanes));
+    autoRole.store (legacy || copy ? 0 : juce::jlimit (0, 3, savedAutoRole));
+    autoLanes.store (copy ? 0u : (uint32_t) juce::jlimit (0, 255, savedAutoLanes));
     if (legacy) setValue ("role", (float) RoleIndependent);
+    if (copy && (int) std::lround (value ("role")) != RoleIndependent) { setValue ("role", (float) RoleAuto); setValue ("sat_lanes", 0.0f); }
+    if (copy) restoring.store (false);       // una copia que se vuelve satélite apaga su sonido de prueba, como una nueva
     updateRole (true);
     restoring.store (false);
     juce::MessageManager::callAsync ([safe = juce::WeakReference<OrreryProcessor> (this), ports] {

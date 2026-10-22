@@ -16,8 +16,9 @@ foto CC0 (`docs/ref/`), y el nombre y la marca son de Audio Tools.
 | MIDI | Entrada (notas, pitch bend → rueda, CC1, sustain → pulsador) y **salida** (Thru, Patch o ambas) |
 | Polifonía | Mono (como el MS-20) o 2/4/6/8/12 voces, unísono de 1 a 4 con detune y apertura estéreo |
 | Audio in | Sidechain en AT20V; entrada principal en AT20V FX. Alimenta la **ESP** y el **vocoder** |
-| Presets | 51: 14 de fábrica del manual original, 13 clásicos propios, 11 **self-playing**, 9 **ambient**, 4 **vocoder** |
+| Presets | 55: 14 de fábrica del manual original, 13 clásicos propios, 11 **self-playing**, 9 **ambient**, 4 **vocoder**, 4 **effect**. Los que necesitan audio in llevan "(Audio In)" en el nombre; AT20V FX lista sólo los 21 que sirven en una pista de audio (effect, vocoder, guitar synth, self-playing) |
 | Validación | `auval` PASS · `pluginval --strictness-level 8` SUCCESS en Mac (VST3 y AU de ambas variantes) y Windows (VST3) |
+| 1.0.7 (QA en DAWs 2026-10-22) | `athosttest` 0 FAIL en VST3 y AU del AT20V (AT20V FX: 1 FAIL conocido, Endless Drift que toca solo), `hostgap`, `statebytes`, `midilatency` (el MIDI out sale 27 muestras tarde, igual que el audio) PASS; `pluginval --strictness-level 10` SUCCESS en los dos VST3; 63 de 68 parámetros automatizables (Live llena el panel hasta 64) |
 | Framework | JUCE 9.0.4 + CMake/Ninja. Mac: Command Line Tools. Windows: VS 2022 Build Tools (MSVC 14.44) |
 
 ## Instalar

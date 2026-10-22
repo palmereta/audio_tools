@@ -29,13 +29,14 @@ public:
     void prepare (double sampleRate, int maxBlock)
     {
         fs = (float) sampleRate; maxB = std::max (16, maxBlock);
+        clipA = std::exp (-2.0f * kPi * 5.0f / fs);
         setOversample (P.oversample, true);
         delayL.assign ((size_t) (4.0 * fs) + 8, 0.0f); delayR = delayL;
         reset();
     }
     void reset()
     {
-        voice.reset(); seq.restart(); dw = 0; dlpL = dlpR = 0; dcL = dcR = 0; heldN = 0; wasRunning = false; driveLp = 0; dcIn2 = dcL2 = 0;
+        voice.reset(); seq.restart(); dw = 0; dlpL = dlpR = 0; dcL = dcR = 0; heldN = 0; wasRunning = false; driveLp = 0; dcIn2 = dcL2 = 0; clipDcL = clipDcR = 0;
         std::fill (delayL.begin(), delayL.end(), 0.0f); std::fill (delayR.begin(), delayR.end(), 0.0f);
     }
     void set (const EngineParams& p)
@@ -67,6 +68,10 @@ public:
         else { voice.setSlide (true); voice.noteOn (2.0f + (float) (held[(size_t) heldN - 1] - 36 + P.transpose) / 12.0f, false, true); }
     }
     void allNotesOff() { heldN = 0; voice.gateOff(); }
+    // El host dejó de llamar y vuelve (bypass de REAPER, dh::HostGap): los note-off de ese rato se perdieron. Se
+    // sueltan las teclas, la compuerta y el slide, y el secuenciador se realinea con el reloj como al arrancar (sin
+    // un fin de compuerta pendiente de la línea de tiempo vieja).
+    void hostGap() { heldN = 0; voice.gateOff(); voice.setSlide (false); seq.restart(); }
 
     // Procesa `n` muestras. `running`: el secuenciador corre; `clock0`: posición del reloj (pulsos de 24 ppq) en
     // la primera muestra; `clocksPerSample`: el avance del reloj por muestra (tempo).
@@ -108,7 +113,7 @@ public:
                 float L = x, R = x;
                 delayStage (L, R, clocksPerSample);
                 // +9 dB para que el patrón por defecto quede cerca de −18 dBFS RMS, y un techo suave en 0 dBFS.
-                l[i0 + i] = ceiling (L * P.volume * kMakeup); r[i0 + i] = ceiling (R * P.volume * kMakeup);
+                l[i0 + i] = outStage (L * P.volume * kMakeup, clipDcL); r[i0 + i] = outStage (R * P.volume * kMakeup, clipDcR);
             }
         }
     }
@@ -125,6 +130,7 @@ private:
     float fs = 48000; int maxB = 512, os = 4;
     std::vector<float> delayL, delayR; int dw = 0; float dlpL = 0, dlpR = 0;
     float dcL = 0, dcR = 0, dcIn = 0, driveLp = 0, dcIn2 = 0, dcL2 = 0;
+    float clipA = 0.9993f, clipDcL = 0, clipDcR = 0;
     std::array<int, 16> held {}; int heldN = 0; bool wasRunning = false, lastSeqMode = true;
 
     // En prepare reserva para el factor máximo; el cambio de Quality tocando ya no reserva memoria en el hilo de
@@ -145,6 +151,17 @@ private:
     {
         const float m = std::fabs (x);
         return m < 0.9f ? x : std::copysign (0.9f + 0.1f * std::tanh ((m - 0.9f) * 10.0f), x);
+    }
+    // El techo recorta una onda asimétrica (la escalera saturada con Overdrive, los presets Driven a todo volumen) y
+    // eso corre el promedio: Overdriven Ladder daba DC 0,037 (QA en DAWs 2026-10-22, F1). Pasa altos de 5 Hz sólo
+    // sobre lo que agrega el techo (salida − entrada): debajo de 0,9 el techo no toca nada y la salida es la misma,
+    // muestra a muestra; recortando, el promedio del recorte se resta. El límite final de ±1 mantiene el techo.
+    inline float outStage (float x, float& dcState)
+    {
+        const float c = ceiling (x), d = c - x;
+        dcState = d + clipA * (dcState - d);
+        if (std::fabs (dcState) < 1.0e-12f) dcState = 0.0f;
+        return clampf (c - dcState, -1.0f, 1.0f);
     }
     inline float driveStage (float x)
     {

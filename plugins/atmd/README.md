@@ -2,7 +2,7 @@
 
 A recreation of the Moog Minimoog Model D, modelled on a mid-1970s unit with the Rev 2 oscillator board
 (the one Moog itself measured for the 2016 reissue). VST3, Audio Unit (macOS) and standalone.
-Version 1.0.2.
+Version 1.0.3.
 
 The panel, the left-hand controller and the 44-key keyboard are a 3D model built to the panel's published
 measurements (`assets/layoutmd.json`, `docs/hardware-spec.md` §6-7), rendered in Blender; every control of
@@ -91,6 +91,10 @@ The editor saves a snapshot without a screen grab:
 | Cutoff about 118 Hz, EMPHASIS 10 | no oscillation (the original stopped near 150 Hz) |
 | DECAY off, 100-150 ms after release | about −80 dBFS; with DECAY on the note keeps sounding |
 | 200 random extreme settings | always finite, peak ≤ 4 (output limiter) |
+| CUTOFF automated in 512-sample host blocks, −3 to +3 in 2 s (dsptest 15) | residue above 2 kHz against an 8-sample reference −59 dB (1.0.2: −28 dB, a step per block) |
+| Two engines prepared alike, one used before (dsptest 16) | identical sample for sample (1.0.2: up to 0.82 apart) |
+| athosttest hostgap, statebytes (1.0.3) | the note is released after a host gap (REAPER bypass); state byte-stable, fresh instance = program 0 |
+| pluginval strictness 10 (1.0.3), auval (aumu Atmd Atls) | pass (VST3 on macOS; AU and Windows by the release build) |
 | pluginval strictness 8, auval (aumu Atmd Atls) | pass (VST3 and AU on macOS, VST3 on Windows) |
 | athosttest | 0 FAIL on macOS and Windows; WARN only for user gain with random parameters and for noise presets that are not sample-identical after a state restore |
 

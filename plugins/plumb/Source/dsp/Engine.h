@@ -378,8 +378,16 @@ private:
             const double ok = De + T + Nx + h + 6;
             if (d > ok + 0.5 * T || (d > ok && quietHere())) jump = T;
         }
-        else if (! voiced && unvoicedFor > 0.02 && d > De + Nx + h + 8)
-            jump = d - De;                                                    // sin voz: de vuelta a la latencia base
+        else if (! voiced && unvoicedFor > 0.02 && std::abs (d - De) > 0.5)
+        {
+            // Sin voz: de vuelta a la latencia base, exacta (sin el ajuste por correlación, que la corría ±4
+            // muestras). Antes sólo volvía si el retardo pasaba De + 35: un resto menor quedaba de una nota a la
+            // siguiente y se acumulaba (QA en REAPER 2026-10-22, P2: ráfagas de 20 ms a 44,1 kHz, 0 → 33 muestras).
+            const double target = (double) (n - De);
+            if (target > (double) n - 2 - Nx || target < 0) return;
+            rpOld = rp; rp = target; xf = Nx; ++splices;
+            return;
+        }
         if (std::equal_to<double>() (jump, 0.0)) return;
         // Ajuste fino por correlación (±4 muestras a 48 kHz) para que no haya salto de fase.
         const int R = 4 * mult;

@@ -91,7 +91,9 @@ struct Adsr42
     inline float process (bool gate, bool loop, float a, float d, float s, float r, float fs)
     {
         if (gate && ! lastGate) stage = Attack;
-        if (! gate && lastGate && ! loop) stage = Release;
+        // Sin gate y sin LOOP la envolvente suelta, también si el LOOP se apagó con el gate ya abajo (quedaba sostenida
+        // para siempre: athosttest, parámetros al azar con LOOP y bypass).
+        if (! gate && ! loop && (stage == Attack || stage == Decay || stage == Sustain)) stage = Release;
         lastGate = gate;
         if (loop && stage == Idle) stage = Attack;
         coefs (a, d, r, fs);

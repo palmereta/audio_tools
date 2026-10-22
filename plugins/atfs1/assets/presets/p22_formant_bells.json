@@ -168,7 +168,8 @@
   "var_type": 0,
   "rev_type": 6,
   "rev_send": 0.45,
-  "rev_time": 0.75
+  "rev_time": 0.75,
+  "volume": 0.703
  },
  "demoNotes": "72:1,76:1,79:1,84:2"
 }

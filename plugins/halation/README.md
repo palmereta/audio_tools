@@ -1,7 +1,7 @@
 # Halation
 
 A delay and a reverb in one space: an original design, not a recreation. VST3, Audio Unit (macOS, a music
-effect with MIDI input), standalone app, and `halationrender`, a command-line renderer. Version 1.0.2.
+effect with MIDI input), standalone app, and `halationrender`, a command-line renderer. Version 1.0.3.
 
 The research behind it (classic delays and reverbs, feedback delay networks, shimmer, freeze, spectral and
 granular processing, what the common delay and reverb devices in DAWs do and where Halation goes further, the

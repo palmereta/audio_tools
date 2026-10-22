@@ -134,6 +134,19 @@ public:
 
     void clear() { held.clear(); order.clear(); }
 
+    // Vuelve al estado de recién creado lo que corre (reloj, arpegio, portamento, vibrato, presión, azar), sin tocar
+    // los ajustes ni la secuencia grabada: prepare() del motor (QA en DAWs 2026-10-22: una instancia preparada de
+    // nuevo después de tocar no sonaba igual que una nueva).
+    void resetRuntime()
+    {
+        clear();
+        voct = gateL = gateR = pressure = 0.0f; activePlate = -1; seqPos = -1; prevArpHold = arpHold;
+        target = 0; arpPos = -1; arpDir = 1; stepGateTimer = 0; retrigGap = 0; extSeen = 1 << 30; lastIdx = -1;
+        clockPhase = 0.0; glide = 0.0f; vibPhase = 0.0f; pressVel = 0.8f; randTarget = 0.5f;
+        trig = lastExt = lastReset = arpReleased = adUp = lastGatePress = false; clockFree = true;
+        rng = Rng { 42 };
+    }
+
     // clockIn: entrada de reloj externa (V); resetIn (V); ppqClock: si ≥ 0, posición del host.
     inline void process (float clockIn, float resetIn, double ppq, bool hostClock, float hostBpm, float fs)
     {

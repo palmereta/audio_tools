@@ -8,6 +8,7 @@
 #include "../PluginProcessor.h"
 #include "Assets42.h"
 #include "Rope.h"
+#include "../../../../shared/ui/Showing.h"
 
 namespace dh {
 
@@ -722,6 +723,9 @@ private:
     // en cada parpadeo de un LED costaba ~20 % de un núcleo con la ventana abierta.
     void timerCallback() override
     {
+        // Ventana escondida (Live la esconde sin cerrarla): ni animación ni repintado (QA en Live 2026-10-22, H3). Al
+        // volver, lo que cambió difiere de lo mostrado y se redibuja solo.
+        if (! dh::reallyShowing (*this)) return;
         const double now = juce::Time::getMillisecondCounterHiRes();
         const float dt = (float) juce::jlimit (0.001, 0.05, (now - lastTime) * 0.001);
         lastTime = now;

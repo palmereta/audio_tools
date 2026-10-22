@@ -67,6 +67,7 @@ void PallorProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     engine.set (buildParams());
     patDirty = ~0ull; chainDirty = true; freeClock = 0;
     latency.setNow (engine.latency());
+    midiDelay.prepare (4096); midiDelay.setDelay (getLatencySamples());
 }
 
 EngineParams PallorProcessor::buildParams() const
@@ -208,6 +209,9 @@ void PallorProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         const int ch = juce::jlimit (1, 16, e.channel);
         midi.addEvent (e.vel > 0 ? juce::MidiMessage::noteOn (ch, e.note, (juce::uint8) e.vel) : juce::MidiMessage::noteOff (ch, e.note), at);
     }
+    // Sale con la latencia que el host conoce (la que compensa en el audio), no la que el motor acaba de pedir.
+    midiDelay.setDelay (getLatencySamples());
+    midiDelay.process (midi, n);
     latency.request (engine.latency());
     // Vista.
     view.running.store (running); view.ppq.store (ppq); view.bpm.store (bpm);
@@ -238,6 +242,7 @@ void PallorProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, ju
 {
     buffer.clear();
     midi.clear(); midiOut.clear();
+    midiDelay.flushNoteOffs (midi);          // lo que esperaba su latencia: los note-off salen ya, las notas nuevas no
     engine.flushMidi (&midiOut, 0);
     for (const auto& e : midiOut) midi.addEvent (juce::MidiMessage::noteOff (juce::jlimit (1, 16, e.channel), e.note), 0);
     wasBypassed = true;

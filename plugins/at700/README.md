@@ -61,6 +61,7 @@ with synthetic mouse events and prints the result.
 | 703E passband loss | −9.7 dB at RES 4, −13 dB at RES 7 (no compensation, as the original) |
 | CPU (render tool, M4, 2x) | 1.8 % one voice; 6.6 % six-voice strings; 8.8 % eight voices with every module per voice |
 | Validation | pluginval strictness 8 (VST3 on macOS), auval; no NaN in a 300-block fuzz with random cables |
+| DAW QA fixes (1.0.5) | `at700proctest` P1-P11 (tools/proctest.cpp): an instance prepared again after playing renders bit-identical to a fresh one (was +4.6 dB apart), state byte-stable, fresh = program 0, Init plays, notes released after a host gap (running, stopped, Poly 8, sustain pedal); athosttest VST3 + AU 0 FAIL, pluginval strictness 10 on the VST3 |
 
 ## Trampas
 

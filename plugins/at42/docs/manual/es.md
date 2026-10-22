@@ -1,6 +1,6 @@
 # Manual del AT42
 
-El AT42 es una máquina de drones ambient libre y de código abierto para macOS y Windows, como instrumento VST3 y Audio Unit y como aplicación independiente. Recrea la familia Elta Music SOLAR 42, con el último modelo (el 42N) como punto de partida, y suma lo que el hardware no tiene: MIDI, sincronía con el host, presets, un control de ancho estéreo y una página de ajustes. Este manual explica cada control, cómo funcionan las voces y la patchera, y cómo pasar del preset Init, que arranca en silencio, a un drone completo.
+El AT42 es una máquina de drones ambient libre y de código abierto para macOS y Windows, como instrumento VST3 y Audio Unit y como aplicación independiente. Recrea la familia Elta Music SOLAR 42, con el último modelo (el 42N) como punto de partida, y suma lo que el hardware no tiene: MIDI, sincronía con el host, presets, un control de ancho estéreo y una página de ajustes. Este manual explica cada control, cómo funcionan las voces y la patchera, y cómo pasar del preset Init a un drone completo.
 
 ## Qué es
 
@@ -52,9 +52,11 @@ Insertá el AT42 en una pista de instrumento o MIDI. Recibe notas, pitch bend y 
 
 Arrastrá la esquina de la ventana para cambiar su tamaño, de la mitad a 1,4 veces el tamaño completo, con las proporciones fijas.
 
+En Ableton Live, los presets de fábrica aparecen en el navegador de Live en Plug-Ins → Audio Tools AT42 (desplegá el plugin), instalados por el launcher o desde la carpeta Presets del zip. Live no muestra la lista de programas propia de un plugin; el menú de presets del editor los tiene todos. El AT42 tiene 230 parámetros, más que los 64 con los que Live llena solo el panel del dispositivo: hacé clic en Configure en la barra de título del dispositivo y tocá los controles que quieras ahí (Live automatiza hasta 128 a la vez). Piezo Percussion necesita audio en la entrada (un side-chain en Live).
+
 ### Tu primer sonido
 
-El AT42 abre con el preset Init, y **Init no suena a propósito**: las voces drone 1 y 2 están subidas en el mezclador, pero sus envolventes quedan cerradas hasta que algo las abra, igual que el hardware sin ninguna tecla apretada.
+El AT42 abre con el preset Init. Tocá una nota MIDI (o una placa del controlador táctil) y responde el VCO A por su camino normalizado, altura del teclado y envolvente A, sin cables. Las voces drone 1 y 2 también están subidas en el mezclador, pero sus envolventes quedan cerradas hasta que algo las abra, igual que el hardware sin ninguna tecla apretada.
 
 1. Hacé clic y mantené apretada la tecla drone 1, abajo a la derecha, bajo DRONE KEYS. El drone 1 suena mientras la mantenés y se apaga despacio al soltarla. La nota MIDI C1 hace lo mismo.
 2. Para que siga sonando, encendé el botón **hold** de DRONE 1 (el botón gris claro a la izquierda de la voz).
@@ -363,7 +365,7 @@ Tiene su propio canal en el mezclador, PREAMP, y alimenta al seguidor de envolve
 
 ![El teclado táctil y el joystick con el preset Arp Constellation y una placa apretada.](img/keyboard.jpg)
 
-El TOUCH SENSITIVE CONTROLLER produce tensiones de control, no sonido: altura, gates y presión, que por defecto manejan los dos VCO y sus envolventes. En Init los canales de los VCO están en cero, así que subí VCO A o B en el mezclador para escucharlo.
+El TOUCH SENSITIVE CONTROLLER produce tensiones de control, no sonido: altura, gates y presión, que por defecto manejan los dos VCO y sus envolventes. En Init el VCO A está subido en el mezclador, así que las teclas lo tocan; subí VCO B para escuchar el segundo oscilador.
 
 - Placas: hacé clic para tocar y arrastrá para deslizarte de una a otra. Más abajo en la placa es más presión. Las seis placas de la izquierda son la mitad izquierda; las seis de la derecha, la mitad derecha.
 - Los dos botones rojos: transponen una octava hacia abajo o hacia arriba, de -2 a +4.
@@ -652,7 +654,7 @@ En SYNC, LFO A, LFO B y el pulser pueden seguir a tu DAW. En Host se ignoran la 
 
 ## Consejos y problemas frecuentes
 
-- **Init no suena.** Es a propósito. Apretá la tecla drone 1 o 2, tocá C1 o C#1, o encendé hold en DRONE 1 o 2.
+- **Los drones de Init no suenan.** Es a propósito: sus envolventes esperan una tecla. Apretá la tecla drone 1 o 2, tocá C1 o C#1, o encendé hold en DRONE 1 o 2. Las demás notas MIDI tocan el VCO A.
 - **Las placas o las notas MIDI no suenan.** El teclado sólo manda tensiones. Subí VCO A o B en el mezclador y fijate que ningún cable haya tomado el gate de la envolvente.
 - **Las notas MIDI de C1 a F1 no tocan el teclado.** Tocan las teclas drone; poné MIDI Drone Keys en Off.
 - **La altura del drone se mueve con el mouse.** El puntero le hace sombra a los orbes, y los osciladores con MOD siguen la luz. Alejate del orbe o apagá MOD.

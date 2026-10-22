@@ -96,6 +96,7 @@ struct Lfo101
 class Chorus101
 {
 public:
+    bool empty() const { return buf.empty(); }
     void prepare (float sampleRate)
     {
         fs = sampleRate;

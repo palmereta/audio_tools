@@ -60,8 +60,8 @@ tools/blender/orrery.py   the 3D orrery for the website (pc50-wsl, CUDA)
 ## Tools
 
 ```bash
-# Engine tests (also on Windows: cl /std:c++17 /O2 /fp:precise /EHsc ...; on Linux add -pthread)
-clang++ -std=c++17 -O2 -ffp-contract=off -I plugins/orrery/Source/gen plugins/orrery/tools/gentest.cpp -o /tmp/orr_gentest && /tmp/orr_gentest
+# Engine tests (also on Windows: cl /std:c++20 /O2 /fp:precise /EHsc ...; on Linux add -pthread)
+clang++ -std=c++20 -O2 -ffp-contract=off -I plugins/orrery/Source/gen plugins/orrery/tools/gentest.cpp -o /tmp/orr_gentest && /tmp/orr_gentest
 
 # Main and satellites through the real VST3 (several instances in one process), and the virtual ports
 athosttest build/plugins/orrery/Orrery_artefacts/Release/VST3/Orrery.vst3 --tests roles,ports
@@ -98,19 +98,22 @@ ORRERY_RECORD=/tmp/demo ORRERY_RECORD_SECS=25.2 ORRERY_RECORD_SCALE=1.4545 Orrer
 
 ## Determinism
 
-A variation number is only useful if it means the same music everywhere. Four things had to hold:
+A variation number is only useful if it means the same music everywhere. Five things had to hold:
 
 | Source of drift | Fix |
 |---|---|
 | Time summed block by block (rounding depends on the host buffer) | beats counted from an anchor in samples, moved only on tempo changes |
 | Chord changes and fades evaluated once per block | lanes and chord changes run in time order; fades and breathing are evaluated at each note's own time |
 | Controllers drawing from the notes' random stream once per block | controllers on a fixed 30 Hz grid of session time, with their own random stream |
+| With the host clock, what played before the transport started (free-running with the host stopped: wall-clock time) and where the first block fell (pre-roll, buffer size) | starting the transport is Play and starts a new session: generator reseeded, music anchored at the song position on a 1/16-beat grid (a pre-roll waits for beat 0), session clock and controller grid counted from that point; the fade-in only when the start is the song's beginning (DAW QA 2026-10-22, REAPER H2) |
 | `std::log`, `std::sin`, `std::exp2` differ by platform; `/fp:fast` reorders; C++ leaves argument evaluation order unspecified (clang and MSVC disagree) | own math in `dm::` (only + − × ÷, `frexp`, `ldexp`), `/fp:precise` on MSVC and `-ffp-contract=off` on clang, one random draw per statement |
 
 Check: `gentest` test 8 prints a fingerprint of three minutes of seven lanes (notes, controllers and
 their sample positions). macOS arm64, macOS x86_64, Windows x64 (MSVC `/fp:precise`) and Linux x86_64
 (GCC 11) print `60e8a62919b73c14`; MSVC with `/fp:fast` prints another one. The same test plays the same 10,194 messages
-with buffers of 64, 333, 441, 512 and 1024 samples at 44.1, 48 and 96 kHz.
+with buffers of 64, 333, 441, 512 and 1024 samples at 44.1, 48 and 96 kHz. Test 17 does the REAPER case with the host
+clock: 0 to 41 s of free-running with the host stopped, pre-rolls of 3 blocks and 12,345 samples, buffers 64/333/512/768/1024:
+8,830 of 8,830 messages identical (±1 sample) over 2 minutes. athosttest `roles` 6 does it with the real plugin (547/547).
 
 ## Main and satellites: the time base
 
@@ -133,12 +136,29 @@ at the same sample, as long as both get the same inputs in the same blocks (`Sou
   mismatch, or if the Main stops being processed, the satellite releases its notes, copies the Main again
   and re-attacks the notes of its lanes that are sounding.
 
+**Tracks out of step** (REAPER's anticipative FX, above all in offline renders: each track on its own thread,
+several blocks ahead of or behind the others; DAW QA H1, where a satellite resynced every block and flooded
+zero-length notes). With the transport running a satellite places itself by the host's sample position, not by the
+processing order: it maps its block to the Main's sample clock from the two positions, and either keeps a copy taken
+at a boundary it has not reached yet until it gets there, or, when it is ahead, catches up from an older copy with
+the inputs it recorded for its own past blocks. While ahead of the Main it predicts that the controls stay the same
+and confirms them when the Main publishes them (a mismatch resyncs). In real time a Main that has not processed for
+3 blocks and 60 ms is stalled (bypass), not late. After a loss the satellite waits longer each time (up to 0.5 s),
+and a note attacked and released at the same sample is dropped. gentest 16: lead/lag up to 16 blocks at 64-1024,
+three satellites, one joining late: identical, no zero-length or hanging notes; with settings changes, a preset,
+a jump, Stop/Play and panic, 30 of 30 windows identical from 3 s after each change.
+
+**Copies** (Duplicate Track in Live copies the state into a new instance while the original is open; QA O2): each
+instance saves a random `instanceId`. A state whose id belongs to another open Orrery is a copy: it gets a new id
+and resolves Auto again (satellite on the next free lane). A project that is reopened keeps its roles; states
+without an id (1.0.5 and earlier) keep theirs too. athosttest `roles` 7.
+
 Known limit: with the host transport stopped, no per-cycle host time and a host that always processes a
 satellite's track more than half a block after the Main's, the wall clock cannot tell "late in this cycle"
 from "early in the next", and the satellite settles one block off (gentest 14 checks it stays stable).
 Starting the transport makes it exact.
 
-| Check (gentest 9-15, athosttest roles) | Result |
+| Check (gentest 9-18, athosttest roles) | Result |
 |---|---|
 | Generator copied mid-run | 1,924 of 1,924 messages identical over 83 s |
 | Auto | first instance Main, next ones lanes 1, 2, 3; a freed lane is taken again; lanes that are off are skipped |

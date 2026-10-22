@@ -49,6 +49,8 @@ In Ableton Live:
 5. Click **Preview sound** in Orrery's top bar, next to Play, so it reads `Preview sound: Off`. You then hear only your synth.
 6. Press Play in Orrery.
 
+In REAPER, use the VST3 too: REAPER does not pass on the MIDI that Audio Unit plugins produce either. Send the Orrery track to each synth track (a send with MIDI), or record-arm the synth track with the Orrery track's MIDI as its input.
+
 Live merges all MIDI channels when it routes MIDI from one track to another, so that synth receives every lane that is on. That is perfect for one synth playing everything. To send different lanes to different synths in Live, add more Orrerys: the first one is the Main and every Orrery you add after it becomes a satellite that plays one lane of the Main. The steps are in One Orrery, many synths, at the start of Routing, ports and sync. A virtual port, or one Orrery per track with Link, also work.
 
 ## First sound
@@ -316,7 +318,7 @@ Mutate keeps a loop from becoming mechanical. At 5 % a loop changes barely at al
 
 ### Variations
 
-The **Variation** number (1 to 9999) seeds every random choice: chords, notes, rhythms, mutations, controller drift and humanized timing. Each time Orrery starts, it starts from that number, so the same variation with the same settings plays the same notes every time, on macOS and Windows, at any buffer size and sample rate. Changing settings while it plays changes the music from that point.
+The **Variation** number (1 to 9999) seeds every random choice: chords, notes, rhythms, mutations, controller drift and humanized timing. Each time Orrery starts, it starts from that number, so the same variation with the same settings plays the same notes every time, on macOS and Windows, at any buffer size and sample rate. With Clock on Host, starting the DAW transport is such a start: from the same song position you get the same notes in playback and in an offline render, whatever Orrery played before with the transport stopped. Changing settings while it plays changes the music from that point.
 
 When a variation sounds right, write its number down or save a preset; for something new with the same character, press **New variation**.
 
@@ -356,7 +358,7 @@ The 16 scales are Major (Ionian), Natural minor, Dorian, Phrygian, Lydian, Mixol
 - **Drone**: the centre barely moves. Most chord changes keep the same chord; now and then it goes to the fourth or fifth degree and comes back.
 - **Two chords**: alternates between the tonic and the chord on the sixth degree (the fourth degree in five-note scales).
 
-**Clock**: with `Host`, Orrery follows the DAW's tempo and song position while the transport runs, and its own Tempo is ignored. With `Free` it always uses its own Tempo. **Play with host stopped** decides what happens when the DAW transport is stopped: On keeps Orrery playing at its own tempo, Off makes it wait for the transport. When the DAW transport jumps (you move the play position), Orrery releases its notes and picks up from the new position.
+**Clock**: with `Host`, Orrery follows the DAW's tempo and song position while the transport runs, and its own Tempo is ignored. With `Free` it always uses its own Tempo. With Clock on `Host`, starting the DAW transport is the same as pressing Play, and stopping it is the same as Stop; the Play button shows it. Each start begins a new session at that song position (on the next sixteenth note if the position falls between them); a pre-roll or count-in before bar 1 waits for bar 1. **Play with host stopped** decides what Play does while the DAW transport is stopped: On plays at Orrery's own tempo until the transport starts (then Orrery starts again from the song position), Off waits for the transport. When the DAW transport jumps (you move the play position or a loop wraps), Orrery releases its notes and picks up from the new position.
 
 **Humanize** moves each note slightly early or late, at random, by up to about that many milliseconds.
 
@@ -382,7 +384,7 @@ These are explained in the next section. **Level** sets the overall velocity of 
 
 **Fade in** brings the music up over its first seconds; **Fade out** takes it down during the last seconds before the session ends (so Fade out only works when Session has a length). Fades act on velocity: notes become softer, down to about a third of their normal velocity at the very start or end. With **Fade with CC7** on, Orrery also moves each lane's channel volume (MIDI CC7) between 0 and 100, so held notes fade too and the session ends in silence. When Orrery stops, it sets CC7 back to 100 and centres the pitch bend on the channels it moved.
 
-The session clock counts only while Orrery plays: Stop pauses it and Play continues it. Loading a preset starts a new session from zero, with its fade in. When a session has finished, press Stop and then Play to start another one.
+The session clock counts only while Orrery plays: Stop pauses it and Play continues it. With Clock on Host, starting the DAW transport starts a new session from zero; it fades in only when the transport starts at the beginning of the song, so stopping and going on from the middle (playing live) comes back at full level. Loading a preset starts a new session from zero, with its fade in. When a session has finished, press Stop and then Play to start another one.
 
 > If your synth uses CC7 for something else, or ignores it, turn Fade with CC7 off. The fades then act on velocity only.
 
@@ -464,7 +466,9 @@ The file has one track per MIDI channel (so one per lane when each lane has its 
 
 Orrery comes with 21 factory presets, three per mood. Presets change the musical settings: harmony, session and every lane. They do not change Play, Clock, Play with host stopped, Level, the preview sound settings, the tuning settings, MIDI clock out, Link, the role, the satellite lanes, Skip satellite lanes, Lanes as MIDI ports or the direct ports, so switching presets never breaks your routing. Lanes a preset does not use are turned off.
 
-A new Orrery starts with `Init`: drone, pad, melody (looped at 17 beats), cloud and bass on, in D Dorian at 60 BPM.
+A new Orrery starts with the first preset, First Light (what hosts show as its first program): drone, pad, looped melody, cloud with echoes and bass, in D Dorian.
+
+Ableton Live does not show plugins' factory presets (it ignores VST3 program lists); use Orrery's own preset menu, or the browser: the factory presets appear in Live's browser under Plug-Ins → Audio Tools Orrery (expand the plugin), installed by the launcher or by copying the Presets folder from the zip.
 
 | Preset | Mood | Key and scale | What plays |
 |---|---|---|---|
@@ -507,13 +511,15 @@ In Ableton Live a synth track that takes its MIDI from another track receives ev
 
 What Auto chose is saved with the project, so when you open the set again the Main is still the Main and each satellite plays the same lane, whatever order the host loads them in. Projects saved with Orrery 1.0.4 or earlier have no role: they open as Independent, with the Link setting they had, and sound as before. Presets never change the role, the satellite's lanes, Skip satellite lanes or the MIDI ports.
 
+A copy of an Orrery does not inherit its role: when you duplicate a track in Live (or copy the track or the effect in REAPER), the copy becomes a satellite on the next free lane, like a new Orrery, even if the original was the Main. A copy of an Independent Orrery stays Independent.
+
 ### The satellite page
 
 ![A satellite: which lane of the Main it plays, its activity, and the lane buttons.](img/satellite.jpg)
 
 A satellite shows one page instead of the full editor:
 
-- **Satellite of** and the name of the Main's track (when the host tells plugins their track name), and which lane it plays, with the lane's role and MIDI channel.
+- **Satellite of** and the name of the Main's track (when the host tells plugins their track name), and which lane it plays, with the lane's role and MIDI channel. Ableton Live tells plugins a track's name only when you rename the track: until then the satellite says `Satellite of the Main Orrery` and the Main lists its satellites by lane (`1 Drone, 2 Pad`). Rename the tracks to see their names.
 - The state: in sync with the Main, syncing, or waiting for a Main.
 - **Lane**: the eight lanes of the Main with their roles. Click one to play it instead; Shift-click (or Cmd-click) adds or removes a lane, so one satellite can play several lanes. A lane that is off in the Main shows `off` and stays silent.
 - **Activity**: how much each of its lanes is playing, and the Main's current chord. The orrery on the right shows only its lanes.
@@ -544,6 +550,7 @@ Things to know:
 - Satellites and their Main must be in the same host application. They do not connect between applications or computers.
 - A satellite plays only while its Main is processed. Bypassing or deactivating the Main silences its satellites, which release their notes and continue when the Main does.
 - Setting changes on a Main take effect one buffer later than on an Independent Orrery (about 10 ms at 512 samples).
+- In REAPER with anticipative FX processing (the default), tracks are not processed in step: one can run several buffers ahead of another, most of all in an offline render. With the transport running, a satellite places itself by the song position, not by the order in which tracks are processed: it copies the Main's state and catches up to its own position, and when it runs ahead of the Main it assumes the Main's settings stay as they were and checks that when the Main gets there. A setting changed at that very moment makes it resynchronize. It never sends notes of zero length.
 - With the host transport stopped, in a host that gives plugins no time for each processing cycle, and when the host always processes a satellite's track more than half a buffer after the Main's, a satellite can end up one buffer away from the Main. Starting the transport, or using Clock on Host with the transport running, makes it exact.
 
 ## Routing, ports and sync
@@ -632,7 +639,7 @@ For movement, set lane 2's CC number to 74, CC shape to Sine and CC period to 32
 
 ### Eno-style tape loops
 
-1. Load Tape Loops (Ambient), or start from Init.
+1. Load Tape Loops (Ambient), or start from First Light.
 2. Set four or five lanes to Melody or Cloud with low density (10 to 20 %) and Loop on.
 3. Give them prime Loop lengths far apart: 17, 23, 29, 31.
 4. Keep Mutate low (around 5 %) so each loop keeps its identity.
@@ -707,7 +714,11 @@ Write down the Variation number too: with the same settings, Orrery will play th
 
 **The Orrery ports do not appear in Live.** Turn on Publish lanes as MIDI ports first, then open Live's Settings, Link, Tempo & MIDI, and turn on Track for the `Orrery` inputs. On Windows there are no virtual ports: use loopMIDI.
 
-**In Ableton Live no MIDI reaches the other tracks.** You are using the Audio Unit. Load the VST3 instead.
+**In Ableton Live (or REAPER) no MIDI reaches the other tracks.** You are using the Audio Unit. Load the VST3 instead.
+
+**Orrery starts when I press Play in the DAW.** With Clock on Host, starting the transport is Play and stopping it is Stop. Set Clock to Free if Orrery should ignore the transport.
+
+**A duplicated track plays the same lane twice.** That was Orrery 1.0.5. From 1.0.6 a copy becomes a satellite on the next free lane; if a set saved with 1.0.5 has two satellites on one lane, click another lane on one of them.
 
 **A port is not in the list.** Click Rescan ports. On macOS, check that the IAC Driver has "Device is online" ticked; on Windows, that loopMIDI is running.
 
@@ -750,8 +761,8 @@ Measured on the engine:
 | Loop of 17 beats | 84 of 84 notes repeat 17 s later |
 | Gentle mode | Velocity at most 92, highest note 86 |
 | Link follower | 56 notes, none outside the leader's chord |
-| Same variation | Same notes on macOS and Windows, at buffers from 64 to 1024 samples and at 44.1, 48 and 96 kHz |
-| Satellites | Exactly the Main's messages for their lane, at buffers from 64 to 1024 samples, in any processing order and on separate threads |
+| Same variation | Same notes on macOS and Windows, at buffers from 64 to 1024 samples and at 44.1, 48 and 96 kHz; with Clock on Host, the same notes from the transport start after any wait with the transport stopped, with a pre-roll, offline or in real time |
+| Satellites | Exactly the Main's messages for their lane, at buffers from 64 to 1024 samples, in any processing order, on separate threads and with tracks up to 16 buffers ahead or behind (REAPER's anticipative FX); no notes of zero length |
 | Lanes as MIDI ports | Every note of every lane arrives on its port; two Orrerys get distinct port names (macOS, Linux) |
 
 CPU, as a percentage of one core at 48 kHz:

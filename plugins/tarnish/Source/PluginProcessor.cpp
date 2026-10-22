@@ -12,6 +12,9 @@ TarnishProcessor::TarnishProcessor()
     for (auto& a : view.scopeM) a.store (0.0f);
     loadFactory();
     tracker.capture (*this);
+    // Una instancia nueva es el programa 0 que informa al host (QA en REAPER 2026-10-22, X2: el VST3 decía "Warm
+    // Studio Tape" pero sonaba con los valores por defecto, y elegir el programa 0 no cambiaba nada).
+    if (! presets.empty()) loadPreset (0);
 }
 
 bool TarnishProcessor::isBusesLayoutSupported (const BusesLayout& l) const

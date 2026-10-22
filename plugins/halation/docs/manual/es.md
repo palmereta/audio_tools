@@ -155,6 +155,8 @@ Treinta presets en cuatro grupos:
 
 **Delay to Cathedral** trae su propia escena B: mové Morph y un delay con puntillo se convierte en una sala brillante e infinita con shimmer. En los demás presets no hay B hasta que guardes uno, y Morph no hace nada.
 
+En Ableton Live, que no muestra la lista de programas propia de un plugin, los presets de fábrica aparecen en el navegador de Live en **Plug-Ins**, **Audio Tools Halation** (desplegá el plugin). Los instala el launcher; con el zip, copiá las carpetas de su carpeta **Presets** a `~/Library/Audio/Presets/Audio Tools/` (macOS).
+
 ## Sesiones largas, meditación y baños de sonido
 
 Halation se pensó para música larga y lenta: colas infinitas, congelados que sostienen un acorde durante minutos, salas que respiran a una décima de hertz, shimmer que no deja de subir. Algunas cosas ayudan:
@@ -176,7 +178,7 @@ halationrender in.wav out.wav --preset "Slow Tide" --tail 16 --at 9 on_freeze=1
 halationrender in.wav out.wav --set space=60 --set length=80 --set on_shimmer=1
 ```
 
-- `--preset` carga un preset por nombre. Sin él, los valores por defecto.
+- `--preset` carga un preset por nombre. Sin él, el primero (Tape Echo 1974), como una instancia nueva en un DAW.
 - `--tail` agrega segundos de silencio al final para que suene la cola (6 por defecto).
 - `--bpm` es el tempo para los tiempos sincronizados (120 por defecto).
 - `--set id=valor` fija un parámetro antes de empezar; `--at segundos id=valor` lo cambia en ese momento.

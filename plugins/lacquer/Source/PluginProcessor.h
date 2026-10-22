@@ -28,10 +28,12 @@ public:
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
     double getTailLengthSeconds() const override { return 0.0; }
-    int getNumPrograms() override { return 1; }
-    int getCurrentProgram() override { return 0; }
-    void setCurrentProgram (int) override {}
-    const juce::String getProgramName (int) override { return {}; }
+    // Los programas son los estilos (QA en REAPER 2026-10-22, L1: el VST3 no mostraba ninguno y el AU uno llamado
+    // "Untitled"). El programa actual es el parámetro Style: un host que reafirme el programa no cambia nada.
+    int getNumPrograms() override { return dh::lq::kStyles; }
+    int getCurrentProgram() override { return juce::jlimit (0, dh::lq::kStyles - 1, (int) value (dh::lq::params::style)); }
+    void setCurrentProgram (int index) override { if (index >= 0 && index < dh::lq::kStyles && index != getCurrentProgram()) setValue (dh::lq::params::style, (float) index); }
+    const juce::String getProgramName (int index) override { return index >= 0 && index < dh::lq::kStyles ? juce::String (dh::lq::styles()[(size_t) index].name) : juce::String(); }
     void changeProgramName (int, const juce::String&) override {}
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;

@@ -3,6 +3,7 @@
 
 #include <JuceHeader.h>
 #include "../PluginProcessor.h"
+#include "Showing.h"
 
 namespace dh {
 
@@ -62,7 +63,7 @@ public:
         shownName = proc.presetDisplayName();
         presetBtn.setButtonText (cat.isNotEmpty() ? cat.toUpperCase() + "   " + shownName : shownName);
         // El nombre lleva " *" en cuanto algo cambia (un clic, la automatización): se mira 4 veces por segundo.
-        if (! nameWatch.isTimerRunning()) { nameWatch.tick = [this] { if (proc.presetDisplayName() != shownName) refresh(); }; nameWatch.startTimerHz (4); }
+        if (! nameWatch.isTimerRunning()) { nameWatch.tick = [this] { if (dh::reallyShowing (*this) && proc.presetDisplayName() != shownName) refresh(); }; nameWatch.startTimerHz (4); }
         repaint();
     }
 

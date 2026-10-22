@@ -54,11 +54,11 @@ PRESETS = [
                                       **mix(10, 10), **hpf(5, 5), **lpf(6, 5, eg=10), fm_mg=10, mg_wave=10, mg_freq=5,
                                       **eg2(5, 5, 10, 10, 10)),
      [("pink_out", "sh_in"), ("mg_sq_out", "sh_clock_in"), ("sh_out", "total_in")], {}),
-    ("Guitar Synth I", "Factory", dict(vco1_wave="saw", vco1_scale="16", vco2_wave="saw", vco2_scale="4", vco2_pitch=3,
+    ("Guitar Synth I (Audio In)", "Factory", dict(vco1_wave="saw", vco1_scale="16", vco2_wave="saw", vco2_scale="4", vco2_pitch=3,
                                        **mix(10, 10), **hpf(0, 5), **lpf(5, 5, eg=8), **eg2(0, 1, 2, 5, 2),
                                        esp_level=9, esp_lowcut=0, esp_highcut=5.5, esp_cvadj=10, esp_thresh=3),
      [("esp_fv_out", "sh_in"), ("eg1_out", "sh_clock_in"), ("sh_out", "vco12_cv_in"), ("esp_trig_out", "kbd_trig_in")], {}),
-    ("Guitar Synth II", "Factory", dict(vco1_wave="pw", vco1_pw=7, vco1_scale="32", vco2_wave="square", vco2_pitch=3,
+    ("Guitar Synth II (Audio In)", "Factory", dict(vco1_wave="pw", vco1_pw=7, vco1_scale="32", vco2_wave="square", vco2_pitch=3,
                                         vco2_scale="16", **mix(10, 10), **hpf(3, 5, eg=7), **lpf(4, 5, eg=8), fm_mg=2,
                                         mg_wave=9, mg_freq=6, **eg2(0, 0, 2, 5, 0),
                                         esp_level=9, esp_lowcut=0, esp_highcut=5.5, esp_cvadj=10, esp_thresh=3),
@@ -197,15 +197,15 @@ PRESETS += [
      [], dict(**poly(8, 1, 6, 0.7), **delay("1/8D", 0.5, 0.3, 0.6), **reverb(0.94, 0.5))),
 
     # ── Vocoder: necesitan voz por la entrada de audio (sidechain o AT20V FX) ──
-    ("Classic Robot Voice", "Vocoder", dict(vco1_wave="saw", vco1_scale="16", vco2_wave="square", vco2_scale="8", vco2_pitch=0.05,
+    ("Classic Robot Voice (Audio In)", "Vocoder", dict(vco1_wave="saw", vco1_scale="16", vco2_wave="square", vco2_scale="8", vco2_pitch=0.05,
                                             **mix(10, 8), **hpf(0, 0), **lpf(9, 0), **eg2(0, 0, 0, 10, 2)),
      [], dict(**poly(6, 1, 8, 0.5), voc_on=1, voc_bands=2, voc_mix=1.0, **reverb(0.5, 0.15))),
-    ("Vocoder Choir", "Vocoder", dict(vco1_wave="saw", vco1_scale="8", vco2_wave="saw", vco2_scale="8", vco2_pitch=0.08,
+    ("Vocoder Choir (Audio In)", "Vocoder", dict(vco1_wave="saw", vco1_scale="8", vco2_wave="saw", vco2_scale="8", vco2_pitch=0.08,
                                       **mix(10, 10), **hpf(1, 0), **lpf(8, 0), fm_mg=0.5, mg_freq=4.5, **eg2(0, 2, 5, 9, 4)),
      [], dict(**poly(6, 2, 16, 0.9), voc_on=1, voc_bands=3, voc_q=0.7, voc_shift=0.15, voc_release=0.45, **reverb(0.85, 0.4))),
-    ("Whisper Machine", "Vocoder", dict(vco1_wave="noise", **mix(10, 0), **hpf(2, 0), **lpf(10, 0), **eg2(0, 0, 0, 10, 2)),
+    ("Whisper Machine (Audio In)", "Vocoder", dict(vco1_wave="noise", **mix(10, 0), **hpf(2, 0), **lpf(10, 0), **eg2(0, 0, 0, 10, 2)),
      [], dict(voc_on=1, voc_bands=3, voc_hiss=0.8, voc_q=0.6, **reverb(0.6, 0.25))),
-    ("Talk Box Lead", "Vocoder", dict(vco1_wave="saw", vco1_scale="8", vco2_wave="pulse", vco2_scale="8", vco2_pitch=0.1,
+    ("Talk Box Lead (Audio In)", "Vocoder", dict(vco1_wave="saw", vco1_scale="8", vco2_wave="pulse", vco2_scale="8", vco2_pitch=0.1,
                                       **mix(10, 7), **hpf(1, 0), **lpf(9, 2), portamento=2.5, **eg2(0, 0, 0, 10, 1.5)),
      [], dict(voc_on=1, voc_bands=1, voc_q=0.8, voc_attack=0.1, voc_release=0.2, **delay("1/8", 0.3, 0.18))),
     # ── Efecto: el audio de la pista entra por la ESP a los filtros (EXT SIGNAL IN) y el disparador de la ESP abre
@@ -234,6 +234,22 @@ def to_norm(k, v):
 
 CABLE_COLORS = ["red", "blue", "yellow", "green", "white", "black"]
 
+# Ajustes de nivel medidos con tools/level_presets.py (QA en DAWs 2026-10-22, A2/A3): los presets que tocaban 0 dBFS
+# bajan hasta un pico de -1,5 dBFS y los que estaban ~30 dB debajo de la mediana suben (Voice, Steam Locomotive y
+# MS Hi-Hat, además, con filtro y envolvente retocados). Valores normalizados (0..1), aplicados sobre las cartas.
+LEVELS = {
+    "Synthe Bass": dict(volume=1.0),
+    "Voice": dict(hpf_peak=0.7, hpf_mod_eg2=0.5, lpf_peak=0.7, volume=1.0),
+    "Steam Locomotive": dict(hpf_cutoff=0.3, hpf_peak=0.4, lpf_cutoff=0.55, lpf_peak=0.7, eg2_decay=0.22, eg2_release=0.15, volume=1.0),
+    "UFO": dict(volume=0.665), "Scream Lead": dict(volume=0.68), "MS Snare": dict(volume=0.976),
+    "MS Hi-Hat": dict(hpf_cutoff=0.7, hpf_peak=0.6, eg2_decay=0.2, eg2_release=0.2, volume=1.0),
+    "Random Bleeps": dict(volume=0.673), "Robot Talk": dict(volume=0.652), "Drip Cave": dict(volume=0.66),
+    "Wind Chimes": dict(volume=0.42), "Bubbling Swamp": dict(volume=0.547), "Endless Drift": dict(volume=0.553),
+    "Space Telemetry": dict(volume=0.673), "Analog Fog": dict(volume=0.626), "Frozen Horizon": dict(volume=0.604),
+    "Aurora": dict(volume=0.558), "Distant Choir": dict(volume=0.649), "Breathing Strings": dict(volume=0.646),
+    "Lunar Bells": dict(volume=0.664),
+}
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     for f in os.listdir(OUT):
@@ -242,10 +258,11 @@ def main():
     for i, (name, cat, knobs, cables, settings) in enumerate(PRESETS, 1):
         k = dict(NORMAL); k.update(knobs)
         data = dict(name=name, category=cat,
-                    knobs={kk: to_norm(kk, vv) for kk, vv in k.items()},
+                    knobs={**{kk: to_norm(kk, vv) for kk, vv in k.items()}, **LEVELS.get(name, {})},
                     cables=[dict(src=s, dst=d, color=CABLE_COLORS[j % len(CABLE_COLORS)]) for j, (s, d) in enumerate(cables)],
                     settings=settings)
-        fn = f"{i:02d}_{name.lower().replace(' ', '_').replace('&', 'and')}.json"
+        base = name.replace(" (Audio In)", "")     # los que necesitan entrada de audio lo dicen en el nombre (A5)
+        fn = f"{i:02d}_{base.lower().replace(' ', '_').replace('&', 'and')}.json"
         json.dump(data, open(os.path.join(OUT, fn), "w"), indent=1)
         index.append(fn)
     print(len(index), "presets")

@@ -43,6 +43,8 @@ The AT700 needs Windows 10 or 11, 64-bit.
 
 The AT700 is an instrument with MIDI input and a stereo output (mono outputs are supported too). Create an instrument or MIDI track and choose AT700 from the Audio Tools plugins. Notes on any MIDI channel play the 701A keyboard. The plugin reports a tail of six seconds, so long releases and the spring reverb are not cut off when a clip ends.
 
+In Ableton Live, the factory presets appear in Live's browser under Plug-Ins → Audio Tools AT700 (expand the plugin), installed by the launcher or from the zip's Presets folder. Live doesn't show a plugin's own program list; the preset menu in the editor has them all. AT700 has 230 parameters, more than the 64 for which Live fills the device panel by itself: click Configure in the device title bar and touch the controls you want there (Live automates up to 128 at once).
+
 ### Your first sound
 
 The AT700 opens on the **Init** preset: VCO-1 with a sawtooth goes through VCF-1 and VCA-1, the envelope ADSR-1 opens the filter and the amplifier, and a little spring reverb is mixed in. Play a few notes from your MIDI keyboard, or click the keys of the 701A at the bottom of the window (choose **KEYBOARD** in the top bar to see them). Then move the **CUTOFF FREQ.** fader of VCF-1 and the **RES.** fader next to it, and you are already shaping the sound.

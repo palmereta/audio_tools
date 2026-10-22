@@ -1,7 +1,7 @@
 # Lacquer
 
 Automatic mastering: an original design, not a recreation. VST3, Audio Unit (macOS), standalone app with a
-file mode, and `lacquerrender`, a command-line renderer. Version 1.0.2.
+file mode, and `lacquerrender`, a command-line renderer. Version 1.0.3.
 
 The research behind every decision (what Mixea, LANDR, Ozone and the others do, loudness standards, target
 curves, the algorithms and their sources, the test plan) is in [`docs/research.md`](docs/research.md). The

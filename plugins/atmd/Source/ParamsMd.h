@@ -19,6 +19,7 @@ struct PDef
     float skew = 1.0f;
     bool global = false;    // no lo pisan los presets (ajustes del sistema)
     juce::String help;
+    bool automatable = true;   // false: el host no lo ofrece para automatizar (ver params(), H2)
 };
 
 inline const char* kRanges = "LO|32'|16'|8'|4'|2'";
@@ -110,6 +111,11 @@ inline const std::vector<PDef>& params()
         ext ({ "rev_mix", "Reverb Mix", 0, 0, 1, 0.2f, "", "", 1.0f, false, "reverb level" });
         ext ({ "oversampling", "Oversampling", 4, 0, 3, 2, "1x|2x|4x|8x", "", 1.0f, true, "internal sample rate of the voice: higher is cleaner with fast modulation and more CPU" });
         ext ({ "output", "Output", 0, -24, 6, 0, "", " dB", 1.0f, true, "output level after the effects" });
+        // Ableton Live llena el panel del dispositivo solo con hasta 64 parámetros automatizables (QA en Live
+        // 2026-10-22, H2): con 66 quedaba vacío. Tres ajustes que nadie automatiza dejan de ofrecerse al host (siguen
+        // en el panel, en el estado y en los presets; los ids no cambian): el sobremuestreo (un ajuste del sistema que
+        // reinicia el motor), el tono A-440 y su nivel (PHONES). Quedan 63.
+        for (auto& d : v) if (d.id == "oversampling" || d.id == "a440" || d.id == "phones_volume") d.automatable = false;
         return v;
     }();
     return all;

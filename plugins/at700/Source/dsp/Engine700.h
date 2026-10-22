@@ -74,6 +74,15 @@ public:
         fsBase = (float) sampleRate;
         os = std::max (1, oversampling);
         fs = fsBase * (float) os;
+        // Los módulos vuelven a nuevos (fases, envolventes, filtros, ruido, LFO, resorte, deriva) y el teclado suelta lo
+        // que tenía: una instancia preparada de nuevo después de tocar suena igual que una recién creada (QA en DAWs
+        // 2026-10-22; athosttest repro +4,6 dB). Los ajustes, el patch y el 717A (su marcha y sus pasos) quedan.
+        for (auto& V : vs) V = VoiceState {};
+        noise = Noise708 {}; lfo1 = lfo2 = Lfo706 {}; sh = Sh709 {}; spring = Spring711 {}; pshaper = PulseShaper717 {};
+        decL = Decimator {}; decR = Decimator {};
+        stdPhase = psLfoPhase = 0.0f; lfo1Delay = 1.0f; vuL = vuR = 0.0f; lastAnyGate = false;
+        prevSeqHost = false; expectedPpq = -1.0e9;
+        kb.allOff(); for (auto& vv : kb.v) vv = Keyboard701::Voice {};
         decL.prepare (os); decR.prepare (os);
         osL.assign ((size_t) (maxBlock + 64) * (size_t) os, 0.0f);
         osR.assign ((size_t) (maxBlock + 64) * (size_t) os, 0.0f);

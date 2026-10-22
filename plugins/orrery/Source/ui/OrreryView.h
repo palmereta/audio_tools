@@ -140,6 +140,13 @@ private:
     void timerCallback() override
     {
         if (! isShowing()) return;      // la otra vista (Simple o satélite) se queda con las chispas
+        if (! dh::reallyShowing (*this))
+        {
+            // Editor escondido (Live no lo cierra): sin animar ni repintar; las chispas se descartan.
+            proc.sparkFifo.read (proc.sparkFifo.getNumReady());
+            sparksLive.clear();
+            return;
+        }
         // Chispas nuevas desde el procesador.
         const auto r = proc.sparkFifo.read (proc.sparkFifo.getNumReady());
         const double now = juce::Time::getMillisecondCounterHiRes() * 0.001;

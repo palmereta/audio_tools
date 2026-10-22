@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include "../../../shared/ui/Showing.h"
 
 // El manual con los colores de la serie (el acento de este producto en la web).
 static dh::manual::Theme manualTheme() { dh::manual::Theme t; t.accent = juce::Colour (0xffa9c83c); return t; }
@@ -245,6 +246,7 @@ void ATFS1Editor::filesDropped (const juce::StringArray& files, int, int)
 
 void ATFS1Editor::timerCallback()
 {
+    if (! dh::reallyShowing (*this)) return;      // ventana escondida (Live): nada que repintar (H3)
     const float c = proc.cpuLoad.load(); const int v = proc.live.voices.load();
     if (std::abs (c - cpuShown) > 0.002f || v != voicesShown || (messageUntil != 0 && juce::Time::getMillisecondCounter() > messageUntil))
     {

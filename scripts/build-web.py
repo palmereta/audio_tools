@@ -11,6 +11,7 @@ desincronicen. Versiones de los CMakeLists y tamaños de las descargas de web/do
 """
 import datetime, hashlib, html, json, os, re, shutil, subprocess, zipfile
 import manual_web
+import changelog
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WEB = os.path.join(ROOT, "web")
@@ -2343,6 +2344,32 @@ LINUX = {
                      "Elegí los plugins y tocá Instalar. El VST3 va a <code>~/.vst3</code>, el LV2 a <code>~/.lv2</code> y las apps independientes al menú de aplicaciones."]),
 }
 
+# Los .vstpreset de fábrica que traen los zips en Presets/ (scripts/package-*.sh): Ableton Live no muestra la lista de
+# programas de un VST3, sí estos archivos. El paso aparece sólo si el zip de web/downloads los trae.
+PRESET_STEP = {
+    "en": {"mac": "For the factory presets in Ableton Live's browser (and Cubase or Bitwig), copy the folders inside <code>Presets</code> to <code>~/Library/Audio/Presets/Audio Tools</code>.",
+           "win": "For the factory presets in Ableton Live's browser (and Cubase or Bitwig), copy the folders inside <code>Presets</code> to <code>Documents\\VST3 Presets\\Audio Tools</code>.",
+           "linux": "For the factory presets as files (Bitwig and other hosts), copy the folders inside <code>Presets</code> to <code>~/.vst3/presets/Audio Tools</code>."},
+    "es": {"mac": "Para ver los presets de fábrica en el navegador de Ableton Live (y en Cubase o Bitwig), copiá las carpetas de <code>Presets</code> a <code>~/Library/Audio/Presets/Audio Tools</code>.",
+           "win": "Para ver los presets de fábrica en el navegador de Ableton Live (y en Cubase o Bitwig), copiá las carpetas de <code>Presets</code> a <code>Documentos\\VST3 Presets\\Audio Tools</code>.",
+           "linux": "Para tener los presets de fábrica como archivos (Bitwig y otros hosts), copiá las carpetas de <code>Presets</code> a <code>~/.vst3/presets/Audio Tools</code>."},
+}
+
+def zip_has_presets(name):
+    """¿El zip de web/downloads trae la carpeta Presets/? (Un puntero de Git LFS o un zip que falta: no se sabe, no.)"""
+    p = os.path.join(WEB, "downloads", name or "")
+    try:
+        with zipfile.ZipFile(p) as z:
+            return any("/Presets/" in n for n in z.namelist())
+    except (OSError, zipfile.BadZipFile):
+        return False
+
+def with_preset_step(steps, zip_name, lang, system):
+    """Los pasos de instalación, más el de los presets antes del último (reescanear) si el zip los trae."""
+    if not zip_has_presets(zip_name):
+        return list(steps)
+    return list(steps[:-1]) + [PRESET_STEP[lang][system]] + list(steps[-1:])
+
 def linux_zip(mac_zip):
     """El zip de Linux que acompaña a uno de macOS, o None si todavía no está en web/downloads."""
     z = mac_zip.replace("-macOS.zip", "-Linux.zip")
@@ -2355,7 +2382,7 @@ UI = {
            compare_h="Which one is yours?", dl_mac="Download for macOS", dl_win="Download for Windows", install="How to install",
            free="Free", prices="Free and open source. For macOS, Windows and Linux.", go_to="Go to slide",
            listen="Listen", listen_h="Hear it.", play="Play", pause="Pause", seek="Position in", midi_dl="Download the MIDI file of",
-           manual="Manual", read_manual="Read the manual",
+           manual="Manual", read_manual="Read the manual", whats_new="What's new", whats_new_in="What's new in {name} {ver}",
            listen_p="Every clip is the engine on its own, playing a factory preset from a MIDI file written for it. Nothing added afterwards, only the level matched across clips. Download the MIDI and play it through the preset yourself."),
 "es": dict(overview="Resumen", film="Film", colours="Colores", specs="Especificaciones", download="Descargar", watch="Ver el film",
            highlights="Lo más destacado.", film_h="El film.", colours_h="Elegí un color.", specs_h="Especificaciones técnicas.",
@@ -2363,7 +2390,7 @@ UI = {
            compare_h="¿Cuál es el tuyo?", dl_mac="Descargar para macOS", dl_win="Descargar para Windows", install="Cómo instalar",
            free="Gratis", prices="Libre y gratis. Para macOS, Windows y Linux.", go_to="Ir a la tarjeta",
            listen="Escuchar", listen_h="Escuchalo.", play="Reproducir", pause="Pausa", seek="Posición en", midi_dl="Descargar el archivo MIDI de",
-           manual="Manual", read_manual="Leer el manual",
+           manual="Manual", read_manual="Leer el manual", whats_new="Novedades", whats_new_in="Novedades de {name} {ver}",
            listen_p="Cada clip es el motor solo, tocando un preset de fábrica desde un MIDI escrito para él. No se le agregó nada después; sólo se igualó el nivel entre clips. Bajá el MIDI y tocalo vos con el mismo preset."),
 }
 
@@ -3042,6 +3069,8 @@ def format_of(f, system):
     """El formato de un ítem del zip. En Linux la standalone es el ejecutable sin extensión; las herramientas de línea
     de comandos (lacquerrender...) también lo son y no cuentan."""
     ext = os.path.splitext(f)[1]
+    if f == "Presets":      # los .vstpreset de fábrica (scripts/package-*.sh); el launcher los instala aparte
+        return None
     if system == "linux" and "." not in f and not f.endswith("render"):
         return "Standalone"
     return FORMAT_OF.get(ext)
@@ -3284,7 +3313,7 @@ def page_launcher(lang):
         <details><summary>{ui['install']}</summary><ol>{steps(t['win_steps'])}</ol></details>
       </article>{lin_card}
     </div>
-    <p class="note">{t['note']} Launcher {VLA}.</p>
+    <p class="note">{t['note']} Launcher {VLA}. <a href="{home}changelog/#launcher">{ui['whats_new']}</a></p>
       <div class="license reveal"><h3>{t['manual_h']}</h3><p>{t['manual_p']}</p><p><a class="more" href="{home}">{t['manual_link']}</a></p></div>
     </div>
   </section>
@@ -3357,7 +3386,7 @@ def shell(lang, path, title, description, body, og_image, footer_extra, body_cla
 {body}
   <footer>
     <div class="wrap">
-      <div class="row"><span>Audio Tools</span><span>{"Free software under the GNU AGPL v3." if lang == "en" else "Software libre bajo la GNU AGPL v3."} <a href="https://github.com/palmereta/audio_tools">{"Source code on GitHub" if lang == "en" else "Código fuente en GitHub"}</a></span></div>
+      <div class="row"><span>Audio Tools</span><span>{"Free software under the GNU AGPL v3." if lang == "en" else "Software libre bajo la GNU AGPL v3."} <a href="https://github.com/palmereta/audio_tools">{"Source code on GitHub" if lang == "en" else "Código fuente en GitHub"}</a> · <a href="{home}changelog/">{CL[lang]["foot"]}</a></span></div>
 {footer_extra}
       <div class="row support-row"><span>{SUPPORT[lang]['foot']}</span>{cafecito_button(lang)}</div>
     </div>
@@ -3452,7 +3481,7 @@ def linux_card(t, root, mac, lang):
     if not lin: return ""
     L = LINUX[lang]
     fmt = t.get("linux_fmt") or t["win_fmt"].replace("VST3", "VST3, LV2", 1)
-    steps = "".join(f"<li>{s}</li>" for s in L["steps"])
+    steps = "".join(f"<li>{s}</li>" for s in with_preset_step(L["steps"], lin, lang, "linux"))
     return f"""
       <article class="dl-card reveal">
         <h3>{L['h']}</h3>
@@ -3463,22 +3492,23 @@ def linux_card(t, root, mac, lang):
 
 def download_html(t, ui, root, mac, win, slug, lang):
     steps = lambda lst: "".join(f"<li>{s}</li>" for s in lst)
+    name, ver = next((n, v) for s, n, y, m, w, v in PRODUCTS if s == slug)
     r = REQ[lang]
     return f"""    <div class="dl-cards">
       <article class="dl-card reveal">
         <h3>macOS</h3>
         <p class="req">{t['mac_req']} {t['mac_fmt']}. {size_mb(mac)}.</p>
         <a class="pill primary" href="{root}downloads/{mac}" download data-support>{ui['dl_mac']}</a>
-        <details><summary>{ui['install']}</summary><ol>{steps(t['mac_steps'])}</ol></details>
+        <details><summary>{ui['install']}</summary><ol>{steps(with_preset_step(t['mac_steps'], mac, lang, "mac"))}</ol></details>
       </article>
       <article class="dl-card reveal">
         <h3>Windows</h3>
         <p class="req">{t['win_req']} {t['win_fmt']}. {size_mb(win)}.</p>
         <a class="pill primary" href="{root}downloads/{win}" download data-support>{ui['dl_win']}</a>
-        <details><summary>{ui['install']}</summary><ol>{steps(t['win_steps'])}</ol></details>
+        <details><summary>{ui['install']}</summary><ol>{steps(with_preset_step(t['win_steps'], win, lang, "win"))}</ol></details>
       </article>{linux_card(t, root, mac, lang)}
     </div>
-    <p class="note">{t['dl_note']}</p>{f'<p class="dl-manual"><a class="more" href="manual/">{ui["read_manual"]}</a></p>' if manual_web.has_manual(slug) else ""}{launcher_promo(lang, root + ("" if lang == "en" else "es/"))}"""
+    <p class="note">{t['dl_note']}</p><p class="dl-manual">{f'<a class="more" href="manual/">{ui["read_manual"]}</a>' if manual_web.has_manual(slug) else ""}<a class="more" href="{root}{"" if lang == "en" else "es/"}changelog/#{slug}">{ui["whats_new_in"].format(name=name, ver=ver)}</a></p>{launcher_promo(lang, root + ("" if lang == "en" else "es/"))}"""
 
 def page_product(slug, lang):
     name, year, mac, win, ver = next((n, y, m, w, v) for s, n, y, m, w, v in PRODUCTS if s == slug)
@@ -3949,7 +3979,7 @@ def page_product(slug, lang):
     <div class="wrap">
       <h1 class="p-name">{name}</h1>
       <p class="p-tag">{pr['tag']}</p>
-      <p class="p-price">{ui['prices']} {name} {ver}.</p>
+      <p class="p-price">{ui['prices']} {name} {ver}. <a class="p-news" href="{home}changelog/#{slug}">{ui['whats_new']}</a></p>
       <div class="p-cta">
         <a class="pill primary" href="#download">{ui['download']}</a>
         <button class="pill link" type="button" data-film-open>{ui['watch']} <span class="tri" aria-hidden="true"></span></button>
@@ -4045,6 +4075,10 @@ def page_product(slug, lang):
     og = {"at20v": "og-image.jpg", "pallor": "pallor/og-image.jpg", "thrum": "thrum/og-image.jpg", "at303": "at303/og-image.jpg", "at101v": "at101v/og-image.jpg", "at42": "at42/og-image.jpg", "at700": "at700/og-image.jpg", "atfs1": "atfs1/og-image.jpg", "orrery": "orrery/og-image.jpg", "murmur": "murmur/og-image.jpg", "atmd": "atmd/og-image.jpg", "lacquer": "lacquer/og-image.jpg", "halation": "halation/og-image.jpg", "tarnish": "tarnish/og-image.jpg", "plumb": "plumb/og-image.jpg"}[slug]
     return shell(lang, slug + "/", title, t["description"], body, og, foot, "p-" + slug)
 
+# Las marcas de los instrumentos originales, al pie de la portada y del changelog.
+MARKS = {"en": "Korg and MS-20 are trademarks of Korg Inc. Roland, SH-101 and System-700 are trademarks of Roland Corporation. Yamaha and FS1R are trademarks of Yamaha Corporation. Moog and Minimoog are trademarks of Moog Music Inc. Elta Music and SOLAR 42 are trademarks of their owners. Audio Tools is an independent project, not affiliated with or endorsed by Korg, Roland, Yamaha, Moog Music or Elta Music. Product names are used only to identify the instruments that inspired these recreations.",
+         "es": "Korg y MS-20 son marcas de Korg Inc. Roland, SH-101 y System-700 son marcas de Roland Corporation. Yamaha y FS1R son marcas de Yamaha Corporation. Moog y Minimoog son marcas de Moog Music Inc. Elta Music y SOLAR 42 son marcas de sus dueños. Audio Tools es un proyecto independiente, sin relación ni aval de Korg, Roland, Yamaha, Moog Music ni Elta Music. Los nombres de productos se usan sólo para identificar los instrumentos que inspiraron estas recreaciones."}
+
 def page_home(lang):
     h, t, ui = H[lang], T[lang], UI[lang]
     root = "" if lang == "en" else "../"
@@ -4107,10 +4141,71 @@ def page_home(lang):
     <div class="wrap"><h2 class="sec-head reveal">{h['next_h']}</h2><p class="lede reveal">{h['next_p']}</p></div>
   </section>
   </main>"""
-    marks = {"en": "Korg and MS-20 are trademarks of Korg Inc. Roland, SH-101 and System-700 are trademarks of Roland Corporation. Yamaha and FS1R are trademarks of Yamaha Corporation. Moog and Minimoog are trademarks of Moog Music Inc. Elta Music and SOLAR 42 are trademarks of their owners. Audio Tools is an independent project, not affiliated with or endorsed by Korg, Roland, Yamaha, Moog Music or Elta Music. Product names are used only to identify the instruments that inspired these recreations.",
-             "es": "Korg y MS-20 son marcas de Korg Inc. Roland, SH-101 y System-700 son marcas de Roland Corporation. Yamaha y FS1R son marcas de Yamaha Corporation. Moog y Minimoog son marcas de Moog Music Inc. Elta Music y SOLAR 42 son marcas de sus dueños. Audio Tools es un proyecto independiente, sin relación ni aval de Korg, Roland, Yamaha, Moog Music ni Elta Music. Los nombres de productos se usan sólo para identificar los instrumentos que inspiraron estas recreaciones."}
-    foot = f"      <p>{marks[lang]}</p>"
+    foot = f"      <p>{MARKS[lang]}</p>"
     return shell(lang, "", h["title"], h["description"], body, "at101v/og-image.jpg", foot, "home")
+
+# ── Changelog: /changelog/ y /es/changelog/, desde scripts/release-notes*.json (scripts/changelog.py) ──
+# Por producto y versión, de la más nueva a la más vieja, sin fechas (pedido del usuario). Usa el armado del manual
+# (índice a la izquierda que marca la sección que se está leyendo, texto a la derecha).
+CL = {
+"en": dict(title="Changelog | Audio Tools", h1="Changelog", foot="Changelog", toc="Products", current="Current",
+           description="What changed in each version of every Audio Tools plugin and of the launcher, newest version first.",
+           lede="What changed in each version of every plugin and of the launcher, newest version first. The same notes open each "
+                '<a href="https://github.com/palmereta/audio_tools/releases">release on GitHub</a>.',
+           page="Product page", other="Leer en castellano"),
+"es": dict(title="Novedades | Audio Tools", h1="Novedades", foot="Novedades", toc="Productos", current="Actual",
+           description="Qué cambió en cada versión de cada plugin de Audio Tools y del launcher, de la más nueva a la más vieja.",
+           lede="Qué cambió en cada versión de cada plugin y del launcher, de la más nueva a la más vieja. Las mismas notas, en inglés, "
+                'abren cada <a href="https://github.com/palmereta/audio_tools/releases">release en GitHub</a>.',
+           page="Página del producto", other="Read in English"),
+}
+
+def cl_typo(text):
+    """Comillas tipográficas (una comilla recta sola al final de renglón se separaba de su texto) y espacio duro entre
+    número y unidad ("0 dBFS", "1,5 dB", "12 s")."""
+    t = re.sub(r'"([^"]+)"', "\u201c\\1\u201d", html.escape(text, quote=False))
+    return re.sub(r"(\d) (dBFS|dB|ms|s|kHz|Hz|V|%)(?=[\s,;.)]|$)", "\\1\u00a0\\2", t)
+
+def page_changelog(lang):
+    c = CL[lang]
+    root = "../" if lang == "en" else "../../"
+    home = root + ("" if lang == "en" else "es/")
+    shown = set(RELEASED) | ({"launcher"} if LAUNCHER_RELEASED else set())
+    products = [p for p in changelog.load(lang, _ORDER + ["launcher"]) if p["slug"] in shown]
+    tags = {s: PRES[s][lang]["tag"] for s in RELEASED}
+    tags["launcher"] = LA[lang]["tag"]
+    acc = lambda s: f' style="--accent:{ACCENT[s]}"' if s in ACCENT else ""
+    toc = "".join(f'<li{acc(p["slug"])}><a href="#{p["slug"]}">{p["name"]}<span class="cl-ver">{p["current"]}</span></a></li>' for p in products)
+    badge = f' <span class="cl-current">{c["current"]}</span>'
+    secs = []
+    for p in products:
+        sl = p["slug"]
+        vers = "\n".join(
+            f'          <h3 id="{sl}-{v}">{v}{badge if v == p["current"] else ""}</h3>\n'
+            f'          <ul>{"".join(f"<li>{cl_typo(i)}</li>" for i in items)}</ul>'
+            for v, items in p["versions"])
+        secs.append(f"""        <section class="cl-product" id="{sl}"{acc(sl)}>
+          <h2><a href="{home}{sl}/">{p['name']}</a></h2>
+          <p class="cl-meta"><span>{html.escape(tags[sl])}</span><a class="more" href="{home}{sl}/">{c['page']}</a></p>
+{vers}
+        </section>""")
+    other = f"{root}es/changelog/" if lang == "en" else f"{root}changelog/"
+    body = f"""  <main id="top" class="manual changelog">
+    <div class="wrap m-grid">
+      <aside class="m-toc" aria-label="{c['toc']}">
+        <details class="m-toc-d" open><summary class="m-toc-h">{c['toc']}</summary>
+        <ol>{toc}</ol></details>
+        <a class="m-other" href="{other}" hreflang="{'es' if lang == 'en' else 'en'}">{c['other']}</a>
+      </aside>
+      <article class="m-body">
+        <h1>{c['h1']}</h1>
+        <p class="m-lede">{c['lede']}</p>
+{chr(10).join(secs)}
+        <p class="m-top"><a href="#top">{"Back to top" if lang == "en" else "Volver arriba"}</a></p>
+      </article>
+    </div>
+  </main>"""
+    return shell(lang, "changelog/", c["title"], c["description"], body, "og-image.jpg", f"      <p>{MARKS[lang]}</p>", "changelog-page")
 
 if __name__ == "__main__":
     # Guion no separable en los nombres de modelo (si no, "MS-20" o "SH-101" se cortan en dos renglones).
@@ -4125,10 +4220,15 @@ if __name__ == "__main__":
             out = os.path.join(WEB, *([] if lang == "en" else ["es"]), s, "manual", "index.html")
             os.makedirs(os.path.dirname(out), exist_ok=True)
             open(out, "w").write(fix(manual_web.page(s, n, lang, shell)))
+        out = os.path.join(WEB, *([] if lang == "en" else ["es"]), "changelog", "index.html")
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        open(out, "w").write(fix(page_changelog(lang)))
         if LAUNCHER_RELEASED:
             out = os.path.join(WEB, *([] if lang == "en" else ["es"]), "launcher", "index.html")
             os.makedirs(os.path.dirname(out), exist_ok=True)
             open(out, "w").write(fix(page_launcher(lang)))
+    # CHANGELOG.md sale de las mismas notas que /changelog/: se regenera junto con la web para que no se desfasen.
+    open(os.path.join(ROOT, "CHANGELOG.md"), "w", encoding="utf-8").write(changelog.markdown())
     m = write_manifest()
     print("manifest:", len(m["products"]), "productos,", "launcher", VLA, "publicado" if LAUNCHER_RELEASED else "sin zips", "|", m["generated"])
     print("web generada:", VERSION, size_mb(MAC), size_mb(WIN), "|", V101, size_mb(MAC101), size_mb(WIN101), "|", V42, size_mb(MAC42), size_mb(WIN42))

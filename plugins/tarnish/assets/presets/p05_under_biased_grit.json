@@ -9,7 +9,8 @@
   "bias": -80,
   "drive": 6,
   "wow": 0.03,
-  "flutter": 0.02
+  "flutter": 0.02,
+  "out": -2.5
  },
  "order": 5
 }

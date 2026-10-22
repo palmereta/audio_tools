@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include "../../../shared/ui/Showing.h"
 
 using namespace dh::sp;
 using namespace dh::sp::ui;
@@ -300,6 +301,9 @@ void SpaceEditor::showManual (bool on)
 
 void SpaceEditor::timerCallback()
 {
+    // Live crea el editor al insertar y después sólo esconde la ventana: escondido no se anima ni se repinta (QA en
+    // Live 2026-10-22, H3).
+    if (! dh::reallyShowing (*this)) return;
     if (const auto name = proc.presetDisplayName(); name != presetBtn.getButtonText()) presetBtn.setButtonText (name);
     const bool sync = proc.value ("sync") > 0.5f;
     time.s.setVisible (! sync); division.s.setVisible (sync);

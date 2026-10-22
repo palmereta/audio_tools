@@ -87,7 +87,8 @@ public:
         bufN = (int) (kMaxBufferSec * sr) + 8;
         if (! keep) { recL.assign ((size_t) bufN, 0.0f); recR.assign ((size_t) bufN, 0.0f); w = 0; written = 0; }
         for (auto& g : grains) g.active = false;
-        wetL.assign ((size_t) std::max (kSub, maxBlock) + kSub, 0.0f); wetR = wetL; dryL = wetL; dryR = wetL;
+        wetL.assign ((size_t) std::max (kSub, maxBlock) + kSub, 0.0f); wetR = wetL; dryL = wetL; dryR = wetL; mixT = wetL; duckT = wetL;
+        subPos = 0;
         duckAtt = 1.0f - std::exp (-1.0f / (0.005f * sr)); duckRel = 1.0f - std::exp (-1.0f / (0.3f * sr));
         dly.prepare (sr); rev.prepare (sr);
         fbDcL.setCutoff (25.0f, sr); fbDcR.setCutoff (25.0f, sr);
@@ -121,7 +122,7 @@ public:
     // Procesa n muestras. inL/inR pueden ser los mismos buffers que outL/outR.
     void process (const float* inL, const float* inR, float* outL, float* outR, int n, const HostInfo& host)
     {
-        if ((int) wetL.size() < n) { wetL.resize ((size_t) n); wetR.resize ((size_t) n); dryL.resize ((size_t) n); dryR.resize ((size_t) n); }
+        if ((int) wetL.size() < n) { for (auto* v : { &wetL, &wetR, &dryL, &dryR, &mixT, &duckT }) v->resize ((size_t) n); }
         const bool frozen = p.freeze || freezeHold;
         const double ppqPerSample = std::max (1.0, host.bpm) / 60.0 / sr;
         double ppq = host.playing ? host.ppq : freePpq;
@@ -129,14 +130,20 @@ public:
         const float inT = dbToGain (p.inGainDb), outT = dbToGain (p.outGainDb);
         int active = 0;
 
-        for (int s0 = 0; s0 < n; s0 += kSub)
+        // Tramos de modulación de kSub muestras contados desde el principio, no desde cada llamada: un tramo puede
+        // quedar repartido entre dos bloques (o entre dos eventos MIDI) y la salida no depende del tamaño de bloque
+        // del host (QA en REAPER 2026-10-22: el AU a 64 muestras no nulaba contra 512).
+        for (int s0 = 0; s0 < n;)
         {
-            const int m = std::min (kSub, n - s0);
-            const Mod md = modulate (host.bpm, (float) m / sr);
-            // Tono (se recalcula por tramo; los coeficientes son baratos).
-            const float lo = clampf (md.lowCut, 10.0f, 0.45f * sr), hi = clampf (md.highCut, lo * 1.05f, 0.45f * sr);
-            hpL.setHp (lo, sr); hpR.coef = hpL.coef; lpL.setLp (hi, sr); lpR.coef = lpL.coef;
-            const double interval = sr / std::max (0.05f, md.density);
+            if (subPos == 0)
+            {
+                segMod = modulate (host.bpm, (float) kSub / sr);
+                // Tono (se recalcula por tramo; los coeficientes son baratos).
+                const float lo = clampf (segMod.lowCut, 10.0f, 0.45f * sr), hi = clampf (segMod.highCut, lo * 1.05f, 0.45f * sr);
+                hpL.setHp (lo, sr); hpR.coef = hpL.coef; lpL.setLp (hi, sr); lpR.coef = lpL.coef;
+            }
+            const int m = std::min (kSub - subPos, n - s0);
+            const double interval = sr / std::max (0.05f, segMod.density);
             const double bufSamples = clampf (p.bufferSec, 0.5f, kMaxBufferSec) * sr;
 
             for (int i = 0; i < m; ++i)
@@ -161,7 +168,7 @@ public:
                     const double expo = -std::log (std::max (1.0e-6f, rng.unipolar()));
                     nextGrain += interval * ((1.0 - p.densityRand) + p.densityRand * expo);
                 }
-                if (spawn && (p.midiMode != MidiGate || heldCount > 0)) startGrain (md, frozen, bufSamples);
+                if (spawn && (p.midiMode != MidiGate || heldCount > 0)) startGrain (segMod, frozen, bufSamples);
 
                 // Granos.
                 float sl = 0.0f, sr_ = 0.0f;
@@ -186,7 +193,7 @@ public:
                 // Grabación (con el feedback de los granos).
                 if (! frozen)
                 {
-                    const float fb = clampf (md.feedback, 0.0f, 0.97f);
+                    const float fb = clampf (segMod.feedback, 0.0f, 0.97f);
                     recL[(size_t) w] = xl + fb * fastTanh (fbDcL.process (sl));
                     recR[(size_t) w] = xr + fb * fastTanh (fbDcR.process (sr_));
                     peakAcc = std::max (peakAcc, std::max (std::fabs (recL[(size_t) w]), std::fabs (recR[(size_t) w])));
@@ -197,11 +204,17 @@ public:
                 // Seguidor de la entrada para el ducking.
                 const float lvl = std::max (std::fabs (xl), std::fabs (xr));
                 duckEnv += (lvl - duckEnv) * (lvl > duckEnv ? duckAtt : duckRel);
+                mixT[(size_t) k] = segMod.mix;
+                duckT[(size_t) k] = 1.0f - clampf (p.duck, 0.0f, 1.0f) * clampf (duckEnv * 4.0f, 0.0f, 1.0f);
             }
             ppq += m * ppqPerSample;
-            mixNow = md.mix;
-            scanSec += (double) p.scan * m / sr;
-            if (scanSec > p.bufferSec || scanSec < -p.bufferSec) scanSec = std::fmod (scanSec, (double) p.bufferSec);
+            s0 += m; subPos += m;
+            if (subPos >= kSub)
+            {
+                subPos = 0;
+                scanSec += (double) p.scan * kSub / sr;
+                if (scanSec > p.bufferSec || scanSec < -p.bufferSec) scanSec = std::fmod (scanSec, (double) p.bufferSec);
+            }
         }
 
         // Delay y reverb sobre los granos.
@@ -215,8 +228,8 @@ public:
         // Mezcla, ducking y salida.
         for (int k = 0; k < n; ++k)
         {
-            const float mx = mixS.process (clampf (mixNow, 0.0f, 1.0f));
-            const float duckG = 1.0f - clampf (p.duck, 0.0f, 1.0f) * clampf (duckEnv * 4.0f, 0.0f, 1.0f);
+            const float mx = mixS.process (clampf (mixT[(size_t) k], 0.0f, 1.0f));
+            const float duckG = duckT[(size_t) k];
             const float og = outS.process (outT);
             const float dl = dryL[(size_t) k], dr = dryR[(size_t) k];
             outL[k] = (dl * (1.0f - mx) + wetL[(size_t) k] * mx * duckG) * og;
@@ -467,7 +480,7 @@ private:
     float sr = 48000.0f;
     int bufN = 1, w = 0;
     long long written = 0;
-    std::vector<float> recL, recR, wetL, wetR, dryL, dryR;
+    std::vector<float> recL, recR, wetL, wetR, dryL, dryR, mixT, duckT;   // mezcla y ducking de cada muestra
     std::array<Grain, kMaxGrains> grains {};
     std::array<LfoState, 2> lfoState {};
     struct Held { int note; float vel; };
@@ -476,7 +489,9 @@ private:
     bool freezeHold = false, dlyIdle = true, revIdle = true;
     double nextGrain = 0.0, scanSec = 0.0, freePpq = 0.0;
     long long lastDiv = -1;
-    float mixNow = 0.5f, duckEnv = 0.0f, duckAtt = 0.01f, duckRel = 0.0005f, peakAcc = 0.0f;
+    Mod segMod {};                             // la modulación del tramo actual
+    int subPos = 0;                            // muestras ya hechas del tramo actual
+    float duckEnv = 0.0f, duckAtt = 0.01f, duckRel = 0.0005f, peakAcc = 0.0f;
     int peakCount = 0;
     Rng rng { 0x6d75726du };
     Smoother mixS, inS, outS;

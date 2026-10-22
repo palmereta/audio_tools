@@ -54,9 +54,13 @@ ATMD is an instrument: put it on a MIDI or instrument track, not on an audio tra
 
 > On Windows, if ATMD does not appear, open Settings, Plug-Ins, turn on Use VST3 Plug-in System Folders and rescan.
 
+Factory presets appear in Live's browser under Plug-Ins → Audio Tools ATMD (expand the plugin), installed by the launcher or from the zip's Presets folder. Live doesn't show the plugin's own program list; the preset menu inside ATMD has them all.
+
+Live fills the device panel by itself only when a plugin has 64 automatable parameters or fewer. Three settings are left out of automation so that ATMD fits: Oversampling, A-440 and Phones Volume. They are still on the panel and in presets and sessions. Any parameter can be added to the device panel with Configure.
+
 ### Other DAWs
 
-In any other host, insert ATMD as an instrument and send it MIDI. Every knob and switch on the panel and on the SETTINGS page is a host parameter, so you can automate it. The two wheels are not parameters, as on the original they are performance controls: automate them with pitch bend and CC 1 in your MIDI clips. The factory and user presets also appear in the host's program list.
+In any other host, insert ATMD as an instrument and send it MIDI. Every knob and switch on the panel and on the SETTINGS page is a host parameter, so you can automate it (except Oversampling, A-440 and Phones Volume, which are settings). The two wheels are not parameters, as on the original they are performance controls: automate them with pitch bend and CC 1 in your MIDI clips. The factory and user presets also appear in the host's program list.
 
 ### Standalone
 

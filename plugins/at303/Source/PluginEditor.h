@@ -8,6 +8,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "ManualView.h"
+#include "../../../shared/ui/Showing.h"
 
 class At303Editor : public juce::AudioProcessorEditor, private juce::Timer
 {

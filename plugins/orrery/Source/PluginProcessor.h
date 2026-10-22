@@ -179,6 +179,9 @@ private:
     std::atomic<uint32_t> effLanes { 0 }, autoLanes { 0 }, skipped { 0 };
     std::atomic<int> regRole { -1 }; std::atomic<uint32_t> regLanes { 0 };   // lo registrado (se escribe con el lock del registro)
     int lastRole = -1;
+    bool lastRunParam = false;                                      // Play: sus cambios son órdenes (ver processBlock)
+    void mirrorRun (bool on);
+    juce::String instanceId;                                        // con el lock del registro; se guarda en el estado (copias)
     std::atomic<bool> resetPending { false }, restoring { false };
     dh::orr::MainCore mainCore;
     dh::orr::SatelliteCore sat;

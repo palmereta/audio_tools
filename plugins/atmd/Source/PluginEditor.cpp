@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include "../../../shared/ui/Showing.h"
 
 using namespace dh::md;
 using namespace dh::md::ui;
@@ -142,6 +143,7 @@ void AtmdEditor::paintBackdrop (juce::Graphics& g)
 
 void AtmdEditor::timerCallback()
 {
+    if (! dh::reallyShowing (*this)) return;      // ventana escondida (Live): nada que repintar (H3)
     if (presetBtn.getButtonText() != proc.currentPresetName.get()) presetBtn.setButtonText (proc.currentPresetName.get());
     content.repaint (statusR.withTrimmedLeft (baseW - 260));
 }

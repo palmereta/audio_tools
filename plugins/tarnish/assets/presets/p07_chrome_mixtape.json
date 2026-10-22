@@ -10,7 +10,8 @@
   "drive": 2,
   "wow": 0.1,
   "flutter": 0.06,
-  "scrape": 15
+  "scrape": 15,
+  "out": -1.5
  },
  "order": 7
 }

@@ -298,6 +298,9 @@ void PanelView::paint (juce::Graphics& g)
 // ───────────── animación ─────────────
 void PanelView::timerCallback()
 {
+    // Live esconde la ventana del editor sin cerrarlo: escondido no se anima ni se repinta (QA en Live 2026-10-22, H3:
+    // ~23 % de un núcleo). Al volver, lo que cambió difiere de lo mostrado y se redibuja solo.
+    if (! dh::reallyShowing (*this)) return;
     const double now = juce::Time::getMillisecondCounterHiRes();
     const float dt = juce::jlimit (0.001f, 0.033f, (float) ((now - lastTime) * 0.001));
     lastTime = now;

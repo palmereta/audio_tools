@@ -75,6 +75,7 @@ void AT700Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
     outL.assign ((size_t) currentBlock + 64, 0.0f);
     outR.assign ((size_t) currentBlock + 64, 0.0f);
     seenPatchVersion = -1;
+    hostGap.prepare (sampleRate);
 }
 
 void AT700Processor::handleMidi (const juce::MidiMessage& m)
@@ -125,6 +126,9 @@ void AT700Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     const int n = buffer.getNumSamples();
     if (n <= 0) return;
     wasBypassed = false;
+    // El host dejó de llamar (REAPER con el plugin en bypass) y vuelve: un note-off pudo perderse en el hueco. Se
+    // suelta el teclado 701A con lo que sostenía el pedal (QA en DAWs 2026-10-22, X1).
+    if (hostGap.check (getPlayHead(), n, isNonRealtime())) { engine.kb.allOff(); midiNote.fill (false); sustained.fill (false); sustainPedal = false; }
     const int wantOs = kOversampling700[juce::jlimit (0, 2, (int) apvts.getRawParameterValue ("quality")->load())];
     { if (wantOs != engine.oversampling()) engine.prepare (currentSr, currentBlock, wantOs); latency.request ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0)); }
     if ((int) outL.size() < n) { outL.resize ((size_t) n); outR.resize ((size_t) n); }
@@ -407,6 +411,10 @@ void AT700Processor::randomizePanel()
 void AT700Processor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
+    // Las propiedades propias se quitan y se vuelven a poner en el mismo orden: setStateInformation deja algunas en el
+    // árbol de parámetros y al guardar otra vez el orden de los atributos cambiaba (Live reescribía el set en cada
+    // guardado sin cambios, QA en Live 2026-10-22, H4).
+    for (auto id : { "presetName", "presetSnapshot", "program", "cables", "midiMap" }) state.removeProperty (id, nullptr);
     const auto pr = presetToJson700 (currentAsPreset (currentPresetName, ""));
     state.setProperty ("presetName", currentPresetName.get(), nullptr);
     state.setProperty ("presetSnapshot", tracker.toString(), nullptr);

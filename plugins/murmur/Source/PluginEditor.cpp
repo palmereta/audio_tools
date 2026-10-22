@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include "../../../shared/ui/Showing.h"
 
 using namespace dh::mm;
 using namespace dh::mm::ui;
@@ -153,6 +154,9 @@ void MurmurEditor::paintBackdrop (juce::Graphics& g)
 
 void MurmurEditor::timerCallback()
 {
+    // Live crea el editor al insertar y después sólo esconde la ventana: escondido no se anima ni se repinta (QA en
+    // Live 2026-10-22, H3).
+    if (! dh::reallyShowing (*this)) return;
     if (presetBtn.getButtonText() != proc.currentPresetName.get()) presetBtn.setButtonText (proc.currentPresetName.get());
     content.repaint (0, 0, 290, barH);
     if (help.isEmpty()) content.repaint (statusR);

@@ -4,6 +4,7 @@
 // transponer, generar, mutar, exportar a .mid). La carga desde el teclado (LOAD) sigue en el panel.
 
 #include <JuceHeader.h>
+#include "../../../../shared/ui/Showing.h"
 #include "../PluginProcessor.h"
 #include "Widgets101.h"
 
@@ -438,6 +439,7 @@ private:
 
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) return;      // ventana escondida (Live la esconde sin cerrarla): sin trabajo (H3)
         const int pos = proc.panelValue (P::seq_play) > 0.5f ? proc.stepPos.load() : -1;
         if (follow && pos >= 0 && pos / kCols != page) page = pos / kCols;
         const int v = proc.seqVersion.load();

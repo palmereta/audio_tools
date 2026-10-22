@@ -54,6 +54,14 @@ Los plugins están en Browser, Plug-Ins, Audio Tools. Si no aparecen, revisá en
 
 > El AT20V FX reemplaza el audio de su pista por el sonido del sintetizador. Si querés seguir escuchando la voz seca, duplicá la pista o mandala a una pista de retorno.
 
+Los presets de fábrica aparecen en el navegador de Live en Plug-Ins → Audio Tools AT20V (y Audio Tools AT20V FX): desplegá el plugin. Los instala el launcher, o están en la carpeta Presets del zip. Live no muestra la lista de programas propia de un plugin; el menú de presets del editor siempre los tiene todos.
+
+El AT20V FX sólo lista los presets que funcionan en una pista de audio: los cuatro de Effect, los de vocoder y guitar synth (su nombre termina en "(Audio In)") y los Self-Playing. Los demás presets de sintetizador necesitan notas; tocalos en el AT20V.
+
+Live llena solo el panel del dispositivo únicamente en plugins con hasta 64 parámetros automatizables, así que cinco ajustes no se ofrecen para automatizar: Oversampling, MIDI Out, Bend Range, Vocoder Bands y Note Priority. Siguen en la página EXTENSIONS, en los presets y en los proyectos. Con Configure se suma cualquier parámetro al panel del dispositivo.
+
+Live (y REAPER) no toman la salida MIDI de un Audio Unit: para mandar el MIDI OUT del AT20V a otra pista, usá el VST3.
+
 ### Otros hosts y la aplicación independiente
 
 En el AT20V la entrada de audio es un bus de sidechain llamado Audio In (Vocoder / ESP); ruteala en tu host para usar el vocoder o el procesador de señal externa.
@@ -434,7 +442,7 @@ Un preset guarda cada perilla de la página SYNTH, cada cable con su color, y lo
 
 | Categoría | Presets |
 |---|---|
-| Factory | Synthe Bass, Hammond Organ, Parallel Fifths, Voice, Pitch Bend, Steam Locomotive, UFO, Horn, Violin, Sample & Hold, Guitar Synth I, Guitar Synth II, Trumpet, Clarinet |
+| Factory | Synthe Bass, Hammond Organ, Parallel Fifths, Voice, Pitch Bend, Steam Locomotive, UFO, Horn, Violin, Sample & Hold, Guitar Synth I (Audio In), Guitar Synth II (Audio In), Trumpet, Clarinet |
 | Bass | Acid Bass, Fat Saw Bass, Hoover Square |
 | Lead | Scream Lead, Reso Pluck, Delayed Vibrato Lead |
 | Keys | Ring Bells |
@@ -442,7 +450,7 @@ Un preset guarda cada perilla de la página SYNTH, cada cable con su color, y lo
 | FX | Howling Wind, Random Bloops, Laser Zap |
 | Self-Playing | Random Bleeps, Robot Talk, Drip Cave, Morse Station, Chaos Arp, Pulse Train Bass, Wind Chimes, Clockwork Toy, Bubbling Swamp, Endless Drift, Space Telemetry |
 | Ambient | Glass Cathedral, Analog Fog, Frozen Horizon, Deep Ocean Drone, Aurora, Distant Choir, Tape Memories, Breathing Strings, Lunar Bells |
-| Vocoder | Classic Robot Voice, Vocoder Choir, Whisper Machine, Talk Box Lead |
+| Vocoder | Classic Robot Voice (Audio In), Vocoder Choir (Audio In), Whisper Machine (Audio In), Talk Box Lead (Audio In) |
 | Effect | Filter FX, Auto-Wah FX, Screaming Filter FX, Envelope Gate FX |
 
 - **Factory**: 14 patches transcriptos de las cartas de ajuste del manual original. Synthe Bass, Voice, Pitch Bend y Steam Locomotive usan la rueda de control; los Guitar Synth necesitan una guitarra en la entrada de audio.
@@ -450,6 +458,8 @@ Un preset guarda cada perilla de la página SYNTH, cada cable con su color, y lo
 - **Self-Playing**: 11 patrones en los que el MG en modo TEMPO dispara las envolventes y el sample and hold, a tiempo con tu DAW. Mantené una tecla para transponer.
 - **Ambient**: 9 pads polifónicos lentos con delay y reverb.
 - **Vocoder**: 4 presets que quedan en silencio hasta que llega una voz a la entrada de audio.
+Los presets cuyo nombre termina en "(Audio In)", y los de Effect, necesitan audio en la entrada (en el AT20V, el sidechain): sin eso quedan en silencio.
+
 - **Effect**: 4 patches para el AT20V FX que procesan la entrada de audio sin MIDI: el procesador de señal externa alimenta los filtros (EXT SIGNAL IN) y su disparador abre el VCA (KBD TRIG IN). Auto-Wah FX además manda la envolvente de la entrada al corte del pasa bajos.
 
 ## MIDI y sincronía
@@ -471,7 +481,9 @@ Se elige con MIDI OUT en la página EXTENSIONS:
 - **PATCH** convierte en nota cada disparo del bus de teclado, incluidos los que genera la patchera (por ejemplo MG RECTANGLE en TRIG IN), con la altura que está tocando el VCO 1, en el canal 1. Así un preset self-playing puede tocar otro instrumento.
 - **BOTH** hace las dos cosas; **OFF** no manda nada.
 
-En Ableton Live, creá una pista MIDI con otro instrumento, poné su MIDI From en la pista del AT20V (y el selector de abajo en AT20V) y Monitor en In. En bypass, el AT20V queda en silencio y sólo deja pasar MIDI en THRU o BOTH.
+En Ableton Live, creá una pista MIDI con otro instrumento, poné su MIDI From en la pista del AT20V (y el selector de abajo en AT20V) y Monitor en In. En bypass, el AT20V queda en silencio y sólo deja pasar MIDI en THRU o BOTH. Live y REAPER toman la salida MIDI sólo del VST3, no del Audio Unit.
+
+La salida MIDI sale tan tarde como la latencia del plugin (27 muestras, los filtros del sobremuestreo), el mismo atraso que su audio: el host compensa el audio, así que las notas que toca otra pista por MIDI From caen junto con el AT20V y no 0,6 ms antes.
 
 ### Tempo del host
 
@@ -479,7 +491,7 @@ El MG en modo TEMPO y el delay siguen el tempo del DAW, o 120 BPM si el host no 
 
 ### Automatización y control MIDI
 
-Todas las perillas y ajustes se pueden automatizar; los cables no. El AT20V no tiene MIDI learn propio: para manejar sus parámetros desde un controlador, usá el mapeo MIDI de tu DAW. En el host, los nombres combinan sección y perilla (HPF Cutoff, EG2 Hold), y algunos ajustes cambian de nombre: MG CLOCK es MG Tempo Sync, FILTER es Filter Revision, INPUT LEVEL es Vocoder Input y RESONANCE es Vocoder Q.
+Todas las perillas y ajustes se pueden automatizar salvo Oversampling, MIDI Out, Bend Range, Vocoder Bands y Note Priority (mirá Ableton Live); los cables no. El AT20V no tiene MIDI learn propio: para manejar sus parámetros desde un controlador, usá el mapeo MIDI de tu DAW. En el host, los nombres combinan sección y perilla (HPF Cutoff, EG2 Hold), y algunos ajustes cambian de nombre: MG CLOCK es MG Tempo Sync, FILTER es Filter Revision, INPUT LEVEL es Vocoder Input y RESONANCE es Vocoder Q.
 
 ## Recetas
 

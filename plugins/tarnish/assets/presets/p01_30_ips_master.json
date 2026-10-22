@@ -10,7 +10,8 @@
   "bias": 20,
   "wow": 0.02,
   "flutter": 0.015,
-  "scrape": 10
+  "scrape": 10,
+  "out": -1.5
  },
  "order": 1
 }

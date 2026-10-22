@@ -11,9 +11,13 @@ At303Processor::At303Processor()
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (prm)) rawIdStore.push_back (rp->getParameterID());
     for (auto& id : rawIdStore) rawIds.push_back ({ id.toRawUTF8(), apvts.getRawParameterValue (id) });
     loadFactory();
-    tracker.capture (*this);
-    // Banco inicial: el patrón 1 con una línea simple; el resto vacío (una nota por paso en C).
+    // Banco inicial vacío (una nota por paso en C); después el preset 0 con su línea en el patrón 1. Un plugin recién
+    // insertado es el programa 0 que informa al host (antes decía "First Squelch" y sonaba con los valores por
+    // defecto, y elegir el programa 0 no hacía nada: QA en DAWs 2026-10-22, X2). Una sesión guardada lo pisa todo
+    // en setStateInformation.
     for (auto& p : bank) p = Pattern();
+    if (! presets.empty()) loadPreset (0);
+    else tracker.capture (*this);
 }
 
 bool At303Processor::isBusesLayoutSupported (const BusesLayout& l) const { return l.getMainOutputChannelSet() == juce::AudioChannelSet::stereo(); }
@@ -26,6 +30,7 @@ void At303Processor::setValue (const juce::String& id, float v)
 void At303Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     sr = sampleRate;
+    hostGap.prepare (sr);
     engine.prepare (sr, samplesPerBlock);
     engine.set (buildParams());
     patDirty = true; lastPatIdx = -1; freeClock = 0;
@@ -98,6 +103,9 @@ void At303Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     const int n = buffer.getNumSamples();
     buffer.clear();
     if (n == 0) return;
+    // El host dejó de llamar un rato (REAPER no llama a un plugin en bypass) y los note-off de ese rato se perdieron:
+    // se sueltan las notas antes del MIDI de este bloque (QA en DAWs 2026-10-22, X1).
+    if (hostGap.check (getPlayHead(), n, isNonRealtime())) { engine.hostGap(); keyboardState.reset(); }
     const auto bp = buildParams();
     engine.set (bp);
     latency.request ((int) std::lround (dh::halfbandChainDelay (bp.oversample)));   // el retardo del diezmador, según Quality

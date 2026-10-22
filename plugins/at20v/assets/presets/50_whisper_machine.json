@@ -1,5 +1,5 @@
 {
- "name": "Whisper Machine",
+ "name": "Whisper Machine (Audio In)",
  "category": "Vocoder",
  "knobs": {
   "vco1_wave": 3,

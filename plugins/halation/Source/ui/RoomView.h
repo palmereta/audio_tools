@@ -4,6 +4,7 @@
 // palabras, la grilla de tempo con los ecos, la curva de caída y el aviso antes de que la realimentación se dispare.
 
 #include "LookHa.h"
+#include "../../../../shared/ui/Showing.h"
 #include "RoomSim.h"
 #include "../PluginProcessor.h"
 
@@ -142,6 +143,8 @@ private:
     void timerCallback() override
     {
         auto& v = proc.view;
+        // Ventana escondida (Live): sin simular ni repintar; los ataques viejos se descartan.
+        if (! dh::reallyShowing (*this)) { v.onsetFifo.finishedRead (v.onsetFifo.getNumReady()); return; }
         view::SimInputs in;
         in.space = v.space.load(); in.sizeScale = v.sizeNow.load(); in.feedback = v.feedback.load(); in.decayS = v.decayS.load();
         in.freeze = v.freeze.load(); in.shimmerLayers = v.shimmerLayers.load(); in.grains = v.grains.load() > 0 ? 0.6f : 0.0f;

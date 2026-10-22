@@ -224,6 +224,8 @@ def main():
                      "`xattr -dr com.apple.quarantine` on the installed files and Windows SmartScreen may ask to confirm.")
             changes = RELEASE_NOTES.get(tag)
             if changes: notes = "What's new:\n\n" + "\n".join(f"- {c}" for c in changes) + "\n\n" + notes
+            # Todas las versiones del producto en CHANGELOG.md (scripts/changelog.py), con su ancla de GitHub.
+            notes += f"\n\nEvery version of {title.rsplit(' ', 1)[0]}: [CHANGELOG.md](https://github.com/{OWNER}/{REPO}/blob/main/CHANGELOG.md#{title.rsplit(' ', 1)[0].lower().replace(' ', '-')})."
             print(f"release {tag}: {title}")
             if DRY: continue
             status, rel = api("POST", f"/repos/{OWNER}/{REPO}/releases", {"tag_name": tag, "name": title, "body": notes, "make_latest": "false"})

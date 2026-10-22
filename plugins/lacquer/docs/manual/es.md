@@ -83,6 +83,8 @@ La ventana se puede agrandar desde la esquina de abajo a la derecha.
 
 Un estilo no es un preset fijo de perillas. Cambia el objetivo al que apunta el análisis, así que el mismo estilo hace cosas distintas en una mezcla oscura y en una brillante.
 
+La lista de programas (presets) del host muestra los seis estilos: elegir uno ahí es lo mismo que elegirlo acá.
+
 ![Style, Intensity, Loudness target y Ceiling: las cuatro decisiones que Lacquer te deja a vos.](img/controls.jpg)
 
 ## Intensity

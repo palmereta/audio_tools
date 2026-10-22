@@ -161,6 +161,10 @@ En la vista de notas, cada renglón es una nota: brillante para las notas de la 
 
 Los presets fijan el carácter de la corrección. Nunca cambian la tonalidad, la escala, la referencia de afinación ni el gate: eso es de la canción y queda como lo dejaste.
 
+Algunos presets también fijan el modo de latencia (el grupo Live y Hard Tune Live), la voz (Low Voice, High Voice, Instrument) o el modo MIDI (MIDI Note Lock). El preset siguiente los devuelve a como estaban antes, salvo que los hayas cambiado mientras tanto: un preset suena igual venga del que venga, y un modo de latencia que elegiste vos se queda.
+
+En Ableton Live, que no muestra la lista de programas propia de un plugin, los presets de fábrica aparecen en el navegador de Live en **Plug-Ins**, **Audio Tools Plumb** (desplegá el plugin). Los instala el launcher; con el zip, copiá las carpetas de su carpeta **Presets** a `~/Library/Audio/Presets/Audio Tools/` (macOS).
+
 | Grupo | Presets |
 |---|---|
 | Natural | Natural Lead, Gentle Polish, Pop Lead, Ballad, Backing Vocals, Choir Section |

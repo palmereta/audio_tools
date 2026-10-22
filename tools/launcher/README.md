@@ -37,7 +37,14 @@ coloured placeholder or a disabled play button is shown and installing still wor
 | Audio Unit | `~/Library/Audio/Plug-Ins/Components` | — | — |
 | LV2 | — | — | `~/.lv2` |
 | Standalone | `~/Applications` | `%LOCALAPPDATA%\Programs\Audio Tools\<Plugin>\` | `~/.local/opt/audio-tools/<Plugin>/`, plus `~/.local/share/applications/audiotools-<name>.desktop` for the menu |
+| Factory presets (`.vstpreset`, with the VST3) | `~/Library/Audio/Presets/Audio Tools/<plugin>` | `<Documents>\VST3 Presets\Audio Tools\<plugin>` | `~/.vst3/presets/Audio Tools/<plugin>` |
 | Launcher data | `~/Library/Application Support/Audio Tools Launcher` | `%APPDATA%\Audio Tools\Launcher` | `~/.config/Audio Tools Launcher` |
+
+The factory presets are the zip's `Presets/<VST3 name>/<category>/*.vstpreset` (written at package time by
+`atvstpresets`, see `tools/hosttest/vstpresets.cpp`), in the user-scope VST3 preset folders of the VST3 specification,
+`<vendor>/<plugin name>`: Ableton Live ignores VST3 program lists but lists these files, and so do Cubase and Bitwig. They go in only with the VST3. The record lists them apart (`presets` in `installed.json`): an update deletes
+the ones the new version no longer has, Remove deletes them all, and other files in those folders (presets the user
+saved) are never touched.
 
 The data folder holds `installed.json` (what the launcher installed, with paths), `settings.json`
 (formats, all-users VST3), `manifest-cache.json` and `cache/`. On macOS the quarantine attribute is
@@ -88,9 +95,10 @@ build/tools/launcher/atlaunchertest_artefacts/Release/atlaunchertest
 
 Builds fake product zips and a local manifest in a temporary folder and checks versions
 (1.0.10 > 1.0.9), checksum and size rejection, install into `LAUNCHER_INSTALL_ROOT`, the record,
-update detection, format selection, manual-install detection, remove, the manifest's images and
+update detection, the factory presets (replaced on update, removed with the plugin, user presets kept), format
+selection, manual-install detection, remove, the manifest's images and
 demos and the asset cache. Optional: `LAUNCHER_TEST_REALZIP=web/downloads/<zip>` installs a real
-product (executable bits, codesign verdict equal to ditto's); `LAUNCHER_TEST_HTTPS=<url of a zip on
+product (executable bits, codesign verdict equal to ditto's, every factory preset of the zip in place and removed again); `LAUNCHER_TEST_HTTPS=<url of a zip on
 the site>` with `LAUNCHER_TEST_HTTPS_SHA=<sha256>` tests the HTTPS download, a 404 and the image
 cache against the live site.
 

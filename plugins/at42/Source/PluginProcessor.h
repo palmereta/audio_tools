@@ -1,6 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "../../../shared/tools/HostGap.h"
 #include "../../../shared/tools/SafeString.h"
 #include "../../../shared/tools/LatencyReporter.h"
 #include "../../../shared/tools/PresetTracker.h"
@@ -109,6 +110,7 @@ private:
     std::vector<dh::Cable42> cables;
     juce::SpinLock cableLock;
     bool wasBypassed = false;
+    dh::HostGap hostGap;          // REAPER no llama al plugin en bypass: al volver se sueltan las notas (X1)
     std::array<std::atomic<int8_t>, dh::jk42::kNumJacks> patchAtomic;
     double currentSr = 48000.0, freePpq = 0.0;
     int currentBlock = 512;

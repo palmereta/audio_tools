@@ -37,14 +37,20 @@ juce::AudioProcessorValueTreeState::ParameterLayout AT101VProcessor::createLayou
                 juce::ParameterID { pp.id, 1 }, panelName (i), juce::NormalisableRange<float> (0.0f, 1.0f), pp.def,
                 juce::AudioParameterFloatAttributes().withStringFromValueFunction ([i] (float v, int) { return formatPanel (i, v); })));
     }
+    // Ableton Live llena el panel del dispositivo solo con hasta 64 parámetros automatizables (QA en Live 2026-10-22,
+    // H2: el AT101V tenía 65). Oversampling y MIDI Out, ajustes de sesión, dejan de ofrecerse al host; siguen en la
+    // página de extensiones, en los presets y en las sesiones, con los mismos ids.
+    auto automatable = [] (const char* id) { return std::strcmp (id, "quality") != 0 && std::strcmp (id, "midi_out") != 0; };
     for (auto& e : extParams())
     {
         if (e.steps > 0)
-            layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { e.id, 1 }, e.name, extChoices (e), (int) e.def));
+            layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { e.id, 1 }, e.name, extChoices (e), (int) e.def,
+                juce::AudioParameterChoiceAttributes().withAutomatable (automatable (e.id))));
         else
             layout.add (std::make_unique<juce::AudioParameterFloat> (
                 juce::ParameterID { e.id, 1 }, e.name, juce::NormalisableRange<float> (e.lo, e.hi), e.def,
-                juce::AudioParameterFloatAttributes().withStringFromValueFunction ([&e] (float v, int) { return formatExt (e, v); })));
+                juce::AudioParameterFloatAttributes().withStringFromValueFunction ([&e] (float v, int) { return formatExt (e, v); })
+                                                     .withAutomatable (automatable (e.id))));
     }
     return layout;
 }
@@ -102,6 +108,20 @@ void AT101VProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     outL.assign ((size_t) currentBlock + 64, 0.0f);
     outR.assign ((size_t) currentBlock + 64, 0.0f);
     engineSeqVersion = -1;
+    freePpq = 0.0;                 // el reloj libre (secuencia y arpegiador con el host parado) arranca de cero
+    hostGap.prepare (sampleRate);
+    midiOutDelay.prepare(); midiOutDelay.setDelay (latencyNow());
+}
+
+// El host reinicia el plugin (AU Reset, VST3 setActive): vuelve al estado de una instancia nueva sin reservar memoria
+// (B3: dos AU nuevos no anulaban en REAPER).
+void AT101VProcessor::reset()
+{
+    engine.resetState();
+    for (int i = 0; i < kNumP; ++i) smoothed[(size_t) i] = panelRaw[(size_t) i]->load();
+    freePpq = 0.0;
+    hostGap.reset();
+    midiOutDelay.reset();
 }
 
 void AT101VProcessor::handleMidi (const juce::MidiMessage& m)
@@ -139,6 +159,17 @@ void AT101VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     wasBypassed = false;
     engine.numMidiEvents = 0;
     engine.curSample = 0;
+    // El host dejó de llamar (REAPER con el plugin en bypass) y vuelve: un note-off pudo perderse en el hueco. Se
+    // sueltan las voces, el arpegiador y la secuencia (sus notas de MIDI out se cierran) y las teclas en pantalla
+    // (QA en DAWs 2026-10-22, X1).
+    const bool gap = hostGap.check (getPlayHead(), n, isNonRealtime());
+    juce::MidiBuffer gapOffs;
+    if (gap)
+    {
+        engine.allNotesOff();
+        keyboardState.reset();
+        midiOutDelay.flushNoteOffs (gapOffs);
+    }
 
     const int wantOs = kOversampling[juce::jlimit (0, 2, (int) pQuality->load())];
     { if (wantOs != engine.oversampling()) engine.prepare (currentSr, currentBlock, wantOs); latency.request ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0)); }
@@ -208,6 +239,7 @@ void AT101VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
 
     const int midiMode = juce::jlimit (0, 2, (int) pMidiOut->load());
     juce::MidiBuffer outMidi;
+    if (gap) { const juce::MidiBuffer none; forwardThru (none, outMidi, n, false); }   // lo que pasó en Thru se cierra
     forwardThru (midi, outMidi, n, midiMode == 1);
     if (midiMode != 2 && synthOn.any())     // se salió de Synth Notes con notas abiertas: se cierran
     {
@@ -215,23 +247,36 @@ void AT101VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         synthOn.reset();
     }
 
+    // Perillas del panel: una rampa lineal desde el valor actual hasta el del host a lo largo del bloque, evaluada cada
+    // 16 muestras (antes se acercaban un 30 % cada 64 muestras y llegaban dentro del bloque: la automatización de
+    // Mixer Saw / Pulse latía a la frecuencia de bloque, QA en REAPER 2026-10-22, B1). Las de pasos saltan.
+    for (int i = 0; i < kNumP; ++i)
+    {
+        float target = panelRaw[(size_t) i]->load();
+        if (! dh::isFiniteF (target)) target = 0.0f;
+        rampFrom[(size_t) i] = panelParam (i).steps > 0 ? target : smoothed[(size_t) i];
+        rampTo[(size_t) i] = target;
+    }
+    // El motor ve los valores del principio del bloque antes de las notas de la muestra 0: si no, las notas de un
+    // primer bloque llegaban con los valores por defecto (con la secuencia apagada en vez de transponerla).
+    engine.p = rampFrom;
+    if (holdPedal.load()) engine.p[(size_t) P::hold] = 1.0f;
+
     auto it = midi.cbegin();
     int pos = 0;
     while (pos < n)
     {
-        int end = std::min (n, pos + 64);
+        int end = std::min (n, pos + 16);
         engine.curSample = 0;
         while (it != midi.cend() && (*it).samplePosition <= pos) { handleMidi ((*it).getMessage()); ++it; }
         if (it != midi.cend()) end = std::min (end, std::max (pos + 1, (*it).samplePosition));
         engine.bender = bender.load();      // por tramo: el pitch bend y la rueda actúan en su muestra, no un bloque tarde
         engine.lfoPush = lfoPush.load();
 
-        for (int i = 0; i < kNumP; ++i)
         {
-            const float target = panelRaw[(size_t) i]->load();
-            if (panelParam (i).steps > 0) smoothed[(size_t) i] = target;
-            else smoothed[(size_t) i] += (target - smoothed[(size_t) i]) * 0.3f;
-            if (! dh::isFiniteF (smoothed[(size_t) i])) smoothed[(size_t) i] = dh::isFiniteF (target) ? target : 0.0f;
+            const float t = (float) end / (float) n;
+            for (int i = 0; i < kNumP; ++i)
+                smoothed[(size_t) i] = rampFrom[(size_t) i] + (rampTo[(size_t) i] - rampFrom[(size_t) i]) * t;
         }
         if (holdPedal.load()) smoothed[(size_t) P::hold] = 1.0f;
         engine.p = smoothed;
@@ -241,7 +286,7 @@ void AT101VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         for (int e = 0; e < engine.numMidiEvents; ++e)
         {
             const auto& ev = engine.midiEvents[(size_t) e];
-            const int at = juce::jlimit (0, n - 1, pos + ev.pos);
+            const int at = juce::jlimit (0, n - 1, pos + ev.pos);     // ev.pos < end - pos: el límite no mueve nada
             if (ev.on && midiMode == 2) { outMidi.addEvent (juce::MidiMessage::noteOn (1, ev.note, (juce::uint8) juce::jlimit (1, 127, ev.vel)), at); synthOn.set ((size_t) ev.note); }
             else if (! ev.on && synthOn[(size_t) ev.note]) { outMidi.addEvent (juce::MidiMessage::noteOff (1, ev.note), at); synthOn.reset ((size_t) ev.note); }
         }
@@ -250,6 +295,11 @@ void AT101VProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     }
     while (it != midi.cend()) { handleMidi ((*it).getMessage()); ++it; }
     midi.swapWith (outMidi);
+    // El audio sale atrasado la latencia del sobremuestreo y el host lo compensa; el MIDI de salida (Thru, Synth Notes)
+    // no lo compensa nadie, así que sale atrasado lo mismo (antes, 27 muestras antes que su audio).
+    midiOutDelay.setDelay (latencyNow());
+    midiOutDelay.process (midi, n);
+    for (const auto md : gapOffs) midi.addEvent (md.getMessage(), 0);
     if (! midi.isEmpty()) midiOutFlash.store (true);
 
     // Carga desde el teclado → copia compartida.
@@ -297,6 +347,7 @@ void AT101VProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, ju
         engine.numMidiEvents = 0;
         for (int k = 0; k < 128; ++k) if (synthOn[(size_t) k]) outMidi.addEvent (juce::MidiMessage::noteOff (1, k), 0);
         synthOn.reset();
+        midiOutDelay.flushNoteOffs (outMidi);
         wasBypassed = true;
     }
     forwardThru (midi, outMidi, n, midiMode == 1);
@@ -478,6 +529,10 @@ void AT101VProcessor::randomizePanel()
 void AT101VProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
+    // Las propiedades propias se quitan y se vuelven a poner en el mismo orden: setStateInformation deja algunas en el
+    // árbol de parámetros y al guardar otra vez el orden de los atributos cambiaba (Live reescribía el set en cada
+    // guardado sin cambios, QA en Live 2026-10-22, H4).
+    for (auto id : { "presetName", "presetSnapshot", "program", "sequence", "keyTranspose", "midiMap" }) state.removeProperty (id, nullptr);
     state.setProperty ("presetName", currentPresetName.get(), nullptr);
     state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
     state.setProperty ("program", currentProgram, nullptr);

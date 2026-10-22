@@ -136,7 +136,12 @@ pressure and CC 74 act on the string that plays it. **Guitar** mode (one channel
 controllers send it): channel 1 is the first (highest) string; its bend range is a parameter.
 **MIDI out**: what the guitar played, every string expanded (strums, fingering, legato), optionally one channel
 per string. The Play page exports the current pattern over the chord being held (or C) and everything played
-since the last clear to `.mid`.
+since the last clear to `.mid`. The MIDI leaves delayed by the latency the host knows (`shared/tools/MidiOutDelay.h`; the host
+compensates only the audio, and in Live the notes were 55 samples early, DAW QA 2026-10-22 P1). REAPER does not
+call a bypassed plugin, so a note-off sent meanwhile was lost: `shared/tools/HostGap.h` releases everything when
+processing resumes after a gap (X1). Patterns follow the host's loop points: what the 60 ms look-ahead window passes
+beyond the loop end is scheduled from the loop start, and a jump without loop information drops the steps
+scheduled for the old position (G1).
 
 ## Tests
 
@@ -158,6 +163,11 @@ since the last clear to `.mid`.
 - T10 the FMV tonestack formula against the nodal solution of the circuit;
 - T11 cabinet: mic position and proximity, user IR resampling;
 - T12 CPU;
+- T15 host loop (REAPER G1): chord held, loop 0-2 s, note-offs at the end and note-ons at the start of every pass,
+  blocks 64/333/512/1024 cut at the loop end or crossing it, centred and on-the-beat strums: every pass strikes the
+  same notes at the same samples (before: a duplicated strum at the wrap); without loop information no stroke of
+  the first pass goes missing. athosttest `midisync` (first MIDI note vs audio: 1.0.0 -60 samples, 1.0.1 -5) and
+  `hostgap` (1.0.0 note stuck at -21 dB, 1.0.1 -240 dB).
 - T13 partitioned convolution: equal to the direct convolution (2.5 s IR, error 2e-6), no latency, IRs of 3 s;
 - T14 Auto level: Gain 3→9 within 6 dB with it, Gain 1→9 more than 8 dB louder without it, equal at Gain 5.
 

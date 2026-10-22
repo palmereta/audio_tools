@@ -6,6 +6,7 @@
 #include <JuceHeader.h>
 #include "../PluginProcessor.h"
 #include "Assets.h"
+#include "Showing.h"
 
 namespace dh {
 
@@ -165,6 +166,7 @@ private:
             if (std::abs (v) < 0.01f) { v = 0.0f; returning = false; }
             proc.wheel.store (v);
         }
+        if (! dh::reallyShowing (*this)) return;              // ventana escondida (Live): la rueda vuelve igual, sin repintar (H3)
         uint64_t h = 0;
         for (int k = 0; k < 37; ++k) if (isDown (k)) h |= (uint64_t) 1 << k;
         const float w = proc.wheel.load(); const bool m = proc.momentary.load() || proc.momentaryPedal.load();

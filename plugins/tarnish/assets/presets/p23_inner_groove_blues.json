@@ -9,7 +9,8 @@
   "groove": 100,
   "groove_follow": 0,
   "saturation": 60,
-  "crackle": 25
+  "crackle": 25,
+  "out": -1.5
  },
  "order": 23
 }

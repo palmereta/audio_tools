@@ -49,6 +49,8 @@ En Ableton Live:
 5. Hacé clic en **Preview sound**, en la barra superior de Orrery al lado de Play, hasta que diga `Preview sound: Off`. Así escuchás sólo tu sinte.
 6. Apretá Play en Orrery.
 
+En REAPER también usá el VST3: REAPER tampoco saca el MIDI que producen los plugins Audio Unit. Mandá la pista de Orrery a la de cada sinte (un envío con MIDI), o armá la pista del sinte con el MIDI de la pista de Orrery como entrada.
+
 Live junta todos los canales MIDI cuando rutea MIDI de una pista a otra, así que ese sinte recibe todos los carriles encendidos. Para un sinte que toca todo, perfecto. Para mandar carriles distintos a sintes distintos en Live, agregá más Orrery: la primera es la Main y cada Orrery que agregues después se vuelve un satélite que toca un carril de la Main. Los pasos están en Una Orrery, muchos sintes, al principio de Ruteo, puertos y sincronía. Un puerto virtual, o una Orrery por pista con Link, también sirven.
 
 ## Primer sonido
@@ -316,7 +318,7 @@ Mutate evita que un lazo se vuelva mecánico. En 5 % casi no cambia en toda una 
 
 ### Variaciones
 
-El número de **Variation** (1 a 9999) es la semilla de todas las elecciones al azar: acordes, notas, ritmos, mutaciones, la deriva de los controladores y el tiempo humanizado. Cada vez que Orrery arranca, arranca desde ese número, así que la misma variación con los mismos ajustes toca siempre las mismas notas, en macOS y en Windows, con cualquier tamaño de buffer y frecuencia de muestreo. Si cambiás ajustes mientras toca, la música cambia desde ahí.
+El número de **Variation** (1 a 9999) es la semilla de todas las elecciones al azar: acordes, notas, ritmos, mutaciones, la deriva de los controladores y el tiempo humanizado. Cada vez que Orrery arranca, arranca desde ese número, así que la misma variación con los mismos ajustes toca siempre las mismas notas, en macOS y en Windows, con cualquier tamaño de buffer y frecuencia de muestreo. Con Clock en Host, arrancar el transporte del DAW es uno de esos arranques: desde la misma posición de la canción salen las mismas notas al reproducir y en un render offline, toque lo que haya tocado Orrery antes con el transporte frenado. Si cambiás ajustes mientras toca, la música cambia desde ahí.
 
 Cuando una variación te suena bien, anotá el número o guardá un preset; para algo nuevo con el mismo carácter, apretá **New variation**.
 
@@ -356,7 +358,7 @@ Las 16 escalas son Major (Ionian), Natural minor, Dorian, Phrygian, Lydian, Mixo
 - **Drone**: el centro casi no se mueve. La mayoría de los cambios mantiene el mismo acorde; cada tanto va al cuarto o al quinto grado y vuelve.
 - **Two chords**: alterna entre la tónica y el acorde del sexto grado (el cuarto grado en las escalas de cinco notas).
 
-**Clock**: en `Host`, Orrery sigue el tempo y la posición del DAW mientras corre el transporte, y su propio Tempo no cuenta. En `Free` usa siempre su propio Tempo. **Play with host stopped** decide qué pasa con el transporte del DAW frenado: On deja a Orrery tocando a su propio tempo, Off la hace esperar al transporte. Cuando el transporte del DAW salta (movés la posición de reproducción), Orrery suelta sus notas y sigue desde la posición nueva.
+**Clock**: en `Host`, Orrery sigue el tempo y la posición del DAW mientras corre el transporte, y su propio Tempo no cuenta. En `Free` usa siempre su propio Tempo. Con Clock en `Host`, arrancar el transporte del DAW es lo mismo que apretar Play, y frenarlo lo mismo que Stop; el botón Play lo muestra. Cada arranque empieza una sesión nueva en esa posición de la canción (en la próxima semicorchea si la posición cae entre dos); un pre-roll o una cuenta previa antes del compás 1 espera al compás 1. **Play with host stopped** decide qué hace Play con el transporte del DAW frenado: On toca al tempo propio de Orrery hasta que arranque el transporte (entonces Orrery vuelve a empezar desde la posición de la canción), Off espera al transporte. Cuando el transporte del DAW salta (movés la posición de reproducción o da la vuelta un loop), Orrery suelta sus notas y sigue desde la posición nueva.
 
 **Humanize** adelanta o atrasa un poco cada nota, al azar, hasta más o menos los milisegundos que marques.
 
@@ -382,7 +384,7 @@ Se explican en la sección siguiente. **Level** marca la velocity general de tod
 
 **Fade in** sube la música durante los primeros segundos; **Fade out** la baja durante los últimos segundos antes de que termine la sesión (así que Fade out sólo funciona si Session tiene duración). Los fades actúan sobre la velocity: las notas se vuelven más suaves, hasta un tercio de su velocity normal al principio o al final de todo. Con **Fade with CC7** encendido, Orrery además mueve el volumen de canal (MIDI CC7) de cada carril entre 0 y 100, así también se apagan las notas sostenidas y la sesión termina en silencio. Cuando Orrery frena, devuelve el CC7 a 100 y centra el pitch bend en los canales que movió.
 
-El reloj de la sesión cuenta sólo mientras Orrery toca: Stop lo pausa y Play lo retoma. Cargar un preset arranca una sesión nueva desde cero, con su fade in. Cuando una sesión terminó, apretá Stop y después Play para empezar otra.
+El reloj de la sesión cuenta sólo mientras Orrery toca: Stop lo pausa y Play lo retoma. Con Clock en Host, arrancar el transporte del DAW empieza una sesión nueva desde cero; hace fade in sólo cuando el transporte arranca en el comienzo de la canción, así que parar y seguir desde el medio (tocando en vivo) vuelve a nivel pleno. Cargar un preset arranca una sesión nueva desde cero, con su fade in. Cuando una sesión terminó, apretá Stop y después Play para empezar otra.
 
 > Si tu sinte usa el CC7 para otra cosa, o lo ignora, apagá Fade with CC7. Los fades quedan entonces sólo en la velocity.
 
@@ -464,7 +466,9 @@ El archivo tiene una pista por canal MIDI (o sea, una por carril cuando cada car
 
 Orrery trae 21 presets de fábrica, tres por clima. Los presets cambian los ajustes musicales: armonía, sesión y todos los carriles. No cambian Play, Clock, Play with host stopped, Level, los ajustes del sonido de prueba, los de afinación, MIDI clock out, Link, el rol, los carriles del satélite, Skip satellite lanes, Lanes as MIDI ports ni los puertos directos, así que cambiar de preset nunca rompe tu ruteo. Los carriles que un preset no usa quedan apagados.
 
-Una Orrery nueva arranca con `Init`: drone, pad, melodía (en lazo de 17 pulsos), nube y bajo encendidos, en D dórico a 60 BPM.
+Una Orrery nueva arranca con el primer preset, First Light (lo que los hosts muestran como su primer programa): drone, pad, melodía en lazo, nube con ecos y bajo, en D dórico.
+
+Ableton Live no muestra los presets de fábrica de los plugins (ignora las listas de programas de VST3); usá el menú de presets de Orrery, o el navegador: los presets de fábrica aparecen en el navegador de Live en Plug-Ins → Audio Tools Orrery (desplegá el plugin), instalados por el launcher o copiando la carpeta Presets del zip.
 
 | Preset | Clima | Tonalidad y escala | Qué suena |
 |---|---|---|---|
@@ -507,13 +511,15 @@ En Ableton Live una pista de sinte que toma su MIDI de otra pista recibe todos s
 
 Lo que eligió Auto se guarda con el proyecto: al abrir el set otra vez la Main sigue siendo la Main y cada satélite toca el mismo carril, en el orden que el host las cargue. Los proyectos guardados con Orrery 1.0.4 o anterior no tienen rol: abren como Independent, con el Link que tenían, y suenan como antes. Los presets nunca cambian el rol, los carriles del satélite, Skip satellite lanes ni los puertos MIDI.
 
+Una copia de una Orrery no hereda su rol: cuando duplicás una pista en Live (o copiás la pista o el efecto en REAPER), la copia se vuelve un satélite en el próximo carril libre, como una Orrery nueva, aunque la original fuera la Main. La copia de una Orrery Independent sigue siendo Independent.
+
 ### La página del satélite
 
 ![Un satélite: qué carril de la Main toca, su actividad y los botones de los carriles.](img/satellite.jpg)
 
 Un satélite muestra una sola página en lugar del editor completo:
 
-- **Satellite of** y el nombre de la pista de la Main (cuando el host les dice a los plugins el nombre de su pista), y qué carril toca, con el rol y el canal MIDI del carril.
+- **Satellite of** y el nombre de la pista de la Main (cuando el host les dice a los plugins el nombre de su pista), y qué carril toca, con el rol y el canal MIDI del carril. Ableton Live les dice a los plugins el nombre de una pista sólo cuando la renombrás: hasta entonces el satélite dice `Satellite of the Main Orrery` y la Main nombra a sus satélites por carril (`1 Drone, 2 Pad`). Renombrá las pistas para ver sus nombres.
 - El estado: en sincronía con la Main, sincronizando, o esperando una Main.
 - **Lane**: los ocho carriles de la Main con sus roles. Un clic en uno lo toca en lugar del actual; Shift-clic (o Cmd-clic) agrega o quita un carril, así un satélite puede tocar varios. Un carril apagado en la Main muestra `off` y queda en silencio.
 - **Activity**: cuánto toca cada uno de sus carriles, y el acorde actual de la Main. El orrery de la derecha muestra sólo sus carriles.
@@ -544,6 +550,7 @@ A tener en cuenta:
 - Los satélites y su Main tienen que estar en la misma aplicación host. No se conectan entre aplicaciones ni entre computadoras.
 - Un satélite toca sólo mientras su Main se procesa. Poner la Main en bypass o desactivarla calla a sus satélites, que sueltan sus notas y siguen cuando la Main vuelve.
 - Los cambios de ajustes en una Main se aplican un buffer más tarde que en una Orrery Independent (unos 10 ms con 512 muestras).
+- En REAPER con el proceso anticipado de efectos (anticipative FX, lo normal), las pistas no se procesan a la par: una puede ir varios buffers adelante de otra, sobre todo en un render offline. Con el transporte en marcha, un satélite se ubica por la posición de la canción, no por el orden en que se procesan las pistas: copia el estado de la Main y se pone al día hasta su propia posición, y cuando va adelante de la Main supone que los ajustes de la Main siguen igual y lo comprueba cuando la Main llega. Un ajuste cambiado justo en ese momento lo hace resincronizar. Nunca manda notas de largo cero.
 - Con el transporte del host frenado, en un host que no les da a los plugins la hora de cada ciclo, y si el host procesa siempre la pista de un satélite más de medio buffer después que la de la Main, un satélite puede quedar a un buffer de la Main. Arrancar el transporte, o usar Clock en Host con el transporte en marcha, lo deja exacto.
 
 ## Ruteo, puertos y sincronía
@@ -632,7 +639,7 @@ Para darle movimiento, poné CC number del carril 2 en 74, CC shape en Sine y CC
 
 ### Lazos de cinta a lo Eno
 
-1. Cargá Tape Loops (Ambient), o arrancá desde Init.
+1. Cargá Tape Loops (Ambient), o arrancá desde First Light.
 2. Poné cuatro o cinco carriles en Melody o Cloud con densidad baja (10 a 20 %) y Loop encendido.
 3. Dales largos de lazo primos y bien separados: 17, 23, 29, 31.
 4. Dejá Mutate bajo (alrededor de 5 %) para que cada lazo conserve su identidad.
@@ -707,7 +714,11 @@ Anotá también el número de Variation: con los mismos ajustes, Orrery va a vol
 
 **Los puertos de Orrery no aparecen en Live.** Primero encendé Publish lanes as MIDI ports; después, en Settings de Live, Link, Tempo & MIDI, encendé Track en las entradas `Orrery`. En Windows no hay puertos virtuales: usá loopMIDI.
 
-**En Ableton Live no llega MIDI a las otras pistas.** Estás usando el Audio Unit. Cargá el VST3.
+**En Ableton Live (o REAPER) no llega MIDI a las otras pistas.** Estás usando el Audio Unit. Cargá el VST3.
+
+**Orrery arranca cuando aprieto Play en el DAW.** Con Clock en Host, arrancar el transporte es Play y frenarlo es Stop. Poné Clock en Free si Orrery tiene que ignorar el transporte.
+
+**Una pista duplicada toca dos veces el mismo carril.** Eso pasaba con Orrery 1.0.5. Desde 1.0.6 una copia se vuelve un satélite en el próximo carril libre; si un set guardado con 1.0.5 tiene dos satélites en un carril, hacé clic en otro carril en uno de ellos.
 
 **Un puerto no aparece en la lista.** Hacé clic en Rescan ports. En macOS, fijate que IAC Driver tenga tildado "El dispositivo está conectado"; en Windows, que loopMIDI esté abierto.
 
@@ -750,8 +761,8 @@ Medido sobre el motor:
 | Lazo de 17 pulsos | 84 de 84 notas se repiten 17 s después |
 | Modo suave | Velocity como mucho 92, nota más aguda 86 |
 | Seguidora del vínculo | 56 notas, ninguna fuera del acorde de la líder |
-| Misma variación | Mismas notas en macOS y Windows, con buffers de 64 a 1024 muestras y a 44,1, 48 y 96 kHz |
-| Satélites | Exactamente los mensajes de la Main para su carril, con buffers de 64 a 1024 muestras, en cualquier orden de proceso y en hilos separados |
+| Misma variación | Mismas notas en macOS y Windows, con buffers de 64 a 1024 muestras y a 44,1, 48 y 96 kHz; con Clock en Host, las mismas notas desde que arranca el transporte tras cualquier espera con el transporte frenado, con pre-roll, offline o en tiempo real |
+| Satélites | Exactamente los mensajes de la Main para su carril, con buffers de 64 a 1024 muestras, en cualquier orden de proceso, en hilos separados y con pistas hasta 16 buffers adelante o atrás (anticipative FX de REAPER); sin notas de largo cero |
 | Carriles como puertos MIDI | Cada nota de cada carril llega a su puerto; dos Orrery reciben nombres distintos (macOS, Linux) |
 
 CPU, en porcentaje de un núcleo a 48 kHz:

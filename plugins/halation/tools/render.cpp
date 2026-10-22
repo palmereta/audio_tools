@@ -2,7 +2,7 @@
 //   halationrender in.wav out.wav --preset "Cathedral of Glass" [--tail 8] [--bpm 100] [--set id=valor ...]
 //                  [--at segundos id=valor ...]
 // --at cambia un parámetro en ese momento (por ejemplo prender Freeze a mitad del clip: --at 6 on_freeze=1).
-// Imprime la CPU (porcentaje de un núcleo). Sin --preset usa los valores por defecto.
+// Imprime la CPU (porcentaje de un núcleo). Sin --preset, el preset 0 (como una instancia nueva).
 #include "PluginProcessor.h"
 
 class HostClock : public juce::AudioPlayHead

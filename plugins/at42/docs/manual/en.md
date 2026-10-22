@@ -1,6 +1,6 @@
 # AT42 user manual
 
-AT42 is a free, open-source ambient drone machine for macOS and Windows, as a VST3 and Audio Unit instrument and as a standalone app. It recreates the Elta Music SOLAR 42 family, taking the latest model (the 42N) as its starting point, and adds what the hardware lacks: MIDI, host sync, presets, a stereo width control and a Settings page. This manual covers every control, how the voices and the patch bay work, and how to get from the silent Init patch to a full drone.
+AT42 is a free, open-source ambient drone machine for macOS and Windows, as a VST3 and Audio Unit instrument and as a standalone app. It recreates the Elta Music SOLAR 42 family, taking the latest model (the 42N) as its starting point, and adds what the hardware lacks: MIDI, host sync, presets, a stereo width control and a Settings page. This manual covers every control, how the voices and the patch bay work, and how to get from the Init patch to a full drone.
 
 ## What it is
 
@@ -52,9 +52,11 @@ Insert AT42 on an instrument or MIDI track. It receives notes, pitch bend and co
 
 Drag the window's corner to resize it, from half to 1.4 times its full size, with fixed proportions.
 
+In Ableton Live, the factory presets appear in Live's browser under Plug-Ins → Audio Tools AT42 (expand the plugin), installed by the launcher or from the zip's Presets folder. Live doesn't show a plugin's own program list; the preset menu in the editor has them all. AT42 has 230 parameters, more than the 64 for which Live fills the device panel by itself: click Configure in the device title bar and touch the controls you want there (Live automates up to 128 at once). Piezo Percussion needs audio at the input (a side-chain in Live).
+
 ### Your first sound
 
-AT42 opens with the Init preset, and **Init is silent by design**: drone voices 1 and 2 are up in the mixer, but their envelopes stay closed until something opens them, just like the hardware with no key pressed.
+AT42 opens with the Init preset. Play a MIDI note (or a plate of the touch controller) and VCO A answers through its normalled path, keyboard pitch and envelope A, with no cables. Drone voices 1 and 2 are up in the mixer too, but their envelopes stay closed until something opens them, just like the hardware with no key pressed.
 
 1. Click and hold drone key 1, at the bottom right under DRONE KEYS. Drone 1 sounds while you hold it and fades when you let go. MIDI note C1 does the same.
 2. To keep it sounding, click the **hold** button of DRONE 1 (the light grey button at the left of the voice).
@@ -363,7 +365,7 @@ It has its own mixer channel, PREAMP, and feeds the envelope follower.
 
 ![The touch keyboard and the joystick with the Arp Constellation preset, one plate pressed.](img/keyboard.jpg)
 
-The TOUCH SENSITIVE CONTROLLER makes control voltages, not sound: pitch, gates and pressure, which by default drive both VCOs and their envelopes. In Init the VCO channels are at zero, so raise VCO A or B in the mixer to hear it.
+The TOUCH SENSITIVE CONTROLLER makes control voltages, not sound: pitch, gates and pressure, which by default drive both VCOs and their envelopes. In Init VCO A is up in the mixer, so the keys play it; raise VCO B to hear the second oscillator.
 
 - Plates: click to play, drag across to slide. Lower on the plate means more pressure. The six left plates are the left half, the six right plates the right half.
 - The two red buttons: transpose one octave down or up, from -2 to +4.
@@ -652,7 +654,7 @@ Under SYNC, LFO A, LFO B and the pulser can follow your DAW. With Host, the rate
 
 ## Tips and troubleshooting
 
-- **Init is silent.** By design. Press drone key 1 or 2, play C1 or C#1, or turn on hold for DRONE 1 or 2.
+- **Init's drones are silent.** By design: their envelopes wait for a key. Press drone key 1 or 2, play C1 or C#1, or turn on hold for DRONE 1 or 2. Other MIDI notes play VCO A.
 - **The plates or MIDI notes are silent.** The keyboard only sends voltages. Raise VCO A or B in the mixer and check that no cable has taken over the envelope's gate.
 - **MIDI notes C1 to F1 don't play the keyboard.** They play the drone keys; set MIDI Drone Keys to Off.
 - **The drone pitch moves with the mouse.** The pointer shades the orbs, and MOD oscillators follow the light. Move away from the orb or turn MOD off.

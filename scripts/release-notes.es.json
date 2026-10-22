@@ -1,0 +1,383 @@
+{
+  "_comment": "Lo que cambió en cada versión, en castellano: las mismas claves que release-notes.json. Lo lee scripts/build-web.py para /es/changelog/.",
+
+  "at20v-v1.0.7": [
+    "Poner AT20V en bypass en REAPER mientras suena una nota ya no la deja colgada cuando termina el bypass.",
+    "La salida MIDI ahora sale con la misma demora que el audio de AT20V (su latencia), así otro instrumento tocado por MIDI From llega a tiempo en lugar de 0,6 ms antes.",
+    "AT20V FX lista sólo los 21 presets que funcionan en una pista de audio (efectos, vocoder, sinte de guitarra, autónomos), empezando por Filter FX; los que necesitan entrada de audio dicen \"(Audio In)\".",
+    "Voice, Steam Locomotive y MS Hi-Hat suenan mucho más fuerte, y 17 presets que tocaban 0 dBFS (Wind Chimes, Endless Drift, Bubbling Swamp, Aurora...) dejan margen.",
+    "Cinco ajustes (Oversampling, MIDI Out, Bend Range, Vocoder Bands, Note Priority) ya no son automatizables, así Ableton Live llena el panel del dispositivo; la barra de estado muestra la versión real; un editor oculto ya no se redibuja. Manual: los presets en el navegador de Live y el VST3 para la salida MIDI."
+  ],
+  "at20v-v1.0.6": [
+    "La rueda de pitch vuelve sola al centro al soltarla (con Alt queda donde la dejás) y gira para el lado correcto.",
+    "Shift y arrastrar desde una salida que ya tiene cable agrega un segundo cable.",
+    "La burbuja de valor ya no se congela mientras arrastrás una perilla; los jacks se iluminan apenas empieza un cable.",
+    "La barra inferior muestra la cantidad real de notas con unísono; las voces que exceden la cantidad elegida terminan su release en lugar de quedar colgadas.",
+    "El pedal de sustain y el interruptor momentáneo son independientes; la posición de la rueda se guarda con la sesión.",
+    "La latencia del sobremuestreo se informa al host; AT20V FX en bypass deja pasar el sonido seco a tiempo.",
+    "El nombre del preset muestra un * cuando cambiás algo después de cargarlo."
+  ],
+  "at20v-v1.0.5": [
+    "La rueda de control gira sobre su propio eje en pantalla (antes se volcaba de costado) y vuelve sola al centro al soltarla; con Alt queda donde la dejás."
+  ],
+  "at20v-v1.0.4": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools AT20V\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo.",
+    "AT20V FX funciona en una pista de audio sin MIDI: presets de efecto nuevos (Filter FX, Auto-Wah FX, Screaming Filter FX, Envelope Gate FX) pasan la entrada por los filtros y dejan que ella misma abra el amplificador, y AT20V FX arranca con Filter FX.",
+    "Las perillas responden al arrastre vertical y al horizontal."
+  ],
+  "at20v-v1.0.3": [
+    "Un manual de uso completo con capturas, en inglés y en castellano, dentro del plugin (botón Manual) y en la web."
+  ],
+  "at20v-v1.0.2": [
+    "Cambiar las voces o el unísono con teclas apretadas ya no deja voces trabadas ni cierra el plugin; cambiar la calidad ya no deja notas colgadas.",
+    "Un patch con realimentación (SIGNAL OUT a EXT IN) satura en lugar de quedar mudo para siempre.",
+    "El hold del EG2 sigue a la perilla mientras suena; la rueda de modulación y el pitch bend se suman en lugar de pisarse; la cola dura hasta 8 s.",
+    "Las notas que se sueltan con el plugin en bypass ya no quedan colgadas; un estado guardado roto o incompleto carga con los valores por defecto en lugar de fallar.",
+    "Desapareció un clic aislado que aparecía de vez en cuando en el delay y la reverb."
+  ],
+  "at20v-v1.0.1": [
+    "Usa mucho menos CPU, sobre todo en Windows, donde corría entre tres y cuatro veces más lento que en una Mac.",
+    "El editor redibuja sólo lo que cambia y usa cerca de un tercio menos de CPU."
+  ],
+  "at20v-v1.0.0": [
+    "Primera versión: un sintetizador semimodular basado en el Korg MS-20 de 1978, con su patchera completa, más AT20V FX para pasar audio por él."
+  ],
+
+  "at101v-v1.0.6": [
+    "Automatizar Mixer Saw, Mixer Pulse y las demás perillas es suave: se acabó el serrucho al ritmo de los bloques del host.",
+    "Los renders son reproducibles: una instancia que ya sonó, o un Audio Unit después de un reset, suena exactamente igual que una nueva; el secuenciador con reloj del host y su salida MIDI son idénticos con cualquier tamaño de buffer.",
+    "Poner el plugin en bypass en REAPER con una nota sonando ya no la deja colgada; la salida MIDI sale con la misma demora que el audio (27 muestras) en lugar de antes.",
+    "Oversampling y MIDI Out ya no son automatizables, así Ableton Live llena el panel del dispositivo; los proyectos guardados ya no cambian en cada guardado; un editor oculto ya no se redibuja.",
+    "Manual: los presets en el navegador de Live y el VST3 para la salida MIDI en Live y REAPER."
+  ],
+  "at101v-v1.0.5": [
+    "Los movimientos de perillas y faders quedan grabados como un solo gesto en la automatización del host.",
+    "MIDI Learn ignora los mensajes de modo de canal y el pedal de sustain; el botón de pánico va primero.",
+    "La escucha en la grilla del secuenciador sigue a LOAD y KEY TRANSPOSE; Shift y arrastrar ya no pinta pasos.",
+    "La latencia del sobremuestreo se informa al host; el nombre del preset muestra un * cuando se edita."
+  ],
+  "at101v-v1.0.4": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools AT101V\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "at101v-v1.0.3": [
+    "Un manual de uso completo con capturas, en inglés y en castellano, dentro del plugin (botón Manual) y en la web."
+  ],
+  "at101v-v1.0.2": [
+    "La salida MIDI ya no deja notas colgadas al transponer, cambiar de modo o apretar pánico; el arpegiador nunca pasa de la nota 127 y cierra sus notas cuando se prende sobre un acorde sostenido.",
+    "Mono, poly, voces y unísono se pueden cambiar con teclas apretadas; volver a pisar el sustain funciona; el arpegiador con reloj del host espera la grilla.",
+    "MIDI Learn ya no toma el pedal de sustain ni los mensajes de modo de canal; el pitch bend y la modulación caen justo en su evento; la deriva ya no depende del tamaño del buffer.",
+    "Las notas que se sueltan con el plugin en bypass ya no quedan colgadas; un estado guardado roto o incompleto carga con los valores por defecto en lugar de fallar.",
+    "Desapareció un clic aislado que aparecía de vez en cuando en los efectos."
+  ],
+  "at101v-v1.0.1": [
+    "Usa mucho menos CPU, sobre todo en Windows; el editor redibuja sólo lo que cambia.",
+    "En poly con unísono, el primer acorde en las voces altas ya no arranca con un golpe fuerte."
+  ],
+  "at101v-v1.0.0": [
+    "Primera versión: un sintetizador monofónico basado en el Roland SH-101 de 1982, con arpegiador, secuenciador visual, polifonía, MIDI Learn y tres colores de panel."
+  ],
+
+  "at42-v1.0.6": [
+    "Init se toca desde el teclado: el VCO A responde a las notas MIDI sin cables (los drones siguen esperando sus teclas).",
+    "Poner el plugin en bypass en REAPER con una nota sonando ya no la deja colgada.",
+    "Una envolvente ya no queda abierta para siempre si se apaga LOOP sin ninguna tecla apretada.",
+    "Los proyectos guardados ya no cambian en cada guardado; un editor oculto ya no se redibuja.",
+    "Manual: los presets en el navegador de Live, Configure para el panel del dispositivo en Live, y Piezo Percussion necesita entrada de audio.",
+    "Una instancia que ya sonó suena exactamente igual que una nueva cuando el host la vuelve a preparar (antes de un render offline)."
+  ],
+  "at42-v1.0.5": [
+    "Los cables se guardan de forma segura mientras patcheás; la rueda MOD (CC1) arranca centrada.",
+    "Botones, llaves y el joystick graban gestos de automatización limpios.",
+    "La burbuja de afinación muestra la nota cromática; la sombra del orbe ya no queda después de cerrarlo.",
+    "La latencia del sobremuestreo se informa al host; el nombre del preset muestra un * cuando se edita."
+  ],
+  "at42-v1.0.4": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools AT42\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "at42-v1.0.3": [
+    "Un manual de uso completo con capturas, en inglés y en castellano, dentro del plugin (botón Manual) y en la web."
+  ],
+  "at42-v1.0.2": [
+    "Las teclas de drone tocadas por MIDI se sueltan con pánico y al cambiar de modo en medio de una nota; apagar el HOLD del arpegiador borra las notas retenidas.",
+    "Las envolventes largas mantienen sus tiempos a frecuencias de muestreo altas; el gate con reloj del host sigue el tempo del host; parar el transporte ya no hace saltar los LFO.",
+    "El buffer reverso de Ochre dura 4 s; una entrada de audio rota ya no frena el seguidor de envolvente; la secuencia de teclas se conserva al abrir una sesión.",
+    "Las notas que se sueltan con el plugin en bypass ya no quedan colgadas; un estado guardado roto o incompleto carga con los valores por defecto en lugar de fallar.",
+    "Desapareció un clic aislado que aparecía de vez en cuando en los efectos."
+  ],
+  "at42-v1.0.1": [
+    "Usa mucho menos CPU, sobre todo en Windows; el editor redibuja sólo lo que cambia y usa casi la mitad de CPU.",
+    "Las entradas del mezclador y la salida tienen acople de alterna como el equipo original: presets como Microtonal Fog ya no arrastran un corrimiento de continua."
+  ],
+  "at42-v1.0.0": [
+    "Primera versión: una máquina de drones ambient basada en el Elta Music SOLAR 42, con sus drones controlados por luz, osciladores, filtros, efector, teclado táctil y patchera de 62 jacks."
+  ],
+
+  "at700-v1.0.5": [
+    "Poner el plugin en bypass en REAPER con una nota sonando (o sostenida por el pedal) ya no la deja colgada.",
+    "Los proyectos guardados ya no cambian en cada guardado; un editor oculto ya no se redibuja.",
+    "Manual: los presets en el navegador de Live y Configure para el panel del dispositivo en Live.",
+    "Una instancia que ya sonó suena exactamente igual que una nueva cuando el host la vuelve a preparar (antes de un render offline)."
+  ],
+  "at700-v1.0.4": [
+    "El secuenciador ya no salta al paso 1 con buffers grandes del host, y CLOCK OUT ya no queda arriba con reloj externo.",
+    "Los cables de múltiple a múltiple ya no salen invertidos; la palanca BENDER se mueve en pantalla mientras la arrastrás.",
+    "RANDOM ya no frena y rearranca el secuenciador; el pedal de sustain (CC64) funciona.",
+    "La reverb de resorte suena igual a cualquier frecuencia de muestreo; las lecturas de Clock Rate, ADSR y VCO LO muestran los valores correctos.",
+    "La latencia del sobremuestreo se informa al host; el nombre del preset muestra un * cuando se edita."
+  ],
+  "at700-v1.0.3": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools AT700\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "at700-v1.0.2": [
+    "Un manual de uso completo con capturas, en inglés y en castellano, dentro del plugin (botón Manual) y en la web."
+  ],
+  "at700-v1.0.1": [
+    "Los patches con realimentación (OUT a PAN IN, lazos de múltiple y de phaser) quedan acotados y se recuperan en lugar de convertirse en un nivel de continua fijo.",
+    "El secuenciador con reloj del host ya no se corre (unos 100 ms cada 10 minutos) y se realinea en los loops; Follow Transport funciona con el reloj interno; los presets de secuencia arrancan apenas cargan.",
+    "El pitch bend vuelve a cero al desactivarlo; el CV del teclado se detiene en 0 V.",
+    "Las notas que se sueltan con el plugin en bypass ya no quedan colgadas; un estado guardado roto o incompleto carga con los valores por defecto en lugar de fallar."
+  ],
+  "at700-v1.0.0": [
+    "Primera versión: un sintetizador modular basado en el Roland System-700 de 1976: la consola principal de 17 módulos, el teclado duofónico y el secuenciador por pasos, con 137 jacks y hasta 8 voces."
+  ],
+
+  "atfs1-v1.0.5": [
+    "Los renders son reproducibles: una instancia que ya sonó suena exactamente igual que una nueva.",
+    "Un valor que escribe el host (Cutoff 0.6739) vuelve exacto al reabrir el proyecto en lugar de redondeado.",
+    "Poner el plugin en bypass en REAPER con una nota sonando ya no la deja colgada; un editor oculto ya no se redibuja.",
+    "Manual: los presets en el navegador de Live.",
+    "El sonido ya no depende de cómo el host corta sus bloques de audio (Audio Unit y VST3), y Release actúa al soltar la tecla, así que bajarlo acorta también las notas ya sostenidas.",
+    "Los 12 presets que llegaban a 0 dBFS (Talking Formants, Shoo Bee Doo, Robot Voice, Space Talk...) dejan cerca de 1,5 dB de margen."
+  ],
+  "atfs1-v1.0.4": [
+    "Una voz reutilizada siempre arranca con su ataque; All Notes Off suelta el pedal y las teclas MIDI sostenidas.",
+    "Escribir un valor (Algorithm, Fine) pone el número correcto; Fine se detiene en 99.",
+    "Hacer clic en la secuencia de formantes ya no fuerza Round; One-way y Round funcionan con un solo punto.",
+    "Los indicadores del LCD y el diagrama de efectos siguen a la automatización; los efectos suenan igual a cualquier frecuencia de muestreo.",
+    "La rueda del mouse gira las perillas; la línea de ayuda sigue al control que está bajo el mouse."
+  ],
+  "atfs1-v1.0.3": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools ATFS1\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "atfs1-v1.0.2": [
+    "Un manual de uso completo con capturas, en inglés y en castellano, dentro del plugin (botón Manual) y en la web."
+  ],
+  "atfs1-v1.0.1": [
+    "Se arreglaron cierres al analizar archivos WAV muy cortos a 96 o 192 kHz y con niveles de operador fuera de rango, y fallas cuando las voces y las secuencias de formantes cambian mientras suena.",
+    "Cambiar entre mono y poly con teclas apretadas, los eventos justo al final de un bloque y la importación de sistema exclusivo desde archivos .mid funcionan; el sistema exclusivo roto se rechaza.",
+    "Las secuencias de formantes van hasta 1000 % de velocidad; la cola dura hasta 12 s.",
+    "Las notas que se sueltan con el plugin en bypass ya no quedan colgadas; un estado guardado roto o incompleto carga con los valores por defecto en lugar de fallar."
+  ],
+  "atfs1-v1.0.0": [
+    "Primera versión: un sintetizador de formantes y FM basado en el Yamaha FS1R de 1998, con secuencias de formantes que lo hacen hablar y cantar."
+  ],
+
+  "atmd-v1.0.3": [
+    "Automatizar Cutoff y Emphasis es suave: se acabó el serrucho al ritmo de los bloques del host.",
+    "Poner el plugin en bypass en REAPER con una nota sonando ya no la deja colgada; los renders son reproducibles después de volver a preparar el plugin.",
+    "Oversampling, A-440 y Phones Volume ya no son automatizables, así Ableton Live llena el panel del dispositivo; los proyectos guardados ya no cambian después de la primera recarga; un editor oculto ya no se redibuja.",
+    "Manual: los presets en el navegador de Live."
+  ],
+  "atmd-v1.0.2": [
+    "Cambiar las voces o el unísono con teclas apretadas ya no deja notas colgadas.",
+    "El teclado de la computadora suelta la nota correcta en cualquier octava; la rueda MOD se guarda con la sesión y en los presets del usuario.",
+    "El doble clic vuelve a poner una perilla en su valor por defecto aunque se haya movido apenas; OSC 3 FREQ se lee bien con CONTROL apagado; la lámpara OVERLOAD atrapa todos los picos.",
+    "El delay y la reverb arrancan limpios; el bypass conserva el teclado en pantalla.",
+    "La latencia del sobremuestreo se informa al host; el nombre del preset muestra un * cuando se edita."
+  ],
+  "atmd-v1.0.1": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools ATMD\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "atmd-v1.0.0": [
+    "Primera versión: un sintetizador monofónico basado en el Moog Minimoog Model D, con su filtro escalera de transistores, un panel en 3D y una página de ajustes."
+  ],
+
+  "at303-v1.0.3": [
+    "Un AT303 nuevo es First Squelch, como dice la lista de programas del host, y elegir el primer programa funciona.",
+    "Overdriven Ladder ya no tiene corrimiento de continua ni golpea 0 dBFS; los cuatro presets Driven quedan cerca de los demás.",
+    "Poner el plugin en bypass en REAPER con una nota sonando ya no la deja colgada; un editor oculto ya no se redibuja.",
+    "Manual: los presets en el navegador de Live."
+  ],
+  "at303-v1.0.2": [
+    "Un slide hacia un gate cerrado ya no silencia la nota siguiente; cambiar el largo o el patrón ya no saltea pasos.",
+    "Los tresillos ya no dejan un hueco de 5 pasos; los saltos del host y las posiciones negativas ya no pierden un paso ni traban el gate.",
+    "Mutate siempre cambia algo; Accent y Slide se editan sólo en el modo Pitch; Transpose y la velocidad del acento se mueven en pasos enteros.",
+    "El tempo funciona con el host parado; Quality cambia sin cortar la nota; la latencia del sobremuestreo se informa."
+  ],
+  "at303-v1.0.1": [
+    "Las letras del panel se dibujan nítidas a cualquier tamaño: títulos de sección, nombres de perillas más grandes que dicen qué hace cada una, botones rotulados en su cara y los nombres de las notas en las teclas.",
+    "El plugin ahora aparece en los hosts como \"Audio Tools AT303\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "at303-v1.0.0": [
+    "Primera versión: un sintetizador de líneas de bajo con su propio secuenciador: filtro escalera de diodos, acento y slide, un generador de patrones ácidos, 16 modificaciones y una vista Inspect."
+  ],
+
+  "pallor-v1.0.1": [
+    "La salida MIDI ahora sale con la misma demora que el audio de Pallor (su latencia), así un sinte o una grabación MIDI alimentados por Pallor llegan a tiempo en lugar de 1,6 ms antes.",
+    "Manual: qué controles sumar con Configure en Ableton Live (Live conserva 128 de los 463 parámetros de Pallor), los presets en el navegador de Live y el VST3 para la salida MIDI en Live y REAPER."
+  ],
+  "pallor-v1.0.0": [
+    "Primera versión: una caja de ritmos para dark wave, coldwave, post-punk, EBM, synthpop, goth rock, industrial, new beat, italo, witch house, trip-hop y dark ambient.",
+    "Dieciséis voces, cada una con un motor analógico (44 modelos de circuito) y un motor digital de los 80 (compansión de 8 bits, afinación por reloj, samplers de 12 bits) con ocho kits incorporados y tus propios samples.",
+    "Secuenciador por pasos: 16 patrones con A, B y Fill, hasta 64 pasos, probabilidad, ratchets, flams, nudge, nueve condiciones, polimetría, swing por patrón y una cadena de canción.",
+    "Salas gateadas, no lineales y reversas, placa, resorte y hall; ecos de cinta, BBD y 12 bits con chorus, ensemble, flanger y phaser; lo-fi, cinta y glue en el master.",
+    "Seis salidas estéreo extra, entrada y salida MIDI, arrastrar un patrón al DAW como MIDI, 65 presets en 13 géneros y un manual en inglés y en castellano."
+  ],
+
+  "thrum-v1.0.1": [
+    "Los patrones de rasgueo y punteo siguen el loop del DAW: cada pasada toca los mismos golpes (antes, en REAPER, los primeros golpes después de un salto de loop se podían perder).",
+    "No quedan notas colgadas después de poner Thrum en bypass en REAPER (REAPER no llama a un plugin en bypass).",
+    "La salida MIDI ahora sale con la misma demora que el audio de la guitarra (su latencia), así los instrumentos que la doblan y las grabaciones llegan a tiempo en lugar de casi 1 ms antes.",
+    "Los interruptores del amplificador y del gabinete se llaman Amp On y Cabinet On en la lista de parámetros del host (antes había dos parámetros llamados Amp y dos llamados Cabinet).",
+    "Manual: el VST3 para la salida MIDI en Live y REAPER; los presets en el navegador de Live."
+  ],
+  "thrum-v1.0.0": [
+    "Primera versión: una guitarra eléctrica por modelado físico, sin samples.",
+    "Seis guitarras (tres de bobina simple, dos humbucker, semihueca, hueca de jazz, barítono, siete cuerdas) con cuerdas de guía de onda, posiciones reales de los micrófonos y el circuito pasivo; nueve afinaciones y cuatro calibres.",
+    "Un guitarrista adentro: cada nota en una cuerda y un traste reales, legato inteligente con hammer-ons, pull-offs y slides, acordes armados como los arma un guitarrista, 32 patrones de rasgueo y 11 de punteo con el rasgueo centrado en el tiempo, diez articulaciones, keyswitches, MPE y salida MIDI.",
+    "Trece pedales que se pueden reordenar, cuatro amplificadores a válvulas con Auto level y un gabinete con dos micrófonos móviles o tus propias respuestas al impulso de hasta 3 s; una salida DI para reamplificar.",
+    "Un editor Stage con la guitarra, los pedales y los amplificadores renderizados en 3D, un diapasón en vivo, una vista Inspect, 69 presets y un manual en inglés y en castellano."
+  ],
+
+  "orrery-v1.0.6": [
+    "Con Clock en Host, arrancar el transporte del DAW arranca Orrery y pararlo lo para; el botón Play acompaña. Play con el host parado sigue tocando al tempo propio de Orrery. La sesión entra con fundido sólo cuando el transporte arranca desde el principio del tema.",
+    "La misma variación ahora toca las mismas notas desde la misma posición del tema sin importar el tamaño de buffer, un pre-roll o lo que sonó antes de arrancar el transporte, en reproducción y en renders offline (antes, los renders de REAPER cambiaban con el tamaño de buffer).",
+    "Los satélites siguen sincronizados cuando el host procesa las pistas a destiempo (el FX anticipativo de REAPER, los renders offline): se acabaron las ráfagas de notas muy cortas.",
+    "Una pista de Orrery duplicada pasa a ser un satélite en el siguiente carril libre en lugar de copiar el rol de la original.",
+    "Sin nombres de pista (Ableton Live los manda sólo cuando renombrás una pista) el Main lista sus satélites por carril.",
+    "Un Orrery nuevo arranca con su primer preset, First Light, como dice la lista de programas del host; se fueron del VST3 unos 2.000 parámetros \"MIDI CC\" que no se usaban.",
+    "Un editor oculto (Ableton Live lo mantiene vivo) ya no anima ni se redibuja.",
+    "Manual: REAPER y Live necesitan el VST3 para la salida MIDI; los presets en el navegador de Live."
+  ],
+  "orrery-v1.0.5": [
+    "Main y satélites: con el nuevo rol por defecto, Auto, el primer Orrery del set es el Main y cada Orrery que agregás pasa a ser un satélite que toca un carril del Main en su propia pista, nota por nota. En Ableton Live cada sinte ahora simplemente toma su MIDI de un satélite.",
+    "Un satélite tiene una página compacta: qué carril del Main toca (clic para cambiarlo, Shift y clic para varios), su actividad y Make independent. Sigue al Play, los presets y los ajustes del Main.",
+    "El Main saltea los carriles que tocan sus satélites, así nada se duplica, y lista sus satélites. Los proyectos de la 1.0.4 abren como Independent y suenan como antes; Link sigue funcionando.",
+    "macOS y Linux: Publish lanes as MIDI ports le da a cada carril su propio puerto MIDI virtual (Orrery Drone, Orrery Pad...).",
+    "El sonido de prueba tiene un botón On/Off al lado de Play, y la página Simple avisa cuando lo estás escuchando; los satélites arrancan con él apagado.",
+    "Los releases largos del sonido de prueba terminan dentro de la cola declarada."
+  ],
+  "orrery-v1.0.4": [
+    "Un puerto MIDI que aparece después de cargar se vuelve a abrir, y uno que falta se muestra como Not connected en lugar de desaparecer.",
+    "El sonido de prueba suena en pistas mono; Capture MIDI incluye los ecos.",
+    "El nombre del preset muestra un * cuando se edita (los ajustes globales no cuentan)."
+  ],
+  "orrery-v1.0.3": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools Orrery\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "orrery-v1.0.2": [
+    "Un manual de uso completo con capturas, en inglés y en castellano, dentro del plugin (botón Manual) y en la web."
+  ],
+  "orrery-v1.0.1": [
+    "Prender el loop mientras toca ya no larga cientos de notas de golpe; Play vuelve a arrancar después de que termina una sesión; cambiar la frecuencia de muestreo conserva el pulso.",
+    "Un seguidor de Link en otra línea de tiempo sigue el pulso en lugar de sostener notas durante 90 s; Capture MIDI usa el tiempo realmente tocado.",
+    "El pitch bend y el volumen vuelven al centro cuando un carril cambia de canal; los CC de los carriles quedan entre 0 y 119; los puertos MIDI mandan All Notes Off al cambiar o cerrarse, y las notas nunca salen antes de tiempo."
+  ],
+  "orrery-v1.0.0": [
+    "Primera versión: un instrumento MIDI generativo para ambient, dark ambient y drone: ocho carriles con su propio rol y canal, que tocan en tu DAW, en equipos externos por puertos MIDI o enlazados entre instancias."
+  ],
+
+  "murmur-v1.0.3": [
+    "Un Murmur nuevo arranca con First Murmur, como dice la lista de presets del host, y su estado guardado ya no cambia solo.",
+    "La salida ya no depende del tamaño de buffer del host (el Audio Unit a 64 muestras sonaba distinto que a 512).",
+    "Un editor oculto (Ableton Live lo mantiene vivo) ya no anima ni se redibuja; los presets de fábrica aparecen en el navegador de Live."
+  ],
+  "murmur-v1.0.2": [
+    "Freeze sobrevive a un cambio de frecuencia de muestreo y a reabrir la sesión (el audio congelado se guarda con ella).",
+    "En una pista de estéreo a mono la realimentación ya no se dispara; el delay y la reverb ya no repiten colas viejas.",
+    "La rueda del mouse gira las perillas; la línea de ayuda sigue al control que está bajo el mouse; el nombre del preset muestra un * cuando se edita."
+  ],
+  "murmur-v1.0.1": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools Murmur\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "murmur-v1.0.0": [
+    "Primera versión: un efecto granular en tiempo real: hasta 128 granos sobre una memoria de 16 segundos, Freeze y Scan, afinación ajustada a escalas, modos MIDI Pitch y Gate, y una vista de bandada que dibuja cada grano como un pájaro."
+  ],
+
+  "halation-v1.0.3": [
+    "Una instancia nueva arranca con su primer preset, Tape Echo 1974, como dice la lista de presets del host.",
+    "El VST3 ya no muestra unos 2.000 parámetros \"MIDI CC\" en el host; el Resonator sigue respondiendo a las notas MIDI.",
+    "Broken Satellite suena 4 dB más bajo, a la par de los otros presets.",
+    "Un editor oculto (Ableton Live lo mantiene vivo) ya no anima ni se redibuja; los presets de fábrica aparecen en el navegador de Live."
+  ],
+  "halation-v1.0.2": [
+    "Las divisiones largas del delay ya no se cortan (líneas de hasta 12 s, delay de hasta 8 s, stutter de hasta 4 s).",
+    "El stutter queda en la grilla y los tresillos son exactos; el pre-delay ya no repite audio viejo.",
+    "El seguidor de envolvente ya no depende del tamaño de buffer del host; una nota repetida ya no redispara el resonador.",
+    "El nombre del preset muestra un * cuando se edita."
+  ],
+  "halation-v1.0.1": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools Halation\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "halation-v1.0.0": [
+    "Primera versión: un delay y una reverb en un mismo espacio, con freeze, shimmer, reverso, granos y más en diez módulos, y 30 presets."
+  ],
+
+  "tarnish-v1.0.3": [
+    "Una instancia nueva arranca con su primer preset, Warm Studio Tape, como dice la lista de presets del host.",
+    "Los presets ya no saturan una mezcla con picos en -3 dBFS: la distorsión de trazado del vinilo ya no tira picos de un solo lado (Inner Groove Blues llegaba a +7,7 dBFS), Auto gain también compensa el cambio de nivel de Bias, y los presets más calientes se renivelaron.",
+    "El VST3 ya no muestra unos 2.000 parámetros \"MIDI CC\" en el host; el tape stop sigue respondiendo a las notas MIDI.",
+    "Un editor oculto (Ableton Live lo mantiene vivo) ya no anima ni se redibuja; los presets de fábrica aparecen en el navegador de Live."
+  ],
+  "tarnish-v1.0.2": [
+    "Se acabó el zumbido con el host parado; el bypass deja pasar el sonido seco a tiempo.",
+    "El tape stop por MIDI ya no se traba; el stop sincronizado sigue los cambios de tempo y dura hasta 10 s; la cola suena durante 4 s.",
+    "Los presets ya no pisan tus ajustes de sesión, y un Mix que puso un preset vuelve a 100 % con el siguiente.",
+    "El nombre del preset muestra un * cuando se edita; el manual explica por qué Mix a la mitad suena como un flanger cuando el wow está alto."
+  ],
+  "tarnish-v1.0.1": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools Tarnish\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "tarnish-v1.0.0": [
+    "Primera versión: cinta, casete, video, vinilo, radio AM y teléfono en un solo plugin, con histéresis magnética."
+  ],
+
+  "plumb-v1.0.2": [
+    "Un preset suena igual sin importar cuál cargaste antes: el modo de latencia, la voz o el modo MIDI que fija un preset vuelven atrás con el siguiente, y un modo de latencia que elegiste vos se mantiene.",
+    "A 44,1 y 88,2 kHz la demora ya no crece de una frase a la otra: después de cada pausa la voz vuelve exactamente con la latencia informada.",
+    "Una instancia nueva arranca con Natural Lead, como dice la lista de presets del host; un editor oculto ya no anima ni se redibuja.",
+    "Los presets de fábrica aparecen en el navegador de Ableton Live."
+  ],
+  "plumb-v1.0.1": [
+    "Throat y Formant ya no bajan la voz: mover los formantes mantiene el nivel dentro de 2 dB (antes caía entre 5 y 9 dB).",
+    "La vista de notas en vivo vuelve a dibujar todas las notas (en algunas tomas se borraba sola).",
+    "Hard tune ya no salta entre dos notas con un vibrato cerca del punto medio; las notas que empiezan con un scoop se corrigen de forma natural.",
+    "La escala por MIDI queda retenida hasta el acorde siguiente; la latencia informada es correcta después de reabrir una sesión.",
+    "Compare, las teclas, la latencia y el nombre del preset siguen los cambios hechos desde el host; el nombre del preset muestra un * cuando se edita."
+  ],
+  "plumb-v1.0.0": [
+    "Primera versión: corrección de afinación en tiempo real para voz, de natural a dura, con latencia desde 0,67 ms."
+  ],
+
+  "lacquer-v1.0.3": [
+    "La lista de presets del host muestra los seis estilos, igual en VST3 y en Audio Unit (antes: ninguno en VST3 y uno \"Untitled\" en AU).",
+    "Un editor oculto (Ableton Live lo mantiene vivo) ya no anima ni se redibuja."
+  ],
+  "lacquer-v1.0.2": [
+    "Cerrar el plugin durante el análisis ya no lo traba; tocar un control ya no frena Learn.",
+    "El bypass deja pasar el sonido seco a tiempo; el modo archivo ya no pisa el plan en vivo, el A/B ni el modo.",
+    "Exportar y volver a renderizar ya no pueden chocar; se soportan buffers del host muy grandes."
+  ],
+  "lacquer-v1.0.1": [
+    "El plugin ahora aparece en los hosts como \"Audio Tools Lacquer\", así se encuentra fácil en el navegador de Ableton Live; los proyectos guardados siguen abriendo."
+  ],
+  "lacquer-v1.0.0": [
+    "Primera versión: masterización automática, en vivo en el bus master (Learn escucha tu tema) o desde un archivo, con A/B a sonoridad igualada y exportación a WAV."
+  ],
+
+  "launcher-v1.0.3": [
+    "Instala los presets de fábrica de cada plugin como archivos .vstpreset en la carpeta estándar de presets VST3, así Ableton Live (que ignora las listas de programas VST3) los muestra en su navegador, igual que Cubase y Bitwig.",
+    "Las actualizaciones reemplazan sólo los archivos de presets de fábrica que instaló, y Remove borra sólo esos: los presets que guardaste en las mismas carpetas quedan."
+  ],
+  "launcher-v1.0.2": [
+    "Las copias instaladas a mano o para otro usuario cuentan para el control de versión, y una actualización las quita o te dice dónde están.",
+    "Las actualizaciones se reemplazan en dos pasos y se deshacen si algo falla.",
+    "Instalar para todos los usuarios le pasa la cola al launcher con permisos de administrador."
+  ],
+  "launcher-v1.0.1": [
+    "Windows: los plugins se instalan en la carpeta VST3 compartida que revisan todos los DAW; si hace falta permiso, ofrece reabrirse como administrador o instalar sólo para tu usuario."
+  ],
+  "launcher-v1.0.0": [
+    "Primera versión: una sola app para ver, instalar, actualizar y quitar todos los plugins de Audio Tools, con imágenes y demos, y sin cuenta."
+  ]
+}

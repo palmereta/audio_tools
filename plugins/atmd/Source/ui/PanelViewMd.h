@@ -9,6 +9,7 @@
 
 #include "../PluginProcessor.h"
 #include "AssetsMd.h"
+#include "../../../../shared/ui/Showing.h"
 
 namespace dh::md::ui {
 
@@ -283,6 +284,10 @@ private:
 
     void timerCallback() override
     {
+        // Ventana escondida (Live esconde el editor sin cerrarlo): nada que mirar ni repintar. Al volver a la vista
+        // se repinta entero, con lo que haya cambiado mientras tanto (QA en Live 2026-10-22, H3).
+        if (! dh::reallyShowing (*this)) { hidden = true; return; }
+        if (hidden) { hidden = false; repaint(); }
         const auto& A = assets();
         const float s = scale();
         for (auto& c : A.controls)
@@ -300,6 +305,7 @@ private:
             repaint (A.keysCrop.transformedBy (juce::AffineTransform::scale (s)).getSmallestIntegerContainer().expanded (2));
     }
 
+    bool hidden = false;
     void handleNoteOn (juce::MidiKeyboardState*, int, int, float) override { keysDirty = true; }
     void handleNoteOff (juce::MidiKeyboardState*, int, int, float) override { keysDirty = true; }
 };

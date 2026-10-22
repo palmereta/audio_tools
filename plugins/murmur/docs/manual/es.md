@@ -454,6 +454,8 @@ Tu proyecto guarda igual el estado completo de Murmur, con el nombre del preset,
 
 Los presets de Stretch esperan que aprietes Freeze. Gated Choir no suena hasta que tocás notas.
 
+En Ableton Live, que no muestra la lista de programas propia de un plugin, los presets de fábrica aparecen en el navegador de Live en **Plug-Ins**, **Audio Tools Murmur** (desplegá el plugin). Los instala el launcher; con el zip, copiá las carpetas de su carpeta **Presets** a `~/Library/Audio/Presets/Audio Tools/` (macOS). Tus presets propios quedan en la carpeta de arriba y en el menú de Murmur.
+
 ## Recetas
 
 ### Nube de voz

@@ -2,6 +2,7 @@
 // Teclado de cinco octavas al pie del editor: para probar sonidos sin controlador (velocidad según la
 // altura del clic) y para ver lo que llega por MIDI.
 
+#include "../../../../shared/ui/Showing.h"
 #include "Widgets.h"
 
 namespace dh::fs::ui {
@@ -65,8 +66,11 @@ private:
         proc.sendCommand (ATFS1Processor::CmdNoteOn, held, juce::jlimit (20, 127, (int) (40 + 87 * y)));
     }
     void release() { if (held >= 0) proc.sendCommand (ATFS1Processor::CmdNoteOff, held); held = -1; }
+    bool hiddenNow = false;
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) { hiddenNow = true; return; }   // ventana escondida (Live): nada que hacer (H3)
+        if (hiddenNow) { hiddenNow = false; repaint(); }                  // vuelve a la vista con lo que cambió mientras tanto
         bool ch = false;
         for (int n = 0; n < 128; ++n) { const bool k = proc.live.keyDown[(size_t) n].load(); if (k != shown[(size_t) n]) { shown[(size_t) n] = k; ch = true; } }
         if (ch) repaint();

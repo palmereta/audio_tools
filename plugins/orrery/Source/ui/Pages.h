@@ -67,7 +67,7 @@ private:
         if (set == RoleAuto && eff > 0) t << " (Auto)";
         if (t != getButtonText()) setButtonText (t);
     }
-    void timerCallback() override { refresh(); }
+    void timerCallback() override { if (! dh::reallyShowing (*this)) return; refresh(); }
 };
 
 // ───────── simple ─────────
@@ -197,6 +197,7 @@ private:
     juce::String roleLine; bool warn = false, hearingPreview = false; uint32_t satMask = 0;
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) return;      // editor escondido (Live lo esconde sin cerrarlo): nada que repintar
         const int r = proc.role();
         skipT->setVisible (r == RoleMain);
         juce::String line; bool w = false; uint32_t mask = 0;
@@ -205,7 +206,8 @@ private:
         {
             const auto sats = proc.satellites();
             juce::StringArray parts;
-            for (auto& s : sats) if (s.alive) { parts.add (laneList (s.lanes, roleOf) + " (" + s.name + ")"); mask |= s.lanes; }
+            // Sin el nombre de la pista (Live sólo lo dice al renombrarla), el carril basta: "1 Drone".
+            for (auto& s : sats) if (s.alive) { parts.add (laneList (s.lanes, roleOf) + (s.name.isNotEmpty() ? " (" + s.name + ")" : juce::String())); mask |= s.lanes; }
             if (proc.otherMainActive()) { line = "Another Orrery is already the Main: satellites follow that one. Set this one to Independent."; w = true; }
             else if (parts.isEmpty()) line = "Main: each Orrery you add on another track becomes a satellite.";
             else line = "Satellites: " + parts.joinIntoString (", ");
@@ -479,6 +481,7 @@ private:
     }
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) return;      // editor escondido (Live lo esconde sin cerrarlo): nada que repintar
         const auto now = juce::MidiOutput::getAvailableDevices();
         if (now.size() != devices.size()) fillPorts();
     }
@@ -601,6 +604,7 @@ private:
     std::array<juce::Rectangle<int>, kLanes> chips {};
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) return;      // editor escondido (Live lo esconde sin cerrarlo): nada que repintar
         const bool noMain = proc.mainName().isEmpty();
         mainBtn->setVisible (noMain); indep->setVisible (! noMain);
         repaint (leftR);

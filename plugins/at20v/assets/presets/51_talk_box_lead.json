@@ -1,5 +1,5 @@
 {
- "name": "Talk Box Lead",
+ "name": "Talk Box Lead (Audio In)",
  "category": "Vocoder",
  "knobs": {
   "vco1_wave": 1,

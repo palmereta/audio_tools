@@ -1,0 +1,4 @@
+{
+  "//": "Read by atvstpresets (tools/hosttest/vstpresets.cpp) when it writes the .vstpreset files. Instance data that a preset file must not carry: with no autoRole in the state, Orrery applies it like a preset from its menu (music only; role, ports, Play and the global settings stay).",
+  "dropAttributes": ["autoRole", "autoLanes", "instanceId"]
+}

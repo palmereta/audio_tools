@@ -75,6 +75,11 @@ static File makeProductZip (const File& dir, const String& name, const String& v
         b.getChildFile ("Contents/MacOS/" + name).replaceWithText ("binary " + version);
     }
    #endif
+    // Factory presets as scripts/package-*.sh lay them out: Presets/<VST3 name>/<category>/<preset>.vstpreset. 1.0.9
+    // has one that later versions drop.
+    top.getChildFile ("Presets/" + name + "/Pads/Warm.vstpreset").create();
+    top.getChildFile ("Presets/" + name + "/Pads/Warm.vstpreset").replaceWithText ("VST3 " + version);
+    top.getChildFile ("Presets/" + name + (version == "1.0.9" ? "/Old/Gone.vstpreset" : "/Leads/Bright.vstpreset")).create();
     top.getChildFile ("INSTALL.txt").replaceWithText ("install notes");
     top.getChildFile ("LICENSE.txt").replaceWithText ("license");
     top.getChildFile (name.toLowerCase() + "render").replaceWithText ("tool");
@@ -136,6 +141,7 @@ int main()
     check (compareVersions ("1.2", "1.2.0") == 0, "1.2 equals 1.2.0");
     check (compareVersions ("2.0.0", "1.99.99") > 0, "2.0.0 is newer than 1.99.99");
     check (formatOf ("AT20V FX.vst3") == Format::vst3 && formatOf ("INSTALL.txt") == Format::other, "formats by extension");
+    check (formatOf ("Presets") == Format::other, "the Presets folder is not a bundle (nor, on Linux, a standalone)");
    #if JUCE_LINUX
     check (formatOf ("AT20V FX.lv2") == Format::lv2 && formatOf ("AT20V FX") == Format::standalone && formatOf ("lacquerrender") == Format::other,
            "Linux: .lv2, the standalone without extension, the renderers are not installed");
@@ -222,6 +228,11 @@ int main()
 
         const auto d = detect (m.products[0], db, paths);
         check (d.present && d.viaLauncher && d.version == "1.0.9" && statusOf (m.products[0], d) == Status::upToDate, "detected as installed by the launcher, up to date");
+        check (paths.presets.isAChildOf (root) && paths.presets.getChildFile ("Fake/Pads/Warm.vstpreset").loadFileAsString() == "VST3 1.0.9"
+                 && paths.presets.getChildFile ("Fake/Old/Gone.vstpreset").existsAsFile() && rec != nullptr && rec->presetFiles.size() == 2,
+               "factory presets in " + paths.presets.getFullPathName() + ", listed apart in the record");
+        // A preset the user saved in the same folder (Cubase and Bitwig save there).
+        paths.presets.getChildFile ("Fake/Pads/Mine.vstpreset").replaceWithText ("user");
     }
 
     // ── update detection: 1.0.10 > 1.0.9
@@ -240,6 +251,11 @@ int main()
         check (bundleVersion (paths.vst3User.getChildFile ("Fake.vst3")) == "1.0.10", "the VST3 on disk is 1.0.10");
         const auto d2 = detect (m2.products[0], db, paths);
         check (d2.version == "1.0.10" && statusOf (m2.products[0], d2) == Status::upToDate, "after the update: up to date");
+        check (paths.presets.getChildFile ("Fake/Pads/Warm.vstpreset").loadFileAsString() == "VST3 1.0.10"
+                 && paths.presets.getChildFile ("Fake/Leads/Bright.vstpreset").existsAsFile()
+                 && ! paths.presets.getChildFile ("Fake/Old/Gone.vstpreset").exists() && ! paths.presets.getChildFile ("Fake/Old").exists()
+                 && paths.presets.getChildFile ("Fake/Pads/Mine.vstpreset").loadFileAsString() == "user",
+               "the update replaces the factory presets, drops the one 1.0.10 no longer has and keeps the user's");
     }
 
     // ── a copy the launcher did not install, in the other VST3 folder: it counts for the version (the DAW could load
@@ -326,6 +342,9 @@ int main()
         fresh.load (paths.recordFile());
         check (r.wasOk() && gone, "remove deleted the " + String (before.size()) + " installed items");
         check (fresh.get ("fake") == nullptr, "remove dropped the record");
+        check (! paths.presets.getChildFile ("Fake/Pads/Warm.vstpreset").exists() && ! paths.presets.getChildFile ("Fake/Leads").exists()
+                 && paths.presets.getChildFile ("Fake/Pads/Mine.vstpreset").existsAsFile(),
+               "remove deletes the factory presets and keeps the user's");
         check (! detect (m2.products[0], db, paths).present, "not detected after remove");
     }
 
@@ -381,6 +400,7 @@ int main()
         z.copyFileTo (copy);
         const auto sha = sha256Of (copy);
         auto mr = load (writeManifest (tmp, "manifest-real.json", name.toLowerCase(), name, ver, copy, sha));
+        paths.presets.getChildFile ("Fake").deleteRecursively();     // the user preset left by the tests above
         const auto t0 = juce::Time::getMillisecondCounterHiRes();
         const auto r = downloadAndInstall (mr.products[0], mr, paths, settings, db, progress, notes);
         check (r.wasOk(), "real zip " + z.getFileName() + " installed in " + String ((juce::Time::getMillisecondCounterHiRes() - t0) / 1000.0, 1)
@@ -411,7 +431,18 @@ int main()
                "the standalone is executable (permissions from the zip)");
         check (bundleVersion (paths.vst3User.getChildFile (name + ".vst3")) == ver, "installed VST3 reports version " + ver);
        #endif
+        // The factory presets (Presets/ in the zip), all of them, in the VST3 preset folder; Remove takes them away.
+        int inZip = 0;
+        {
+            juce::ZipFile zf (copy);
+            for (int i = 0; i < zf.getNumEntries(); ++i)
+                if (auto* e = zf.getEntry (i); e != nullptr && e->filename.contains ("/Presets/") && e->filename.endsWith (".vstpreset")) ++inZip;
+        }
+        const auto installedPresets = paths.presets.findChildFiles (File::findFiles, true, "*.vstpreset").size();
+        check (installedPresets == inZip && (db.get (name.toLowerCase()) == nullptr ? 0 : db.get (name.toLowerCase())->presetFiles.size()) == inZip,
+               String (inZip) + " factory presets in the zip, " + String (installedPresets) + " installed in " + paths.presets.getFullPathName());
         remove (mr.products[0], paths, db);
+        check (paths.presets.findChildFiles (File::findFiles, true, "*.vstpreset").isEmpty(), "Remove deleted the factory presets");
     }
 
     // ── optional: the network path (juce::URL over HTTPS), against the real site

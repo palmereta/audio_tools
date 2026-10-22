@@ -1,8 +1,10 @@
 // Pruebas del generador de Orrery sin JUCE:
-//   clang++ -std=c++17 -O2 -ffp-contract=off -I plugins/orrery/Source/gen plugins/orrery/tools/gentest.cpp -o /tmp/orr_gentest && /tmp/orr_gentest
-//   cl /std:c++17 /O2 /fp:precise /EHsc /I plugins\orrery\Source\gen plugins\orrery\tools\gentest.cpp   (Windows)
+//   clang++ -std=c++20 -O2 -ffp-contract=off -I plugins/orrery/Source/gen plugins/orrery/tools/gentest.cpp -o /tmp/orr_gentest && /tmp/orr_gentest
+//   cl /std:c++20 /O2 /fp:precise /EHsc /I plugins\orrery\Source\gen plugins\orrery\tools\gentest.cpp   (Windows)
 // La "huella" de la prueba 8 tiene que dar igual en macOS y en Windows.
 // Pruebas 9 a 15: Main y satélites (Constellation.h). En Linux, compilar con -pthread.
+// Pruebas 16 a 18: lo que encontró la QA en DAWs (2026-10-22): pistas desfasadas (REAPER, anticipative FX), la misma
+// variación con el reloj del host en cualquier buffer, pre-roll o espera previa, y el transporte como Play y Stop.
 #include "Generator.h"
 #include "Constellation.h"
 #include <condition_variable>
@@ -73,8 +75,10 @@ struct Schedule
         b.lanes[1].ccNum = 74; b.lanes[1].ccShape = CcSwell; b.lanes[3].echoes = 4;
         preset2.g = b.g; preset2.lanes = b.lanes;
     }
+    bool steady = false;                              // sin cambios: base y Play todo el tiempo
     Controls at (double sec, double prevSec, double total) const
     {
+        if (steady) { Controls c = base; c.g.run = sec < total - 3.0; return c; }
         Controls c = sec < 20.0 ? base : (sec < 40.0 ? changed : preset2);
         c.g.run = ((sec >= 1.0 && sec < 55.0) || sec >= 58.0) && sec < total - 3.0;
         c.reset = prevSec < 40.0 && sec >= 40.0;
@@ -102,6 +106,9 @@ struct Config
     std::vector<std::pair<uint32_t, double>> sats;   // carriles y hora de alta de cada satélite
     double laneChangeAt = -1.0;                      // el primer satélite pasa a otro carril
     bool fixedOrder = false;                         // siempre el Main primero (un solo hilo, siempre el mismo orden)
+    double playFrom = 0.5;                           // reloj del host: cuándo arranca el transporte
+    int maxLag = 0;                                  // > 0: cada pista va a su ritmo, hasta maxLag bloques adelante de la más atrasada
+    bool steady = false;                             // controles fijos (sin cambios de ajustes, preset, Stop ni pánico)
 };
 
 struct Result { std::vector<Inst> inst; int resyncs = 0; };
@@ -126,7 +133,7 @@ private:
 
 static Result simulate (const Config& cfg)
 {
-    Schedule sch (cfg.hostClock);
+    Schedule sch (cfg.hostClock); sch.steady = cfg.steady;
     auto& reg = Constellation::get();
     const int mainSlot = reg.join();
     { std::lock_guard<std::mutex> lk (reg.lock); reg.setRoleLocked (mainSlot, RoleMain, 0); }
@@ -172,14 +179,38 @@ static Result simulate (const Config& cfg)
     auto cycleAt = [&] (int64_t start, int n) {
         Cycle c; c.start = start; c.n = n;
         c.sec = (double) start / cfg.fs; c.prevSec = (double) (start - n) / cfg.fs;
-        c.playing = cfg.hostClock;
+        // Con el reloj del host el transporte arranca a los 0,5 s (arrancarlo es Play): los satélites ya están.
+        c.playing = cfg.hostClock && c.sec >= cfg.playFrom;
         double beat = (double) start / cfg.fs * bpm / 60.0;
         if (c.sec >= 50.0) beat += 16.0;       // salto del transporte
         c.ppq = beat; c.bpm = bpm;
         c.ns = 1.0e9 * (double) start / cfg.fs + 123456789.0;
         return c;
     };
-    if (! cfg.threads)
+    if (cfg.maxLag > 0)
+    {
+        // Como REAPER con "anticipative FX": cada pista procesa todos los bloques en orden, pero unas van varios
+        // bloques adelante de otras (a rachas: durante un rato una pista preferida avanza más).
+        const int64_t blocks = (total + cfg.block - 1) / cfg.block;
+        std::vector<int64_t> idx ((size_t) N, 0);
+        int preferred = 0, left = 0;
+        for (;;)
+        {
+            int64_t lo = INT64_MAX;
+            for (int i = 0; i < N; ++i) if (idx[(size_t) i] < blocks) lo = std::min (lo, idx[(size_t) i]);
+            if (lo == INT64_MAX) break;
+            if (left-- <= 0) { preferred = (int) (rng() % (uint32_t) N); left = 20 + (int) (rng() % 200u); }
+            std::vector<int> can;
+            for (int i = 0; i < N; ++i) if (idx[(size_t) i] < blocks && idx[(size_t) i] - lo < cfg.maxLag) can.push_back (i);
+            int i = can[(size_t) (rng() % (uint32_t) can.size())];
+            if (std::find (can.begin(), can.end(), preferred) != can.end() && rng() % 10u < 7u) i = preferred;
+            const int64_t pos = idx[(size_t) i] * cfg.block;
+            const Cycle c = cycleAt (pos, (int) std::min<int64_t> (cfg.block, total - pos));
+            if (res.inst[(size_t) i].isMain) stepMain (c); else stepSat (res.inst[(size_t) i], c);
+            ++idx[(size_t) i];
+        }
+    }
+    else if (! cfg.threads)
     {
         std::vector<int> order (N);
         for (int64_t pos = 0; pos < total; pos += cfg.block)
@@ -255,6 +286,19 @@ static int hanging (const std::vector<E>& log)
     }
     int h = 0; for (auto& kv : on) h += kv.second;
     return h;
+}
+
+// Notas de largo cero: nota-on y nota-off de la misma tecla en la misma muestra (QA en REAPER, H1).
+static int zeroLength (const std::vector<E>& log)
+{
+    std::map<int, int64_t> on; int z = 0;
+    for (auto& e : log)
+    {
+        const int st = e.s & 0xF0, k = (e.s & 15) * 128 + e.d1;
+        if (st == 0x90 && e.d2 > 0) on[k] = e.t;
+        else if (st == 0x80 || st == 0x90) { auto it = on.find (k); if (it != on.end()) { if (it->second == e.t) ++z; on.erase (it); } }
+    }
+    return z;
 }
 
 } // namespace sat
@@ -400,9 +444,14 @@ static void constellationTests()
         const bool early = sameEvents (want, later, ms) || sameEvents (want, sooner, ms2);
         std::printf ("  %s, resincronizaciones %d, notas colgadas %d\n", exact ? "exacto" : (early ? "un bloque corrido" : "distinto"), r.resyncs, hanging (r.inst[1].log));
         check ((exact || early) && r.resyncs <= 2 && hanging (r.inst[1].log) == 0, "estable: exacto o un bloque corrido, sin bucles");
-        cfg.hostClock = true; cfg.keyed = true;
+        // Transporte en marcha desde el primer bloque (arrancarlo es Play: el Main toca desde ahí y el satélite se
+        // suma enseguida, ubicándose por la posición del host).
+        cfg.hostClock = true; cfg.keyed = true; cfg.playFrom = 0.0;
         const auto r2 = simulate (cfg);
-        int m2 = 0; const bool exact2 = sameEvents (laneEvents (r2.inst[0].log, 0x1u, 0), r2.inst[1].log, m2);
+        const int64_t from2 = r2.inst[1].syncT + cfg.block;
+        int m2 = 0; const bool exact2 = r2.inst[1].syncT >= 0 && r2.inst[1].syncT < (int64_t) (0.1 * cfg.fs) && r2.resyncs == 0
+                                        && sameEvents (laneEvents (r2.inst[0].log, 0x1u, from2), laneEvents (r2.inst[1].log, 0xFFu, from2), m2);
+        std::printf ("  con el transporte: se sumó a los %.3f s, %d eventos iguales, resincronizaciones %d\n", (double) r2.inst[1].syncT / cfg.fs, m2, r2.resyncs);
         check (exact2, "con el transporte del host en marcha, exacto aunque el orden y la hora engañen");
     }
     std::printf ("15. El Main deja de procesar 3 s (bypass, pista congelada)\n");
@@ -420,6 +469,215 @@ static void constellationTests()
         }
         std::printf ("  resincronizaciones %d, notas colgadas %d, %d de 2 iguales al volver\n", r.resyncs, h, okAfter);
         check (r.resyncs >= 2 && h == 0 && okAfter == 2, "sueltan las notas, esperan y se vuelven a sincronizar");
+    }
+}
+
+// ───────── QA en DAWs (2026-10-22) ─────────
+static void leadLagTests()
+{
+    using namespace sat;
+    std::printf ("16. Pistas que no van a la par (REAPER con anticipative FX): el Main y los satélites, varios bloques adelante o atrás\n");
+    {
+        bool exact = true; int zl = 0, hang = 0;
+        for (int lag : { 2, 5, 16 })
+            for (int block : { 64, 333, 512, 1024 })
+            {
+                Config cfg; cfg.block = block; cfg.hostClock = true; cfg.playFrom = 0.0; cfg.steady = true; cfg.maxLag = lag; cfg.secs = 40.0;
+                cfg.seed = (uint32_t) (lag * 1000 + block);
+                cfg.sats = { { 0x1u, 0.0 }, { 0x2u, 0.0 }, { 0x30u, 7.3 } };
+                const auto r = simulate (cfg);
+                int ok = 0;
+                for (size_t i = 1; i < r.inst.size(); ++i)
+                {
+                    const auto& s = r.inst[i];
+                    // Hasta el Stop del final (3 s antes): un satélite adelantado no puede saber que viene un Stop y se
+                    // resincroniza ahí (como debe).
+                    const int64_t from = s.syncT + block, to = (int64_t) ((cfg.secs - 3.5) * cfg.fs);
+                    int m = 0;
+                    ok += s.syncT >= 0 && s.syncT < (int64_t) ((s.joinSec + 0.3) * cfg.fs)
+                          && sameEvents (laneEvents (r.inst[0].log, s.mask, from, to), laneEvents (s.log, 0xFFu, from, to), m);
+                    zl += zeroLength (s.log); hang += hanging (s.log);
+                }
+                std::printf ("  hasta %2d bloques de desfase, bloque %4d: %d de 3 iguales, resincronizaciones %d\n", lag, block, ok, r.resyncs);
+                exact = exact && ok == 3 && r.resyncs <= 3;
+            }
+        std::printf ("  notas de largo cero %d, colgadas %d\n", zl, hang);
+        check (exact, "con desfases de varios bloques cada satélite saca exactamente lo del Main (sólo se resincroniza en el Stop)");
+        check (zl == 0 && hang == 0, "ni notas de largo cero ni colgadas");
+    }
+    {
+        // Con cambios: ajustes (20 s), otro preset (40 s), salto del transporte (50 s), Stop y Play (55-58 s),
+        // pánico (70 s). Un satélite adelantado supone los controles y, si no eran, se resincroniza.
+        int zl = 0, hang = 0, okWin = 0, wins = 0, rs = 0;
+        static const double W[][2] = { { 3, 19.5 }, { 23, 39.5 }, { 43, 49.5 }, { 61, 69.5 }, { 73, 86.5 } };
+        for (int block : { 128, 512 })
+        {
+            Config cfg; cfg.block = block; cfg.hostClock = true; cfg.playFrom = 0.0; cfg.maxLag = 8; cfg.secs = 90.0; cfg.seed = 5u + (uint32_t) block;
+            cfg.sats = { { 0x1u, 0.0 }, { 0x4u, 0.0 }, { 0x30u, 0.0 } };
+            const auto r = simulate (cfg);
+            rs += r.resyncs;
+            for (size_t i = 1; i < r.inst.size(); ++i)
+            {
+                const auto& s = r.inst[i];
+                zl += zeroLength (s.log); hang += hanging (s.log);
+                for (auto& w : W)
+                {
+                    const int64_t a = (int64_t) (w[0] * cfg.fs), b = (int64_t) (w[1] * cfg.fs);
+                    int m = 0; ++wins;
+                    okWin += sameEvents (laneEvents (r.inst[0].log, s.mask, a, b), laneEvents (s.log, 0xFFu, a, b), m);
+                }
+            }
+            std::printf ("  con cambios, bloque %d, hasta 8 bloques de desfase: resincronizaciones %d\n", block, r.resyncs);
+        }
+        std::printf ("  %d de %d tramos iguales (desde 3 s después de cada cambio), notas de largo cero %d, colgadas %d\n", okWin, wins, zl, hang);
+        check (okWin == wins && zl == 0 && hang == 0 && rs <= 60, "se recupera de cada cambio, sin notas de largo cero ni colgadas");
+    }
+}
+
+// Orrery Independent con el reloj del host, como en REAPER: un rato con el host parado y Play puesto (cuánto,
+// depende del reloj de pared), después el transporte desde startPpq, con un pre-roll de "preroll" muestras.
+// Devuelve los eventos con su muestra contada desde startPpq.
+static std::vector<sat::E> hostSession (int block, double fs, int freeBlocks, double startPpq, int64_t preroll, bool runWhenStopped, double secs)
+{
+    Generator g; setupAmbient (g, 11);
+    g.g.hostClock = true; g.g.runWhenStopped = runWhenStopped; g.g.breathRate = 6.0f; g.g.fadeIn = 20.0f; g.g.humanizeMs = 12.0f;
+    g.lanes[4].loop = true; g.lanes[4].loopBeats = 23.0f; g.lanes[2].loop = true; g.lanes[2].loopBeats = 19.0f;
+    g.lanes[5].ccNum = 1; g.lanes[6].ccNum = 11; g.lanes[6].ccShape = CcBreath; g.lanes[1].driftCents = 10.0f;
+    g.prepare (fs);
+    std::vector<OutEvent> ev; std::vector<sat::E> log;
+    const double bpm = 120.0;
+    for (int b = 0; b < freeBlocks; ++b) g.process (block, false, startPpq, bpm, ev);
+    const int64_t total = (int64_t) (secs * fs) + preroll;
+    for (int64_t pos = 0; pos < total; pos += block)
+    {
+        const int n = (int) std::min<int64_t> (block, total - pos);
+        const double ppq = startPpq + (double) (pos - preroll) / fs * bpm / 60.0;
+        g.process (n, true, ppq, bpm, ev);
+        for (auto& e : ev) log.push_back ({ pos + e.offset - preroll, e.data[0], e.data[1], e.data[2], e.lane });
+    }
+    return log;
+}
+
+// Iguales con hasta tol muestras de diferencia en la hora (el borde de bloque redondea distinto).
+static int sameWithin (const std::vector<sat::E>& a, const std::vector<sat::E>& b, int64_t tol, int& total)
+{
+    total = 0; int matched = 0;
+    std::vector<bool> used (b.size(), false); size_t from = 0;
+    for (auto& x : a)
+    {
+        if (x.t < 0) continue;
+        ++total;
+        while (from < b.size() && b[from].t < x.t - tol) ++from;
+        for (size_t j = from; j < b.size() && b[j].t <= x.t + tol; ++j)
+            if (! used[j] && b[j].s == x.s && b[j].d1 == x.d1 && b[j].d2 == x.d2 && b[j].lane == x.lane) { used[j] = true; ++matched; break; }
+    }
+    // De más: lo que no está en a, salvo los note-off de notas que b tocaba antes del comienzo (el transporte
+    // arrancó con Orrery sonando y las suelta).
+    int extra = 0; std::set<int> on;
+    for (size_t j = 0; j < b.size(); ++j)
+    {
+        if (b[j].t < 0) continue;
+        const int st = b[j].s & 0xF0, key = (b[j].s & 15) * 128 + b[j].d1;
+        const bool off = st == 0x80 || (st == 0x90 && b[j].d2 == 0);
+        if (st == 0x90 && b[j].d2 > 0) on.insert (key);
+        if (! used[j] && ! (off && on.count (key) == 0)) ++extra;
+        if (off) on.erase (key);
+    }
+    return matched - extra;
+}
+
+static void hostClockTests()
+{
+    std::printf ("17. Reloj del host como en REAPER: buffers 64/333/512/768/1024, tiempo real y offline, pre-roll\n");
+    {
+        const double secs = 120.0;
+        const auto ref = hostSession (512, 48000.0, 0, 0.0, 0, true, secs);
+        int notes = 0; for (auto& e : ref) notes += (e.s & 0xF0) == 0x90;
+        struct V { const char* name; int block; int freeBlocks; int64_t preroll; bool rws; };
+        const V vs[] = {
+            { "offline, 64", 64, 0, 0, true },
+            { "offline, 333, pre-roll de 3 bloques", 333, 0, 3 * 333, true },
+            { "offline, 768 (REAPER con 1024)", 768, 0, 0, true },
+            { "offline, 1024, pre-roll de 12345 muestras", 1024, 0, 12345, true },
+            { "tiempo real, 512, 1,3 s con el host parado", 512, 122, 0, true },
+            { "tiempo real, 64, 41 s con el host parado", 64, 30750, 0, true },
+            { "tiempo real, 333, 9 s parado y pre-roll", 333, 1297, 4000, true },
+            { "Play with host stopped Off, 1024", 1024, 77, 0, false },
+        };
+        bool all = true;
+        for (auto& v : vs)
+        {
+            const auto b = hostSession (v.block, 48000.0, v.freeBlocks, 0.0, v.preroll, v.rws, secs);
+            int total = 0; const int m = sameWithin (ref, b, 1, total);
+            std::printf ("  %-44s %d de %d mensajes iguales (±1 muestra)\n", v.name, m, total);
+            all = all && m == total;
+        }
+        std::printf ("  (referencia: %d notas en 2 minutos)\n", notes);
+        check (all && notes > 100, "las mismas notas y controles desde el comienzo, con cualquier buffer, pre-roll o espera previa");
+        // Desde el medio de la canción: el mismo comienzo con o sin pre-roll y con otro buffer.
+        const auto mid = hostSession (512, 48000.0, 0, 37.25, 0, true, 60.0);
+        const auto mid2 = hostSession (333, 48000.0, 400, 37.25, 2 * 333 + 17, true, 60.0);
+        int total = 0; const int m = sameWithin (mid, mid2, 1, total);
+        std::printf ("  desde el pulso 37,25: %d de %d iguales\n", m, total);
+        check (m == total && total > 50, "arrancar desde el medio también da lo mismo");
+        // El fade in sólo cuando el transporte arranca en el comienzo de la canción (pedido: parar y seguir en vivo no
+        // vuelve a entrar en 20 s). Fade in 20 s: velocidad media del primer segundo desde 0 y desde el pulso 37,25.
+        auto firstVel = [] (const std::vector<sat::E>& log) { double v = 0; int k = 0; for (auto& e : log) if ((e.s & 0xF0) == 0x90 && e.d2 > 0 && e.t >= 0 && e.t < (int64_t) (3.0 * 48000.0)) { v += e.d2; ++k; } return k ? v / k : 0.0; };
+        auto cc7 = [] (const std::vector<sat::E>& log) { int lo = 127; for (auto& e : log) if ((e.s & 0xF0) == 0xB0 && e.d1 == 7 && e.t >= 0 && e.t < (int64_t) (2.0 * 48000.0)) lo = std::min (lo, (int) e.d2); return lo; };
+        const auto fromZero = hostSession (512, 48000.0, 0, 0.0, 0, true, 10.0);
+        const double v0 = firstVel (fromZero), vm = firstVel (mid);
+        std::printf ("  fade in: velocidad media de los primeros 3 s %.0f desde el comienzo, %.0f desde el pulso 37,25; CC7 mínimo %d y %d\n", v0, vm, cc7 (fromZero), cc7 (mid));
+        check (v0 < 0.75 * vm && cc7 (fromZero) < 20 && cc7 (mid) >= 100, "el fade in sólo cuando el transporte arranca en el comienzo de la canción");
+    }
+    std::printf ("18. Con el reloj del host, arrancar el transporte es Play y pararlo es Stop\n");
+    {
+        auto mk = [] (Generator& g, bool rws, bool hostClock) {
+            setupAmbient (g, 3); g.g.cmdMode = true; g.g.runCmd = 0; g.g.hostClock = hostClock; g.g.runWhenStopped = rws; g.prepare (48000.0);
+        };
+        auto blocks = [] (Generator& g, int count, bool playing, double& ppq, int& notes, int& edges, std::vector<sat::E>* log = nullptr, int64_t* t = nullptr) {
+            std::vector<OutEvent> ev;
+            for (int b = 0; b < count; ++b)
+            {
+                g.process (512, playing, ppq, 120.0, ev);
+                if (g.lastHostEdge() != 0) edges = g.lastHostEdge();
+                g.g.runCmd = 0;
+                for (auto& e : ev)
+                {
+                    notes += (e.data[0] & 0xF0) == 0x90 && e.data[2] > 0;
+                    if (log) log->push_back ({ *t + e.offset, e.data[0], e.data[1], e.data[2], e.lane });
+                }
+                if (t) *t += 512;
+                if (playing) ppq += 512.0 / 48000.0 * 2.0;
+            }
+        };
+        Generator g; mk (g, true, true);
+        double ppq = 0.0; int n0 = 0, n1 = 0, n2 = 0, n3 = 0, e1 = 0, e2 = 0;
+        blocks (g, 200, false, ppq, n0, e1);                       // parado, sin Play: nada
+        blocks (g, 1000, true, ppq, n1, e1);                       // arranca el transporte
+        std::vector<sat::E> stopLog; int64_t t = 0;
+        blocks (g, 500, false, ppq, n2, e2, &stopLog, &t);         // para: Stop, aunque toque con el host parado
+        std::printf ("  parado %d notas, con el transporte %d (flanco %d), después de parar %d (flanco %d), notas colgadas %d\n", n0, n1, e1, n2, e2, sat::hanging (stopLog));
+        check (n0 == 0 && n1 > 20 && e1 == 1 && n2 == 0 && e2 == -1 && ! g.isRunning() && ! g.isArmed(), "el transporte arranca y para a Orrery");
+        g.g.runCmd = 1; blocks (g, 500, false, ppq, n3, e2);       // Play con el host parado: toca (Play with host stopped)
+        check (n3 > 5 && g.isRunning(), "Play con el host parado toca");
+        // Sonando con el host parado, arranca el transporte: empieza de cero, igual que si hubiera estado parado.
+        std::vector<sat::E> a, b; int64_t ta = 0, tb = 0; int na = 0, nb = 0, ea = 0, eb = 0;
+        double pa = 12.0, pb = 12.0;
+        blocks (g, 1500, true, pa, na, ea, &a, &ta);
+        Generator h; mk (h, true, true);
+        blocks (h, 1500, true, pb, nb, eb, &b, &tb);
+        int tot = 0; const int m = sameWithin (b, a, 0, tot);
+        std::printf ("  transporte desde el pulso 12 con Orrery sonando antes: %d de %d eventos iguales a una recién abierta\n", m, tot);
+        check (m == tot && tot > 100 && na > 20, "al arrancar el transporte empieza de cero (no depende de lo que tocó antes)");
+        Generator w; mk (w, false, true);
+        double pw = 0.0; int nw = 0, nw2 = 0, ew = 0;
+        w.g.runCmd = 1; blocks (w, 300, false, pw, nw, ew);
+        blocks (w, 500, true, pw, nw2, ew);
+        check (nw == 0 && w.isArmed() && nw2 > 5, "Play with host stopped Off: Play espera al transporte");
+        Generator f; mk (f, true, false);
+        double pf = 0.0; int nf = 0, ef = 0;
+        blocks (f, 500, true, pf, nf, ef);
+        check (nf == 0 && ef == 0 && ! f.isRunning(), "con el reloj Free el transporte no la arranca");
     }
 }
 
@@ -575,6 +833,8 @@ int main()
     }
 
     constellationTests();
+    leadLagTests();
+    hostClockTests();
     std::printf ("\n%s (%d fallas)\n", fails == 0 ? "TODO OK" : "HAY FALLAS", fails);
     return fails == 0 ? 0 : 1;
 }

@@ -54,6 +54,7 @@ Editor self-test: `AT42_SNAPSHOT=/tmp/x.png AT42_TAB=0|1 AT42_PRESET=n AT42_PANE
 | Presets | leveled to ≈ −17 dBFS RMS (Piezo Percussion needs an audio input and is left at MASTER 7) |
 | CPU (standalone, Apple Silicon, 2x) | 10-20 % of one core for the whole instrument; 1x halves it |
 | Validation | pluginval strictness 8 (VST3 + AU on macOS, VST3 with GUI on Windows), auval |
+| DAW QA fixes (1.0.6) | `at42proctest` P1-P10 (tools/proctest.cpp): an instance prepared again after playing renders bit-identical to a fresh one (was +4.1 dB apart), state byte-stable, fresh = program 0, Init plays a MIDI chord (-23 dBFS RMS), notes released after a host gap (running, stopped, arpeggiator); athosttest VST3 + AU 0 FAIL besides the two self-playing presets (Pulser Ritual, Arp Constellation), pluginval strictness 10 on the VST3 |
 
 ## Trampas
 

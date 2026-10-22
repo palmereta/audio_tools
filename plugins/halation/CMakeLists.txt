@@ -1,5 +1,5 @@
 # Halation — delay y reverb en un solo espacio (red de realimentación que va de ecos a sala; docs/research.md).
-set(HALATION_VERSION 1.0.2)
+set(HALATION_VERSION 1.0.3)
 
 if(APPLE)
     set(HALATION_FORMATS VST3 AU Standalone)
@@ -40,7 +40,7 @@ target_sources(Halation PRIVATE ${HALATION_SOURCES})
 target_include_directories(Halation PRIVATE Source Source/dsp ${CMAKE_SOURCE_DIR}/plugins/lacquer/Source/dsp)
 target_compile_definitions(Halation PUBLIC
     HALATION_HAS_ASSETS=1 HALATION_VERSION="${HALATION_VERSION}"
-    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_DISPLAY_SPLASH_SCREEN=0 _USE_MATH_DEFINES=1)
+    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS=0 JUCE_DISPLAY_SPLASH_SCREEN=0 _USE_MATH_DEFINES=1)
 target_link_libraries(Halation
     PRIVATE HalationAssets juce::juce_audio_utils
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_lto_flags juce::juce_recommended_warning_flags)

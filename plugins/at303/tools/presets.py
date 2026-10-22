@@ -80,15 +80,17 @@ preset(B, "Pocket", "A tight two-bar feel squeezed into one: rests on the one an
        "0 0 3 0 5 3 0 0 7 5", "RNNNRNNNRNNNRNNN", tempo=120, cutoff=34, resonance=48, envmod=42, decay=28, accent=45)
 
 # ── Distorsión: la salida empujada ──
+# Volume propio para quedar cerca del resto (QA en DAWs 2026-10-22, F1: Overdriven Ladder estaba 18 dB arriba de la
+# mediana y golpeaba el techo; Broken Speaker 13 dB).
 D = "Driven"
 preset(D, "Hot Box", "Soft clip into the delay: thick, compressed and warm.",
-       "0 12a 0 3s 0 7 12 0 0a 10 0 5s 3 0 12 7", "NNNNNNNNNNNNNNNN", tempo=134, cutoff=40, resonance=82, envmod=60, decay=45, accent=75, drive_type=1, drive=70)
+       "0 12a 0 3s 0 7 12 0 0a 10 0 5s 3 0 12 7", "NNNNNNNNNNNNNNNN", tempo=134, cutoff=40, resonance=82, envmod=60, decay=45, accent=75, drive_type=1, drive=70, volume=55)
 preset(D, "Broken Speaker", "Hard clip with the tone low: a small speaker pushed too far.",
-       "0 0 0a 0 3 0 0 12s 0 0 7a 0 5 0 3 0", "NNNNNNNNNNNNNNNN", tempo=138, cutoff=36, resonance=78, envmod=58, decay=40, accent=80, drive_type=2, drive=80, drive_tone=30)
+       "0 0 0a 0 3 0 0 12s 0 0 7a 0 5 0 3 0", "NNNNNNNNNNNNNNNN", tempo=138, cutoff=36, resonance=78, envmod=58, decay=40, accent=80, drive_type=2, drive=80, drive_tone=30, volume=42)
 preset(D, "Fuzz Worm", "Fuzz after the filter: the resonance turns into a buzzing worm.",
-       "0 3s 5 7s 10 12s 10 7s", "NNNNNNNNNNNNNNNN", tempo=128, cutoff=30, resonance=88, envmod=50, decay=55, accent=60, drive_type=3, drive=65, drive_tone=55)
+       "0 3s 5 7s 10 12s 10 7s", "NNNNNNNNNNNNNNNN", tempo=128, cutoff=30, resonance=88, envmod=50, decay=55, accent=60, drive_type=3, drive=65, drive_tone=55, volume=55)
 preset(D, "Overdriven Ladder", "The extended overdrive: the ladder itself driven harder, before any output stage.",
-       "0a 0 12 0 0 3a 0 10 0 0a 7 0 5 0 3a 0", "NNNNNNNNNNNNNNNN", tempo=130, cutoff=42, resonance=80, envmod=60, decay=44, accent=78, overdrive=70, drive=20)
+       "0a 0 12 0 0 3a 0 10 0 0a 7 0 5 0 3a 0", "NNNNNNNNNNNNNNNN", tempo=130, cutoff=42, resonance=80, envmod=60, decay=44, accent=78, overdrive=70, drive=20, volume=19)
 
 # ── Tresillos ──
 T = "Triplets"

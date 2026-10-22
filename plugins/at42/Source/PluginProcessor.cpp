@@ -82,6 +82,8 @@ void AT42Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
     outL.assign ((size_t) currentBlock + 64, 0.0f);
     outR.assign ((size_t) currentBlock + 64, 0.0f);
     inCopy.assign ((size_t) (currentBlock + 64) * 2, 0.0f);
+    hostGap.prepare (sampleRate);
+    freePpq = 0.0;                 // el reloj libre (LFO sincronizados con el host parado) arranca de cero
 }
 
 void AT42Processor::handleMidi (const juce::MidiMessage& m)
@@ -131,6 +133,9 @@ void AT42Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     const int n = buffer.getNumSamples();
     if (n <= 0) return;
     wasBypassed = false;
+    // El host dejó de llamar (REAPER con el plugin en bypass) y vuelve: un note-off pudo perderse en el hueco. Se
+    // sueltan el teclado (y con él el arpegiador) y los drones tocados por MIDI (QA en DAWs 2026-10-22, X1).
+    if (hostGap.check (getPlayHead(), n, isNonRealtime())) { engine.keys.clear(); midiDrone.fill (false); }
     const int wantOs = kOversampling42[juce::jlimit (0, 2, (int) apvts.getRawParameterValue ("quality")->load())];
     { if (wantOs != engine.oversampling()) engine.prepare (currentSr, currentBlock, wantOs); latency.request ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0)); }
     if ((int) outL.size() < n) { outL.resize ((size_t) n); outR.resize ((size_t) n); }
@@ -450,6 +455,10 @@ void AT42Processor::randomizePanel()
 void AT42Processor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
+    // Las propiedades propias se quitan y se vuelven a poner en el mismo orden: setStateInformation deja algunas en el
+    // árbol de parámetros y al guardar otra vez el orden de los atributos cambiaba (Live reescribía el set en cada
+    // guardado sin cambios, QA en Live 2026-10-22, H4).
+    for (auto id : { "presetName", "presetSnapshot", "program", "cables", "keyseq", "midiMap" }) state.removeProperty (id, nullptr);
     const auto pr = presetToJson42 (currentAsPreset (currentPresetName, ""));
     state.setProperty ("presetName", currentPresetName.get(), nullptr);
     state.setProperty ("presetSnapshot", tracker.toString(), nullptr);

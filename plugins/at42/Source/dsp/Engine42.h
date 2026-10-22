@@ -67,6 +67,16 @@ public:
         fsBase = (float) sampleRate;
         os = std::max (1, oversampling);
         fs = fsBase * (float) os;
+        // Todos los módulos vuelven a nuevos (fases, envolventes, filtros, efectos, azar): una instancia preparada de
+        // nuevo después de tocar suena igual que una recién creada (QA en DAWs 2026-10-22; athosttest repro +4,1 dB).
+        // Los ajustes (p, st, patch, la secuencia grabada) quedan.
+        d1 = d2 = d4 = d5 = ClassicVoice {}; papa3 = papa6 = PapaVoice {};
+        vcoA = vcoB = Vco42 {}; egA = egB = Adsr42 {}; fltL = fltR = Polivoks {};
+        fxL = EffectEngine42 {}; fxR = EffectEngine42 {};
+        lfoA = lfoB = pulser = Lfo42 {}; seq = Seq5 {}; ef = EnvFollower {};
+        decL = Decimator {}; decR = Decimator {};
+        fxCv = {}; noise = Rng { 5 }; preSig = 0.0f; view = {};
+        keys.resetRuntime();
         int seed = 11;
         for (auto* v : classicPtrs()) v->prepare (fs, (uint32_t) (seed += 101));
         papa3.prepare (fs, 0x3333u); papa6.prepare (fs, 0x6666u);

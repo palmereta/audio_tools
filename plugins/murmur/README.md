@@ -2,7 +2,7 @@
 
 A real-time granular effect. Everything that comes in is recorded into a memory of up to 16 seconds,
 and up to 128 grains read it at once, each with its own length, pitch, direction, envelope and place in
-the stereo field. VST3, Audio Unit (macOS) and standalone. Version 1.0.2.
+the stereo field. VST3, Audio Unit (macOS) and standalone. Version 1.0.3.
 
 The window draws the memory as a horizon and each grain as a bird: its place is the moment it reads, its
 height is its pitch, its size follows its envelope, and reverse grains fly the other way.
@@ -78,6 +78,7 @@ takes the manual's screenshots that way.
 | Feedback at maximum with shimmer | bounded, and silent after the input stops |
 | Sync 1/8 at 120 BPM | 16 onsets in 4 s |
 | 60 random extreme settings | always finite, peak below 8 |
+| Blocks of 64, 333, 512 and 1024 samples with two LFOs, ducking and a modulated mix (dsptest 10) | bit-identical |
 | pluginval strictness 8, auval (aumf Mrmr Atls) | pass (VST3 and AU on macOS, VST3 on Windows) |
 | athosttest (programs, MIDI, rates, state, fuzz, parameters) | 0 FAIL on macOS and Windows; WARN only for user gain above 0 dB and for restored state not sample-identical (grains are random) |
 

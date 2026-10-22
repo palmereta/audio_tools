@@ -1,6 +1,7 @@
 #pragma once
 #include "../../../../shared/ui/Wheel.h"
 #include "../../../../shared/ui/HelpRouter.h"
+#include "../../../../shared/ui/Showing.h"
 // Controles de Murmur atados a parámetros del host: la perilla-órbita, la caja (elección o entero que se
 // arrastra) y la llave. Todos muestran ayuda al pasar el mouse.
 
@@ -31,7 +32,7 @@ protected:
     juce::RangedAudioParameter* param = nullptr;
     std::unique_ptr<juce::ParameterAttachment> attach;
     float last = -1.0f;
-    void timerCallback() override { if (param != nullptr && std::abs (param->getValue() - last) > 1e-5f) { last = param->getValue(); repaint(); } }
+    void timerCallback() override { if (param != nullptr && dh::reallyShowing (*this) && std::abs (param->getValue() - last) > 1e-5f) { last = param->getValue(); repaint(); } }
     void setNorm (float v, bool gesture) { if (gesture) attach->setValueAsPartOfGesture (param->convertFrom0to1 (juce::jlimit (0.0f, 1.0f, v))); else attach->setValueAsCompleteGesture (param->convertFrom0to1 (juce::jlimit (0.0f, 1.0f, v))); }
 };
 

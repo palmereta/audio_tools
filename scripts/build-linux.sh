@@ -27,8 +27,10 @@ ssh "$HOST" "docker build -q -t $IMAGE $REMOTE/src/scripts/linux >/dev/null"
 case "$ONLY" in
     "") TARGETS="" ;;
     launcher) TARGETS="tools/launcher/all" ;;
-    *) TARGETS="plugins/$ONLY/all" ;;
+    *) TARGETS="plugins/$ONLY/all atvstpresets" ;;       # atvstpresets: los .vstpreset del zip (package-linux.sh)
 esac
+# qa.sh usa athosttest: con un plugin solo y una carpeta de build nueva no estaría compilado.
+[ -n "$QA" ] && [ -n "$TARGETS" ] && TARGETS="$TARGETS athosttest"
 # Con el usuario del host (los archivos de build/ y dist/ no quedan de root) y sin pasar de 6 GB: el host corre
 # otros servicios (Postgres, Redis).
 RUN="docker run --rm -u \$(id -u):\$(id -g) -e HOME=/tmp --memory=6g -v \$HOME/$REMOTE:/work -w /work/src $IMAGE"

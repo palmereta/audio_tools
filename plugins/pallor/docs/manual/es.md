@@ -291,7 +291,9 @@ GM es el mapa de la mayoría de los controladores de batería y de los racks de 
 
 Con **Send the sequencer as MIDI** prendido, Pallor manda cada paso que toca como una nota, con el mismo mapa de notas, en el **Channel** elegido (10 por defecto). Los pasos con acento salen con velocidad 127. **Gate** fija cuánto dura cada nota, de 2 a 1.000 ms (30 ms por defecto); una nota siempre termina antes de que vuelva a sonar la misma nota. Cuando el transporte para o salta, se terminan todas las notas que siguen prendidas. Usalo para tocar otra caja de ritmos o un sampler con el secuenciador de Pallor, o para grabar el patrón como MIDI.
 
-En Ableton Live, usá la versión VST3 para la salida MIDI: Live no toma MIDI de los Audio Units.
+Las notas salen de Pallor tan tarde como su audio (su latencia, 78 muestras a 48 kHz con Tape encendido), que el host compensa sólo para el audio, así que un sinte o una grabación MIDI alimentados por Pallor quedan a tiempo con el sonido de Pallor.
+
+En Ableton Live y en REAPER, usá la versión VST3 para la salida MIDI: ninguno de los dos toma el MIDI que producen los plugins Audio Unit.
 
 ### Arrastrar MIDI
 
@@ -325,6 +327,12 @@ Elegí qué carga un clic: **SOUND + PATTERNS** (todo), **SOUND ONLY** (el kit, 
 
 Cada preset está nivelado a unos −18 LUFS, así que podés compararlos sin que gane el que suena más fuerte.
 
+### En Ableton Live
+
+Live no muestra los presets de fábrica de los plugins (ignora las listas de programas de VST3). La página PRESETS funciona como en todos lados, y los presets de fábrica aparecen además en el navegador de Live en Plug-Ins → Audio Tools Pallor (desplegá el plugin), instalados por el launcher o copiando la carpeta Presets del zip.
+
+Pallor tiene 463 parámetros y Live guarda como mucho 128 de un dispositivo para automatizar y para su panel, y llena el panel solo únicamente cuando un plugin tiene 64 o menos. Hacé clic en **Configure** en el dispositivo de Pallor en Live y mové los controles que quieras automatizar o mapear: se agregan en ese orden. Un buen juego para tocar en vivo: **Pattern**, **Fill**, **Swing**, **Volume**, **Space Return**, **Echo Return**, **Tape Drive** y **Glue Mix**, más **Level**, **Tune**, **Decay** y **Cutoff** de las tres o cuatro voces con las que tocás (Kick, Snare, Closed Hat...). Todo lo demás queda en el panel de Pallor y se guarda con el set.
+
 ## Setup
 
 ![La página SETUP: reloj, swing, acento y probabilidad, salidas y MIDI.](img/setup.jpg)
@@ -357,7 +365,8 @@ Cada preset está nivelado a unos −18 LUFS, así que podés compararlos sin qu
 - **No suena nada cuando le doy play en el DAW.** Fijate que Follow host esté prendido (SETUP) y que el modo de reproducción no sea SONG con la cadena vacía (en ese caso Pallor toca A).
 - **Los charles suenan finos cuando se corta el abierto.** Los charles cerrado y abierto están en el grupo de choke 1; poné el Choke del charles abierto en NONE para que suenen juntos.
 - **Un cambio de patrón no pasa enseguida.** Entra al final de la pasada que está sonando, para quedar a tiempo con el compás.
-- **No sale MIDI en Ableton Live.** Usá la versión VST3, y en la pista que recibe poné MIDI From en la pista de Pallor.
+- **No sale MIDI en Ableton Live ni en REAPER.** Usá la versión VST3, y en la pista que recibe poné MIDI From en la pista de Pallor (en REAPER, un envío con MIDI).
+- **El panel del dispositivo de Pallor en Live está vacío.** Hacé clic en Configure y tocá los controles que quieras ahí (ver Presets, En Ableton Live).
 - **Falta mi muestra cuando vuelvo a abrir el proyecto.** Solo 8 MB de muestras viajan dentro del proyecto; el resto se guarda por su ruta. Dejá los archivos donde estaban, o guardá el proyecto con menos muestras o más cortas.
 - **La probabilidad siempre toca lo mismo.** Es a propósito: un render se puede repetir. Cambiá la Chance seed para tener otras elecciones.
 

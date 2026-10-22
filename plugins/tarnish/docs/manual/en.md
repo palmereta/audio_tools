@@ -129,7 +129,7 @@ The settings of the selected machine:
 ## More
 
 - **Output**, after the machine.
-- **Auto gain** undoes the level change of Drive.
+- **Auto gain** undoes the level change of Drive and of Bias (under-bias makes the tape louder).
 - **Stereo wobble**: each channel wobbles on its own. Real machines move both channels together; this is not physical, but it is wide.
 - **Lock to timeline**: dropouts, crackle, static and the slow drift follow the song position. With it on, a bounce is identical to playback, and bar 17 sounds the same whether you start at bar 1 or bar 16. With it off, every pass is different, like a real worn tape.
 - **Quality**: **Eco** halves the CPU of the magnetic model, with a less exact loop at high drive.
@@ -155,6 +155,10 @@ Thirty-three presets in six groups:
 - **Radio and phone.** Old Radio, Distant Station, Telephone, Mobile Call Breakup, Intercom.
 - **Lo-fi and effects.** Tape Stop Drop, Half-Speed Dream, 12-bit Sampler, Toy Sampler.
 
+The presets are levelled close to the level of what goes in: a mix peaking at -3 dBFS comes out below 0 dBFS with every one of them. The machines still move the peaks of a mix by a dB or two (the head bump, the record and playback curves), so a master at -14 LUFS can touch 0 dBFS: lower **Output** or put a limiter after Tarnish.
+
+In Ableton Live, which does not show a plugin's own program list, the factory presets appear in Live's browser under **Plug-Ins**, **Audio Tools Tarnish** (unfold the plugin). The launcher installs them; with the zip, copy the folders inside its **Presets** folder to `~/Library/Audio/Presets/Audio Tools/` (macOS).
+
 ## The command-line renderer
 
 `tarnishrender` runs a file through the whole effect:
@@ -165,10 +169,11 @@ tarnishrender in.wav out.wav --preset "Tape Stop Drop" --bpm 96 --at 8 stop=1 --
 tarnishrender in.wav out.wav --set machine=3 --set crackle=50 --set scratches=2
 ```
 
-- `--preset` loads a preset by name. Without it, the defaults.
+- `--preset` loads a preset by name. Without it, the first one (Warm Studio Tape), as a new instance in a DAW.
 - `--tail` adds seconds of silence at the end (6 by default).
 - `--bpm` is the tempo for a synced stop (120 by default).
 - `--set id=value` sets a parameter before starting; `--at seconds id=value` changes it at that moment.
+- `--float` writes 32-bit floating point, so peaks above 0 dBFS are kept (24-bit by default).
 
 ## Getting the best from it
 

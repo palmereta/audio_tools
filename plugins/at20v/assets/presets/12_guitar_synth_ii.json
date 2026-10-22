@@ -1,5 +1,5 @@
 {
- "name": "Guitar Synth II",
+ "name": "Guitar Synth II (Audio In)",
  "category": "Factory",
  "knobs": {
   "vco1_wave": 2,

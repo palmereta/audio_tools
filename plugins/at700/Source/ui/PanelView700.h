@@ -11,6 +11,7 @@
 #include "../PluginProcessor.h"
 #include "Assets700.h"
 #include "Rope.h"
+#include "../../../../shared/ui/Showing.h"
 
 namespace dh {
 
@@ -766,6 +767,9 @@ private:
     // Sólo se redibuja lo que cambió.
     void timerCallback() override
     {
+        // Ventana escondida (Live la esconde sin cerrarla): ni animación ni repintado (QA en Live 2026-10-22, H3). Al
+        // volver, lo que cambió difiere de lo mostrado y se redibuja solo.
+        if (! dh::reallyShowing (*this)) return;
         const double now = juce::Time::getMillisecondCounterHiRes();
         const float dt = (float) juce::jlimit (0.001, 0.05, (now - lastTime) * 0.001);
         lastTime = now;

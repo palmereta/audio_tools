@@ -24,7 +24,7 @@ enum class Format { vst3, au, lv2, standalone, other };
 
 /** By the item's extension: .vst3, .component, .lv2, .app (macOS) or .exe (Windows). En Linux la standalone es
     el ejecutable sin extensión (p. ej. "AT20V FX"). Anything else (INSTALL.txt, LICENSE.txt, the command-line
-    renderers, que terminan en "render") is "other" and is not installed. */
+    renderers, que terminan en "render", and the Presets folder, which install() handles apart) is "other". */
 Format formatOf (const String& itemName);
 
 //==============================================================================
@@ -101,6 +101,10 @@ struct Settings
 struct Paths
 {
     File vst3User, vst3System, au, lv2, apps, data;
+    /** The vendor folder of the VST3 preset locations (VST3 spec, user scope): the zips' Presets/<plugin name>/
+        folders go inside. macOS ~/Library/Audio/Presets/Audio Tools, Windows <Documents>\VST3 Presets\Audio Tools,
+        Linux ~/.vst3/presets/Audio Tools; <LAUNCHER_INSTALL_ROOT>/Presets in tests. */
+    File presets;
     File desktopEntries;    // Linux: ~/.local/share/applications, un .desktop por standalone para el menú
     juce::Array<File> vst3Extra, auExtra, lv2Extra, appsExtra;   // only searched, for manual installs
     bool overridden = false;
@@ -123,6 +127,7 @@ struct InstallRecord
 {
     String version, installedAt;
     StringArray paths;
+    StringArray presetFiles;   // the factory .vstpreset files it put in Paths::presets; only these are ever deleted
 };
 
 /** What the launcher installed, kept as JSON in the data folder. */
@@ -173,10 +178,13 @@ String sha256Of (const File&);
 
 /** Unzips, keeps the formats the settings ask for (plus any format a previous launcher install
     put on disk, so an update never leaves an old copy behind) and moves them into place.
+    With the VST3, the factory presets of the zip's Presets/ folder go to Paths::presets, replacing the ones a previous
+    install put there (other files in those folders, such as presets the user saved, are left alone).
     Writes the record. 'notes' collects what to tell the user (e.g. rescan for Audio Units). */
 juce::Result install (const Product&, const File& zip, const Paths&, const Settings&, InstalledDb&, StringArray& notes);
 
-/** Deletes what the record lists, or what detect() found when the product was installed by hand. */
+/** Deletes what the record lists (with its factory presets), or what detect() found when the product was installed
+    by hand. */
 juce::Result remove (const Product&, const Paths&, InstalledDb&);
 
 /** Images and demo clips: the cached copy of a URL, downloaded the first time. The URLs carry a

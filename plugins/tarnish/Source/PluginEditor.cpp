@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include "../../../shared/ui/Showing.h"
 
 using namespace dh::tn;
 using namespace dh::tn::ui;
@@ -317,6 +318,9 @@ void TarnishEditor::showManual (bool on)
 
 void TarnishEditor::timerCallback()
 {
+    // Live crea el editor al insertar y después sólo esconde la ventana: escondido no se anima ni se repinta (QA en
+    // Live 2026-10-22, H3: 47 % de un núcleo por editor escondido).
+    if (! dh::reallyShowing (*this)) { deck.idle(); return; }
     const int m = (int) proc.value ("machine");
     for (int i = 0; i < machineBtns.size(); ++i) machineBtns[i]->setToggleState (i == m, juce::dontSendNotification);
     if (m != lastMachine) { lastMachine = m; bindVariant(); if (tab == "machine") buildDetail(); content.repaint (machineR); }

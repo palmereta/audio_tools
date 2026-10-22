@@ -8,6 +8,7 @@
 #include "ParamsPl.h"
 #include "SafeString.h"
 #include "PresetTracker.h"
+#include <map>
 
 class PlumbProcessor : public juce::AudioProcessor, private juce::AsyncUpdater
 {
@@ -80,6 +81,9 @@ private:
     dh::PresetTracker tracker { { "key", "scale", "mode", "ref_a", "gate", "midi_mode", "voice", "mix", "output",
                                   "deg0", "deg1", "deg2", "deg3", "deg4", "deg5", "deg6", "deg7", "deg8", "deg9", "deg10", "deg11" } };   // la canción y la sesión no "modifican" el preset
     std::atomic<bool> presetDirty { false };
+    // Ajustes de sesión que puso el último preset: el valor que dejó y el que había antes (ver loadPreset).
+    struct SessionValue { float set = 0, before = 0; };
+    std::map<juce::String, SessionValue> presetSessionValues;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlumbProcessor)
 };

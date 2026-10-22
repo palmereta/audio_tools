@@ -5,6 +5,7 @@
 #include "../PluginProcessor.h"
 #include "Assets.h"
 #include "Rope.h"
+#include "Showing.h"
 
 namespace dh {
 

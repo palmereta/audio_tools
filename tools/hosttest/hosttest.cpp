@@ -3,13 +3,21 @@
 // frecuencia de muestreo, estado guardado y restaurado, MIDI de salida balanceado, CPU y denormales.
 //
 //   athosttest <plugin.vst3|.component> [--tests a,b,...] [--out dir] [--quick]
+//   (un .component fuera de las carpetas de Plug-Ins se registra en el proceso: se prueba el compilado, no el instalado)
 //   athosttest --chain <generador.vst3> <sinte.vst3> [--gen-programs all|0,3] [--synth-program n] [--secs 120] [--out dir]
 //
-// Pruebas: info programs midi rates state fuzz params cpu reprepare midiout stopped bypass freeze roles ports (por defecto, todas;
-// roles y ports sólo hacen algo con Orrery: Main y satélites, puertos virtuales)
+// Pruebas: info programs midi rates state fuzz params cpu reprepare midiout midisync stopped bypass hostgap freeze roles ports (por
+// defecto, todas; roles y ports sólo hacen algo con Orrery: Main y satélites, puertos virtuales). Aparte, con --tests:
+// editor (CPU del editor con la ventana escondida, como lo deja Live; necesita una sesión gráfica), statebytes (estado
+// estable byte a byte, instancia nueva = programa 0), repro (instancias nuevas, re-preparadas y con bloques al azar suenan igual),
+// midilatency (la nota de MIDI out sale atrasada la latencia), midifx (notas y pedal a un efecto cambian la salida;
+// --fx-program n), progorder (un programa deja los mismos parámetros venga del programa que venga)
 // Cada resultado es PASS, WARN (para mirar a mano) o FAIL. Se escribe <out>/<plugin>.json y, de los casos con
 // problemas, un WAV para escucharlos. Sale con 1 si hubo algún FAIL.
 
+#if defined (__APPLE__)
+ #include <AudioToolbox/AudioToolbox.h>     // antes de JuceHeader (que hace using namespace juce)
+#endif
 #include <JuceHeader.h>
 #include <chrono>
 #include <cmath>
@@ -20,6 +28,9 @@
 #include <random>
 #include <set>
 #include <thread>
+#if ! JUCE_WINDOWS
+ #include <sys/resource.h>
+#endif
 
 using Clock = std::chrono::steady_clock;
 
@@ -70,6 +81,33 @@ juce::AudioPluginFormatManager& formats()
 }
 
 juce::String pluginPath;
+
+#if JUCE_MAC
+// Un .component recién compilado (fuera de las carpetas de Plug-Ins): el host de AU de JUCE busca por tipo, subtipo y
+// fabricante, así que con un path cargaba la versión INSTALADA del mismo plugin sin avisar. Se registra el binario
+// compilado en este proceso con el fabricante 'Atqa' y se lo carga por ese identificador; la instalada no se toca.
+juce::String registerBuiltAu (const juce::String& path)
+{
+    CFURLRef url = CFURLCreateWithFileSystemPath (nullptr, path.toCFString(), kCFURLPOSIXPathStyle, true);
+    CFBundleRef bundle = CFBundleCreate (nullptr, url);                 // queda cargado mientras dure el proceso
+    CFRelease (url);
+    if (bundle == nullptr || ! CFBundleLoadExecutable (bundle)) return {};
+    auto comps = (CFArrayRef) CFBundleGetValueForInfoDictionaryKey (bundle, CFSTR ("AudioComponents"));
+    if (comps == nullptr || CFArrayGetCount (comps) < 1) return {};
+    auto d = (CFDictionaryRef) CFArrayGetValueAtIndex (comps, 0);
+    auto str = [d] (CFStringRef k) { auto v = (CFStringRef) CFDictionaryGetValue (d, k); return v != nullptr ? juce::String::fromCFString (v) : juce::String(); };
+    auto fourCC = [] (const juce::String& s) { OSType t = 0; for (int i = 0; i < 4; ++i) t = (t << 8) | (OSType) (juce::uint8) (i < s.length() ? s[i] : ' '); return t; };
+    auto fn = (AudioComponentFactoryFunction) CFBundleGetFunctionPointerForName (bundle, str (CFSTR ("factoryFunction")).toCFString());
+    if (fn == nullptr) return {};
+    UInt32 version = 0;
+    if (auto v = (CFNumberRef) CFDictionaryGetValue (d, CFSTR ("version"))) CFNumberGetValue (v, kCFNumberSInt32Type, &version);
+    AudioComponentDescription desc { fourCC (str (CFSTR ("type"))), fourCC (str (CFSTR ("subtype"))), fourCC ("Atqa"), 0, 0 };
+    if (AudioComponentRegister (&desc, (U ("Audio Tools QA: ") + str (CFSTR ("name"))).toCFString(), version, fn) == nullptr) return {};
+    const auto type = str (CFSTR ("type"));
+    return "AudioUnit:" + juce::String (type == "aumu" ? "Synths/" : "Effects/") + type + "," + str (CFSTR ("subtype")) + ",Atqa";
+}
+#endif
+
 
 std::unique_ptr<Plug> load (const juce::String& path, double sr = 48000.0, int block = 512)
 {
@@ -145,7 +183,11 @@ Out render (Plug& pl, std::vector<Ev> events, juce::int64 total, const RenderOpt
             for (int c = 0; c < pl.ins; ++c)
                 for (int i = 0; i < n; ++i) buf.setSample (c, i, o.audioIn (pos + i, c));
         pl.ph.pos = o.frozenPosition ? 0 : pos;
-        if (o.randomBlocks && rnd.nextInt (16) == 0)       // bloques de 0 muestras: algunos hosts VST3 los mandan
+        // Bloques de 0 muestras: algunos hosts VST3 los mandan. A un AU no: AudioUnitRender con 0 cuadros deja la hora
+        // de render en el mismo lugar y el AU (AUBase::NeedsToRender) devuelve el bloque siguiente sin procesarlo, con
+        // sus notas; el ATFS1 AU salía desafinado 123 cents por eso. Ningún host de AU lo hace.
+        static const bool noZero = juce::SystemStats::getEnvironmentVariable ("HT_NOZERO", "").isNotEmpty();   // para aislar fallas
+        if (o.randomBlocks && ! noZero && pl.p->getPluginDescription().pluginFormatName != "AudioUnit" && rnd.nextInt (16) == 0)
         {
             juce::AudioBuffer<float> empty (buf.getNumChannels(), 0); juce::MidiBuffer none;
             pl.p->processBlock (empty, none);
@@ -345,6 +387,10 @@ void scenario (const juce::String& name, std::vector<Ev> ev, double lastEventSec
         // sonando, si decae: una nota colgada se sostiene.
         const double tail = pl->p->getTailLengthSeconds(), before = db (stats (r, total - 4.5, total - 4.0, pl->sr).rms);
         if (tail > waitSec (*pl) && before - db (end.rms) > 6.0) d << fmt (", cola declarada de %.0f s (decae %.0f dB en 4 s)", tail, before - db (end.rms));
+        // Con parámetros al azar un release largo (un RELEASE al máximo mientras se suelta una tecla) deja una cola
+        // que decae: no es una nota colgada, que se sostiene. Se avisa.
+        else if (name.startsWith (U ("parámetros al azar")) && before - db (end.rms) > 6.0)
+        { status = status == "FAIL" ? status : "WARN"; d << fmt (", cola larga que decae %.0f dB en 4 s", before - db (end.rms)); }
         else { status = "FAIL"; d << U (", sigue sonando (¿nota colgada?)"); }
     }
     if (pl->p->producesMidi())
@@ -574,10 +620,19 @@ void testMidi()
             if (pos < t (0.2)) return;
             if (pos < t (2.4))
             {
-                // HT_PARAMS=lo:hi limita el azar a esos índices (para aislar el parámetro culpable).
-                static const auto lim = juce::StringArray::fromTokens (juce::SystemStats::getEnvironmentVariable ("HT_PARAMS", ""), ":", "");
-                const int lo = lim.size() == 2 ? lim[0].getIntValue() : 0, hi = lim.size() == 2 ? std::min (lim[1].getIntValue(), ps.size()) : ps.size();
-                for (int i = 0; i < 4; ++i) { const int k = rnd->nextInt (ps.size()); const float v = rnd->nextFloat(); if (k >= lo && k < hi) ps[k]->setValue (v); }
+                // HT_PARAMS=lo:hi limita el azar a esos índices (para aislar el parámetro culpable); HT_PARAMS=a,b,c o
+                // a:b,c:d, a esos índices o tramos (para aislar una combinación).
+                static const auto spec = juce::SystemStats::getEnvironmentVariable ("HT_PARAMS", "");
+                auto allowed = [&] (int k) {
+                    if (spec.isEmpty()) return true;
+                    for (auto& part : juce::StringArray::fromTokens (spec, ",", ""))
+                    {
+                        const auto r = juce::StringArray::fromTokens (part, ":", "");
+                        if (r.size() == 2 ? (k >= r[0].getIntValue() && k < r[1].getIntValue()) : k == part.getIntValue()) return true;
+                    }
+                    return false;
+                };
+                for (int i = 0; i < 4; ++i) { const int k = rnd->nextInt (ps.size()); const float v = rnd->nextFloat(); if (allowed (k)) ps[k]->setValue (v); }
             }
             else if (pos < t (2.5)) for (int i = 0; i < ps.size() && i < (int) init->size(); ++i) ps[i]->setValue ((*init)[(size_t) i]);
         };
@@ -665,23 +720,29 @@ void testState()
         juce::MemoryBlock st; a->p->getStateInformation (st);
         a->p->setStateInformation (st.getData(), (int) st.getSize());      // las dos instancias cargan el mismo estado
         render (*a, {}, 2048, {});
+        // a se cierra antes de abrir b, como un proyecto que se guarda y se vuelve a abrir (Orrery trata un estado que
+        // se carga mientras su original sigue abierto como una copia: Duplicate Track, y le resuelve el rol de nuevo).
+        std::vector<float> aVals; for (auto* pr : params) aVals.push_back (pr->getValue());
+        RenderOpts o; if (isEffect (*a)) o.audioIn = testInput (a->sr, 3.4);
+        auto ra = render (*a, phrase (a->sr), S (5.0, a->sr), o);
+        const double aSr = a->sr; const bool aEffect = isEffect (*a);
+        a.reset();
         auto b = load (pluginPath);
         b->p->setStateInformation (st.getData(), (int) st.getSize());
         render (*b, {}, 2048, {});
         int mism = 0; juce::String which;
-        for (int i = 0; i < params.size(); ++i)
+        auto bParams = realParams (*b);
+        for (int i = 0; i < bParams.size() && i < (int) aVals.size(); ++i)
         {
-            float va = params[i]->getValue(), vb = realParams (*b)[i]->getValue();
-            const int steps = params[i]->getNumSteps();      // los discretos se comparan por paso
+            float va = aVals[(size_t) i], vb = bParams[i]->getValue();
+            const int steps = bParams[i]->getNumSteps();      // los discretos se comparan por paso
             if (steps > 1 && steps < 100000) { va = std::round (va * (float) (steps - 1)); vb = std::round (vb * (float) (steps - 1)); }
-            if (std::abs (va - vb) > 1e-3f) { ++mism; if (mism <= 3) which << params[i]->getName (24) << " " << juce::String (va, 3) << U ("≠") << juce::String (vb, 3) << "; "; }
+            if (std::abs (va - vb) > 1e-3f) { ++mism; if (mism <= 3) which << bParams[i]->getName (24) << " " << juce::String (va, 3) << U ("≠") << juce::String (vb, 3) << "; "; }
         }
         juce::MemoryBlock st2; b->p->getStateInformation (st2);
-        RenderOpts o; if (isEffect (*a)) o.audioIn = testInput (a->sr, 3.4);
-        auto ra = render (*a, phrase (a->sr), S (5.0, a->sr), o);
-        RenderOpts o2; if (isEffect (*b)) o2.audioIn = testInput (b->sr, 3.4);
+        RenderOpts o2; if (aEffect) o2.audioIn = testInput (b->sr, 3.4);
         auto rb = render (*b, phrase (b->sr), S (5.0, b->sr), o2);
-        const double la = db (stats (ra, 0, 5, a->sr).rms), lb = db (stats (rb, 0, 5, b->sr).rms);
+        const double la = db (stats (ra, 0, 5, aSr).rms), lb = db (stats (rb, 0, 5, b->sr).rms);
         double num = 0, da = 0, dbb = 0;
         for (size_t i = 0; i < std::min (ra.L.size(), rb.L.size()); ++i) { num += (double) ra.L[i] * rb.L[i]; da += (double) ra.L[i] * ra.L[i]; dbb += (double) rb.L[i] * rb.L[i]; }
         const double corr = da > 0 && dbb > 0 ? num / std::sqrt (da * dbb) : 1.0;
@@ -917,6 +978,346 @@ void testBypass()
     report ("bypass", U ("impulso por processBlockBypassed"), got == L ? "PASS" : "FAIL", fmt ("sale a %d muestras; latencia informada %d", got, L));
 }
 
+// Hueco del host (QA en DAWs 2026-10-22, X1): REAPER no llama a un plugin en bypass (ni processBlock ni
+// processBlockBypassed), así que un note-off que llega en ese rato se pierde. Al volver, el plugin tiene que soltar
+// las notas (dh::HostGap). Dos casos: (a) transporte andando, se saltan los bloques de 1,0 a 2,0 s mientras la
+// posición avanza y el note-off de 1,5 s no llega; (b) transporte parado, 600 ms de reloj sin llamadas.
+void testHostGap()
+{
+    {
+        auto probe = load (pluginPath);
+        if (isEffect (*probe) || ! probe->p->acceptsMidi() || isGenerator (*probe)) return;
+    }
+    struct Lv { double note, end; };
+    auto run = [] (bool gap, bool playing) -> Lv {
+        auto pl = load (pluginPath);
+        const double sr = pl->sr; const int n = pl->block;
+        const double total = 2.0 + waitSec (*pl);
+        juce::AudioBuffer<float> buf (std::max ({ 2, pl->ins, pl->outs }), n);
+        juce::MidiBuffer mb;
+        Out o;
+        const juce::int64 tOn = S (0.5, sr), tOff = S (1.5, sr), g0 = S (1.0, sr), g1 = S (2.0, sr), end = S (total, sr);
+        pl->ph.playing = playing; pl->ph.ppq = 0;
+        bool slept = false;
+        for (juce::int64 pos = 0; pos < end; pos += n)
+        {
+            const bool skip = gap && pos >= g0 && pos < g1;
+            if (! skip)
+            {
+                if (gap && ! playing && pos >= g1 && ! slept) { juce::Thread::sleep (600); slept = true; }
+                mb.clear();
+                if (tOn >= pos && tOn < pos + n) mb.addEvent (on (60, 110), (int) (tOn - pos));
+                if (tOff >= pos && tOff < pos + n) mb.addEvent (off (60), (int) (tOff - pos));
+                buf.clear();
+                pl->ph.pos = playing ? pos : 0;
+                pl->p->processBlock (buf, mb);
+            }
+            else buf.clear();
+            const float* l = buf.getReadPointer (0); const float* r = buf.getReadPointer (pl->outs > 1 ? 1 : 0);
+            o.L.insert (o.L.end(), l, l + n); o.R.insert (o.R.end(), r, r + n);
+            if (playing) pl->ph.ppq += n * pl->ph.bpm / 60.0 / sr;
+        }
+        return { db (stats (o, 0.6, 0.95, sr).rms), db (stats (o, total - 0.5, total, sr).rms) };
+    };
+    for (bool playing : { true, false })
+    {
+        const auto ctl = run (false, playing), gap = run (true, playing);
+        const juce::String name = playing ? U ("hueco con el transporte andando") : U ("hueco de reloj, transporte parado");
+        if (ctl.note < -60.0) { report ("hostgap", name, "PASS", fmt ("la nota no suena con el programa inicial (%.0f dB)", ctl.note)); continue; }
+        const bool ok = gap.end <= std::max (ctl.end + 6.0, -70.0);
+        report ("hostgap", name, ok ? "PASS" : "FAIL",
+                fmt ("nota %.0f dB; al final %.0f dB con el note-off perdido, %.0f dB con el note-off%s", ctl.note, gap.end, ctl.end, ok ? "" : U (" (nota colgada)").toRawUTF8()));
+    }
+}
+
+// Estado byte a byte (QA en Live 2026-10-22, H4: Live reescribía el set en cada guardado porque el estado cambiaba sin
+// que el usuario tocara nada) y una instancia nueva igual al programa 0 (QA en REAPER, X2).
+bool editPluginState (Plug& pl, const std::function<void (juce::XmlElement&)>& edit, juce::MemoryBlock* result);
+void testStateBytes()
+{
+    // Orrery guarda un id propio de cada instancia (para reconocer copias): no cuenta como diferencia.
+    auto save = [] (Plug& pl) {
+        juce::MemoryBlock m;
+        bool has = false;
+        if (editPluginState (pl, [&] (juce::XmlElement& x) { if (x.hasAttribute ("instanceId")) { has = true; x.setAttribute ("instanceId", "0"); } }, &m) && has) return m;
+        m.reset(); pl.p->getStateInformation (m);
+        auto* d = static_cast<char*> (m.getData());
+        const std::string key = "instanceId=\"";
+        for (size_t i = 0; i + key.size() < m.getSize(); ++i)
+            if (std::memcmp (d + i, key.data(), key.size()) == 0)
+                for (size_t j = i + key.size(); j < m.getSize() && d[j] != '"'; ++j) d[j] = '0';
+        return m;
+    };
+    auto diff = [] (const juce::MemoryBlock& a, const juce::MemoryBlock& b) -> juce::String {
+        if (a == b) return fmt ("iguales, %d bytes", (int) a.getSize());
+        size_t i = 0; const auto* x = static_cast<const char*> (a.getData()); const auto* y = static_cast<const char*> (b.getData());
+        while (i < a.getSize() && i < b.getSize() && x[i] == y[i]) ++i;
+        return fmt ("%d vs %d bytes, distintos desde el byte %d", (int) a.getSize(), (int) b.getSize(), (int) i);
+    };
+    auto a = load (pluginPath);
+    const auto s1 = save (*a), s2 = save (*a);
+    report ("statebytes", U ("instancia nueva guardada dos veces"), s1 == s2 ? "PASS" : "FAIL", diff (s1, s2));
+    a->p->setStateInformation (s1.getData(), (int) s1.getSize());
+    const auto s3 = save (*a);
+    report ("statebytes", U ("guardar → cargar → guardar"), s1 == s3 ? "PASS" : "FAIL", diff (s1, s3));
+    // Cada instancia se cierra antes de cargar su estado en otra (como reabrir el proyecto): Orrery trata un estado que
+    // se carga con su original todavía abierto como una copia (Duplicate Track) y le resuelve el rol de nuevo.
+    const int aProgram = a->p->getCurrentProgram(), aPrograms = a->p->getNumPrograms();
+    const juce::String aName0 = a->p->getProgramName (0);
+    a.reset();
+    auto b = load (pluginPath);
+    b->p->setStateInformation (s1.getData(), (int) s1.getSize());
+    const auto s4 = save (*b);
+    report ("statebytes", U ("cargado en otra instancia y guardado"), s1 == s4 ? "PASS" : "FAIL", diff (s1, s4));
+    b.reset();
+    if (aPrograms > 1)
+    {
+        auto c = load (pluginPath);
+        c->p->setCurrentProgram (std::min (3, c->p->getNumPrograms() - 1)); c->p->setCurrentProgram (0);
+        const auto s5 = save (*c);
+        report ("statebytes", U ("instancia nueva == programa 0"), s1 == s5 && aProgram == 0 ? "PASS" : "FAIL",
+                aName0 + ", " + diff (s1, s5));
+        c.reset();
+        auto d = load (pluginPath);
+        d->p->setCurrentProgram (std::min (5, d->p->getNumPrograms() - 1));
+        render (*d, { { 0, on (60) }, { S (0.3, d->sr), off (60) } }, S (0.5, d->sr), {});
+        const auto t1 = save (*d);
+        d.reset();
+        auto e = load (pluginPath);
+        e->p->setStateInformation (t1.getData(), (int) t1.getSize());
+        render (*e, {}, S (0.2, e->sr), {});
+        const auto t2 = save (*e);
+        report ("statebytes", U ("otro programa tocado: guardar → cargar → guardar"), t1 == t2 ? "PASS" : "FAIL", diff (t1, t2));
+    }
+    // Lo que el host escribe vuelve igual al reabrir la sesión (QA en REAPER, D2: Cutoff 0.6739 volvía 0.6772).
+    {
+        auto f = load (pluginPath);
+        auto params = realParams (*f);
+        juce::Random rnd (4242);
+        std::vector<float> want;
+        for (auto* prm : params) { float v = rnd.nextFloat(); if (prm->isDiscrete() || prm->isBoolean()) v = prm->getValue(); prm->setValueNotifyingHost (v); want.push_back (prm->getValue()); }
+        const auto st = save (*f);
+        const int fParams = params.size();
+        f.reset();
+        auto g = load (pluginPath);
+        g->p->setStateInformation (st.getData(), (int) st.getSize());
+        auto back = realParams (*g);
+        int bad = 0; juce::String first;
+        for (int i = 0; i < std::min (fParams, back.size()); ++i)
+            if (std::abs (back[i]->getValue() - want[(size_t) i]) > 1.0e-5f)
+            {
+                if (bad++ == 0) first = back[i]->getName (32) + fmt (" %.4f -> %.4f", want[(size_t) i], back[i]->getValue());
+            }
+        // WARN y no FAIL: un AudioParameterInt redondea al guardar (el host lo ve continuo) y vuelve en el entero; es
+        // cosmético, y hacerlo discreto cambiaría la escala de la automatización de los AU ya guardados.
+        report ("statebytes", U ("valores continuos al azar: guardar → reabrir"), bad == 0 ? "PASS" : "WARN",
+                bad == 0 ? fmt ("%d parámetros iguales", fParams) : fmt ("%d distintos, el primero ", bad) + first);
+    }
+}
+
+// Notas a un efecto (QA en REAPER 2026-10-22, X4): los efectos que sólo usan notas compilan sin los ~2.080
+// parámetros "MIDI CC n|m" del VST3; las notas tienen que seguir llegando. Entrada: un seno de 220 Hz; se compara la
+// salida con una nota (y el pedal CC64) entre 1,0 y 2,0 s contra la misma sin MIDI. --fx-program n elige el programa
+// (por ejemplo uno con Follow MIDI). PASS si las notas cambian la salida; WARN si no (el programa no usa MIDI).
+int fxProgram = -1;
+void testMidiFx()
+{
+    auto probe = load (pluginPath);
+    const bool fx = isEffect (*probe);
+    const double sr = probe->sr;
+    probe.reset();
+    if (! fx) return;
+    auto one = [&] (bool withNotes) {
+        auto pl = load (pluginPath);
+        if (fxProgram >= 0 && fxProgram < pl->p->getNumPrograms()) pl->p->setCurrentProgram (fxProgram);
+        RenderOpts o; o.audioIn = [sr] (juce::int64 i, int) { return 0.25f * (float) std::sin (2.0 * juce::MathConstants<double>::pi * 220.0 * (double) i / sr); };
+        std::vector<Ev> ev;
+        if (withNotes) ev = { { S (1.0, sr), juce::MidiMessage::controllerEvent (1, 64, 127) }, { S (1.0, sr), on (69) }, { S (1.0, sr), on (76) },
+                              { S (2.0, sr), off (69) }, { S (2.0, sr), off (76) }, { S (2.0, sr), juce::MidiMessage::controllerEvent (1, 64, 0) } };
+        return render (*pl, ev, S (3.0, sr), o);
+    };
+    const auto a = one (false), b = one (true);
+    double d = 0, ref = 0;
+    for (size_t i = (size_t) (1.1 * sr); i < (size_t) (1.95 * sr) && i < a.L.size(); ++i) { const double x = a.L[i] - b.L[i]; d += x * x; ref += (double) a.L[i] * a.L[i]; }
+    const double rel = 10.0 * std::log10 ((d + 1e-30) / (ref + 1e-30));
+    report ("midifx", fmt ("notas y pedal a un efecto%s", fxProgram >= 0 ? fmt (" (programa %d)", fxProgram).toRawUTF8() : ""), rel > -60.0 ? "PASS" : "WARN",
+            fmt ("diferencia con y sin MIDI %.1f dB respecto de la salida", rel));
+}
+
+// Un programa suena igual venga del programa que venga (QA en REAPER 2026-10-22, P1: en Plumb el modo de latencia,
+// la voz y el modo MIDI de un preset quedaban en los siguientes). Para cada par j → k: los parámetros después de
+// elegir j y después k son los mismos que eligiendo k en una instancia nueva.
+void testProgramOrder()
+{
+    auto ref = load (pluginPath);
+    const int N = ref->p->getNumPrograms();
+    if (N < 2) return;
+    std::vector<std::vector<float>> want ((size_t) N);
+    for (int k = 0; k < N; ++k)
+    {
+        auto pl = load (pluginPath); pl->p->setCurrentProgram (k);
+        for (auto* prm : realParams (*pl)) want[(size_t) k].push_back (prm->getValue());
+    }
+    int bad = 0; juce::String first;
+    for (int j = 0; j < N; ++j)
+    {
+        auto pl = load (pluginPath);
+        const auto ps = realParams (*pl);
+        for (int k = 0; k < N; ++k)
+        {
+            pl->p->setCurrentProgram (j); pl->p->setCurrentProgram (k);
+            for (int i = 0; i < ps.size() && i < (int) want[(size_t) k].size(); ++i)
+                if (std::abs (ps[i]->getValue() - want[(size_t) k][(size_t) i]) > 1.0e-4f)
+                {
+                    if (bad++ == 0) first = fmt ("%s después de %s: %s", pl->p->getProgramName (k).toRawUTF8(), pl->p->getProgramName (j).toRawUTF8(), ps[i]->getName (40).toRawUTF8());
+                    break;
+                }
+        }
+    }
+    report ("progorder", fmt ("%d programas, %d pares", N, N * N), bad == 0 ? "PASS" : "FAIL",
+            bad == 0 ? U ("cada programa deja los mismos parámetros venga de donde venga") : fmt ("%d pares distintos; el primero: %s", bad, first.toRawUTF8()));
+}
+
+// Reproducible (QA en REAPER 2026-10-22: ATFS1 y el AU del AT101V no anulaban entre dos instancias nuevas): dos
+// instancias nuevas con el mismo MIDI, y una que ya tocó y el host volvió a preparar (lo que hace un render), tienen
+// que dar las mismas muestras. WARN si no (un plugin puede tener deriva al azar a propósito).
+void testRepro()
+{
+    auto nullDb = [] (const Out& a, const Out& b) {
+        double d = 0, e = 0; const size_t n = std::min (a.L.size(), b.L.size());
+        for (size_t i = 0; i < n; ++i) { const double x = (double) a.L[i] - b.L[i], y = (double) a.R[i] - b.R[i]; d += x * x + y * y; e += (double) a.L[i] * a.L[i] + (double) a.R[i] * a.R[i]; }
+        return d == 0.0 ? -400.0 : 10.0 * std::log10 (d / (e + 1e-30) + 1e-40);
+    };
+    auto go = [] (Plug& pl) {
+        RenderOpts o; if (isEffect (pl)) o.audioIn = testInput (pl.sr, 3.5);
+        return render (pl, phrase (pl.sr), S (4.5, pl.sr), o);
+    };
+    auto a = load (pluginPath), b = load (pluginPath);
+    const auto ra = go (*a), rb = go (*b);
+    const double n1 = nullDb (ra, rb);
+    report ("repro", U ("dos instancias nuevas, el mismo MIDI"), n1 < -100.0 ? "PASS" : "WARN", n1 <= -400.0 ? U ("idénticas") : fmt ("diferencia %.1f dB", n1));
+    auto c = load (pluginPath);
+    go (*c);
+    c->p->releaseResources(); c->p->prepareToPlay (c->sr, c->block); c->ph.ppq = 0;
+    const auto rc = go (*c);
+    const double n2 = nullDb (ra, rc);
+    report ("repro", U ("una que ya tocó, preparada de nuevo"), n2 < -100.0 ? "PASS" : "WARN", n2 <= -400.0 ? U ("idénticas") : fmt ("diferencia %.1f dB", n2));
+    // Bloques al azar de 1 a 512 muestras (y de 0 en VST3) contra bloques fijos de 512: lo mismo.
+    auto e = load (pluginPath);
+    RenderOpts ro; ro.randomBlocks = true; if (isEffect (*e)) ro.audioIn = testInput (e->sr, 3.5);
+    const auto re = render (*e, phrase (e->sr), S (4.5, e->sr), ro);
+    const double n3 = nullDb (ra, re);
+    report ("repro", U ("bloques al azar contra bloques de 512"), n3 < -100.0 ? "PASS" : "WARN", n3 <= -400.0 ? U ("idénticas") : fmt ("diferencia %.1f dB", n3));
+}
+
+// MIDI de salida atrasado la latencia (QA en Live 2026-10-22, P1: el host compensa el audio pero no el MIDI de salida,
+// y una pista que dobla por MIDI From quedaba adelantada). Una nota de entrada a los 0,5 s: la primera nota que sale
+// (eco en Thru, o la que el plugin genera con esa nota) tiene que salir a 0,5 s + latencia. WARN si no.
+void testMidiLatency()
+{
+    auto pl = load (pluginPath);
+    if (! pl->p->producesMidi() || ! pl->p->acceptsMidi()) return;
+    const int L = pl->p->getLatencySamples();
+    const juce::int64 at = S (0.5, pl->sr);
+    pl->ph.playing = true;
+    auto r = render (*pl, { { at, on (60, 100) }, { at + S (0.4, pl->sr), off (60) } }, S (1.5, pl->sr), {});
+    juce::int64 first = -1;
+    for (auto& e : r.midi) if (e.m.isNoteOn()) { first = e.sample; break; }
+    if (first < 0) { report ("midilatency", U ("nota de salida = entrada + latencia"), "PASS", fmt ("sin notas de salida con la configuración inicial (latencia %d)", L)); return; }
+    const juce::int64 d = first - at;
+    report ("midilatency", U ("nota de salida = entrada + latencia"), d == L ? "PASS" : "WARN",
+            fmt ("sale %lld muestras después de la entrada; latencia informada %d", (long long) d, L));
+}
+
+// MIDI de salida a tiempo con el audio (QA en Live 2026-10-22, P1): un plugin con latencia L saca su audio L muestras
+// tarde y el host lo compensa; el MIDI que produce no lo compensa nadie, así que tiene que salir también L muestras
+// tarde. Con el transporte andando (secuenciadores) y un acorde en 0,5 s (instrumentos que sacan lo que tocan), la
+// primera nota de salida tiene que caer donde empieza el audio. Sólo plugins con MIDI de salida y latencia.
+void testMidiSync()
+{
+    auto pl = load (pluginPath);
+    const int L = pl->p->getLatencySamples();
+    if (! pl->p->producesMidi() || L <= 0 || isGenerator (*pl)) return;
+    // Sólo el VST3: Live y REAPER no entregan el MIDI de salida de un AU, y el AU hospedado acá trae sus notas sin la
+    // posición dentro del bloque (todas al principio).
+    if (! pluginPath.endsWithIgnoreCase (".vst3")) return;
+    for (auto* p : realParams (*pl)) if (p->getName (64).equalsIgnoreCase ("MIDI out")) p->setValueNotifyingHost (1.0f);
+    pl->ph.playing = true;
+    const juce::int64 at = S (0.5, pl->sr);
+    std::vector<Ev> ev;
+    for (int n : { 48, 55, 60, 64 }) { ev.push_back ({ at, on (n, 100) }); ev.push_back ({ at + S (1.0, pl->sr), off (n) }); }
+    auto r = render (*pl, ev, S (2.0, pl->sr), {});
+    juce::int64 tm = -1, ta = -1;
+    for (auto& e : r.midi) if (e.m.isNoteOn()) { tm = e.sample; break; }
+    for (size_t i = 0; i < r.L.size(); ++i) if (std::abs (r.L[i]) > 1.0e-3f || std::abs (r.R[i]) > 1.0e-3f) { ta = (juce::int64) i; break; }
+    if (tm < 0 || ta < 0) { report ("midisync", U ("MIDI de salida con el audio"), "WARN", fmt ("sin notas o sin audio (nota %lld, audio %lld)", (long long) tm, (long long) ta)); return; }
+    const juce::int64 d = tm - ta;
+    report ("midisync", U ("MIDI de salida con el audio"), std::abs ((double) d) <= 8.0 ? "PASS" : "FAIL",
+            fmt ("primera nota en %lld, audio desde %lld (%+lld muestras; latencia %d)", (long long) tm, (long long) ta, (long long) d, L));
+}
+
+// Editor escondido (QA en Live 2026-10-22, H3): Live crea el editor al insertar y después sólo esconde la ventana,
+// sin cerrarlo. Un editor escondido no tiene que gastar CPU (timers, animaciones, repintados). Mide la CPU del
+// proceso (sin audio) sin editor, con la ventana del host vacía y escondida (la referencia), con el editor a la vista
+// y escondido. WARN si escondido gasta más de 2 % de un núcleo sobre la referencia. Medición ruidosa (±3 %): repetir.
+// No reproduce lo que midió la QA en Live (8-26 %): JUCE ya no pinta una ventana escondida, lo que queda son los timers.
+// (Tapar la ventana con otra no sirve para probar: macOS no la marcó ocluida en esta prueba.)
+double processCpuSeconds()
+{
+   #if JUCE_WINDOWS
+    return -1.0;
+   #else
+    rusage ru {}; getrusage (RUSAGE_SELF, &ru);
+    return (double) ru.ru_utime.tv_sec + 1e-6 * (double) ru.ru_utime.tv_usec + (double) ru.ru_stime.tv_sec + 1e-6 * (double) ru.ru_stime.tv_usec;
+   #endif
+}
+
+void testEditor()
+{
+    auto pl = load (pluginPath);
+    if (! pl->p->hasEditor()) return;
+    if (processCpuSeconds() < 0) { report ("editor", U ("CPU del editor escondido"), "WARN", U ("sin medición de CPU en este sistema")); return; }
+    auto pump = [] (int ms) { juce::MessageManager::getInstance()->runDispatchLoopUntil (ms); };
+    auto measure = [&] (int ms) {
+        const double c0 = processCpuSeconds(); const auto t0 = Clock::now();
+        pump (ms);
+        return 100.0 * (processCpuSeconds() - c0) / std::chrono::duration<double> (Clock::now() - t0).count();
+    };
+    pump (500);
+    const double base = measure (3000);
+    juce::DocumentWindow w ("athosttest", juce::Colours::black, 0, true);
+    w.setUsingNativeTitleBar (true);
+    w.setTopLeftPosition (40, 40);
+    // La ventana del host vacía, mostrada y escondida: lo que cuesta sin el plugin (el enlace de pantalla de macOS).
+    juce::Component empty; empty.setSize (400, 300);
+    w.setContentNonOwned (&empty, true);
+    w.setVisible (true); pump (800); w.setVisible (false); pump (500);
+    const double baseWin = measure (3000);
+    w.clearContentComponent();
+    std::unique_ptr<juce::AudioProcessorEditor> ed (pl->p->createEditorIfNeeded());
+    if (ed == nullptr) { report ("editor", U ("CPU del editor escondido"), "FAIL", U ("createEditor devolvió nullptr")); return; }
+    w.setContentNonOwned (ed.get(), true);
+    w.setAlwaysOnTop (true);         // athosttest no es la aplicación del frente: sin esto la tapan otras ventanas
+    w.setVisible (true); w.toFront (false);
+    pump (1500);
+    const double shown = measure (3000);
+    pump (500);
+    w.setVisible (false);
+    pump (500);
+    const double hidden = measure (3000);
+    w.setVisible (true); w.toFront (false);
+    pump (1000);
+    const double again = measure (2000);
+    w.setVisible (false);
+    w.clearContentComponent();
+    ed.reset();
+    pump (300);
+    const double extra = hidden - baseWin;
+    report ("editor", U ("CPU del editor escondido"), extra > 2.0 ? "WARN" : "PASS",
+            fmt ("%% de un núcleo: sin editor %.1f, ventana vacía escondida %.1f, a la vista %.1f, escondido %.1f, de nuevo a la vista %.1f",
+                 base, baseWin, shown, hidden, again));
+}
+
 // ───────── Orrery: Main y satélites, puertos virtuales ─────────
 // Varias instancias del mismo VST3 en el mismo proceso (como las pistas de un DAW), procesadas ciclo a ciclo con el
 // mismo transporte y en un orden al azar (o cada una en su hilo).
@@ -1028,6 +1429,8 @@ int sameMidi (const std::vector<Ev>& a, const std::vector<Ev>& b)
 
 void testConstellation()
 {
+    // Sólo el VST3: el estado se lee en su formato (IComponent), y los hosts sacan el MIDI de Orrery sólo del VST3.
+    if (! pluginPath.endsWithIgnoreCase (".vst3")) { std::printf ("  roles: sólo con el VST3\n"); return; }
     {
         auto probe = load (pluginPath);
         if (paramNamed (*probe, "Role") == nullptr || paramNamed (*probe, "Satellite Lanes") == nullptr) return;     // sólo Orrery 1.0.5+
@@ -1087,8 +1490,8 @@ void testConstellation()
             setChoice (*rig.inst[3], "Satellite Lanes", 0x30, 256);         // un satélite con dos carriles (5 y 6)
             M.p->setCurrentProgram (0);                                     // First Light: carriles 1, 2, 3, 5 y 6
             setChoice (M, "Clock", mode == 0 ? 1 : 0, 2);
-            rig.playing = mode == 0;
             rig.run (0.3);                                                  // se sincronizan con el Main parado
+            rig.playing = mode == 0;                                        // con el reloj del host, arrancar el transporte ya es Play (1.0.6)
             setChoice (M, "Play", 1, 2);
             rig.run (20.0);
             setChoice (M, "Density", 80, 101);                              // cambios en marcha
@@ -1146,6 +1549,69 @@ void testConstellation()
         rig.run (2.0);
         int stuck = 0; for (int i = 0; i < 3; ++i) stuck += (int) stuckNotes (rig.midi[(size_t) i]).size();
         report ("roles", U ("5 al parar, nada colgado"), stuck == 0 ? "PASS" : "FAIL", fmt ("%d notas sin note-off en las tres", stuck));
+    }
+    if (paramNamed (*load (pluginPath), "Play") == nullptr) return;
+    // 6. QA en DAWs (2026-10-22). La misma variación con el reloj del host, como en REAPER: un rato con el host parado y
+    // Play puesto (cuánto, depende del reloj de pared), después el transporte desde 0, con o sin pre-roll y con otro
+    // buffer: las mismas notas en la misma muestra (H2). Arrancar el transporte es Play y pararlo es Stop (O1).
+    {
+        struct V { int n; int stoppedBlocks; int preroll; };
+        std::vector<std::vector<Ev>> runs; juce::String d; bool ok = true, edges = true;
+        for (auto v : { V { 512, 0, 0 }, V { 64, 900, 0 }, V { 333, 37, 3 * 333 }, V { 1024, 5, 12345 }, V { 768, 0, 0 } })
+        {
+            Rig rig; rig.add (48000.0, v.n);
+            auto& P = *rig.inst[0];
+            setChoice (P, "Role", 1, 4);                                   // Independent
+            P.p->setCurrentProgram (0);
+            setChoice (P, "Play", 1, 2);
+            for (int b = 0; b < v.stoppedBlocks; ++b) rig.cycle();
+            rig.midi[0].clear();
+            const juce::int64 start = rig.pos + v.preroll;                 // la muestra del pulso 0
+            rig.ppq = -(double) v.preroll * 100.0 / 60.0 / 48000.0;
+            rig.playing = true;
+            rig.run (20.0);
+            edges = edges && pluginParamValue (P, "run") == "1";
+            rig.playing = false; rig.run (0.5);
+            edges = edges && pluginParamValue (P, "run") == "0" && stuckNotes (rig.midi[0]).empty();
+            std::vector<Ev> r;
+            // Desde 2 muestras antes del pulso 0: el pulso que el rig suma bloque a bloque puede redondear una muestra.
+            for (auto& e : rig.midi[0]) if (e.sample - start >= -2 && e.sample - start < S (19.0, 48000.0) && ! (e.m.isNoteOff() && e.sample == start - v.preroll))
+                r.push_back ({ e.sample - start, e.m });
+            runs.push_back (r);
+        }
+        for (size_t k = 1; k < runs.size(); ++k)
+        {
+            int m = 0; const auto& a0 = runs[0]; const auto& b0 = runs[k];
+            std::vector<bool> used (b0.size(), false);
+            juce::String miss;
+            for (auto& x : a0)
+            {
+                bool found = false;
+                for (size_t j = 0; j < b0.size() && ! found; ++j)
+                    if (! used[j] && std::abs ((double) (b0[j].sample - x.sample)) <= 1.0 && b0[j].m.getRawDataSize() == x.m.getRawDataSize()
+                        && std::memcmp (b0[j].m.getRawData(), x.m.getRawData(), (size_t) x.m.getRawDataSize()) == 0) { used[j] = true; ++m; found = true; }
+                if (! found && miss.isEmpty()) miss = fmt (" (falta en %.4f s: ", (double) x.sample / 48000.0) + x.m.getDescription() + ")";
+            }
+            ok = ok && m == (int) a0.size() && b0.size() == a0.size() && a0.size() > 20;
+            d << m << "/" << (int) a0.size() << miss << " ";
+        }
+        report ("roles", U ("6 la misma variación: buffers 64/333/1024/768, pre-roll, espera con el host parado"), ok ? "PASS" : "FAIL", U ("mensajes iguales (±1 muestra): ") + d);
+        report ("roles", U ("6 el transporte arranca y para (Play lo muestra)"), edges ? "PASS" : "FAIL", edges ? U ("Play sigue al transporte, nada colgado") : U ("Play no siguió al transporte o quedaron notas"));
+    }
+    // 7. Duplicate Track (Live copia el estado a una instancia nueva mientras la original sigue abierta): la copia no
+    // hereda el rol; resuelve Auto de nuevo (O2). Un proyecto que se reabre conserva los roles (prueba 1).
+    {
+        Rig rig; for (int i = 0; i < 2; ++i) rig.add (48000.0, 512);
+        rig.run (0.1);
+        juce::MemoryBlock satState, mainState;
+        rig.inst[1]->p->getStateInformation (satState); rig.inst[0]->p->getStateInformation (mainState);
+        rig.add (48000.0, 512); rig.inst[2]->p->setStateInformation (satState.getData(), (int) satState.getSize());
+        rig.add (48000.0, 512); rig.inst[3]->p->setStateInformation (mainState.getData(), (int) mainState.getSize());
+        rig.run (0.1);
+        juce::StringArray roles, lanes; for (auto& p : rig.inst) { roles.add (pluginStateAttr (*p, "autoRole")); lanes.add (pluginStateAttr (*p, "autoLanes")); }
+        const bool ok = roles.joinIntoString (",") == "2,3,3,3" && lanes.joinIntoString (",") == "0,1,2,4";
+        report ("roles", U ("7 copias de un satélite y del Main: satélites en los carriles libres"), ok ? "PASS" : "FAIL",
+                "rol " + roles.joinIntoString (",") + U (", carriles ") + lanes.joinIntoString (","));
     }
 }
 
@@ -1223,8 +1689,9 @@ void testMidiOut()
         { const int n = 36 + rnd.nextInt (48); ev.push_back ({ S (s, sr), on (n, 1 + rnd.nextInt (127)) }); ev.push_back ({ S (s + 0.05 + rnd.nextDouble(), sr), off (n) }); }
         RenderOpts o;
         o.transport = { { 0, 0, 0 }, { S (7.0, sr), 1, 0 }, { S (8.0, sr), 0, 0 }, { S (12.0, sr), 2, 1.0 }, { S (19.0, sr), 1, 0 } };
+        auto* play = isGenerator (*pl) ? paramNamed (*pl, "Play") : nullptr;     // Orrery con reloj Free no para con el transporte
         o.perBlock = [&] (juce::int64 pos, int) {
-            if (pos > S (18.5, sr)) return;
+            if (pos > S (18.5, sr)) { if (play != nullptr && pos > S (19.0, sr)) play->setValue (0.0f); return; }
             if (rnd.nextInt (8) == 0) params[rnd.nextInt (params.size())]->setValue (rnd.nextFloat());
         };
         for (int ch = 1; ch <= 16; ++ch) ev.push_back ({ S (19.0, sr), cc (123, 0, ch) });
@@ -1339,6 +1806,16 @@ int main (int argc, char** argv)
 
     pluginPath = juce::File::getCurrentWorkingDirectory().getChildFile (args[0]).getFullPathName();
     plugName = juce::File (pluginPath).getFileNameWithoutExtension();
+   #if JUCE_MAC
+    if (pluginPath.endsWithIgnoreCase (".component") && ! pluginPath.contains ("/Library/Audio/Plug-Ins/Components"))
+    {
+        const auto id = registerBuiltAu (pluginPath);
+        if (id.isEmpty()) { std::printf ("no se pudo registrar el AU compilado %s\n", pluginPath.toRawUTF8()); return 2; }
+        std::printf ("AU compilado registrado en este proceso como %s (no la versión instalada)\n", id.toRawUTF8());
+        pluginPath = id;
+        plugName << "_AU";
+    }
+   #endif
     // Estado de cada programa tal como lo guarda un host VST3 (el flujo de IComponent::getState): <dir>/<n>.bin y
     // <dir>/programs.txt. Sirve para armar sesiones de un DAW con los presets ya cargados (Ableton lo guarda en hex).
     if (args.contains ("--dump-states"))
@@ -1364,11 +1841,17 @@ int main (int argc, char** argv)
     }
     if (args.contains ("--list-params"))
     {
-        auto pl = load (pluginPath); int i = 0;
-        for (auto* p : realParams (*pl)) std::printf ("%3d %s (%d pasos)\n", i++, p->getName (40).toRawUTF8(), p->getNumSteps());
+        auto pl = load (pluginPath); int i = 0, autom = 0;
+        for (auto* p : realParams (*pl))
+        {
+            std::printf ("%3d %s (%d pasos)%s\n", i++, p->getName (40).toRawUTF8(), p->getNumSteps(), p->isAutomatable() ? "" : " [no automatizable]");
+            autom += p->isAutomatable() ? 1 : 0;
+        }
+        std::printf ("%d parámetros, %d automatizables (Ableton Live llena el panel del dispositivo con hasta 64)\n", i, autom);
         return 0;
     }
-    juce::StringArray tests = juce::StringArray::fromTokens (opt ("--tests", "info,programs,midi,rates,state,fuzz,params,cpu,reprepare,midiout,stopped,bypass,freeze,roles,ports"), ",", "");
+    fxProgram = opt ("--fx-program", "-1").getIntValue();
+    juce::StringArray tests = juce::StringArray::fromTokens (opt ("--tests", "info,programs,midi,rates,state,fuzz,params,cpu,reprepare,midiout,midisync,stopped,bypass,hostgap,freeze,roles,ports"), ",", "");
     std::printf ("%s\n", pluginPath.toRawUTF8());
     const auto t0 = Clock::now();
     for (auto& t : tests)
@@ -1386,6 +1869,14 @@ int main (int argc, char** argv)
         else if (t == "midiout") testMidiOut();
         else if (t == "stopped") testStopped();
         else if (t == "bypass") testBypass();
+        else if (t == "hostgap") testHostGap();
+        else if (t == "editor") testEditor();
+        else if (t == "midifx") testMidiFx();
+        else if (t == "progorder") testProgramOrder();
+        else if (t == "statebytes") testStateBytes();
+        else if (t == "repro") testRepro();
+        else if (t == "midilatency") testMidiLatency();
+        else if (t == "midisync") testMidiSync();
         else if (t == "freeze") testFreezeState();
         else if (t == "roles") testConstellation();
         else if (t == "ports") testPorts();

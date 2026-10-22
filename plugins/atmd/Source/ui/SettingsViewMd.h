@@ -5,6 +5,7 @@
 
 #include "../PluginProcessor.h"
 #include "AssetsMd.h"
+#include "../../../../shared/ui/Showing.h"
 
 namespace dh::md::ui {
 
@@ -220,9 +221,12 @@ private:
         onHelp (d.name + ": " + formatParam (d, proc.value (it->id)) + "   " + d.help);
     }
 
+    bool hidden = false;
     void timerCallback() override
     {
-        bool changed = last.size() != items.size();
+        if (! dh::reallyShowing (*this)) { hidden = true; return; }     // escondida: sin trabajo (H3)
+        bool changed = hidden || last.size() != items.size();
+        hidden = false;
         last.resize (items.size());
         for (size_t i = 0; i < items.size(); ++i)
         {

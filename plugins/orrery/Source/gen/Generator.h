@@ -40,6 +40,14 @@ struct LaneParams
     int follow = FollowChord, voices = 4;
     int ccNum = -1, ccShape = CcSine; float ccBeats = 16.0f, ccDepth = 0.4f, ccCenter = 0.5f;
     float driftCents = 0.0f;
+   #if defined (__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wfloat-equal"      // igualdad exacta a propósito (¿son los mismos ajustes?)
+   #endif
+    bool operator== (const LaneParams&) const = default;
+   #if defined (__clang__)
+    #pragma clang diagnostic pop
+   #endif
 };
 
 struct GlobalParams
@@ -56,6 +64,18 @@ struct GlobalParams
     bool gentle = false, fadeCC7 = true;
     float refPitch = 440.0f; int bendRange = 2; bool tuneByBend = false;
     float humanizeMs = 8.0f, level = 1.0f;
+    // Play y Stop. Sin cmdMode (orreryrender, pruebas) cuentan los cambios de run. Con cmdMode (el plugin) run no se
+    // mira: runCmd 1 = Play, 2 = Stop, en el bloque en que llega (así el plugin puede reflejar en su parámetro
+    // lo que hizo el transporte sin que ese eco vuelva como una orden).
+    bool cmdMode = false; int runCmd = 0;
+   #if defined (__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wfloat-equal"      // igualdad exacta a propósito (¿son los mismos ajustes?)
+   #endif
+    bool operator== (const GlobalParams&) const = default;
+   #if defined (__clang__)
+    #pragma clang diagnostic pop
+   #endif
 };
 
 struct OutEvent { int offset; uint8_t data[3]; uint8_t size; int8_t lane; };
@@ -104,11 +124,45 @@ public:
         out.clear();
         const bool useHost = g.hostClock && hostPlaying;
         const double bpm = useHost ? std::max (20.0, hostBpm) : (double) std::max (20.0f, g.tempo);
-        if (g.run && ! prevRun && ended) resetSession();      // Play después de una sesión terminada: arranca otra
+        // Play y Stop: las órdenes (o los cambios de run) y, con el reloj del host, el transporte: arrancarlo es
+        // Play y pararlo es Stop (lo que prometen el manual y la página del satélite; QA en Live, O1).
+        if (g.cmdMode) { if (g.runCmd == 1) arm (true); else if (g.runCmd == 2) arm (false); }
+        else if (g.run != prevRun) arm (g.run);
         prevRun = g.run;
+        hostEdge = 0;
+        bool transportStart = false;
+        if (g.hostClock && hostPlaying != prevHost)
+        {
+            hostEdge = hostPlaying ? 1 : -1;
+            transportStart = hostPlaying;
+            arm (hostPlaying);
+        }
+        prevHost = hostPlaying;
         if (resetRequest.exchange (false)) resetSession();
-        const bool shouldRun = g.run && (! g.hostClock || hostPlaying || g.runWhenStopped) && ! ended;
-        if (shouldRun && ! running) start (useHost ? hostPpq : 0.0);
+        // El transporte arranca: una sesión nueva desde esa posición, como un Play desde cero. Lo que haya tocado
+        // antes con el host parado (cuánto, depende del reloj de pared) no cambia lo que suena desde acá: la misma
+        // variación da las mismas notas en la misma posición, en tiempo real y en un render offline, con cualquier
+        // buffer (QA en REAPER, H2).
+        if (transportStart)
+        {
+            if (running) { allNotesOff (0); running = false; for (auto& S : st) S.wasOn = false; }
+            resetSession();
+        }
+        const bool shouldRun = armed && (! g.hostClock || hostPlaying || g.runWhenStopped) && ! ended;
+        if (shouldRun && ! running)
+        {
+            start (useHost ? musicalStart (hostPpq) : 0.0, useHost ? hostPpq : 0.0);
+            // Una sesión nueva con el host: su reloj (fades, respiración, la grilla de los controles) cuenta desde el
+            // comienzo musical, no desde el bloque en que arrancó el transporte (un pre-roll lo adelantaba).
+            if (useHost && sessionSamples == 0)
+            {
+                anchorSession = sessionSamples = (int64_t) std::llround ((hostPpq - startAt) * 60.0 / bpm * fs);
+                // El fade in sólo desde el comienzo de la canción: arrancar en otro lado (parar y seguir tocando en vivo)
+                // entra a nivel pleno. Depende sólo de la posición, así que sigue siendo determinista.
+                noFadeIn = startAt > 0.0;
+                fade = gainAt (0.0);
+            }
+        }
         if (! shouldRun && running) { stop (0); outEvents = out; return; }
         if (! running) { outEvents = out; view.running = false; return; }
 
@@ -117,7 +171,7 @@ public:
         double b0, b1;
         if (useHost)
         {
-            if (std::abs (hostPpq - beat) > 0.25) { allNotesOff (0); resetLanes (hostPpq); }   // salto del transporte
+            if (std::abs (hostPpq - beat) > 0.25) { allNotesOff (0); resetLanes (musicalStart (hostPpq)); }   // salto del transporte
             b0 = hostPpq; b1 = b0 + bpm / 60.0 / fs * n;
             anchorBeat = b0; anchorSession = sessionSamples; anchorBpm = bpm;
         }
@@ -154,7 +208,12 @@ public:
         {
             auto& L = lanes[(size_t) l]; auto& S = st[(size_t) l];
             if (! L.on) { if (S.wasOn) { releaseLane (l, 0); S.wasOn = false; } continue; }
-            if (! S.wasOn) { S.wasOn = true; S.next = b0; S.voicing.clear(); S.loopEvents.clear(); S.recording = L.loop; S.prevLoop = L.loop; S.cycleStart = b0; S.orbitStart = b0; }
+            if (! S.wasOn)
+            {
+                // Desde el comienzo musical (el transporte pudo arrancar en un pre-roll o fuera de la grilla).
+                const double t0 = std::max (b0, startAt);
+                S.wasOn = true; S.next = t0; S.voicing.clear(); S.loopEvents.clear(); S.recording = L.loop; S.prevLoop = L.loop; S.cycleStart = t0; S.orbitStart = t0;
+            }
         }
         for (int guard = 0; guard < 64 * kLanes; ++guard)
         {
@@ -201,8 +260,21 @@ public:
 
     void panic (std::vector<OutEvent>& outEvents) { out.clear(); allNotesOff (0); for (int ch = 1; ch <= 16; ++ch) { push (0, 0xB0 | (ch - 1), 123, 0, -1); push (0, 0xB0 | (ch - 1), 120, 0, -1); } outEvents = out; }
     std::atomic<bool> resetRequest { false };       // el hilo de mensajes pide una sesión nueva; la hace el audio
-    void resetSession() { ended = false; sessionSec = 0.0; sessionSamples = 0; anchorSession = 0; anchorBeat = beat; }
+    void resetSession() { ended = false; sessionSec = 0.0; sessionSamples = 0; anchorSession = 0; anchorBeat = beat; noFadeIn = false; }
     bool isRunning() const { return running; }
+    bool isArmed() const { return armed; }              // Play (puede estar esperando el transporte)
+    int lastHostEdge() const { return hostEdge; }       // en el último bloque: 1 el transporte arrancó, -1 paró (reloj del host)
+
+    // Dónde empieza la música cuando el transporte arranca o salta a p: en p, llevado a la grilla de 1/16 de pulso
+    // (lo que cae a menos de 1/256 de pulso de una línea es esa línea), y nunca antes de 0 (un pre-roll espera al
+    // comienzo). Así no depende de dónde caiga el borde del bloque.
+    static double musicalStart (double p)
+    {
+        if (p <= 0.0) return 0.0;
+        const double q = 0.0625, k = std::round (p / q);
+        if (std::abs (p - k * q) < 1.0 / 256.0) return k * q;
+        return std::ceil (p / q) * q;
+    }
 
     // Satélites: una réplica toma todo el estado musical de la generadora del Main (no la captura) y desde
     // ahí avanza igual, bloque a bloque. Los vectores reusan su capacidad (sin pedir memoria si alcanza).
@@ -212,6 +284,7 @@ public:
         following = o.following; external = o.external; resetRequest.store (o.resetRequest.load());
         fs = o.fs; beat = o.beat; blockB0 = o.blockB0; blockLen = o.blockLen; curBpm = o.curBpm; blockN = o.blockN;
         running = o.running; ended = o.ended; prevRun = o.prevRun; playedBeats = o.playedBeats;
+        armed = o.armed; prevHost = o.prevHost; hostEdge = o.hostEdge; startAt = o.startAt; noFadeIn = o.noFadeIn;
         sessionSec = o.sessionSec; fade = o.fade; sessionSamples = o.sessionSamples; anchorSession = o.anchorSession;
         anchorBeat = o.anchorBeat; anchorBpm = o.anchorBpm; genT = o.genT;
         for (int l = 0; l < kLanes; ++l)
@@ -258,6 +331,11 @@ private:
     double fs = 48000.0, beat = 0.0, blockB0 = 0.0, blockLen = 1.0, curBpm = 60.0;
     int blockN = 1;
     bool running = false, ended = false, prevRun = false;
+    bool armed = false, prevHost = false; int hostEdge = 0;
+    double startAt = 0.0;          // comienzo musical de la sesión o del último salto (pulsos)
+    bool noFadeIn = false;         // la sesión arrancó con el transporte fuera del comienzo de la canción
+
+    void arm (bool on) { if (on && ! armed && ended) resetSession(); armed = on; }    // Play después de una sesión terminada: arranca otra
     double playedBeats = 0.0;     // pulsos tocados en total (la captura no se confunde con stops ni saltos)
     double sessionSec = 0.0; float fade = 1.0f;
     int64_t sessionSamples = 0, anchorSession = 0; double anchorBeat = 0.0, anchorBpm = -1.0;
@@ -279,9 +357,9 @@ private:
     float tensionEff() const { return g.gentle ? std::min (g.tension, 0.3f) : g.tension; }
     float densityEff (const LaneParams& L) const { float d = std::clamp (L.density * mfac (g.density), 0.0f, 1.0f); return g.gentle ? std::min (d, 0.7f) : d; }
 
-    void start (double atBeat)
+    void start (double atBeat, double nowBeat)
     {
-        running = true; beat = atBeat; anchorBpm = -1.0;
+        running = true; beat = nowBeat; startAt = atBeat; anchorBpm = -1.0;
         hrng.reseed (g.seed);
         for (int l = 0; l < kLanes; ++l)
         {
@@ -318,6 +396,7 @@ private:
     {
         pending.clear();
         for (auto& S : st) { S.wasOn = false; S.next = atBeat; }
+        startAt = atBeat;
         chordStart = atBeat; nextChordBeat = atBeat + chordLength();
     }
 
@@ -418,7 +497,7 @@ private:
     }
     float gainAt (double sec) const
     {
-        float gIn = g.fadeIn > 0.0f ? (float) std::clamp (sec / g.fadeIn, 0.0, 1.0) : 1.0f;
+        float gIn = g.fadeIn > 0.0f && ! noFadeIn ? (float) std::clamp (sec / g.fadeIn, 0.0, 1.0) : 1.0f;
         float gOut = 1.0f;
         if (g.sessionMinutes > 0.0f && g.fadeOut > 0.0f)
         {
@@ -740,7 +819,7 @@ private:
     {
         const int64_t F = std::max<int64_t> (1, (int64_t) std::llround (fs));
         auto tickSample = [F] (int64_t k) { return k * F / 30; };
-        int64_t k = s0 * 30 / F;
+        int64_t k = std::max<int64_t> (0, s0 * 30 / F);      // nada antes del comienzo de la sesión (pre-roll)
         while (tickSample (k) < s0) ++k;
         while (k > 0 && tickSample (k - 1) >= s0) --k;
         const double tuneCents = g.tuneByBend ? 1200.0 * dm::log2 (g.refPitch / 440.0) : 0.0;

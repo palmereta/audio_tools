@@ -11,7 +11,8 @@
   "wow": 0.9,
   "flutter": 0.2,
   "highcut": 6000,
-  "dropouts": 35
+  "dropouts": 35,
+  "out": -1.0
  },
  "order": 13
 }

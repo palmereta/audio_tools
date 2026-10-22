@@ -1,5 +1,5 @@
 # Orrery — generador de MIDI para ambient, drone y música tranquila: ocho carriles en órbita.
-set(ORRERY_VERSION 1.0.5)
+set(ORRERY_VERSION 1.0.6)
 
 if(APPLE)
     set(ORRERY_FORMATS VST3 AU Standalone)
@@ -38,7 +38,9 @@ target_sources(Orrery PRIVATE ${ORRERY_SOURCES})
 target_include_directories(Orrery PRIVATE Source Source/gen ${CMAKE_SOURCE_DIR}/shared/dsp)
 target_compile_definitions(Orrery PUBLIC
     ORRERY_HAS_ASSETS=1
-    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_DISPLAY_SPLASH_SCREEN=0 _USE_MATH_DEFINES=1)
+    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_DISPLAY_SPLASH_SCREEN=0 _USE_MATH_DEFINES=1
+    # Orrery no usa el MIDI que entra: sin los ~2.080 parámetros "MIDI CC n|m" que JUCE agrega al VST3 (QA en REAPER, X4).
+    JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS=0)
 target_link_libraries(Orrery
     PRIVATE OrreryAssets juce::juce_audio_utils
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_lto_flags juce::juce_recommended_warning_flags)

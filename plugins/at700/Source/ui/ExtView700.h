@@ -5,6 +5,7 @@
 #include <JuceHeader.h>
 #include "../PluginProcessor.h"
 #include "Assets700.h"
+#include "../../../../shared/ui/Showing.h"
 
 namespace dh {
 
@@ -185,6 +186,7 @@ private:
 
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) return;      // ventana escondida (Live la esconde sin cerrarla): sin trabajo (H3)
         uint64_t h = 1469598103934665603ull;
         for (auto& c : items) h = (h ^ (uint64_t) (proc.extValue (c.id) * 1000.0f + 50000.0f) ^ (uint64_t) (proc.ccForParam (c.id) + 2)) * 1099511628211ull;
         if (h != shown) { shown = h; repaint(); }

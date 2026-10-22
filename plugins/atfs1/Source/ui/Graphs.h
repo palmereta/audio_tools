@@ -3,6 +3,7 @@
 // envolventes editables a mano, el espectro de cada operador y el Formant Sequence.
 
 #include <JuceHeader.h>
+#include "../../../../shared/ui/Showing.h"
 #include "Widgets.h"
 
 namespace dh::fs::ui {
@@ -211,8 +212,11 @@ private:
             g.fillRect (mr.withTop (mr.getBottom() - h));
         }
     }
+    bool hiddenNow = false;
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) { hiddenNow = true; return; }   // ventana escondida (Live): nada que hacer (H3)
+        if (hiddenNow) { hiddenNow = false; repaint(); }                  // vuelve a la vista con lo que cambió mientras tanto
         const auto G = algoGeom (area(), proc.voice().algorithm, false);
         for (int k = 0; k < 8; ++k)
         {
@@ -583,8 +587,11 @@ private:
     juce::dsp::FFT fft;
     std::array<float, 8192> buf {};
     std::array<float, 2048> smooth {};
+    bool hiddenNow = false;
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) { hiddenNow = true; return; }   // ventana escondida (Live): nada que hacer (H3)
+        if (hiddenNow) { hiddenNow = false; repaint(); }                  // vuelve a la vista con lo que cambió mientras tanto
         const int pos = proc.live.scopePos.load (std::memory_order_acquire);
         for (int i = 0; i < 4096; ++i)
         {
@@ -636,7 +643,7 @@ public:
         const auto& f = proc.fseq();
         if (f.empty()) return;
         const int fr = frameAt (e.position.x);
-        const int ls = (int) proc.value ("fseq_lp_start"), le = (int) proc.value ("fseq_lp_end");
+        const int ls = (int) std::lround (proc.value ("fseq_lp_start")), le = (int) std::lround (proc.value ("fseq_lp_end"));
         const float px = area().getWidth() / (float) std::max (1, (int) f.frames.size() - 1);
         // Tocar el gráfico pasa a puntos propios conservando el modo del Fseq (antes forzaba Round, ida y vuelta).
         if ((int) proc.value ("fseq_loop") == 0) { proc.setValue ("fseq_loop", f.loopMode == 1 ? 2.0f : 1.0f); proc.setValue ("fseq_lp_start", (float) f.loopStart); proc.setValue ("fseq_lp_end", (float) f.loopEnd); }
@@ -648,8 +655,8 @@ public:
         const auto& f = proc.fseq();
         if (f.empty()) return;
         const int fr = frameAt (e.position.x);
-        if (dragEdge == 0) proc.setValue ("fseq_lp_start", (float) std::min (fr, (int) proc.value ("fseq_lp_end") - 1));
-        else if (dragEdge == 1) proc.setValue ("fseq_lp_end", (float) std::max (fr, (int) proc.value ("fseq_lp_start") + 1));
+        if (dragEdge == 0) proc.setValue ("fseq_lp_start", (float) std::min (fr, (int) std::lround (proc.value ("fseq_lp_end")) - 1));
+        else if (dragEdge == 1) proc.setValue ("fseq_lp_end", (float) std::max (fr, (int) std::lround (proc.value ("fseq_lp_start")) + 1));
         else { proc.setValue ("fseq_lp_start", (float) std::min (anchor, fr)); proc.setValue ("fseq_lp_end", (float) std::max (anchor, fr)); }
     }
 private:
@@ -668,7 +675,7 @@ private:
     {
         const auto& f = proc.fseq();
         const int mode = (int) proc.value ("fseq_loop");
-        const int ls = (int) proc.value ("fseq_lp_start"), le = (int) proc.value ("fseq_lp_end");
+        const int ls = (int) std::lround (proc.value ("fseq_lp_start")), le = (int) std::lround (proc.value ("fseq_lp_end"));
         return mode != 0 && le > ls ? std::array<int, 3> { mode, ls, le } : std::array<int, 3> { mode, f.loopStart, f.loopEnd };   // sin puntos propios: los del Fseq
     }
     void paintTracks (juce::Graphics& g)
@@ -731,8 +738,11 @@ private:
             dotText (g, s, (float) getWidth() - 10 - (float) s.length() * 9.6f, 8.0f, 1.6f, col::ink, false);
         }
     }
+    bool hiddenNow = false;
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) { hiddenNow = true; return; }   // ventana escondida (Live): nada que hacer (H3)
+        if (hiddenNow) { hiddenNow = false; repaint(); }                  // vuelve a la vista con lo que cambió mientras tanto
         const auto& f = proc.fseq();
         if ((const void*) f.frames.data() != shownData || f.frames.size() != shownSize) { shownData = f.frames.data(); shownSize = f.frames.size(); back.repaint(); front.repaint(); }
         const auto L = loopNow();

@@ -107,6 +107,7 @@ inline float detuneRatio (int detune, int note) { return fastExp2 ((float) detun
 struct Voice
 {
     bool active = false, gate = false, sustained = false;
+    bool ctlFresh = false;                           // recién encendida: su primer control va en la muestra en que arranca
     int note = 60, voiceNote = 60; float velocity = 1.0f; uint32_t age = 0;
     float pitchSemis = 60.0f, glideFrom = 60.0f, glideRate = 0.0f;
     std::array<FormOperator, kOps> fo {};
@@ -143,7 +144,12 @@ public:
     void prepare (float sampleRate)
     {
         fs = sampleRate;
+        // Todo vuelve al estado de una instancia nueva (fases de LFO y de operadores, generadores de ruido, filtros,
+        // envolventes, el contador de edad del robo de voces): dos instancias preparadas igual y tocadas igual dan las
+        // mismas muestras, aunque una haya procesado antes (QA en REAPER 2026-10-22, D1: un render prepara de nuevo).
+        for (auto& v : voices) v = Voice {};
         for (int i = 0; i < kMaxVoices; ++i) voices[(size_t) i].seed (i);
+        ageCounter = 0; lastMono = false; held.fill (0); opMeter.fill (0.0f); ctlPhase = 0;
         mixL.assign (8192, 0.0f); mixR.assign (8192, 0.0f);
         reset();
     }
@@ -182,6 +188,7 @@ public:
     }
     void noteOff (int note, const PartParams& pp)
     {
+        releaseOfsNow = (int) std::lround ((float) pp.release * 0.78f);
         checkMode (pp);
         popHeld (note);
         if (pp.mono)
@@ -222,28 +229,38 @@ public:
     {
         std::fill (L, L + n, 0.0f); std::fill (R, R + n, 0.0f);
         const AlgorithmDef& alg = algorithm (std::clamp (vd.algorithm, 0, 87));
+        releaseOfsNow = (int) std::lround ((float) pp.release * 0.78f);
         prepareAlgorithm (alg, vd);
         const bool useFseq = pp.fseqOn && fsq != nullptr && ! fsq->empty();
         std::array<float, 16> meter {};
+        // El control corre en una grilla fija de kCtl muestras contadas desde prepare, no desde el principio de cada
+        // llamada: antes caía donde el host partía los bloques y el sonido (envolventes, LFO, Fseq) cambiaba con el
+        // tamaño de bloque (athosttest repro, bloques al azar: -2 dB de diferencia). Una voz que arranca entre dos
+        // controles recibe el suyo en el momento, por lo que falta hasta el próximo.
         for (auto& vc : voices)
         {
             if (! vc.active) continue;
-            for (int s0 = 0; s0 < n; s0 += kCtl)
+            int phase = ctlPhase;
+            for (int s0 = 0; s0 < n;)
             {
-                const int m = std::min (kCtl, n - s0);
-                control (vc, vd, useFseq ? fsq : nullptr, pp, (float) m / fs);
+                const int m = std::min (kCtl - phase, n - s0);
+                if (phase == 0 || vc.ctlFresh) { control (vc, vd, useFseq ? fsq : nullptr, pp, (float) (kCtl - phase) / fs); vc.ctlFresh = false; }
                 render (vc, alg, vd, pp, L + s0, R + s0, m);
+                s0 += m; phase = (phase + m) % kCtl;
                 if (! vc.active) break;
             }
             if (vc.active) for (int k = 0; k < kOps; ++k) { meter[(size_t) k] = std::max (meter[(size_t) k], vc.ampV[(size_t) k]); meter[(size_t) k + 8] = std::max (meter[(size_t) k + 8], vc.ampN[(size_t) k]); }
         }
         opMeter = meter;
+        ctlPhase = (ctlPhase + n) % kCtl;
         const float vol = pp.volume * pp.volume;
         for (int i = 0; i < n; ++i) { L[i] *= vol; R[i] *= vol; }
     }
 
 private:
     float fs = 48000.0f;
+    int ctlPhase = 0;                               // muestras dentro del período de control actual (grilla fija)
+    int releaseOfsNow = 0;                          // desvío de RELEASE de la parte, el último que llegó
     std::array<Voice, kMaxVoices> voices {};
     std::array<int, 16> held {}; int heldCount = 0;
     bool sustain = false;
@@ -303,9 +320,11 @@ private:
         if (! wasActive && pp.porta && pp.portaFulltime && lastNote >= 0) vc.pitchSemis = (float) lastNote;
         lastNote = note;
         vc.note = note; vc.velocity = vel; vc.gate = true; vc.sustained = false; vc.age = ++ageCounter;
+        if (! wasActive) vc.ctlFresh = true;
         const int attackOfs = (int) std::lround ((float) pp.attack * 0.78f);
         const int decayOfs = (int) std::lround ((float) pp.decay * 0.78f);
         const int releaseOfs = (int) std::lround ((float) pp.release * 0.78f);
+        releaseOfsNow = releaseOfs;
         for (int k = 0; k < kOps; ++k)
         {
             const auto& o = vd.op[(size_t) k];
@@ -346,7 +365,11 @@ private:
     void release (Voice& vc)
     {
         vc.gate = false;
-        for (int k = 0; k < kOps; ++k) { vc.egV[(size_t) k].keyOff(); vc.egN[(size_t) k].keyOff(); }
+        for (int k = 0; k < kOps; ++k)
+        {
+            vc.egV[(size_t) k].setReleaseOfs (-releaseOfsNow); vc.egN[(size_t) k].setReleaseOfs (-releaseOfsNow);
+            vc.egV[(size_t) k].keyOff(); vc.egN[(size_t) k].keyOff();
+        }
         vc.peg.keyOff(); vc.feg.keyOff(); vc.fseq.release();
     }
 

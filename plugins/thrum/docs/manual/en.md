@@ -162,6 +162,8 @@ Each noise has its own level (0 to 100 %):
 - **Picking pattern**: the fingerpicking pattern, from a library of 11 (Travis, alternating bass, rolls, p-i-m-a, ballad arpeggios and more).
 - **Tempo (host stopped)**: when your DAW is not playing, the patterns follow this tempo and start with the first key you press.
 
+With the DAW playing, the patterns follow its song position, and when it loops, every pass strums the same as the first one: the end of the loop flows into its start without losing or repeating a stroke.
+
 > With Centred on the beat, a chord that changes exactly on the beat in your MIDI clip is caught a few milliseconds late: the strings of the old chord that had not been picked yet are skipped and the new chord is strummed at once. For the tightest changes, start the new chord's notes a 64th note early, as a guitarist moves the hand before the beat, or choose Starts on the beat.
 
 ### The strum pattern language
@@ -282,6 +284,8 @@ Sixty-nine presets in nine categories:
 
 A preset sets the guitar, the playing and the whole chain. The MIDI settings, the tempo for when the host is stopped, the DI output and the amp quality belong to your session and are kept when you change presets.
 
+Ableton Live does not show plugins' factory presets (it ignores VST3 program lists). Thrum's own preset menu works everywhere, and the factory presets also appear in Live's browser under Plug-Ins → Audio Tools Thrum (expand the plugin), installed by the launcher or by copying the Presets folder from the zip. Thrum has 182 parameters and Live keeps at most 128 of a device for automation: click **Configure** on Thrum's device and move the controls you want there. In a host's parameter list the amp's and the cabinet's switches are **Amp On** and **Cabinet On** (**Amp** and **Cabinet** are the model and the box).
+
 ## MIDI
 
 ![The Settings page: MIDI input and output, the outputs, and the keyswitches and controllers with the real note names.](img/settings.jpg)
@@ -333,6 +337,10 @@ Velocity is the force of the pick, and with **Dead notes below velocity** and **
 With **MIDI out** on, Thrum sends what the guitar actually played: every strummed string, every fingered note, legato and slides, at the moment it sounds. Record it on another track to edit a strum note by note, or send it to another instrument to double the guitar. **MIDI out channel** sets the channel, or **MIDI out channel per string** sends each string on its own channel (channel 1 the highest), ready for a guitar-style instrument.
 
 > Dead strums and the muted strings inside a strum are played but are not sent as notes: they have no pitch.
+
+The notes leave Thrum as late as its audio (its latency, 55 samples at 4x quality), which the host compensates for the audio only, so a doubling instrument or a recording lines up with the guitar.
+
+In Ableton Live and in REAPER use the VST3 for MIDI out: neither takes the MIDI that Audio Unit plugins produce. In Live set the receiving track's MIDI From to the Thrum track; in REAPER use a send with MIDI.
 
 On the Play page, **Export pattern** saves the current strum or picking pattern as a `.mid` file, played over the chord you are holding (or C major), and **Export played** saves everything Thrum played since you last pressed **Clear**.
 

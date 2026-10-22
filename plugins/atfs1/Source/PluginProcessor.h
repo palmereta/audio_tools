@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "../../../shared/tools/SafeString.h"
+#include "../../../shared/tools/HostGap.h"
 #include "SynthFs.h"
 #include "PresetFs.h"
 
@@ -44,6 +45,7 @@ public:
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     bool wasBypassed = false;
+    dh::HostGap hostGap;              // REAPER no llama al plugin en bypass: al volver se sueltan las notas (X1)
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }

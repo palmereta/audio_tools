@@ -3,6 +3,7 @@
 // del bender y teclado de 32 teclas. Todo lo que se mueve son sprites de Blender sobre el fondo.
 
 #include <JuceHeader.h>
+#include "../../../../shared/ui/Showing.h"
 #include "../PluginProcessor.h"
 #include "Assets101.h"
 
@@ -488,6 +489,7 @@ private:
 
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) return;      // ventana escondida (Live la esconde sin cerrarla): sin trabajo (H3)
         if (bubbleTimer > 0 && --bubbleTimer == 0) repaint();
         // Redibuja sólo si cambió algo visible que no movió el ratón (MIDI, automatización, LEDs).
         uint64_t h = 1469598103934665603ull;

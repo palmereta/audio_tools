@@ -172,7 +172,10 @@ public:
         humHz = p.machine == kVhs ? 59.94 : (p.machine == kPhone || p.machine == kRadio ? 50.0 : 60.0);
         // Compensación automática: el drive sube el nivel como en la cinta; acá se baja lo mismo, más el ajuste
         // propio de cada máquina (medido con ruido rosa a −18 dBFS, tools/tarnishtest.cpp).
-        const double trim = machineTrimDb (p.machine, p.variant);
+        // Bias bajo sube el nivel (más sensibilidad y la curva más abierta): +1,4 dB a −40 %, +3,7 dB a −80 %; alto lo
+        // baja un poco. Medido con ruido rosa a −18 dBFS RMS; Auto gain lo compensa como al Drive.
+        const double biasDb = prof.magnetic ? -2.4 * p.bias + 2.8 * p.bias * p.bias : 0.0;
+        const double trim = machineTrimDb (p.machine, p.variant) - biasDb;
         outGain = dbToGain (p.outDb + (p.autoGain ? -(prof.magnetic || p.machine == kPhone ? p.driveDb : 0.0) + trim : 0.0));
         mix = clampd (p.mix, 0.0, 1.0);
         sideLen = p.machine == kVinyl ? (p.variant == 0 ? 1200.0 : (p.variant == 1 ? 420.0 : 240.0)) : 1200.0;
@@ -310,8 +313,12 @@ private:
             {
                 double x = cutB[c].process (cutA[c].process (v[c])) / riaaNorm;
                 const double h = traceHp[c].process (x);
-                const double th = std::tanh (h);
-                x += traceDc[c].process ((0.25 + 2.5 * P.saturation * P.saturation) * (0.3 + 0.7 * g) * th * th);   // distorsión de lectura (par, acotada)
+                // Distorsión de lectura (par): cuadrática hasta el nivel de referencia (0,125, −18 dBFS), como antes, y
+                // proporcional por encima (k·r·h·tanh(h/r) en vez de k·tanh²(h)): agrega como mucho un 14 % de la banda
+                // aguda. Con la forma anterior los transitorios agudos salían en picos de un solo signo y una mezcla a
+                // −3 dBFS llegaba a +7,7 dBFS en Inner Groove Blues (QA 2026-10-22, T1).
+                const double k = (0.25 + 2.5 * P.saturation * P.saturation) * (0.3 + 0.7 * g);
+                x += traceDc[c].process (0.125 * k * h * std::tanh (8.0 * h));
                 v[c] = x;
             }
             vu += ((v[0] * v[0] + v[1] * v[1]) * 0.5 - vu) * (1.0 / (0.3 * fs));

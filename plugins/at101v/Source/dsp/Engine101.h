@@ -75,23 +75,19 @@ public:
         os = oversampling;
         fsOs = fs * (float) os;
         interpolatorsUnused = maxBlock;
-        decL.prepare (os); decR.prepare (os);
         osL.assign ((size_t) (kSub * os), 0.0f);
         osR.assign ((size_t) (kSub * os), 0.0f);
-        lfo.prepare (fs);
-        for (int v = 0; v < kMaxVoices; ++v)
-        {
-            auto& vc = voices[(size_t) v];
-            vc.vco.seed (0x9e3779b9u * (uint32_t) (v + 1), std::fmod (0.13f * (float) v, 1.0f));   // fase en [0,1): con 16 voces 0.13·v pasaba de 1 y la voz arrancaba con un golpe de DC
-            vc.vcf.reset(); vc.env.reset();
-            vc.dc.r = 1.0f - 2.0f * 3.14159265f * 8.0f / fsOs;
-            vc.driftRng = Rng (0x1234u + (uint32_t) v * 77u);
-        }
+        // Los efectos y los diezmadores se rehacen (sus LFO y filtros no vuelven a cero en reset()) y se guarda una copia
+        // limpia para resetState(), que corre en el hilo de audio y no puede reservar memoria.
+        chorus = Chorus101 {}; delay = StereoDelay {}; reverb = PlateReverb {};
         chorus.prepare (fs);
         delay.prepare (fs);
         reverb.prepare (fs);
+        decL = Decimator {}; decR = Decimator {};
+        decL.prepare (os); decR.prepare (os);
+        chorus0 = chorus; delay0 = delay; reverb0 = reverb; dec0L = decL; dec0R = decR;
         held.reserve (64); latched.reserve (64); arpKeys.reserve (64);
-        resetNotes();
+        resetState();
         if (std::any_of (outOn.begin(), outOn.end(), [] (bool b) { return b; })) flushPending = true;     // los note-off salen en el próximo bloque (los eventos de acá se pierden)
     }
 
@@ -171,6 +167,34 @@ public:
         flushOut();
     }
     void flushMidiIfPending() { if (flushPending) flushOut(); }
+
+    // Todo lo que corre libre vuelve al estado de una instancia nueva: LFO (fase y ruido), voces (fases, filtros,
+    // envolventes, deriva), arpegiador, reloj, efectos. Dos instancias preparadas igual suenan igual aunque una haya
+    // procesado antes (QA en REAPER 2026-10-22, B3: dos AU nuevos no anulaban). La secuencia cargada, los ajustes y
+    // el transpose de teclado no se tocan. Sin reservar memoria (el host puede llamarlo desde el hilo de audio).
+    void resetState()
+    {
+        lfo = Lfo101 {}; lfo.prepare (fs);
+        for (int v = 0; v < kMaxVoices; ++v)
+        {
+            auto& vc = voices[(size_t) v];
+            vc = Voice {};
+            vc.vco.seed (0x9e3779b9u * (uint32_t) (v + 1), std::fmod (0.13f * (float) v, 1.0f));   // fase en [0,1): con 16 voces 0.13·v pasaba de 1 y la voz arrancaba con un golpe de DC
+            vc.vcf.reset(); vc.env.reset();
+            vc.dc.r = 1.0f - 2.0f * 3.14159265f * 8.0f / fsOs;
+            vc.driftRng = Rng (0x1234u + (uint32_t) v * 77u);
+        }
+        if (! chorus0.empty()) { chorus = chorus0; delay = delay0; reverb = reverb0; decL = dec0L; decR = dec0R; }
+        sh = 0.0f; ageCounter = 0; sampleCount = 0;
+        arp.restart();
+        lastHostStep = -1; hostGateOffPending = false; hostGateOffAt = 0.0;
+        prevSeqPlay = false; prevArp = 0; seqPos = -1; seqTranspose = 0; seqTiePending = false;
+        lastVel = 0.8f; latchReleased = false;
+        resetNotes();
+        // Notas que quedaron abiertas en el MIDI out: sus note-off salen en el próximo bloque (y el próximo note-on de
+        // esa nota no se descarta por repetido).
+        if (std::any_of (outOn.begin(), outOn.end(), [] (bool b) { return b; })) flushPending = true;
+    }
     void resetNotes()
     {
         held.clear(); latched.clear();
@@ -260,6 +284,7 @@ private:
     Decimator decL, decR;
     std::vector<float> osL, osR;
     Chorus101 chorus; StereoDelay delay; PlateReverb reverb;
+    Chorus101 chorus0; StereoDelay delay0; PlateReverb reverb0; Decimator dec0L, dec0R;   // copias limpias (resetState)
     Arp arp;
 
     std::vector<int> held, latched, arpKeys;
@@ -673,8 +698,12 @@ private:
             {
                 const double q = st.ppq + (double) curSample * ppqPerSample;
                 const double stepLen = std::max (1.0e-3, (double) st.clockBeats);
-                const long long idx = (long long) std::floor (q / stepLen);
-                const double frac = q / stepLen - (double) idx;
+                // Un pequeño margen: la posición del bloque más i·(ppq por muestra) redondea distinto según cómo el host parte
+                // los bloques, y un paso que cae justo en el borde salía una muestra antes o después (B2: el MIDI out
+                // dependía del tamaño de bloque). 1e-7 pasos es menos de una décima de muestra.
+                const double x = q / stepLen + 1.0e-7;
+                const long long idx = (long long) std::floor (x);
+                const double frac = x - (double) idx;
                 const double start = (idx & 1) ? st.swing * 0.5 : 0.0;
                 if (idx != lastHostStep && frac >= start)
                 {

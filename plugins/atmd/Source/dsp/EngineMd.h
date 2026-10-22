@@ -112,12 +112,24 @@ public:
             vc.vcf.reset(); vc.fEnv.reset(); vc.lEnv.reset();
             vc.dc.setCutoff (6.0f, fsOs); vc.dc.reset();
             vc.cutoffOffset = 0.06f * vc.drift.bipolar();     // cada voz con su filtro un poco distinto
+            // Todo lo que corre libre vuelve a cero: dos instancias preparadas igual suenan igual aunque una haya
+            // procesado más tiempo antes (un render prepara de nuevo el plugin).
+            for (int o = 0; o < 3; ++o) { vc.driftSemis[o] = 0.0f; vc.driftTarget[o] = 0.0f; }
+            vc.driftCountdown = 0; vc.age = 0; vc.pitch = vc.target = 60.0f; vc.vel = 1.0f; vc.detune = vc.pan = 0.0f;
         }
+        // Los efectos de shared/dsp no ponen a cero su LFO (la reverb) ni sus filtros en reset(): se rehacen.
+        delay = StereoDelay {}; reverb = PlateReverb {};
         delay.prepare (fs); reverb.prepare (fs);
-        outDc.setCutoff (8.0f, fs); outDcR.setCutoff (8.0f, fs);
-        a440Phase = 0.0f;
+        dlyWasOn = revWasOn = false;
+        outDc.setCutoff (8.0f, fs); outDcR.setCutoff (8.0f, fs); outDc.reset(); outDcR.reset();
+        a440Phase = 0.0f; volSmooth = 0.0f; ageCounter = 0;
+        cutNow = resNow = -1.0e9f;                     // el primer bloque toma el valor sin rampa
         allNotesOff (true);
     }
+
+    // Largo de la rampa de corte y énfasis: el bloque del host. El procesador llama a esto una vez por bloque, antes
+    // de partirlo en trozos por los eventos MIDI; sin llamarlo, la rampa dura lo que pide cada process().
+    void setRampLength (int samples) { rampLen = std::max (1, samples); }
 
     int oversampling() const { return os; }
 
@@ -186,6 +198,18 @@ public:
                 else monoUpdate (true);
             }
         }
+        // CUTOFF y EMPHASIS llegan una vez por bloque (automatización, MIDI learn): una rampa lineal por muestra hasta el
+        // valor nuevo a lo largo de un bloque del host en vez de un escalón por bloque (el "zipper" del QA, E1). El
+        // corte se interpola en octavas, que es lo que lee el filtro: la tan sigue siendo fastTan por muestra base.
+        if (cutNow < -1.0e8f) { cutNow = p.cutoff; resNow = p.emphasis; cutLeft = 0; }
+        else if (p.cutoff != cutTo || p.emphasis != resTo)
+        {
+            const int len = rampLen > 0 ? rampLen : n;
+            cutStep = (p.cutoff - cutNow) / (float) len; resStep = (p.emphasis - resNow) / (float) len;
+            cutLeft = len;
+        }
+        cutTo = p.cutoff; resTo = p.emphasis;
+        rampLen = 0;
         overload = false;                              // se acumula en los trozos (la lámpara ve todo el bloque)
         for (int done = 0; done < n; done += kSub)
         {
@@ -233,6 +257,10 @@ private:
     DcBlocker outDc, outDcR;
     float a440Phase = 0.0f;
     float volSmooth = 0.0f;
+    // Rampa de CUTOFF (divisiones del panel) y EMPHASIS (0..10): valor actual, destino, paso y muestras que faltan.
+    float cutNow = -1.0e9f, cutTo = 0.0f, cutStep = 0.0f, resNow = 0.0f, resTo = 0.0f, resStep = 0.0f;
+    int cutLeft = 0, rampLen = 0;
+    std::array<float, 32> cutArr {}, resArr {};
 
     bool isPoly() const { return st.voices > 1; }
     int unisonCount() const { return std::clamp (st.unison, 1, std::max (1, kMaxVoices / std::max (1, st.voices))); }
@@ -350,9 +378,15 @@ private:
         const float wheel = clampf (modWheel, 0.0f, 1.0f);
         const float modAmt = clampf (wheel * wheel * wheel + st.atMod * aftertouch, 0.0f, 1.0f);
         const bool modOn = modAmt > 1.0e-5f;
+        // CUTOFF y EMPHASIS por muestra base, con la rampa del bloque (ver process()).
         // EMPHASIS: autooscila desde ~8 (k = 4); hasta k ≈ 4.4 en 10 [spec §5].
-        const float e = clampf (p.emphasis, 0.0f, 10.0f);
-        const float res = e <= 8.0f ? e / 8.0f : 1.0f + 0.1f * (e - 8.0f) / 2.0f;
+        for (int i = 0; i < n; ++i)
+        {
+            if (cutLeft > 0) { cutNow += cutStep; resNow += resStep; if (--cutLeft == 0) { cutNow = cutTo; resNow = resTo; } }
+            cutArr[(size_t) i] = cutNow;
+            const float e = clampf (resNow, 0.0f, 10.0f);
+            resArr[(size_t) i] = e <= 8.0f ? e / 8.0f : 1.0f + 0.1f * (e - 8.0f) / 2.0f;
+        }
         const float kbdTrack = (p.kbd1 ? 1.0f / 3.0f : 0.0f) + (p.kbd2 ? 2.0f / 3.0f : 0.0f);
         const float contour = clampf (p.contourAmt / 10.0f, 0.0f, 1.0f) * 6.0f;     // hasta ~6 octavas
         const float bendSemis = bend * st.bendSemis;
@@ -399,7 +433,8 @@ private:
                 semis[2] = p.osc3Ctrl ? keyPitch + kRangeSemis[std::clamp (p.range[2], 0, 5)] + p.freq3 + v.driftSemis[2]
                                       : kLowF + tuneSemis + kRangeSemis[std::clamp (p.range[2], 0, 5)] + p.freq3 * (36.0f / 7.5f) + v.driftSemis[2];
                 // Corte: una octava por división, −1.1 = 440 Hz sin seguimiento [spec §3.4].
-                const float baseCut = 8.7814f + 1.1f + p.cutoff + v.cutoffOffset * st.analog * (1.0f / 0.35f);
+                const float baseCut = 8.7814f + 1.1f + cutArr[(size_t) i] + v.cutoffOffset * st.analog * (1.0f / 0.35f);
+                const float res = resArr[(size_t) i];
                 const float cutOct = baseCut + contour * fe + kbdTrack * (v.pitch - kLowF) / 12.0f + velF
                                    + st.atFilter * aftertouch * 2.0f;
                 const float amp = le * velA;

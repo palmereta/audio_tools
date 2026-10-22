@@ -143,6 +143,8 @@ void ThrumProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     }
     engine.setSyncCab (isNonRealtime());
     engine.prepare (sr, std::min (maxBlock, 2048));
+    hostGap.prepare (sr);
+    midiDelay.prepare (4096);
     const auto p = buildParams();
     engine.set (p);
     // La IR de arranque, ya: el primer bloque suena con su gabinete.
@@ -262,6 +264,8 @@ void ThrumProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     buffer.clear();
     if (n == 0) { midi.clear(); return; }
     const bool offline = isNonRealtime();
+    // El host dejó de llamar (REAPER en bypass) y vuelve: las notas que sonaban se sueltan antes de seguir.
+    if (hostGap.check (getPlayHead(), n, offline)) { midiOut.clear(); engine.allNotesOff (&midiOut); gapRelease = true; }
     engine.setSyncCab (offline);
     // Patrón elegido en la biblioteca (parámetro): se carga en el patrón editable.
     {
@@ -298,6 +302,9 @@ void ThrumProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
             h.playing = pos->getIsPlaying();
             if (auto q = pos->getPpqPosition()) h.ppq = *q; else h.playing = false;
             if (auto b = pos->getBpm()) h.bpm = juce::jlimit (20.0, 999.0, *b);
+            // El loop del host: el patrón pasa del final al principio sin perder ni repetir golpes (QA en REAPER, G1).
+            if (pos->getIsLooping())
+                if (auto lp = pos->getLoopPoints()) { h.looping = true; h.loopStart = lp->ppqStart; h.loopEnd = lp->ppqEnd; }
         }
     recBpm = h.bpm;
     // MIDI de entrada (y el wah por CC 11).
@@ -325,6 +332,12 @@ void ThrumProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     // MIDI de salida y grabación.
     midi.clear();
     const bool out = p.perf.midiOut;
+    if (gapRelease)
+    {
+        gapRelease = false;
+        midiDelay.flushNoteOffs (midi);
+        for (int c = 0; c < 16; ++c) for (int k = 0; k < 128; ++k) if (hostNotes[(size_t) c][(size_t) k]) { midi.addEvent (juce::MidiMessage::noteOff (c + 1, k), 0); hostNotes[(size_t) c][(size_t) k] = false; }
+    }
     // Salida apagada a mitad de una nota: se cierran las que el host tenía abiertas.
     if (lastMidiOut && ! out)
         for (int c = 0; c < 16; ++c) for (int k = 0; k < 128; ++k) if (hostNotes[(size_t) c][(size_t) k]) { midi.addEvent (juce::MidiMessage::noteOff (c + 1, k), 0); hostNotes[(size_t) c][(size_t) k] = false; }
@@ -351,6 +364,9 @@ void ThrumProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
         }
         if (l.isLocked()) recCount = (int) rec.size();
     }
+    // Con la latencia que el host conoce (la que compensa en el audio).
+    midiDelay.setDelay (getLatencySamples());
+    midiDelay.process (midi, n);
     latency.request (engine.latency());
     // Vista.
     const auto& perf = engine.performer();
@@ -376,6 +392,7 @@ void ThrumProcessor::processBlockBypassed (juce::AudioBuffer<float>& buffer, juc
     buffer.clear();
     midi.clear(); midiOut.clear();
     engine.allNotesOff (&midiOut);
+    midiDelay.flushNoteOffs (midi);
     for (int c = 0; c < 16; ++c) for (int k = 0; k < 128; ++k) if (hostNotes[(size_t) c][(size_t) k]) { midi.addEvent (juce::MidiMessage::noteOff (c + 1, k), 0); hostNotes[(size_t) c][(size_t) k] = false; }
 }
 

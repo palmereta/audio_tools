@@ -5,6 +5,7 @@
 #include <JuceHeader.h>
 #include "../PluginProcessor.h"
 #include "Assets.h"
+#include "Showing.h"
 #include "LayoutExt.generated.h"
 
 namespace dh {
@@ -184,6 +185,7 @@ private:
 
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) return;              // ventana escondida (Live): sin repintar (H3)
         bool dirty = false;
         for (auto& k : knobs) { const float v = valueOf (k); if (v != k.shown) { k.shown = v; dirty = true; } }
         const float lvl = proc.inputLevel.load();

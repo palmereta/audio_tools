@@ -262,6 +262,7 @@ void OrreryEditor::resized()
 
 void OrreryEditor::timerCallback()
 {
+    if (! dh::reallyShowing (*this)) return;      // editor escondido (Live lo esconde sin cerrarlo): nada que repintar
     const float run = proc.value ("run");
     if (std::abs (run - lastPlay) > 0.1f)
     {

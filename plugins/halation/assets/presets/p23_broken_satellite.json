@@ -11,7 +11,8 @@
   "mix": 45,
   "on_grains": 1,
   "grains": 60,
-  "grain_ms": 60
+  "grain_ms": 60,
+  "out_gain": -4
  },
  "order": 23
 }

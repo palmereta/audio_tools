@@ -8,6 +8,7 @@
 #include "../../../shared/tools/SafeString.h"
 #include "../../../shared/tools/PresetTracker.h"
 #include "../../../shared/tools/LatencyReporter.h"
+#include "../../../shared/tools/HostGap.h"
 
 class At303Processor : public juce::AudioProcessor, private juce::AsyncUpdater
 {
@@ -19,7 +20,8 @@ public:
     void releaseResources() override {}
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-    // En bypass el motor sigue recibiendo el MIDI (si no, un note-off que llega en bypass deja la nota colgada).
+    // En bypass el motor sigue recibiendo el MIDI (si no, un note-off que llega en bypass deja la nota colgada). Un
+    // host que en bypass no llama a nada (REAPER) lo detecta hostGap en processBlock.
     void processBlockBypassed (juce::AudioBuffer<float>& b, juce::MidiBuffer& m) override { processBlock (b, m); b.clear(); }
 
     juce::AudioProcessorEditor* createEditor() override;
@@ -81,6 +83,7 @@ private:
     juce::SpinLock patLock; std::atomic<bool> patDirty { true }; int lastPatIdx = -1;
     std::vector<PresetEntry> presets; int currentProgram = 0;
     double freeClock = 0;
+    dh::HostGap hostGap;
     void loadFactory();
     dh::tb::EngineParams buildParams() const;
     juce::ValueTree patternsToTree() const;

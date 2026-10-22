@@ -96,6 +96,32 @@ inline const std::vector<HostParam>& hostParams()
     return p;
 }
 
+// Un parámetro entero (perillas -64..+63, Voices, Note Shift…) para el motor y la pantalla, que el host ve continuo
+// y que guarda el valor tal como llegó. Con AudioParameterInt el host escribía 0.6739 en "Cutoff", el plugin lo
+// guardaba redondeado a +22 y al reabrir la sesión el host leía 0.6772 (QA en REAPER 2026-10-22, D2). El motor
+// redondea al leerlo (applyHost) y la interfaz lo mueve de a enteros (snapReal / snapNorm).
+class SteppedParam : public juce::AudioParameterFloat
+{
+public:
+    SteppedParam (const juce::ParameterID& pid, const juce::String& name, float lo, float hi, float def, int numSteps,
+                  const juce::AudioParameterFloatAttributes& attributes)
+        : juce::AudioParameterFloat (pid, name, juce::NormalisableRange<float> (lo, hi), def, attributes), steps (numSteps) {}
+    // Para la interfaz (pasos de la rueda, arrastre); los wrappers sólo lo leen en parámetros discretos, y este no lo es.
+    int getNumSteps() const override { return steps; }
+private:
+    int steps;
+};
+
+// Valor real → el entero más cercano si el parámetro es entero (lo que escribe la interfaz).
+inline float snapReal (const juce::RangedAudioParameter& p, float v)
+{
+    return dynamic_cast<const SteppedParam*> (&p) != nullptr ? std::round (v) : v;
+}
+inline float snapNorm (const juce::RangedAudioParameter& p, float norm)
+{
+    return dynamic_cast<const SteppedParam*> (&p) != nullptr ? p.convertTo0to1 (std::round (p.convertFrom0to1 (norm))) : norm;
+}
+
 inline int hostIndex (const juce::String& id)
 {
     const auto& ps = hostParams();

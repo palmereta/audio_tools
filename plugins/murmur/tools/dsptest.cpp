@@ -168,6 +168,25 @@ int main()
         std::printf ("  %.2f %% de un núcleo, %d granos activos al final\n", r.cpu, e.activeGrains.load());
         check (e.activeGrains.load() >= 120, "llega a 128 granos");
     }
+    std::printf ("10. Misma salida con bloques de 64, 333, 512 y 1024 muestras (dos LFO, ducking, mezcla modulada)\n");
+    {
+        // QA en REAPER 2026-10-22: con "First Murmur" el AU a 64 muestras no nulaba contra 512 (−2,2 dB): los tramos
+        // de modulación empezaban de nuevo en cada bloque y la mezcla y el ducking tomaban el valor del final del bloque.
+        auto make = [] (Engine& e) {
+            e.prepare (48000.0, 1024); e.p.mix = 0.6f; e.p.density = 25.0f; e.p.duck = 0.5f; e.p.delayMix = 0.2f; e.p.revMix = 0.2f;
+            e.p.lfo[0] = { 0.7f, 0.5f, 0, LStep, TPitch }; e.p.lfo[1] = { 0.3f, 0.6f, 0, LDrift, TMix };
+        };
+        Engine a; make (a); const auto ra = run (a, 4.0, 2.5, 48000.0, 512);
+        float worst = 0.0f;
+        for (int bs : { 64, 333, 1024 })
+        {
+            Engine b; make (b); const auto rb = run (b, 4.0, 2.5, 48000.0, bs);
+            float d = 0.0f; for (size_t i = 0; i < ra.L.size(); ++i) d = std::max (d, std::max (std::fabs (ra.L[i] - rb.L[i]), std::fabs (ra.R[i] - rb.R[i])));
+            std::printf ("  bloque %4d contra 512: diferencia máxima %.3g\n", bs, d);
+            worst = std::max (worst, d);
+        }
+        check (worst == 0.0f, "bit a bit iguales");
+    }
     std::printf ("\n%s (%d fallas)\n", fails == 0 ? "TODO OK" : "HAY FALLAS", fails);
     return fails == 0 ? 0 : 1;
 }

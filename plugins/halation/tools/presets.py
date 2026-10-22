@@ -36,7 +36,7 @@ p("Rhythmic", "Gated 1984", "The big drum reverb that stops dead.", space=100, s
 p("Rhythmic", "Swing Taps", "Swung repeats that lean back into the groove.", space=10, division=D["1/4"], pattern=7, length=45, mix=30, pingpong=1)
 # ── Experimentales ──
 p("Experimental", "Ghost Before You", "Reversed swells that rise into each beat.", space=80, size=150, length=60, mix=50, on_reverse=1, reverse=85, reverse_div=D["1/4"])
-p("Experimental", "Broken Satellite", "Grains and tape wear: a transmission breaking up in orbit.", space=60, division=D["1/8T"], length=68, character=CH["tape"], wear=80, mix=45, on_grains=1, grains=60, grain_ms=60)
+p("Experimental", "Broken Satellite", "Grains and tape wear: a transmission breaking up in orbit.", space=60, division=D["1/8T"], length=68, character=CH["tape"], wear=80, mix=45, on_grains=1, grains=60, grain_ms=60, out_gain=-4)
 p("Experimental", "Collapsing Hall", "While you play, the hall closes in and the tail climbs.", space=90, size=260, length=70, mix=45, on_breathe=1, breathe_mode=1, breathe_depth=70, breathe_rate=0.25)
 p("Experimental", "Self-Oscillation", "Feedback at the edge: the repeats feed themselves (the limiter keeps it safe).", space=25, division=D["1/4D"], length=100, tone=50, character=CH["tape"], wear=30, mix=40)
 p("Experimental", "Reverse Shimmer", "Reversed swells that climb an octave as they repeat.", space=85, size=200, length=72, mix=50, on_reverse=1, reverse=70, reverse_div=D["1/2"], on_shimmer=1, shimmer=40)

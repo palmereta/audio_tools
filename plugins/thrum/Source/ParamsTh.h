@@ -214,7 +214,8 @@ inline const std::vector<BoolDef>& bools()
         { "trem_on", "Tremolo", false, "Pedals" }, { "vib_on", "Vibrato pedal", false, "Pedals" }, { "dly_on", "Delay", false, "Pedals" },
         { "rev_on", "Reverb", false, "Pedals" },
         { "trem_sync", "Tremolo sync", false, "Pedals" }, { "dly_sync", "Delay sync", true, "Pedals" }, { "rev_freeze", "Reverb freeze", false, "Pedals" },
-        { "amp_on", "Amp", true, "Amp" }, { "amp_bright", "Bright", false, "Amp" }, { "amp_auto", "Auto level", true, "Amp" }, { "cab_on", "Cabinet", true, "Amp" },
+        // "Amp On" y "Cabinet On": en los hosts "Amp" y "Cabinet" ya son el modelo y la caja (QA en Live, T1); los IDs no cambian.
+        { "amp_on", "Amp On", true, "Amp" }, { "amp_bright", "Bright", false, "Amp" }, { "amp_auto", "Auto level", true, "Amp" }, { "cab_on", "Cabinet On", true, "Amp" },
         { "out_di_main", "Main output is DI", false, "Settings" },
     };
     return b;

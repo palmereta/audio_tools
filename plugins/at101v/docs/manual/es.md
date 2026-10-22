@@ -52,11 +52,15 @@ El AT101V es un instrumento: ponelo en una pista MIDI o de instrumento, no en un
 
 > En Windows, si el AT101V no aparece, abrí Settings, Plug-Ins, activá Use VST3 Plug-in System Folders y reescaneá.
 
-Para grabar como clips MIDI las notas que tocan el arpegiador o el secuenciador, mirá Salida MIDI en la sección MIDI.
+Para grabar como clips MIDI las notas que tocan el arpegiador o el secuenciador, mirá Salida MIDI en la sección MIDI. Live toma la salida MIDI sólo del VST3, no del Audio Unit (REAPER tampoco).
+
+Los presets de fábrica aparecen en el navegador de Live en Plug-Ins → Audio Tools AT101V (desplegá el plugin), instalados por el launcher o desde la carpeta Presets del zip. Live no muestra la lista de programas propia de un plugin; el menú de presets del editor los tiene todos.
+
+Live llena solo el panel del dispositivo únicamente en plugins con hasta 64 parámetros automatizables, así que Oversampling y MIDI Out, dos ajustes de sesión, no se ofrecen para automatizar. Siguen en la página de ajustes, en los presets y en los proyectos. Con Configure se suma cualquier parámetro al panel del dispositivo.
 
 ### Otros DAW
 
-En cualquier otro host, insertá el AT101V como instrumento y mandale MIDI. Cada control del panel y de la página de ajustes es un parámetro del host, así que lo podés automatizar. Los presets de fábrica y los tuyos aparecen también en la lista de programas del host.
+En cualquier otro host, insertá el AT101V como instrumento y mandale MIDI. Cada control del panel y de la página de ajustes es un parámetro del host, así que lo podés automatizar (salvo Oversampling y MIDI Out). Los presets de fábrica y los tuyos aparecen también en la lista de programas de los hosts que la muestran (REAPER, Logic, Bitwig; no Ableton Live, mirá arriba).
 
 ### Aplicación independiente
 
@@ -482,7 +486,9 @@ El AT101V tiene salida MIDI. La lista **MIDI OUT** de la página de ajustes elig
 - **Thru**: el MIDI que entra, sin cambios.
 - **Synth Notes** (de fábrica): las notas que toca de verdad el AT101V, en el canal 1, con velocidad: tus teclas, el arpegio y la secuencia, con la transposición aplicada.
 
-Synth Notes te deja grabar un arpegio o una secuencia como MIDI, o manejar otro instrumento con ellos. En Ableton Live: creá una segunda pista MIDI, poné su MIDI From en la pista que tiene el AT101V y, en el selector de abajo, en AT101V; después armá la segunda pista y grabá. Si escuchás notas dobles o se quedan colgadas, fijate que la salida del AT101V no vuelva a su propia entrada.
+Synth Notes te deja grabar un arpegio o una secuencia como MIDI, o manejar otro instrumento con ellos. En Ableton Live: creá una segunda pista MIDI, poné su MIDI From en la pista que tiene el AT101V y, en el selector de abajo, en AT101V; después armá la segunda pista y grabá. Si escuchás notas dobles o se quedan colgadas, fijate que la salida del AT101V no vuelva a su propia entrada. Usá el VST3: Live y REAPER ignoran la salida MIDI de un Audio Unit.
+
+La salida MIDI sale tan tarde como la latencia del plugin (27 muestras, los filtros del sobremuestreo), el mismo atraso que su audio: el host compensa el audio, así que otro instrumento tocado por MIDI From cae junto con el AT101V y no 0,6 ms antes.
 
 ## Recetas
 

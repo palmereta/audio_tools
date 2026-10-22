@@ -28,6 +28,8 @@ En Windows:
 2. Volvé a escanear los plugins en tu DAW.
 3. `AT303.exe` es la versión independiente y `at303render.exe` el renderizador de línea de comandos.
 
+**Ableton Live.** Los presets de fábrica aparecen en el navegador de Live en Plug-Ins → Audio Tools AT303 (desplegá el plugin), instalados por el launcher o desde la carpeta Presets del zip. Live 12 no muestra la lista de programas propia de un plugin, así que desde Live se recorren ahí; el menú de presets dentro del AT303 siempre los tiene todos.
+
 ## Primeros sonidos en un minuto
 
 1. Poné AT303 en una pista de instrumento y dale play en tu DAW. El secuenciador sigue al host: arranca y para con el transporte, al tempo del host.

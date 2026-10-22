@@ -168,6 +168,7 @@ private:
 
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) return;          // ventana escondida (Live): sin animar ni repintar
         const auto& e = proc.engine();
         const auto b = getLocalBounds().toFloat();
         const float x0 = b.getX() + 16.0f, x1 = b.getRight() - 16.0f, W = x1 - x0;

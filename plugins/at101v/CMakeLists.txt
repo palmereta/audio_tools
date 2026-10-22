@@ -1,6 +1,6 @@
 # AT101V — monofónico basado en el Roland SH-101 (1982), con arpegiador y secuenciador.
 # Un solo plugin (instrumento): el 101 no tiene entrada de audio.
-set(AT101V_VERSION 1.0.5)
+set(AT101V_VERSION 1.0.6)
 
 if(APPLE)
     set(AT101V_FORMATS VST3 AU Standalone)
@@ -57,3 +57,13 @@ target_include_directories(at101vrender PRIVATE Source Source/dsp ${CMAKE_SOURCE
 target_compile_definitions(at101vrender PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 _USE_MATH_DEFINES=1)
 target_link_libraries(at101vrender PRIVATE juce::juce_audio_formats
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_lto_flags)
+
+# Pruebas con el plugin cargado como en un DAW (VST3 o AU compilados): tools/hostcheck.cpp.
+juce_add_console_app(at101vhostcheck VERSION ${AT101V_VERSION} PRODUCT_NAME "at101vhostcheck")
+juce_generate_juce_header(at101vhostcheck)
+target_sources(at101vhostcheck PRIVATE tools/hostcheck.cpp)
+target_compile_definitions(at101vhostcheck PRIVATE
+    JUCE_PLUGINHOST_VST3=1 $<$<PLATFORM_ID:Darwin>:JUCE_PLUGINHOST_AU=1>
+    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_MODAL_LOOPS_PERMITTED=1)
+target_link_libraries(at101vhostcheck PRIVATE juce::juce_audio_utils juce::juce_audio_processors juce::juce_audio_formats
+    PUBLIC juce::juce_recommended_config_flags)

@@ -4,6 +4,7 @@
 
 #include <JuceHeader.h>
 #include "../PluginProcessor.h"
+#include "Showing.h"
 
 namespace dh {
 
@@ -87,12 +88,14 @@ public:
         // CPU y marca.
         label (getWidth() - 300, "CPU " + juce::String (proc.cpuLoad.load() * 100.0f, 1) + " %", dim, true);
         g.setColour (dim); g.setFont (f);
-        g.drawText (juce::String::fromUTF8 ("AT20V 1.0  ·  Audio Tools"), getWidth() - 200, 0, 186, h, juce::Justification::centredRight);
+        // La versión real (de AT20V_VERSION en CMakeLists): decía "AT20V 1.0" fijo (QA en REAPER 2026-10-22, A4).
+        g.drawText (juce::String ("AT20V ") + JucePlugin_VersionString + juce::String::fromUTF8 ("  ·  Audio Tools"), getWidth() - 200, 0, 186, h, juce::Justification::centredRight);
     }
 
 private:
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) return;              // ventana escondida (Live): sin repintar (H3)
         if (proc.midiInFlash.exchange (false)) midiIn = 3; else if (midiIn > 0) --midiIn;
         if (proc.midiOutFlash.exchange (false)) midiOut = 3; else if (midiOut > 0) --midiOut;
         repaint();

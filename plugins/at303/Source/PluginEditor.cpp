@@ -684,6 +684,9 @@ void At303Editor::showManual (bool on)
 
 void At303Editor::timerCallback()
 {
+    // Live esconde la ventana del editor sin cerrarlo: escondido no se repinta nada (QA en Live 2026-10-22, H3: 16 %
+    // de un núcleo). Todo lo de abajo se recalcula en cada tic, así que al volver a la vista aparece lo que cambió.
+    if (! dh::reallyShowing (*this)) return;
     if (const auto name = proc.presetDisplayName(); name != presetBtn.getButtonText()) presetBtn.setButtonText (name);
     const int pi = proc.patternIndex();
     for (int i = 0; i < 4; ++i) groupBtns[i]->setToggleState (pi / 16 == i, juce::dontSendNotification);

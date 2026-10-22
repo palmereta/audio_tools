@@ -3,6 +3,7 @@
 // abajo voces, MIDI, reloj, transposición, paso de la secuencia, octava del teclado y CPU.
 
 #include <JuceHeader.h>
+#include "../../../../shared/ui/Showing.h"
 #include "../PluginProcessor.h"
 #include "Assets101.h"
 
@@ -70,7 +71,7 @@ public:
         shownName = proc.presetDisplayName();
         presetBtn.setButtonText (cat.isNotEmpty() ? cat.toUpperCase() + "   " + shownName : shownName);
         // El nombre lleva " *" en cuanto algo cambia (un clic, la automatización): se mira 4 veces por segundo.
-        if (! nameWatch.isTimerRunning()) { nameWatch.tick = [this] { if (proc.presetDisplayName() != shownName) refresh(); }; nameWatch.startTimerHz (4); }
+        if (! nameWatch.isTimerRunning()) { nameWatch.tick = [this] { if (dh::reallyShowing (*this) && proc.presetDisplayName() != shownName) refresh(); }; nameWatch.startTimerHz (4); }
         repaint();
     }
 
@@ -255,6 +256,7 @@ public:
 private:
     void timerCallback() override
     {
+        if (! dh::reallyShowing (*this)) return;      // ventana escondida (Live la esconde sin cerrarla): sin trabajo (H3)
         if (proc.midiInFlash.exchange (false)) midiIn = 3; else if (midiIn > 0) --midiIn;
         if (proc.midiOutFlash.exchange (false)) midiOut = 3; else if (midiOut > 0) --midiOut;
         repaint();

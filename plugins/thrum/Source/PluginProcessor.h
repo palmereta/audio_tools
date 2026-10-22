@@ -15,6 +15,8 @@
 #include "../../../shared/tools/SafeString.h"
 #include "../../../shared/tools/PresetTracker.h"
 #include "../../../shared/tools/LatencyReporter.h"
+#include "../../../shared/tools/MidiOutDelay.h"
+#include "../../../shared/tools/HostGap.h"
 
 #ifndef THRUM_PRODUCT
  #define THRUM_PRODUCT "Thrum"
@@ -125,6 +127,11 @@ private:
     std::vector<float> diScratch;
     std::array<std::bitset<128>, 16> hostNotes;          // notas de salida abiertas en el host (para cerrarlas siempre)
     bool lastMidiOut = false;
+    // QA en DAWs 2026-10-22. P1: el MIDI de salida sale atrasado la latencia que el host compensa en el audio (salía 55
+    // muestras antes). X1: REAPER no llama a un plugin en bypass; al volver, lo que sonaba se suelta (si no, quedaba colgado).
+    dh::MidiOutDelay midiDelay;
+    dh::HostGap hostGap;
+    bool gapRelease = false;
 
     // IR: diseño en un hilo, publicación por bandera.
     struct IrWorker;

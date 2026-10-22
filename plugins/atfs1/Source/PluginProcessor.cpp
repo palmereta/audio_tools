@@ -24,8 +24,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout ATFS1Processor::createLayout
         if (e.choices != nullptr)
             layout.add (std::make_unique<juce::AudioParameterChoice> (pid, e.name, hostChoices (e), (int) e.def));
         else if (e.steps > 0)
-            layout.add (std::make_unique<juce::AudioParameterInt> (pid, e.name, (int) e.lo, (int) e.hi, (int) e.def,
-                juce::AudioParameterIntAttributes().withStringFromValueFunction ([ep] (int v, int) { return formatHost (*ep, (float) v); })));
+            layout.add (std::make_unique<SteppedParam> (pid, e.name, e.lo, e.hi, e.def, e.steps,
+                juce::AudioParameterFloatAttributes().withStringFromValueFunction ([ep] (float v, int) { return formatHost (*ep, v); })));
         else
             layout.add (std::make_unique<juce::AudioParameterFloat> (pid, e.name, juce::NormalisableRange<float> (e.lo, e.hi), e.def,
                 juce::AudioParameterFloatAttributes().withStringFromValueFunction ([ep] (float v, int) { return formatHost (*ep, v); })));
@@ -55,6 +55,7 @@ void ATFS1Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     currentSr = sampleRate;
     synth.prepare (sampleRate, samplesPerBlock);
+    hostGap.prepare (sampleRate);
     outL.assign ((size_t) std::max (64, samplesPerBlock) + 64, 0.0f);
     outR.assign ((size_t) std::max (64, samplesPerBlock) + 64, 0.0f);
 }
@@ -80,6 +81,9 @@ void ATFS1Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     const int n = buffer.getNumSamples();
     if (n <= 0) return;
     wasBypassed = false;
+    // El host dejó de llamar (REAPER con el plugin en bypass) y vuelve: el note-off pudo perderse en el hueco. Se
+    // sueltan las voces (y con ellas sus Fseq) antes del MIDI de este bloque (QA en DAWs 2026-10-22, X1).
+    if (hostGap.check (getPlayHead(), n, isNonRealtime())) { synth.engine.allNotesOff(); midiNote.fill (false); uiNote.fill (false); }
     if ((int) outL.size() < n) { outL.resize ((size_t) n); outR.resize ((size_t) n); }
     if (! midi.isEmpty()) midiInFlash.store (true);
 
