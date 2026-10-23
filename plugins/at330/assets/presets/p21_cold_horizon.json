@@ -1,0 +1,20 @@
+{
+ "name": "Cold Horizon",
+ "category": "Layers",
+ "description": "Wide ensemble, all voices, slow attack: an endless horizon of sound.",
+ "order": 21,
+ "params": {
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "ch_male8_lo": 1,
+  "ens_depth": 140,
+  "str_attack": 2.0,
+  "ch_attack": 1.0,
+  "release": 6.0,
+  "str_tone": 40,
+  "volume": -5.4
+ },
+ "demo_chords": "Dm Am Bb C",
+ "voice": false
+}

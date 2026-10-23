@@ -30,6 +30,7 @@ against the hardware and improve.
 | [Plumb](plugins/plumb/) | Original: real-time pitch correction for voice, natural to hard, from 0.67 ms of latency | 1.0.2 | Released |
 | [Thrum](plugins/thrum/) | Original: electric guitar by physical modelling: six guitars with waveguide strings and real pickups, a guitarist that fingers, strums and plays the articulations, thirteen pedals, four amps and a cabinet with movable microphones | 1.0.1 | Released |
 | [Pallor](plugins/pallor/) | Original: drum machine for dark wave, coldwave, post-punk and EBM, analog and 80s digital engines, 80s/90s effects, step sequencer | 1.0.2 | Released |
+| [AT330](plugins/at330/) | Roland VP-330 (1979), strings, choir and 10-band vocoder with a BBD ensemble | 1.0.0 | Released |
 
 ## AT20V
 
@@ -229,6 +230,23 @@ Technical notes: [`plugins/tarnish/README.md`](plugins/tarnish/README.md) and th
 
 Technical notes: [`plugins/at303/README.md`](plugins/at303/README.md) and the research behind it,
 [`plugins/at303/docs/research.md`](plugins/at303/docs/research.md).
+
+## AT330
+
+- A top-octave divider with every note phase-locked and within 2 cents, and the waveforms measured on the original's
+  adjustment sheet: an exponential-charge sawtooth at 8' and the truncated one at 4'.
+- Strings at 4'; a choir of male 8', male 4' and female 4' voices through one fixed bank of seven formant filters;
+  the original's single envelope per section (it re-attacks the whole chord on every key) as Classic, and per-key
+  envelopes as Poly.
+- A ten-band vocoder, 200 Hz to 6 kHz, through the audio input (sidechain): Hold, a consonant path, direct mic,
+  and the carrier from the keys, an external signal on the right channel, or both; Freeze and formant shift.
+- The four-BBD ensemble with the LFO periods measured on the original (3.9 s / 150 ms, 4.6 s / 175 ms), a BBD
+  vibrato with delay, a pitch shift that bends down; velocity, pitch bend both ways, mod-wheel vibrato, a plate reverb.
+- The window is a rendered instrument in oiled walnut with knobs, tablets, the band display and the keyboard;
+  45 presets.
+
+Technical notes: [`plugins/at330/README.md`](plugins/at330/README.md) and the research behind it,
+[`plugins/at330/docs/research.md`](plugins/at330/docs/research.md).
 
 ## Plumb
 

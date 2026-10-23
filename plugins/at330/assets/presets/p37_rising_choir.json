@@ -1,0 +1,21 @@
+{
+ "name": "Rising Choir",
+ "category": "Pitch and Motion",
+ "description": "Pitch Shift in Auto: every chord starts a fifth below and glides up.",
+ "order": 37,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "ch_male8_lo": 1,
+  "pitch_mode": 1,
+  "pitch_set": 7,
+  "pitch_time": 0.35,
+  "release": 2.0,
+  "volume": -5.4
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

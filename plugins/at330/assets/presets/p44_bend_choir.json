@@ -1,0 +1,20 @@
+{
+ "name": "Bend Choir",
+ "category": "Pitch and Motion",
+ "description": "Pitch bend up and down a full fifth (extra) over a full choir; the mod wheel adds vibrato.",
+ "order": 44,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "ch_male8_lo": 1,
+  "bend_range": 7,
+  "mod_vib": 100,
+  "vib_depth": 10,
+  "volume": -5.3
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

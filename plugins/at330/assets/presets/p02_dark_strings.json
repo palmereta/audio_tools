@@ -1,0 +1,13 @@
+{
+ "name": "Dark Strings",
+ "category": "Strings",
+ "description": "Tone almost closed: a soft, muffled section for low pads.",
+ "order": 2,
+ "params": {
+  "str_tone": 12,
+  "release": 2.5,
+  "volume": 1.6
+ },
+ "demo_chords": "Em C G D",
+ "voice": false
+}

@@ -1,0 +1,16 @@
+{
+  "title": "AT330",
+  "tagline": "Strings, voices and a vocoder that sings.",
+  "fps": 24,
+  "bpm": 64,
+  "shots": [
+    {"name": "open", "beats": 6},
+    {"name": "tablets", "beats": 4},
+    {"name": "bands", "beats": 4},
+    {"name": "keys", "beats": 4},
+    {"name": "hero", "beats": 8},
+    {"name": "end", "beats": 6, "in": "dissolve"}
+  ],
+  "poster": {"shot": "hero", "frame": 60},
+  "audio": {"cmd": ["build-at330/plugins/at330/at330render_artefacts/Release/at330render", "{out}", "--preset", "Rain on Neon", "--chords", "Fm Db Ab Eb Fm", "--beats-per-chord", "8", "--bpm", "64", "--seconds", "{seconds}"]}
+}

@@ -1,0 +1,21 @@
+{
+ "name": "Cathedral Voices",
+ "category": "Choir",
+ "description": "The full choir in a large space (extra reverb).",
+ "order": 13,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "ch_male8_lo": 1,
+  "ch_attack": 0.4,
+  "release": 3.5,
+  "space_mix": 35,
+  "space_size": 85,
+  "volume": -7.0
+ },
+ "demo_chords": "Am Dm Em Am",
+ "voice": false
+}

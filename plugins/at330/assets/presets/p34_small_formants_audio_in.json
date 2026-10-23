@@ -1,0 +1,18 @@
+{
+ "name": "Small Formants (Audio In)",
+ "category": "Vocoder",
+ "description": "Formants shifted up (extra): a small, high voice on the same notes.",
+ "order": 34,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "voc_upper": 1,
+  "voc_lower": 1,
+  "formant_shift": 6,
+  "voc_tone": 80,
+  "release": 0.6,
+  "volume": 0.0
+ },
+ "demo_chords": "C G Am F",
+ "voice": true
+}

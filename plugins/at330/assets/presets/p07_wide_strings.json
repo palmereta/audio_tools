@@ -1,0 +1,13 @@
+{
+ "name": "Wide Strings",
+ "category": "Strings",
+ "description": "Ensemble depth pushed past the original for a wider, more seasick chorus.",
+ "order": 7,
+ "params": {
+  "ens_depth": 150,
+  "release": 2.0,
+  "volume": 0.0
+ },
+ "demo_chords": "Dm Am Bb F",
+ "voice": false
+}

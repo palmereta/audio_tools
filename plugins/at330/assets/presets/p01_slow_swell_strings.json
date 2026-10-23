@@ -1,0 +1,13 @@
+{
+ "name": "Slow Swell Strings",
+ "category": "Strings",
+ "description": "A long attack and a long release: chords that rise and hang.",
+ "order": 1,
+ "params": {
+  "str_attack": 2.2,
+  "release": 4.5,
+  "volume": 0.0
+ },
+ "demo_chords": "Dm Bb F C",
+ "voice": false
+}

@@ -15,6 +15,7 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 | [AT303](#at303) | 1.0.3 |
 | [Pallor](#pallor) | 1.0.2 |
 | [Thrum](#thrum) | 1.0.1 |
+| [AT330](#at330) | 1.0.0 |
 | [Orrery](#orrery) | 1.0.7 |
 | [Murmur](#murmur) | 1.0.4 |
 | [Halation](#halation) | 1.0.3 |
@@ -336,6 +337,17 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 - A guitarist inside: every note on a real string and fret, smart legato with hammer-ons, pull-offs and slides, chords voiced like a guitarist, 32 strum and 11 fingerpicking patterns with strums centred on the beat, ten articulations, keyswitches, MPE and MIDI out.
 - Thirteen reorderable pedals, four tube amps with Auto level, and a cabinet with two movable microphones or your own impulse responses up to 3 s; a DI output for re-amping.
 - A Stage editor with the guitar, pedals and amps rendered in 3D, a live fretboard, an Inspect view, 69 presets and a manual in English and Spanish.
+
+## AT330
+
+### 1.0.0
+
+- First release: strings, choir and a ten-band vocoder with a four-BBD ensemble, recreated from the service documentation of a 1979 string, choir and vocoder keyboard.
+- The original's tone generation: a top-octave divider with every note phase-locked, the measured 8' and 4' waveforms, strings at 4', a choir of male 8', male 4' and female 4' voices through a fixed seven-filter formant bank, and a single envelope per section that re-attacks the whole chord on every key (Classic).
+- A vocoder with ten bands from 200 Hz to 6 kHz through the plugin's audio input (sidechain): Hold, a consonant path, direct mic, and the carrier from the keys, from an external signal on the right channel, or both.
+- The ensemble of four bucket-brigade delays with the LFO rates measured on the original, a BBD vibrato with its delay, and a Pitch Shift that bends down in Auto or Manual.
+- Extras the original did not have: per-key envelopes (Poly, the default), velocity, Freeze, formant shift, vocoder response, pitch bend both ways, mod-wheel vibrato, a movable split, a switchable strings ensemble and a plate reverb.
+- A rendered panel in oiled walnut with every knob and tablet, the band display and the keyboard; an Extended page; 45 presets and a manual in English and Spanish.
 
 ## Orrery
 

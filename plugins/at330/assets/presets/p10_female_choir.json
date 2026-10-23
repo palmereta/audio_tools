@@ -1,0 +1,17 @@
+{
+ "name": "Female Choir",
+ "category": "Choir",
+ "description": "Female 4' on the upper half, male 4' below: the classic split choir.",
+ "order": 10,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_female_up": 1,
+  "ch_male4_lo": 1,
+  "ch_attack": 0.25,
+  "release": 2.0,
+  "volume": -1.1
+ },
+ "demo_chords": "C Em F G",
+ "voice": false
+}

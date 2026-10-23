@@ -255,6 +255,14 @@
     "Trece pedales que se pueden reordenar, cuatro amplificadores a válvulas con Auto level y un gabinete con dos micrófonos móviles o tus propias respuestas al impulso de hasta 3 s; una salida DI para reamplificar.",
     "Un editor Stage con la guitarra, los pedales y los amplificadores renderizados en 3D, un diapasón en vivo, una vista Inspect, 69 presets y un manual en inglés y en castellano."
   ],
+  "at330-v1.0.0": [
+    "Primera versión: cuerdas, coro y un vocoder de diez bandas con un ensemble de cuatro BBD, recreados de la documentación de servicio de un teclado de cuerdas, coro y vocoder de 1979.",
+    "La generación de tono del original: un divisor de octava superior con todas las notas en fase, las formas de onda de 8' y 4' medidas, cuerdas en 4', un coro de voces masculinas de 8' y 4' y femenina de 4' por un banco fijo de siete filtros formantes, y una sola envolvente por sección que vuelve a atacar todo el acorde con cada tecla (Classic).",
+    "Un vocoder de diez bandas de 200 Hz a 6 kHz por la entrada de audio del plugin (sidechain): Hold, un paso para las consonantes, micrófono directo, y el portador desde las teclas, desde una señal externa por el canal derecho, o los dos.",
+    "El ensemble de cuatro líneas de retardo BBD con las velocidades de LFO medidas en el original, un vibrato BBD con su retardo y un Pitch Shift que baja en modo Auto o Manual.",
+    "Lo que el original no tenía: envolventes por tecla (Poly, por defecto), velocity, Freeze, corrimiento de formantes, respuesta del vocoder, pitch bend para los dos lados, vibrato con la rueda de modulación, división del teclado movible, ensemble de las cuerdas apagable y una reverb de placa.",
+    "Un panel renderizado en nogal aceitado con cada perilla y cada llave, el visor de bandas y el teclado; una página Extended; 45 presets y un manual en inglés y castellano."
+  ],
 
   "orrery-v1.0.7": [
     "Los satélites siguen sincronizados cuando el host vuelve a preparar el plugin a la misma frecuencia de muestreo, como hace REAPER antes de cada render offline: el satélite ya no deja su drone colgado sin note-off ni lo vuelve a atacar uno a nueve buffers tarde.",

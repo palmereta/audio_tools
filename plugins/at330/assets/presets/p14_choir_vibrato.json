@@ -1,0 +1,19 @@
+{
+ "name": "Choir Vibrato",
+ "category": "Choir",
+ "description": "Deeper, faster vibrato through the BBD, no delay before it starts.",
+ "order": 14,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "vib_depth": 65,
+  "vib_rate": 7.5,
+  "vib_delay": 0,
+  "volume": -3.6
+ },
+ "demo_chords": "F C Dm Bb",
+ "voice": false
+}

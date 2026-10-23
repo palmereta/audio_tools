@@ -1,0 +1,19 @@
+{
+ "name": "Vocoder with Choir (Audio In)",
+ "category": "Vocoder",
+ "description": "The vocoder over the choir: the voice speaks, the choir holds the chord.",
+ "order": 28,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "voc_upper": 1,
+  "voc_lower": 1,
+  "ch_male8_up": 1,
+  "ch_male8_lo": 1,
+  "ch_level": 45,
+  "release": 1.5,
+  "volume": -2.2
+ },
+ "demo_chords": "Dm Bb F C",
+ "voice": true
+}

@@ -1,0 +1,18 @@
+{
+ "name": "Slow Response (Audio In)",
+ "category": "Vocoder",
+ "description": "The band detectors slowed down (extra): a smeared, ghostly voice.",
+ "order": 35,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "voc_upper": 1,
+  "voc_lower": 1,
+  "voc_response": 220,
+  "release": 1.8,
+  "space_mix": 30,
+  "volume": -2.7
+ },
+ "demo_chords": "Fm Db Ab Eb",
+ "voice": true
+}

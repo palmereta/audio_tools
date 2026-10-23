@@ -1,0 +1,21 @@
+{
+ "name": "Machine Voice (Audio In)",
+ "category": "Vocoder",
+ "description": "Fast response, bright tone, no ensemble: a hard, robotic voice.",
+ "order": 27,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "voc_upper": 1,
+  "voc_lower": 1,
+  "voc_ens": 0,
+  "vib_depth": 0,
+  "voc_response": 8,
+  "voc_tone": 90,
+  "consonants": 70,
+  "release": 0.15,
+  "volume": -3.5
+ },
+ "demo_chords": "Em Em G D",
+ "voice": true
+}

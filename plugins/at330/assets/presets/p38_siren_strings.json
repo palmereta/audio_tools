@@ -1,0 +1,16 @@
+{
+ "name": "Siren Strings",
+ "category": "Pitch and Motion",
+ "description": "Auto Pitch Shift a full octave below with a long glide.",
+ "order": 38,
+ "params": {
+  "pitch_mode": 1,
+  "pitch_set": 12,
+  "pitch_time": 1.2,
+  "release": 1.5,
+  "str_tone": 70,
+  "volume": 0.0
+ },
+ "demo_chords": "Em Em C D",
+ "voice": false
+}

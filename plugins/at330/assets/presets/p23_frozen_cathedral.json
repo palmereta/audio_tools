@@ -1,0 +1,21 @@
+{
+ "name": "Frozen Cathedral",
+ "category": "Layers",
+ "description": "Everything on with the longest release and a huge space.",
+ "order": 23,
+ "params": {
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "ch_male8_lo": 1,
+  "release": 8.0,
+  "str_attack": 1.5,
+  "ch_attack": 1.0,
+  "space_mix": 55,
+  "space_size": 100,
+  "ens_depth": 120,
+  "volume": -8.2
+ },
+ "demo_chords": "Em Cmaj7 Am D",
+ "voice": false
+}

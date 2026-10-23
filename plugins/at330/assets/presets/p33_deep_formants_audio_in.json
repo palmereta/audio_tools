@@ -1,0 +1,18 @@
+{
+ "name": "Deep Formants (Audio In)",
+ "category": "Vocoder",
+ "description": "Formants shifted down (extra): the voice sounds bigger and lower than the singer.",
+ "order": 33,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "voc_upper": 1,
+  "voc_lower": 1,
+  "formant_shift": -5,
+  "voc_tone": 50,
+  "release": 0.8,
+  "volume": -1.5
+ },
+ "demo_chords": "Em C G D",
+ "voice": true
+}

@@ -1,0 +1,18 @@
+{
+ "name": "Poly Swells",
+ "category": "Pitch and Motion",
+ "description": "Poly envelopes (extra, the default) with a slow attack: each note swells on its own, unlike Classic Retrigger.",
+ "order": 43,
+ "params": {
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "ch_male8_lo": 1,
+  "str_attack": 0.6,
+  "ch_attack": 0.6,
+  "release": 2.0,
+  "volume": -5.8
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

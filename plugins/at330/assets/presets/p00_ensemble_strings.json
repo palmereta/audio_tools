@@ -1,0 +1,11 @@
+{
+ "name": "Ensemble Strings",
+ "category": "Strings",
+ "description": "The string section as it leaves the factory: both halves at 4', medium attack, the ensemble always on.",
+ "order": 0,
+ "params": {
+  "volume": 0.0
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

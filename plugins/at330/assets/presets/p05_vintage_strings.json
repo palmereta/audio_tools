@@ -1,0 +1,14 @@
+{
+ "name": "Vintage Strings",
+ "category": "Strings",
+ "description": "The original's single envelope (Classic): each new chord dips and attacks again, the way the machine plays.",
+ "order": 5,
+ "params": {
+  "keying": 0,
+  "str_attack": 0.15,
+  "release": 1.4,
+  "volume": 0.0
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

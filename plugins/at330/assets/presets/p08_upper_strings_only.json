@@ -1,0 +1,13 @@
+{
+ "name": "Upper Strings Only",
+ "category": "Strings",
+ "description": "Strings only above the split: the lower half is free for a bass from another instrument.",
+ "order": 8,
+ "params": {
+  "str_lower": 0,
+  "release": 1.6,
+  "volume": 1.4
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

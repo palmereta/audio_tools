@@ -1,0 +1,19 @@
+{
+ "name": "Scoop Voices",
+ "category": "Pitch and Motion",
+ "description": "A short scoop up into each note, like a singer reaching for it.",
+ "order": 39,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_female_up": 1,
+  "ch_male4_lo": 1,
+  "pitch_mode": 1,
+  "pitch_set": 2,
+  "pitch_time": 0.08,
+  "release": 1.6,
+  "volume": -1.1
+ },
+ "demo_chords": "Dm Bb F C",
+ "voice": false
+}

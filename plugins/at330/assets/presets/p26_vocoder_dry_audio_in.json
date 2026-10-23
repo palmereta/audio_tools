@@ -1,0 +1,18 @@
+{
+ "name": "Vocoder Dry (Audio In)",
+ "category": "Vocoder",
+ "description": "The ten bands without ensemble or vibrato: the plain vocoder.",
+ "order": 26,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "voc_upper": 1,
+  "voc_lower": 1,
+  "voc_ens": 0,
+  "vib_depth": 0,
+  "release": 0.4,
+  "volume": -4.1
+ },
+ "demo_chords": "Am F C G",
+ "voice": true
+}

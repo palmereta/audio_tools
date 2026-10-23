@@ -1,0 +1,17 @@
+{
+ "name": "Glass Hall",
+ "category": "Layers",
+ "description": "Bright strings and the female voice, each note swelling on its own.",
+ "order": 20,
+ "params": {
+  "ch_female_up": 1,
+  "str_tone": 85,
+  "str_attack": 0.9,
+  "ch_attack": 0.9,
+  "release": 3.0,
+  "space_mix": 30,
+  "volume": -2.0
+ },
+ "demo_chords": "Cmaj7 Am7 Fmaj7 G",
+ "voice": false
+}

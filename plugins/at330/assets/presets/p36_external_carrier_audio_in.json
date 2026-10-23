@@ -1,0 +1,16 @@
+{
+ "name": "External Carrier (Audio In)",
+ "category": "Vocoder",
+ "description": "The carrier comes from the right input channel (extra), the voice from the left.",
+ "order": 36,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "carrier": 1,
+  "voc_ens": 1,
+  "release": 0.5,
+  "volume": 2.3
+ },
+ "demo_chords": "Am F C G",
+ "voice": true
+}

@@ -1,0 +1,19 @@
+{
+ "name": "Strings and Choir",
+ "category": "Layers",
+ "description": "Strings and the full choir together, the sound most people know this machine for.",
+ "order": 17,
+ "params": {
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "ch_male8_lo": 1,
+  "str_level": 70,
+  "ch_level": 75,
+  "release": 2.5,
+  "ch_attack": 0.3,
+  "volume": -5.3
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

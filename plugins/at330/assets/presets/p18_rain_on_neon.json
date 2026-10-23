@@ -1,0 +1,20 @@
+{
+ "name": "Rain on Neon",
+ "category": "Layers",
+ "description": "Slow strings with male and female voices, long release, a wet hall: slow, wide minor chords.",
+ "order": 18,
+ "params": {
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male8_lo": 1,
+  "str_attack": 1.4,
+  "ch_attack": 0.8,
+  "release": 5.5,
+  "space_mix": 40,
+  "space_size": 90,
+  "str_tone": 45,
+  "volume": -6.1
+ },
+ "demo_chords": "Fm Db Ab Eb",
+ "voice": false
+}

@@ -1,0 +1,19 @@
+{
+ "name": "Full Choir",
+ "category": "Choir",
+ "description": "All four choir tablets on: male 8' and female 4' above, male 4' and 8' below.",
+ "order": 11,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "ch_male8_lo": 1,
+  "ch_attack": 0.3,
+  "release": 2.4,
+  "volume": -5.3
+ },
+ "demo_chords": "Dm Bb F C",
+ "voice": false
+}

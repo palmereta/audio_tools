@@ -1,0 +1,16 @@
+{
+ "name": "Vocoder with Strings (Audio In)",
+ "category": "Vocoder",
+ "description": "Vocoder on top of the strings, a little direct voice mixed in.",
+ "order": 29,
+ "params": {
+  "voc_upper": 1,
+  "voc_lower": 1,
+  "str_level": 55,
+  "direct_mic": 12,
+  "release": 1.2,
+  "volume": -2.0
+ },
+ "demo_chords": "Am F C G",
+ "voice": true
+}

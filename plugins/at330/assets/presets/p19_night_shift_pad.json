@@ -1,0 +1,17 @@
+{
+ "name": "Night Shift Pad",
+ "category": "Layers",
+ "description": "Dark strings under a quiet male choir: a bed for dark wave and synthwave.",
+ "order": 19,
+ "params": {
+  "ch_male8_up": 1,
+  "ch_male8_lo": 1,
+  "str_tone": 30,
+  "ch_level": 55,
+  "release": 2.8,
+  "str_attack": 0.6,
+  "volume": -1.6
+ },
+ "demo_chords": "Em C Am B",
+ "voice": false
+}

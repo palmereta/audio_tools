@@ -1,0 +1,19 @@
+{
+ "name": "Classic Retrigger",
+ "category": "Pitch and Motion",
+ "description": "The original's single envelope with a slow attack: every new key re-attacks the whole chord.",
+ "order": 42,
+ "params": {
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "ch_male8_lo": 1,
+  "keying": 0,
+  "str_attack": 0.6,
+  "ch_attack": 0.6,
+  "release": 2.0,
+  "volume": -5.8
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

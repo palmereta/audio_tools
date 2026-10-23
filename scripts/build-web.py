@@ -166,6 +166,9 @@ WINPA = f"Pallor-{VPA}-Windows.zip"
 VTH = version("thrum")
 MACTH = f"Thrum-{VTH}-macOS.zip"
 WINTH = f"Thrum-{VTH}-Windows.zip"
+VA330 = version("at330")
+MACA330 = f"AT330-{VA330}-macOS.zip"
+WINA330 = f"AT330-{VA330}-Windows.zip"
 
 # ───────────────────────── AT20V (y textos de la portada sobre código abierto) ─────────────────────────
 T = {
@@ -404,6 +407,10 @@ H = {
              what="An electric guitar, played string by string.",
              body="Six guitars modelled from the strings up, with a guitarist inside that fingers every note on a real string and fret, strums in time with your song, bends, slides and mutes. Then thirteen pedals, four amps and a cabinet with microphones you move. No samples.",
              alt="A red electric guitar with an original body shape on a stand, a black amplifier stack and a pedalboard under a warm stage light, rendered in 3D"),
+        dict(slug="at330", name="AT330", year="1979", img="hero", imgdir="at330/", ver=VA330, mac=MACA330, win=WINA330,
+             what="Strings, a choir and a vocoder, in one keyboard.",
+             body="The string section through a four-BBD ensemble, a choir of three voices through a bank of seven formant filters, and a ten-band vocoder that makes the keys speak. Recreated from the service documentation of a 1979 string, choir and vocoder keyboard, with the extras it never had: an envelope per key, Freeze, formant shift and an external carrier.",
+             alt="A wood-sided keyboard rendered in 3D at an angle on a dark surface: a charcoal panel with sections of knobs and coloured tablets, a lit ten-band display and a keyboard"),
     ],
     about="About", dl_mac="macOS", dl_win="Windows", formats="VST3, Audio Unit and standalone app. Free.",
     hero_alt="Close-up of the blue AT101V rendered in 3D: sliders with black caps and the white AT101V logo",
@@ -478,6 +485,10 @@ H = {
              what="Una guitarra eléctrica, tocada cuerda por cuerda.",
              body="Seis guitarras modeladas desde las cuerdas, con un guitarrista adentro que digita cada nota en una cuerda y un traste reales, rasguea a tiempo con tu tema, hace bends, slides y apagados. Después, trece pedales, cuatro amplificadores y un gabinete con micrófonos que movés. Sin samples.",
              alt="Una guitarra eléctrica roja de forma propia en un soporte, un stack de amplificador negro y una pedalera bajo una luz cálida de escenario, renderizados en 3D"),
+        dict(slug="at330", name="AT330", year="1979", img="hero", imgdir="at330/", ver=VA330, mac=MACA330, win=WINA330,
+             what="Cuerdas, un coro y un vocoder, en un solo teclado.",
+             body="La sección de cuerdas por un ensemble de cuatro BBD, un coro de tres voces por un banco de siete filtros de formantes y un vocoder de diez bandas que hace hablar a las teclas. Recreado a partir de la documentación de servicio de un teclado de cuerdas, coro y vocoder de 1979, con lo que nunca tuvo: una envolvente por tecla, Freeze, corrimiento de formantes y una portadora externa.",
+             alt="Un teclado con laterales de madera renderizado en 3D, en ángulo sobre una superficie oscura: un panel carbón con secciones de perillas y pulsadores de colores, una pantalla de diez bandas encendida y un teclado"),
     ],
     about="Ver más", dl_mac="macOS", dl_win="Windows", formats="VST3, Audio Unit y aplicación independiente. Gratis.",
     hero_alt="Primer plano del AT101V azul renderizado en 3D: faders con capuchones negros y el logo AT101V en blanco",
@@ -2087,6 +2098,121 @@ TH = {
 ),
 }
 
+A330T = {
+"en": dict(
+    title="AT330 — free strings, choir and vocoder plugin, based on a 1979 keyboard | Audio Tools",
+    description="AT330 is a free, open-source plugin for macOS, Windows and Linux, recreated from the service documentation of a 1979 string, choir and vocoder keyboard: strings at 4', a choir of three voices through a fixed bank of seven formant filters, a ten-band vocoder from 200 Hz to 6 kHz with Hold, a consonant path and a direct mic, a four-BBD ensemble at the original's measured LFO rates, BBD vibrato with its delay, and a pitch shift that bends down. Plus an envelope per key, velocity, Freeze, formant shift, an external carrier, a plate reverb and 45 presets. VST3, Audio Unit, LV2 and standalone.",
+    listen_p="Every clip is AT330 playing factory presets from MIDI written for it, rendered offline with no edits. The vocoder clips use a synthetic voice made by our own script: there is no recorded voice anywhere on this page. The two sketches add Pallor, Thrum and Orrery, with Lacquer on the master. Every clip is at the same loudness.",
+    sound_h="Strings, voices and a vocoder.",
+    sound_p1="The strings are the sawtooth of the original's dividers at 4', through an ensemble of four bucket-brigade delays moved by LFOs at the rates measured on the original. Most of the sound is the ensemble, and you can switch it off to hear the bare saw. The choir takes male 8', male 4' and female 4' voices through a fixed bank of seven formant filters, with a vibrato from the same delay lines that starts after a short pause.",
+    sound_p2="The vocoder splits a voice into ten bands from 200 Hz to 6 kHz and lets the keys speak with it, with a path for the consonants and a little direct mic. Hold keeps every band while the voice fades. Everything is recreated from the original's service documentation, and the original's quirks stay as a choice: Classic mode re-attacks the whole chord on every new key.",
+    spec=[("Strings", "4' upper and lower, the divider sawtooth, through the four-BBD ensemble, which you can switch off and deepen"),
+          ("Choir", "Male 8', male 4' and female 4' through a fixed bank of seven formant filters, with vibrato after its delay"),
+          ("Vocoder", "Ten bands from 200 Hz to 6 kHz, Hold, a consonant path, a direct mic, adjustable response and formant shift"),
+          ("Pitch", "Pitch shift that bends down, Auto or Manual; pitch bend up and down and vibrato on the mod wheel"),
+          ("Keys", "Per-key envelopes with velocity, or Classic with the original's single envelope; a movable split"),
+          ("Sound", "A plate reverb, 45 presets, 44 automatable parameters and zero latency")],
+    flow_h="The whole machine, in one panel.",
+    flow_p="Pitch shift, vibrato, strings, choir, vocoder and master sit side by side as on the original, with their coloured tablets, their knobs and the ten-band display. Below, the keyboard with the split marked between the lower and the upper half. A second page holds everything the original did not have.",
+    flow_caption="Rain on Neon: slow strings with male and female voices, with six keys held.",
+    room_h="What the original did not have.",
+    room_p="The Extended page keeps the additions apart, so the panel stays the machine you know.",
+    room_facts=[("An envelope per key.", "Poly gives every key its own envelope, with velocity. Classic keeps the original's: one envelope per section, and every new key re-attacks the whole chord."),
+                ("Freeze and Hold.", "Hold keeps each vocoder band for about two and a half seconds after the voice stops. Freeze keeps the loudest level each band heard until you switch it off."),
+                ("Response and formants.", "Choose how fast the ten band detectors follow the voice, from crisp and robotic to smeared, and shift the formants up or down for a smaller or bigger voice on the same notes."),
+                ("Bend, wheel and space.", "Pitch bend up and down with an adjustable range, vibrato on the mod wheel, a plate reverb with its size, the ensemble depth, and a split you can move.")],
+    room_caption="The Extended page: envelopes and keys, vocoder, and ensemble and space.",
+    mods_h="A vocoder that sings.",
+    mods_p="Talk, sing or play something else into the plugin's audio input and the keys take the shape of the voice.",
+    mods_facts=[("Ten bands.", "From 200 Hz to 6 kHz, each with its own detector, shown live in the display."),
+                ("Consonants and direct mic.", "A high path lets the s, t and k through while a key is down, and a little of the dry microphone gives the words their edge."),
+                ("Your own carrier.", "Speak with the keys, or with an external synth on the right input channel while the voice goes on the left."),
+                ("A voice you can bend.", "Fast bands for a robot, slow ones for a ghost, Hold for vowels that hang, formants shifted for a giant or a child.")],
+    mods_caption="The vocoder section with its ten-band display, the consonant path and the direct mic.",
+    slow_h="From a string section to a talking choir.",
+    slow_p="Forty-five presets in five groups: strings, choir, layers of both, vocoder and pitch and motion. Every vocoder preset is marked Audio In, so you know which ones are waiting for a voice.",
+    presets_h="Forty-five presets.",
+    presets=[("17", "Strings and choir", "Ensemble Strings, Slow Swell Strings, Dark Strings, Vintage Strings, Male Choir 8', Female Choir, Low Monks, Cathedral Voices…"),
+             ("8", "Layers", "Strings and Choir, Rain on Neon, Night Shift Pad, Glass Hall, Cold Horizon, Frozen Cathedral, Velvet Poly…"),
+             ("12", "Vocoder (Audio In)", "Vocoder Ensemble, Machine Voice, Whisper Bands, Hold Pad, Formant Freeze, Deep Formants, External Carrier…"),
+             ("8", "Pitch and motion", "Rising Choir, Siren Strings, Scoop Voices, Sinking Pad, Wobbling Tape, Classic Retrigger, Poly Swells, Bend Choir")],
+    dl_h=f"Download AT330 {VA330}.",
+    dl_p="Free, no account, no subscription.",
+    mac_h="macOS", mac_req="macOS 11 or later. Apple silicon and Intel in one universal binary.",
+    mac_fmt="VST3, Audio Unit, standalone app and at330render",
+    mac_steps=["Unzip the file.", "Copy <code>AT330.vst3</code> to <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copy <code>AT330.component</code> to <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "Rescan plugins in your DAW and put AT330 on an instrument track."],
+    win_h="Windows", win_req="Windows 10 or 11, 64-bit.", win_fmt="VST3, standalone app and at330render",
+    win_steps=["Unzip the file.", "Copy <code>AT330.vst3</code> to <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Rescan plugins in your DAW and put AT330 on an instrument track."],
+    file_label="file",
+    dl_note="The builds are not code-signed yet. macOS may refuse to open them until you run <code>xattr -dr com.apple.quarantine</code> on the installed files, and Windows SmartScreen may ask you to confirm the first time. Every package includes an INSTALL.txt with the exact steps and the renderer's options.",
+    os_p="AT330 is free software under the GNU Affero General Public License v3, like the JUCE framework it is built on. You can use it, study it, change it and share it. The source code is on <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, with every release.",
+    os_link="Why Audio Tools is open source",
+    trademark="Audio Tools is an independent project. AT330 is an original design recreated from the service documentation of a 1979 string, choir and vocoder keyboard; it contains no samples of that machine, its panel, name and logo are our own, and no brand names appear in it.",
+    photo_credit="The instrument in the pictures is a 3D render made for this page; the screenshots show the real interface. Every sound on this page is AT330's own, and the voice in the vocoder clips is synthetic.",
+    hero_alt="A wood-sided keyboard rendered in 3D at an angle on a dark surface: a charcoal panel with sections of knobs and coloured tablets, a lit ten-band display and a keyboard below.",
+    alt_ui="AT330 with the Rain on Neon preset", alt_room="AT330's Extended page", alt_frozen="AT330's vocoder section",
+),
+"es": dict(
+    title="AT330 — plugin gratis de cuerdas, coro y vocoder, basado en un teclado de 1979 | Audio Tools",
+    description="AT330 es un plugin libre y de código abierto para macOS, Windows y Linux, recreado a partir de la documentación de servicio de un teclado de cuerdas, coro y vocoder de 1979: cuerdas de 4', un coro de tres voces por un banco fijo de siete filtros de formantes, un vocoder de diez bandas de 200 Hz a 6 kHz con Hold, vía de consonantes y micrófono directo, un ensemble de cuatro BBD con las velocidades de LFO medidas en el original, vibrato por BBD con su retardo y un pitch shift que baja. Más una envolvente por tecla, velocity, Freeze, corrimiento de formantes, una portadora externa, una reverb de placa y 45 presets. VST3, Audio Unit, LV2 y aplicación independiente.",
+    listen_p="Cada clip es AT330 tocando presets de fábrica con MIDI escrito para él, renderizado sin edición. Los clips de vocoder usan una voz sintética hecha por un script nuestro: en esta página no hay ninguna voz grabada. Los dos bocetos suman a Pallor, Thrum y Orrery, con Lacquer en el master. Todos los clips están a la misma sonoridad.",
+    sound_h="Cuerdas, voces y un vocoder.",
+    sound_p1="Las cuerdas son el diente de sierra de los divisores del original a 4', por un ensemble de cuatro líneas de retardo de cubo (BBD) movidas por LFO a las velocidades medidas en el original. Casi todo el sonido es el ensemble, y lo podés apagar para escuchar la sierra pelada. El coro toma voces masculinas de 8' y 4' y femeninas de 4' por un banco fijo de siete filtros de formantes, con un vibrato de las mismas líneas de retardo que arranca después de una pausa corta.",
+    sound_p2="El vocoder parte una voz en diez bandas de 200 Hz a 6 kHz y hace hablar a las teclas con ella, con una vía para las consonantes y un poco de micrófono directo. Hold mantiene cada banda mientras la voz se apaga. Todo está recreado a partir de la documentación de servicio del original, y sus rarezas quedan como una opción: el modo Classic vuelve a atacar todo el acorde con cada tecla nueva.",
+    spec=[("Cuerdas", "4' superior e inferior, el diente de sierra de los divisores, por el ensemble de cuatro BBD, que podés apagar y profundizar"),
+          ("Coro", "Masculino de 8', masculino de 4' y femenino de 4' por un banco fijo de siete filtros de formantes, con vibrato después de su retardo"),
+          ("Vocoder", "Diez bandas de 200 Hz a 6 kHz, Hold, vía de consonantes, micrófono directo, respuesta y corrimiento de formantes ajustables"),
+          ("Altura", "Pitch shift que baja, Auto o Manual; pitch bend hacia arriba y hacia abajo y vibrato en la rueda de modulación"),
+          ("Teclas", "Envolvente por tecla con velocity, o Classic con la envolvente única del original; un split que se mueve"),
+          ("Sonido", "Una reverb de placa, 45 presets, 44 parámetros automatizables y latencia cero")],
+    flow_h="La máquina entera, en un solo panel.",
+    flow_p="Pitch shift, vibrato, cuerdas, coro, vocoder y master van lado a lado como en el original, con sus pulsadores de colores, sus perillas y la pantalla de diez bandas. Abajo, el teclado con el split marcado entre la mitad inferior y la superior. Una segunda página reúne todo lo que el original no tenía.",
+    flow_caption="Rain on Neon: cuerdas lentas con voces masculinas y femeninas, con seis teclas apretadas.",
+    room_h="Lo que el original no tenía.",
+    room_p="La página Extended guarda lo agregado aparte, así el panel sigue siendo la máquina que conocés.",
+    room_facts=[("Una envolvente por tecla.", "Poly le da a cada tecla su propia envolvente, con velocity. Classic conserva la del original: una envolvente por sección, y cada tecla nueva vuelve a atacar todo el acorde."),
+                ("Freeze y Hold.", "Hold mantiene cada banda del vocoder unos dos segundos y medio después de que la voz se detiene. Freeze conserva el nivel más alto que escuchó cada banda hasta que lo apagás."),
+                ("Respuesta y formantes.", "Elegí qué tan rápido siguen a la voz los diez detectores de banda, de seco y robótico a borroso, y corré los formantes hacia arriba o hacia abajo para una voz más chica o más grande sobre las mismas notas."),
+                ("Bend, rueda y espacio.", "Pitch bend hacia arriba y hacia abajo con rango ajustable, vibrato en la rueda de modulación, una reverb de placa con su tamaño, la profundidad del ensemble y un split que movés.")],
+    room_caption="La página Extended: envolventes y teclas, vocoder, y ensemble y espacio.",
+    mods_h="Un vocoder que canta.",
+    mods_p="Hablá, cantá o tocá otra cosa en la entrada de audio del plugin y las teclas toman la forma de la voz.",
+    mods_facts=[("Diez bandas.", "De 200 Hz a 6 kHz, cada una con su detector, mostradas en vivo en la pantalla."),
+                ("Consonantes y micrófono directo.", "Una vía aguda deja pasar la s, la t y la k mientras hay una tecla apretada, y un poco del micrófono seco les da filo a las palabras."),
+                ("Tu propia portadora.", "Hablá con las teclas, o con un sinte externo en el canal derecho de la entrada mientras la voz va por el izquierdo."),
+                ("Una voz que se dobla.", "Bandas rápidas para un robot, lentas para un fantasma, Hold para vocales que quedan colgadas, formantes corridos para un gigante o un chico.")],
+    mods_caption="La sección del vocoder con su pantalla de diez bandas, la vía de consonantes y el micrófono directo.",
+    slow_h="De una sección de cuerdas a un coro que habla.",
+    slow_p="Cuarenta y cinco presets en cinco grupos: cuerdas, coro, capas de los dos, vocoder, y altura y movimiento. Todos los presets de vocoder dicen Audio In, así sabés cuáles esperan una voz.",
+    presets_h="Cuarenta y cinco presets.",
+    presets=[("17", "Cuerdas y coro", "Ensemble Strings, Slow Swell Strings, Dark Strings, Vintage Strings, Male Choir 8', Female Choir, Low Monks, Cathedral Voices…"),
+             ("8", "Capas", "Strings and Choir, Rain on Neon, Night Shift Pad, Glass Hall, Cold Horizon, Frozen Cathedral, Velvet Poly…"),
+             ("12", "Vocoder (Audio In)", "Vocoder Ensemble, Machine Voice, Whisper Bands, Hold Pad, Formant Freeze, Deep Formants, External Carrier…"),
+             ("8", "Altura y movimiento", "Rising Choir, Siren Strings, Scoop Voices, Sinking Pad, Wobbling Tape, Classic Retrigger, Poly Swells, Bend Choir")],
+    dl_h=f"Descargá AT330 {VA330}.",
+    dl_p="Gratis, sin cuenta, sin suscripción.",
+    mac_h="macOS", mac_req="macOS 11 o posterior. Apple silicon e Intel en un solo binario universal.",
+    mac_fmt="VST3, Audio Unit, aplicación independiente y at330render",
+    mac_steps=["Descomprimí el archivo.", "Copiá <code>AT330.vst3</code> a <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copiá <code>AT330.component</code> a <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "Volvé a escanear los plugins en tu DAW y poné AT330 en una pista de instrumento."],
+    win_h="Windows", win_req="Windows 10 u 11, de 64 bits.", win_fmt="VST3, aplicación independiente y at330render",
+    win_steps=["Descomprimí el archivo.", "Copiá <code>AT330.vst3</code> a <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Volvé a escanear los plugins en tu DAW y poné AT330 en una pista de instrumento."],
+    file_label="archivo",
+    dl_note="Los builds todavía no están firmados. macOS puede negarse a abrirlos hasta que corras <code>xattr -dr com.apple.quarantine</code> sobre los archivos instalados, y SmartScreen de Windows puede pedirte que confirmes la primera vez. Cada paquete trae un INSTALL.txt con los pasos exactos y las opciones del render.",
+    os_p="AT330 es software libre bajo la GNU Affero General Public License v3, como el framework JUCE sobre el que está hecho. Lo podés usar, estudiar, modificar y compartir. El código fuente está en <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, con cada versión.",
+    os_link="Por qué Audio Tools es de código abierto",
+    trademark="Audio Tools es un proyecto independiente. AT330 es un diseño original recreado a partir de la documentación de servicio de un teclado de cuerdas, coro y vocoder de 1979; no contiene muestras de esa máquina, su panel, su nombre y su logo son propios, y no aparecen nombres de marcas.",
+    photo_credit="El instrumento de las imágenes es un render 3D hecho para esta página; las capturas muestran la interfaz real. Todos los sonidos de esta página son de AT330, y la voz de los clips de vocoder es sintética.",
+    hero_alt="Un teclado con laterales de madera renderizado en 3D, en ángulo sobre una superficie oscura: un panel carbón con secciones de perillas y pulsadores de colores, una pantalla de diez bandas encendida y un teclado debajo.",
+    alt_ui="AT330 con el preset Rain on Neon", alt_room="La página Extended de AT330", alt_frozen="La sección del vocoder de AT330",
+),
+}
+
 A3 = {
 "en": dict(
     title="AT303 — free bass line synthesizer with a diode ladder filter and step sequencer | Audio Tools",
@@ -2241,6 +2367,10 @@ CPU_TH = (3.25, 4.91, 8.49)        # Apple M4: thrumrender --bench (promedio de 
 WINCPU_TH = (6.23, 7.89, 11.68)   # Ryzen 9 5900XT: lo mismo con thrumrender.exe y thrumtest.exe (pc50 sin otra carga)
 DISK_TH = (132, 42)
 UICPU_TH = 2
+CPU_A330 = (1.3, 2.0, 4.3)          # Apple M4 a 48 kHz: cuerdas con un acorde de 8 notas / todo prendido con 16 notas, vocoder y reverb / las 49 teclas con todo
+WINCPU_A330 = (3.4, 6.0, 15.3)      # Ryzen 9 5900XT: lo mismo con at330test.exe (pc50 sin otra carga)
+DISK_A330 = (47, 16)                # instalado: VST3 + AU + app en macOS, VST3 + exe en Windows
+UICPU_A330 = 2                      # athosttest --tests editor, con el editor a la vista (M4)
 UICPU_HA = 8
 DISK_FS1 = (80, 24)
 CPU = {
@@ -2259,6 +2389,7 @@ CPU = {
     "plumb": [("plnat", CPU_PL[0], WINCPU_PL[0]), ("plhard", CPU_PL[1], WINCPU_PL[1]), ("plthroat", CPU_PL[2], WINCPU_PL[2])],
     "pallor": [("padef", CPU_PA[0], WINCPU_PA[0]), ("paheavy", CPU_PA[1], WINCPU_PA[1]), ("paworst", CPU_PA[2], WINCPU_PA[2])],
     "thrum": [("thavg", CPU_TH[0], WINCPU_TH[0]), ("thheavy", CPU_TH[1], WINCPU_TH[1]), ("thworst", CPU_TH[2], WINCPU_TH[2])],
+    "at330": [("a330str", CPU_A330[0], WINCPU_A330[0]), ("a330all", CPU_A330[1], WINCPU_A330[1]), ("a330keys", CPU_A330[2], WINCPU_A330[2])],
 }
 CPU_LABEL = {
     "en": {"mono": "Mono patch, 4x", "poly8": "8 voices with delay and reverb, 4x", "poly12": "12 voices, 8x (the heaviest setting)",
@@ -2274,7 +2405,8 @@ CPU_LABEL = {
            "a3def": "The default sound at 4x, sequencer running", "a3all": "Square wave, distortion, delay and filter FM, 4x", "a3x8": "The default sound at 8x",
            "plnat": "Natural Lead, Tight mode, formants preserved", "plhard": "Hard Tune, Tight mode", "plthroat": "Throat Down: formants moved",
            "padef": "Night Shift Mercury, sequencer running", "paheavy": "Ash Choir Pulse, the heaviest factory preset", "paworst": "All 16 voices digital on every other step, every effect on",
-           "thavg": "Average of the 69 factory presets, each playing its phrase", "thheavy": "The heaviest factory preset", "thworst": "Strummed chords, high-gain amp at 8x, delay and hall"},
+           "thavg": "Average of the 69 factory presets, each playing its phrase", "thheavy": "The heaviest factory preset", "thworst": "Strummed chords, high-gain amp at 8x, delay and hall",
+           "a330str": "Strings, an 8-note chord", "a330all": "Everything on: 16 notes, vocoder and reverb", "a330keys": "All 49 keys held with everything on"},
     "es": {"mono": "Patch mono, 4x", "poly8": "8 voces con delay y reverb, 4x", "poly12": "12 voces, 8x (el ajuste más pesado)",
            "poly6": "Pad de 6 voces, 4x", "poly6x8": "Pad de 6 voces, 8x", "drones": "Dos voces drone con efectos, 2x",
            "all2": "Todas las voces y el efector, 2x", "all4": "Todas las voces y el efector, 4x",
@@ -2288,10 +2420,11 @@ CPU_LABEL = {
            "a3def": "El sonido de fábrica a ×4, con el secuenciador corriendo", "a3all": "Cuadrada, distorsión, delay y FM del filtro, ×4", "a3x8": "El sonido de fábrica a ×8",
            "plnat": "Natural Lead, modo Tight, formantes preservados", "plhard": "Hard Tune, modo Tight", "plthroat": "Throat Down: formantes movidos",
            "padef": "Night Shift Mercury, con el secuenciador corriendo", "paheavy": "Ash Choir Pulse, el preset de fábrica más pesado", "paworst": "Las 16 voces digitales en un paso de cada dos, todos los efectos prendidos",
-           "thavg": "Promedio de los 69 presets de fábrica, cada uno tocando su frase", "thheavy": "El preset de fábrica más pesado", "thworst": "Acordes rasgueados, amplificador de alta ganancia a ×8, delay y sala"},
+           "thavg": "Promedio de los 69 presets de fábrica, cada uno tocando su frase", "thheavy": "El preset de fábrica más pesado", "thworst": "Acordes rasgueados, amplificador de alta ganancia a ×8, delay y sala",
+           "a330str": "Cuerdas, un acorde de 8 notas", "a330all": "Todo prendido: 16 notas, vocoder y reverb", "a330keys": "Las 49 teclas apretadas con todo prendido"},
 }
-UI_CPU = {"at20v": 15, "at101v": 5, "at42": 11, "at700": 8, "atfs1": UICPU_FS1, "orrery": 4, "murmur": UICPU_MM, "atmd": 6, "lacquer": UICPU_LQ, "halation": UICPU_HA, "tarnish": UICPU_TN, "at303": UICPU_A3, "plumb": UICPU_PL, "pallor": UICPU_PA, "thrum": UICPU_TH}          # lo que suma el editor abierto en el M4 (% de un núcleo)
-DISK = {"at20v": (219, 73), "at101v": (71, 24), "at42": (125, 42), "at700": (78, 26), "atfs1": DISK_FS1, "orrery": DISK_OR, "murmur": DISK_MM, "atmd": DISK_MD, "lacquer": DISK_LQ, "halation": DISK_HA, "tarnish": DISK_TN, "at303": DISK_A3, "plumb": DISK_PL, "pallor": DISK_PA, "thrum": DISK_TH}
+UI_CPU = {"at20v": 15, "at101v": 5, "at42": 11, "at700": 8, "atfs1": UICPU_FS1, "orrery": 4, "murmur": UICPU_MM, "atmd": 6, "lacquer": UICPU_LQ, "halation": UICPU_HA, "tarnish": UICPU_TN, "at303": UICPU_A3, "plumb": UICPU_PL, "pallor": UICPU_PA, "thrum": UICPU_TH, "at330": UICPU_A330}          # lo que suma el editor abierto en el M4 (% de un núcleo)
+DISK = {"at20v": (219, 73), "at101v": (71, 24), "at42": (125, 42), "at700": (78, 26), "atfs1": DISK_FS1, "orrery": DISK_OR, "murmur": DISK_MM, "atmd": DISK_MD, "lacquer": DISK_LQ, "halation": DISK_HA, "tarnish": DISK_TN, "at303": DISK_A3, "plumb": DISK_PL, "pallor": DISK_PA, "thrum": DISK_TH, "at330": DISK_A330}
 
 REQ = {
 "en": dict(
@@ -2305,7 +2438,7 @@ REQ = {
     cpu_note="Percentage of one CPU core at 48 kHz, sound engine only. With the editor open, the interface adds about {ui} % on the M4. Hosts run each instrument on one core, so single-core speed is what counts.",
     cpu_cols=("Setting", "Apple M4", "AMD Ryzen 9 5900XT"),
     disk="Disk space: {mac} MB on macOS (all formats), {win} MB on Windows.",
-    heavy={"at303": "", "pallor": "", "thrum": "", "at20v": "The 12-voice, 8x setting needs the recommended processor.", "at101v": "", "at42": "", "at700": "Eight voices at 4x need the recommended processor.", "atfs1": "Thirty-two voices with every operator need the recommended processor.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
+    heavy={"at303": "", "pallor": "", "thrum": "", "at330": "", "at20v": "The 12-voice, 8x setting needs the recommended processor.", "at101v": "", "at42": "", "at700": "Eight voices at 4x need the recommended processor.", "atfs1": "Thirty-two voices with every operator need the recommended processor.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
 ),
 "es": dict(
     min_h="Mínimo", rec_h="Recomendado", cpu_h="Carga de CPU medida",
@@ -2318,7 +2451,7 @@ REQ = {
     cpu_note="Porcentaje de un núcleo de CPU a 48 kHz, sólo el motor de sonido. Con el editor abierto, la interfaz suma alrededor de {ui} % en el M4. Los DAW corren cada instrumento en un núcleo, así que lo que cuenta es la velocidad de un núcleo.",
     cpu_cols=("Ajuste", "Apple M4", "AMD Ryzen 9 5900XT"),
     disk="Espacio en disco: {mac} MB en macOS (todos los formatos), {win} MB en Windows.",
-    heavy={"at303": "", "pallor": "", "thrum": "", "at20v": "El ajuste de 12 voces a 8x necesita el procesador recomendado.", "at101v": "", "at42": "", "at700": "Ocho voces a 4x necesitan el procesador recomendado.", "atfs1": "Treinta y dos voces con todos los operadores necesitan el procesador recomendado.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
+    heavy={"at303": "", "pallor": "", "thrum": "", "at330": "", "at20v": "El ajuste de 12 voces a 8x necesita el procesador recomendado.", "at101v": "", "at42": "", "at700": "Ocho voces a 4x necesitan el procesador recomendado.", "atfs1": "Treinta y dos voces con todos los operadores necesitan el procesador recomendado.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
 ),
 }
 
@@ -2599,6 +2732,24 @@ PRES = {
         stats=[("6", "", "guitarras, cada una con sus cuerdas y pastillas"), ("32", "", "patrones de rasgueo, más los tuyos"), ("69", "", "presets en nueve categorías"), ("3,3", "%", "de un núcleo en un Apple M4")],
         film_cap="Una guitarra, una pedalera y un amplificador en un escenario oscuro, renderizados en 3D: las pastillas bajo las cuerdas, el mástil, los pedales que se encienden de a uno, el parlante que se mueve con el sonido. El sonido es Thrum tocando Night Drive Strum."),
 },
+"at330": {
+    "en": dict(tag="Strings, voices and a vocoder that sings.",
+        highlights=[("at330/hl-top", "Three sections, one machine.", "Strings, a choir of three voices and a ten-band vocoder, each with its tablets and knobs, side by side on one panel."),
+                    ("at330/hl-close", "A vocoder that sings.", "Ten bands from 200 Hz to 6 kHz, a consonant path for the s and t, a direct mic, and Hold to keep the vowels hanging."),
+                    ("at330/hl-keys", "The ensemble is most of the sound.", "Four bucket-brigade delays moved by LFOs at the rates measured on the original: the wide, swaying shimmer of the strings."),
+                    ("at330/hl-ui", "The real panel.", "The editor shows the whole machine: switch the tablets, turn the knobs and play the keys, all of it automatable."),
+                    ("at330/hl-extended", "What the original did not have.", "An envelope per key, velocity, Freeze, formant shift, an external carrier, pitch bend both ways and a plate reverb, on a page of their own.")],
+        stats=[("45", "", "presets in five groups"), ("44", "", "automatable parameters"), ("0", "", "samples of latency"), ("1.3", "%", "of one core for an 8-note string chord, on an Apple M4")],
+        film_cap="AT330 rendered in 3D in oiled walnut: the choir tablets light on the beat, the ten-band display follows the sound and the keys play the chords. The sound is AT330 playing Rain on Neon, slow minor chords at 64 BPM."),
+    "es": dict(tag="Cuerdas, voces y un vocoder que canta.",
+        highlights=[("at330/hl-top", "Tres secciones, una máquina.", "Cuerdas, un coro de tres voces y un vocoder de diez bandas, cada uno con sus pulsadores y perillas, lado a lado en un solo panel."),
+                    ("at330/hl-close", "Un vocoder que canta.", "Diez bandas de 200 Hz a 6 kHz, una vía de consonantes para la s y la t, un micrófono directo, y Hold para que las vocales queden colgadas."),
+                    ("at330/hl-keys", "El ensemble es casi todo el sonido.", "Cuatro líneas de retardo de cubo movidas por LFO a las velocidades medidas en el original: el brillo ancho y ondulante de las cuerdas."),
+                    ("at330/hl-ui", "El panel real.", "El editor muestra la máquina entera: cambiá los pulsadores, girá las perillas y tocá las teclas, todo automatizable."),
+                    ("at330/hl-extended", "Lo que el original no tenía.", "Una envolvente por tecla, velocity, Freeze, corrimiento de formantes, una portadora externa, pitch bend para los dos lados y una reverb de placa, en una página aparte.")],
+        stats=[("45", "", "presets en cinco grupos"), ("44", "", "parámetros automatizables"), ("0", "", "muestras de latencia"), ("1,3", "%", "de un núcleo para un acorde de cuerdas de 8 notas, en un Apple M4")],
+        film_cap="El AT330 renderizado en 3D en nogal aceitado: las llaves del coro se prenden a tiempo, el visor de diez bandas sigue el sonido y las teclas tocan los acordes. El sonido es el AT330 tocando Rain on Neon, acordes menores lentos a 64 BPM."),
+},
 "pallor": {
     "en": dict(tag="The cold drum machine.",
         highlights=[("pallor/hl-close", "Pads that glow.", "Sixteen pale pads lit from inside with every hit, from the sequencer, from MIDI or from your hand."),
@@ -2845,6 +2996,34 @@ SPECS = {
            ("Formatos", ["Instrumento VST3, Audio Unit (macOS), LV2 (Linux) y aplicación independiente", "thrumrender: render por línea de comandos con archivos MIDI o progresiones de acordes, mediciones de CPU y las respuestas al impulso de fábrica",
                          "Latencia de 47, 55 o 57 muestras con el amplificador a ×2, ×4 u ×8, informada al host"])],
 },
+"at330": {
+    "en": [("Strings", ["Upper and lower 4' strings: the divider sawtooth with attack, tone and level",
+                        "Ensemble of four BBD delay lines at the LFO rates measured on the original; switchable and with adjustable depth (extra)"]),
+           ("Choir", ["Three voices, male 8', male 4' and female 4', through a fixed bank of seven formant filters",
+                      "Female 4' and male 8' tablets above the split, male 4' and male 8' below, with attack, level and an ensemble tablet"]),
+           ("Vocoder", ["Ten bands from 200 Hz to 6 kHz, with a consonant path for the high frequencies and a direct mic; the voice comes in through the plugin's audio input",
+                        "Hold keeps each band about 2.5 s after the voice stops; Freeze (extra) keeps the loudest level each band heard until switched off",
+                        "Adjustable response (extra), formant shift (extra) and an external carrier on the right input channel with the voice on the left (extra)"]),
+           ("Vibrato and pitch", ["BBD vibrato with rate, depth and a delay before it starts; mod-wheel vibrato (extra)",
+                                  "Pitch shift that bends down, Auto (glides up to pitch) or Manual; pitch bend up and down with an adjustable range (extra)"]),
+           ("Keyboard and space", ["Poly: every key has its own envelope, with velocity (extra); Classic keeps the original's single envelope, which re-attacks the whole chord on every new key",
+                                   "Split between the lower and the upper half at C4 as on the original, movable (extra); plate reverb with adjustable size (extra)"]),
+           ("Control", ["45 factory presets in five groups; 44 automatable parameters; 0 samples of latency"]),
+           ("Formats", ["Instrument VST3, Audio Unit (macOS), LV2 (Linux) and standalone app", "at330render: command-line renderer"])],
+    "es": [("Cuerdas", ["Cuerdas de 4' superior e inferior: el diente de sierra de los divisores con ataque, tono y nivel",
+                        "Ensemble de cuatro líneas de retardo BBD a las velocidades de LFO medidas en el original; se puede apagar y con profundidad ajustable (extra)"]),
+           ("Coro", ["Tres voces, masculina de 8', masculina de 4' y femenina de 4', por un banco fijo de siete filtros de formantes",
+                     "Pulsadores femenino de 4' y masculino de 8' sobre el split, masculino de 4' y de 8' debajo, con ataque, nivel y un pulsador de ensemble"]),
+           ("Vocoder", ["Diez bandas de 200 Hz a 6 kHz, con una vía de consonantes para las frecuencias agudas y un micrófono directo; la voz entra por la entrada de audio del plugin",
+                        "Hold mantiene cada banda unos 2,5 s después de que la voz se detiene; Freeze (extra) conserva el nivel más alto que escuchó cada banda hasta que se apaga",
+                        "Respuesta ajustable (extra), corrimiento de formantes (extra) y una portadora externa en el canal derecho de la entrada con la voz en el izquierdo (extra)"]),
+           ("Vibrato y altura", ["Vibrato por BBD con velocidad, profundidad y un retardo antes de empezar; vibrato en la rueda de modulación (extra)",
+                                 "Pitch shift que baja, Auto (sube deslizando hasta la altura) o Manual; pitch bend hacia arriba y hacia abajo con rango ajustable (extra)"]),
+           ("Teclado y espacio", ["Poly: cada tecla tiene su propia envolvente, con velocity (extra); Classic conserva la envolvente única del original, que vuelve a atacar todo el acorde con cada tecla nueva",
+                                  "Split entre la mitad inferior y la superior en Do4 como en el original, movible (extra); reverb de placa con tamaño ajustable (extra)"]),
+           ("Control", ["45 presets de fábrica en cinco grupos; 44 parámetros automatizables; 0 muestras de latencia"]),
+           ("Formatos", ["Instrumento VST3, Audio Unit (macOS), LV2 (Linux) y aplicación independiente", "at330render: render por línea de comandos"])],
+},
 "pallor": {
     "en": [("Voices", ["Sixteen: kick, snare, clap, rim, closed and open hat, crash, ride, four toms, cowbell, clave, tambourine and FX",
                        "Analog engine: 44 circuit models in twelve families (bridged-T, VCO, six-square metal, noise, hexagonal, FM and more), each calibrated against published measurements",
@@ -2993,6 +3172,7 @@ PRODUCTS = [  # slug, nombre, año, mac, win, versión
     ("plumb", "Plumb", "2026", MACPL, WINPL, VPL),
     ("pallor", "Pallor", "2026", MACPA, WINPA, VPA),
     ("thrum", "Thrum", "2026", MACTH, WINTH, VTH),
+    ("at330", "AT330", "1979", MACA330, WINA330, VA330),
 ]
 # Un producto entra a la web cuando sus dos zips están en web/downloads: así se puede publicar uno mientras el
 # siguiente sigue en preparación con su texto ya escrito.
@@ -3000,7 +3180,7 @@ PRODUCTS = [p for p in PRODUCTS if all(os.path.exists(os.path.join(WEB, "downloa
 RELEASED = {p[0] for p in PRODUCTS}
 # Menú de productos (encabezado): grupos y color de cada uno. Las miniaturas son web/assets/img/nav/<slug>.jpg.
 NAV_GROUPS = [(g, [x for x in sl if x in RELEASED]) for g, sl in
-              [("synths", ["at20v", "at101v", "at42", "at700", "atfs1", "atmd", "at303", "pallor", "thrum"]), ("tools", ["orrery", "murmur", "halation", "tarnish", "plumb", "lacquer"])]]
+              [("synths", ["at20v", "at101v", "at42", "at700", "atfs1", "atmd", "at303", "pallor", "thrum", "at330"]), ("tools", ["orrery", "murmur", "halation", "tarnish", "plumb", "lacquer"])]]
 # El mismo orden en el carrusel de la portada, las fichas y el launcher: sintetizadores a la izquierda,
 # herramientas y efectos a la derecha (pedido del usuario, 2026-10-19).
 _ORDER = [s for _, sl in NAV_GROUPS for s in sl]
@@ -3008,10 +3188,10 @@ PRODUCTS.sort (key=lambda p: _ORDER.index (p[0]) if p[0] in _ORDER else len (_OR
 NAV_LABELS = {"en": {"synths": "Synthesizers", "tools": "Tools and effects", "button": "Plugins", "all": "All plugins", "close": "Close menu"},
               "es": {"synths": "Sintetizadores", "tools": "Herramientas y efectos", "button": "Plugins", "all": "Todos los plugins", "close": "Cerrar el menú"}}
 # La imagen grande de cada página de producto (web/assets/img/<nombre>-1200.jpg); el launcher la usa en su ficha.
-HERO_IMG = {"at20v": "render-hero", "pallor": "pallor/hero", "thrum": "thrum/hero", "at303": "at303/hero", "at101v": "at101v/hero-grey", "at42": "at42/hero-blue", "at700": "at700/hero", "atfs1": "atfs1/hero", "orrery": "orrery/hero", "murmur": "murmur/hero", "atmd": "atmd/hero", "lacquer": "lacquer/hero", "halation": "halation/hero", "tarnish": "tarnish/hero", "plumb": "plumb/hero"}
+HERO_IMG = {"at20v": "render-hero", "pallor": "pallor/hero", "thrum": "thrum/hero", "at330": "at330/hero", "at303": "at303/hero", "at101v": "at101v/hero-grey", "at42": "at42/hero-blue", "at700": "at700/hero", "atfs1": "atfs1/hero", "orrery": "orrery/hero", "murmur": "murmur/hero", "atmd": "atmd/hero", "lacquer": "lacquer/hero", "halation": "halation/hero", "tarnish": "tarnish/hero", "plumb": "plumb/hero"}
 ACCENT = {"at20v": "#d24a35", "at101v": "#3a7bd5", "at42": "#ea8c3f", "at700": "#e0b341", "atfs1": "#a9c83c", "orrery": "#f2c878",
-          "murmur": "#f3a27e", "atmd": "#e8743b", "lacquer": "#e0563f", "halation": "#b8a5ff", "tarnish": "#3e8c84", "at303": "#f2a03d", "plumb": "#9db4c8", "pallor": "#e0709c", "thrum": "#e8a33d"}
-TEXTS = lambda slug, lang: {"at20v": T, "at101v": S, "at42": Q, "at700": Z, "atfs1": F, "orrery": O, "murmur": M, "atmd": D, "lacquer": LQ, "halation": HA, "tarnish": TN, "at303": A3, "plumb": PL, "pallor": PA, "thrum": TH}[slug][lang]
+          "murmur": "#f3a27e", "atmd": "#e8743b", "lacquer": "#e0563f", "halation": "#b8a5ff", "tarnish": "#3e8c84", "at303": "#f2a03d", "plumb": "#9db4c8", "pallor": "#e0709c", "thrum": "#e8a33d", "at330": "#e2a43b"}
+TEXTS = lambda slug, lang: {"at20v": T, "at101v": S, "at42": Q, "at700": Z, "atfs1": F, "orrery": O, "murmur": M, "atmd": D, "lacquer": LQ, "halation": HA, "tarnish": TN, "at303": A3, "plumb": PL, "pallor": PA, "thrum": TH, "at330": A330T}[slug][lang]
 
 # Visitas y descargas: Pulse (analytics.digitalhub.com.ar, la analítica propia), sitio "Audio Tools". Sólo carga en el
 # dominio real, así las pruebas locales no cuentan. Las descargas llegan como eventos (ver site.js); el panel es privado.
@@ -3326,6 +3506,12 @@ def launcher_promo(lang, home):
     t = LA[lang]
     return f'<p class="dl-launcher">{t["promo"]} <a class="more" href="{home}launcher/">{t["promo_link"]}</a></p>'
 
+# Versión de site.css y site.js por contenido: Cloudflare y los navegadores cachean /assets/ por nombre, y sin esto
+# un cambio de estilos llegaba con el HTML nuevo pero el CSS viejo (la sección del equipo se vio sin estilos).
+def asset_v(name):
+    import hashlib
+    return hashlib.sha1(open(os.path.join(WEB, "assets", name), "rb").read()).hexdigest()[:10]
+
 def shell(lang, path, title, description, body, og_image, footer_extra, body_class=""):
     depth = path.count("/") + (1 if lang == "es" else 0)
     root = "../" * depth
@@ -3367,9 +3553,9 @@ def shell(lang, path, title, description, body, og_image, footer_extra, body_cla
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{a}site.css">
+  <link rel="stylesheet" href="{a}site.css?v={asset_v("site.css")}">
   <script>document.documentElement.classList.add("js")</script>
-  <script src="{a}site.js" defer></script>
+  <script src="{a}site.js?v={asset_v("site.js")}" defer></script>
   <script>if (location.hostname === "audiotools.com.ar") {{ var p = document.createElement("script"); p.defer = true; p.src = "{PULSE_SRC}"; document.head.appendChild(p); }}</script>
 </head>
 <body class="{body_class}">
@@ -3388,6 +3574,7 @@ def shell(lang, path, title, description, body, og_image, footer_extra, body_cla
     <div class="wrap">
       <div class="row"><span>Audio Tools</span><span>{"Free software under the GNU AGPL v3." if lang == "en" else "Software libre bajo la GNU AGPL v3."} <a href="https://github.com/palmereta/audio_tools">{"Source code on GitHub" if lang == "en" else "Código fuente en GitHub"}</a> · <a href="{home}changelog/">{CL[lang]["foot"]}</a></span></div>
 {footer_extra}
+      <div class="row"><span>{"Audio Tools is a <a href='https://digitalhub.com.ar'>Digital Hub</a> project." if lang == "en" else "Audio Tools es un proyecto de <a href='https://digitalhub.com.ar'>Digital Hub</a>."}</span><span>{"Questions, requests and ideas:" if lang == "en" else "Consultas, pedidos e ideas:"} <a href="mailto:hi@audiotools.com.ar">hi@audiotools.com.ar</a> · <a href="{home}#team">{"Who makes it" if lang == "en" else "Quiénes lo hacen"}</a></span></div>
       <div class="row support-row"><span>{SUPPORT[lang]['foot']}</span>{cafecito_button(lang)}</div>
     </div>
   </footer>
@@ -3457,22 +3644,28 @@ def samples_html(slug, lang, a, ui):
 def specs_rows(slug, lang):
     r = REQ[lang]
     rows = [(g, items) for g, items in SPECS[slug][lang]]
-    mac_d, win_d = DISK[slug]
+    mac_d, win_d = DISK[slug] or (None, None)
     heavy = r["heavy"][slug]
     rows.append((r["min_h"], [f"<strong>macOS</strong> {r['mac_min']}", f"<strong>Windows</strong> {r['win_min']}", r["common_min"],
-                              r["disk"].format(mac=mac_d, win=win_d)]))
+                              ] + ([r["disk"].format(mac=mac_d, win=win_d)] if mac_d else [])))
     rows.append((r["rec_h"], [f"<strong>macOS</strong> {r['mac_rec']}", f"<strong>Windows</strong> {r['win_rec']}", r["common_rec"]] + ([heavy] if heavy else [])))
     dec = (lambda v: f"{v:.1f}".replace(".", ",")) if lang == "es" else (lambda v: f"{v:.1f}")
     pct = lambda v: ("&lt; 0,01" if lang == "es" else "&lt; 0.01") if v < 0.01 else dec(v)     # el generador de Orrery
     cols = r["cpu_cols"]
     table = (f'<table class="cpu-table"><thead><tr><th>{cols[0]}</th><th>{cols[1]}</th><th>{cols[2]}</th></tr></thead><tbody>'
-             + "".join(f"<tr><td>{CPU_LABEL[lang][k]}</td><td>{pct(m)} %</td><td>{pct(w)} %</td></tr>" for k, m, w in CPU[slug])
+             + "".join(f"<tr><td>{CPU_LABEL[lang][k]}</td><td>{pct(m)} %</td><td>{pct(w) + ' %' if w is not None else '&mdash;'}</td></tr>" for k, m, w in CPU[slug])
              + "</tbody></table>")
+    cpu_note = r["cpu_note"].format(ui=UI_CPU[slug])
+    if UI_CPU[slug] is None:
+        cpu_note = re.sub(r" (With the editor open|Con el editor abierto)[^.]*\.", "", r["cpu_note"])
+    unmeasured = ""
+    if any(w is None for _, _, w in CPU[slug]):
+        unmeasured = " Windows is not measured yet." if lang == "en" else " Windows todavía no está medido."
     out = []
     for g, items in rows:
         lis = "".join(f"<li>{i}</li>" for i in items)
         out.append(f'      <div class="spec-row reveal"><h3>{g}</h3><ul>{lis}</ul></div>')
-    out.append(f'      <div class="spec-row reveal"><h3>{r["cpu_h"]}</h3><div>{table}<p class="note">{r["cpu_note"].format(ui=UI_CPU[slug])}</p></div></div>')
+    out.append(f'      <div class="spec-row reveal"><h3>{r["cpu_h"]}</h3><div>{table}<p class="note">{cpu_note}{unmeasured}</p></div></div>')
     return "\n".join(out)
 
 def linux_card(t, root, mac, lang):
@@ -3521,6 +3714,8 @@ def page_product(slug, lang):
     hero_alt = t.get("hero_alt", name)
 
     nav = [("highlights", ui["overview"]), ("film", ui["film"])] + ([("demos", "Demos")] if slug == "orrery" else []) + [("listen", ui["listen"])] + ([("colours", ui["colours"])] if colours else []) + [("specs", ui["specs"])]
+    has_film = os.path.exists(os.path.join(WEB, "assets", "video", slug + ".mp4"))       # AT330 todavía no tiene film
+    if not has_film: nav = [n for n in nav if n[0] != "film"]
     navlinks = "".join(f'<a href="#{i}">{l}</a>' for i, l in nav)
     if manual_web.has_manual(slug): navlinks += f'<a href="manual/">{ui["manual"]}</a>'
     cards = "\n".join(f"""        <article class="hl-card">{pic(a, img, b, "(max-width: 700px) 80vw, 620px")}<p><strong>{b}</strong> {txt}</p></article>"""
@@ -3775,6 +3970,38 @@ def page_product(slug, lang):
       <p class="lede center reveal">{t['slow_p']}</p>
     </div>
   </section>"""
+    elif slug == "at330":
+        sound_img = ("at330/hl-top", t["hero_alt"])
+        mid = f"""
+  <section class="sec statement" id="flow">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{t['flow_h']}</h2>
+      <p class="lede center reveal">{t['flow_p']}</p>
+      <figure class="statement-img reveal">{pic(a, "at330/ui-overview", t["alt_ui"])}<figcaption>{t['flow_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec deep" id="room">
+    <div class="wrap split">
+      <div class="reveal"><h2 class="sec-head">{t['room_h']}</h2><p class="lede">{t['room_p']}</p><ul class="facts">
+{facts_html(t['room_facts'])}
+        </ul></div>
+      <figure class="reveal">{pic(a, "at330/ui-extended", t["alt_room"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['room_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec" id="modules">
+    <div class="wrap split reverse">
+      <div class="reveal"><h2 class="sec-head">{t['mods_h']}</h2><p class="lede">{t['mods_p']}</p><ul class="facts">
+{facts_html(t['mods_facts'])}
+        </ul></div>
+      <figure class="reveal">{pic(a, "at330/ui-vocoder", t["alt_frozen"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['mods_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec statement" id="slow">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{t['slow_h']}</h2>
+      <p class="lede center reveal">{t['slow_p']}</p>
+    </div>
+  </section>"""
     elif slug == "pallor":
         sound_img = ("pallor/hl-close", t["hero_alt"])
         mid = f"""
@@ -3966,6 +4193,19 @@ def page_product(slug, lang):
     </div>
   </section>"""
 
+    film_sec = f"""  <section class="sec deep" id="film">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{ui['film_h']}</h2>
+      <figure class="film-frame reveal">
+        {player_html(a, slug, pr['film_cap'], pr['film_cap'])}
+        <figcaption>{pr['film_cap']}</figcaption>
+      </figure>
+    </div>
+  </section>""" if has_film else ""
+    film_dialog = f"""<dialog class="film-modal" aria-label="{ui['film_h']}">
+    <button class="film-close" type="button" aria-label="{ui['close']}">×</button>
+    <video data-player preload="none" playsinline poster="{a}img/{slug}/film-poster.jpg"><source src="{a}video/{slug}.mp4" type="video/mp4"></video>
+  </dialog>""" if has_film else ""
     os_text = t.get("os_p") or (t["license_p1"] + " " + t["license_p2"])
     os_link = (S if slug == "at20v" else t)[lang]["os_link"] if slug == "at20v" else t["os_link"]
     body = f"""  <nav class="localnav" aria-label="{name}">
@@ -3982,7 +4222,7 @@ def page_product(slug, lang):
       <p class="p-price">{ui['prices']} {name} {ver}. <a class="p-news" href="{home}changelog/#{slug}">{ui['whats_new']}</a></p>
       <div class="p-cta">
         <a class="pill primary" href="#download">{ui['download']}</a>
-        <button class="pill link" type="button" data-film-open>{ui['watch']} <span class="tri" aria-hidden="true"></span></button>
+        {f'<button class="pill link" type="button" data-film-open>{ui["watch"]} <span class="tri" aria-hidden="true"></span></button>' if has_film else ""}
       </div>
     </div>
     <div class="p-hero-img">{pic(a, hero_img, hero_alt, eager=True)}</div>
@@ -4002,15 +4242,7 @@ def page_product(slug, lang):
     </div>
   </section>
 
-  <section class="sec deep" id="film">
-    <div class="wrap">
-      <h2 class="sec-head reveal">{ui['film_h']}</h2>
-      <figure class="film-frame reveal">
-        {player_html(a, slug, pr['film_cap'], pr['film_cap'])}
-        <figcaption>{pr['film_cap']}</figcaption>
-      </figure>
-    </div>
-  </section>
+{film_sec}
 {demos_html(a, t, lang) if slug == "orrery" else ""}
   <section class="sec" id="sound">
     <div class="wrap split">
@@ -4066,18 +4298,64 @@ def page_product(slug, lang):
     </div>
   </section>
   </main>
-  <dialog class="film-modal" aria-label="{ui['film_h']}">
-    <button class="film-close" type="button" aria-label="{ui['close']}">×</button>
-    <video data-player preload="none" playsinline poster="{a}img/{slug}/film-poster.jpg"><source src="{a}video/{slug}.mp4" type="video/mp4"></video>
-  </dialog>"""
+  {film_dialog}"""
     foot = f"      <p>{t['trademark']}</p>\n      <p>{t['photo_credit']}</p>"
     title = t["title_20"] if slug == "at20v" else t["title"]
-    og = {"at20v": "og-image.jpg", "pallor": "pallor/og-image.jpg", "thrum": "thrum/og-image.jpg", "at303": "at303/og-image.jpg", "at101v": "at101v/og-image.jpg", "at42": "at42/og-image.jpg", "at700": "at700/og-image.jpg", "atfs1": "atfs1/og-image.jpg", "orrery": "orrery/og-image.jpg", "murmur": "murmur/og-image.jpg", "atmd": "atmd/og-image.jpg", "lacquer": "lacquer/og-image.jpg", "halation": "halation/og-image.jpg", "tarnish": "tarnish/og-image.jpg", "plumb": "plumb/og-image.jpg"}[slug]
+    og = {"at20v": "og-image.jpg", "pallor": "pallor/og-image.jpg", "thrum": "thrum/og-image.jpg", "at330": "at330/og-image.jpg", "at303": "at303/og-image.jpg", "at101v": "at101v/og-image.jpg", "at42": "at42/og-image.jpg", "at700": "at700/og-image.jpg", "atfs1": "atfs1/og-image.jpg", "orrery": "orrery/og-image.jpg", "murmur": "murmur/og-image.jpg", "atmd": "atmd/og-image.jpg", "lacquer": "lacquer/og-image.jpg", "halation": "halation/og-image.jpg", "tarnish": "tarnish/og-image.jpg", "plumb": "plumb/og-image.jpg"}[slug]
     return shell(lang, slug + "/", title, t["description"], body, og, foot, "p-" + slug)
 
 # Las marcas de los instrumentos originales, al pie de la portada y del changelog.
 MARKS = {"en": "Korg and MS-20 are trademarks of Korg Inc. Roland, SH-101 and System-700 are trademarks of Roland Corporation. Yamaha and FS1R are trademarks of Yamaha Corporation. Moog and Minimoog are trademarks of Moog Music Inc. Elta Music and SOLAR 42 are trademarks of their owners. Audio Tools is an independent project, not affiliated with or endorsed by Korg, Roland, Yamaha, Moog Music or Elta Music. Product names are used only to identify the instruments that inspired these recreations.",
          "es": "Korg y MS-20 son marcas de Korg Inc. Roland, SH-101 y System-700 son marcas de Roland Corporation. Yamaha y FS1R son marcas de Yamaha Corporation. Moog y Minimoog son marcas de Moog Music Inc. Elta Music y SOLAR 42 son marcas de sus dueños. Audio Tools es un proyecto independiente, sin relación ni aval de Korg, Roland, Yamaha, Moog Music ni Elta Music. Los nombres de productos se usan sólo para identificar los instrumentos que inspiraron estas recreaciones."}
+
+# ── Equipo (portada, sección #team) ──
+# Pedido del usuario (2026-10-23): roles musicales, aptitudes técnicas, y solo el LinkedIn y el email de Alejandro.
+# El "Javier" del pedido es Martín Ezequiel Ferraro (lo aclaró el usuario).
+# Sin foto ("photo": None) se muestra la inicial.
+DH = '<a href="https://digitalhub.com.ar">Digital Hub</a>'
+TEAM = {
+"en": dict(h="Who makes Audio Tools",
+           p=f"Audio Tools was created as a {DH} project. Questions, requests or ideas: <a href='mailto:hi@audiotools.com.ar'>hi@audiotools.com.ar</a>",
+           people=[
+             dict(name="Alejandro Duarte", photo="alejandro", role="Music producer", tech="Developer and automation specialist",
+                  bio="Building and shipping software since 2008, CTO of Digital Hub. He designs the sound engines and interfaces, and automates everything around them: builds, tests and releases.",
+                  links=[("LinkedIn", "https://www.linkedin.com/in/alejandro-s-duarte/"), ("alejandro@digitalhub.com.ar", "mailto:alejandro@digitalhub.com.ar")]),
+             dict(name="Guillermo Silvero Ortiz", photo="guillermo", role="Producer, composer and drummer", tech="Product and project management",
+                  bio="Twenty years across different areas of IT and a Project Management expert. He plays the instruments with a drummer's ear and keeps every release on track."),
+             dict(name="Martín Ezequiel Ferraro", photo="martin", role="Music producer, composer and musician", tech="",
+                  bio="He composes and plays with the instruments, and checks that each one sounds and feels right in real music."),
+           ]),
+"es": dict(h="Quiénes hacen Audio Tools",
+           p=f"Audio Tools nació como un proyecto de {DH}. Consultas, pedidos o ideas: <a href='mailto:hi@audiotools.com.ar'>hi@audiotools.com.ar</a>",
+           people=[
+             dict(name="Alejandro Duarte", photo="alejandro", role="Productor musical", tech="Desarrollador y especialista en automatización",
+                  bio="Desarrolla e implementa software desde 2008 y es CTO de Digital Hub. Diseña los motores de sonido y las interfaces, y automatiza todo lo que los rodea: compilación, pruebas y publicación.",
+                  links=[("LinkedIn", "https://www.linkedin.com/in/alejandro-s-duarte/"), ("alejandro@digitalhub.com.ar", "mailto:alejandro@digitalhub.com.ar")]),
+             dict(name="Guillermo Silvero Ortiz", photo="guillermo", role="Productor, compositor y baterista", tech="Gestión de producto y proyectos",
+                  bio="20 años en distintas áreas de sistemas y experto en Project Management. Toca los instrumentos con oído de baterista y ordena cada lanzamiento."),
+             dict(name="Martín Ezequiel Ferraro", photo="martin", role="Productor musical, compositor y músico", tech="",
+                  bio="Compone y toca con los instrumentos, y comprueba que cada uno suene y responda bien en música de verdad."),
+           ]),
+}
+
+def team_html(lang, a):
+    # Créditos discretos al final de la portada (el usuario pidió "más discreto y chiquito"): sin bios ni título grande.
+    tm = TEAM[lang]
+    people = []
+    for m in tm["people"]:
+        img = (f'<img class="tm-photo" src="{a}img/team/{m["photo"]}.jpg" alt="" width="480" height="480" loading="lazy" decoding="async">'
+               if m["photo"] else f'<span class="tm-photo tm-initial" aria-hidden="true">{m["name"][0]}</span>')
+        sub = m["role"] + (f'<br>{m["tech"]}' if m["tech"] else "")
+        links = " ".join(f'<a href="{u}">{t}</a>' for t, u in m.get("links", []))
+        people.append(f'<li>{img}<span class="tm-text"><b>{m["name"]}</b><span>{sub}</span>'
+                      + (f'<span class="tm-links">{links}</span>' if links else "") + '</span></li>')
+    return f"""  <section class="team-strip" id="team">
+    <div class="wrap">
+      <h2>{tm['h']}</h2>
+      <p>{tm['p']}</p>
+      <ul class="team">{"".join(people)}</ul>
+    </div>
+  </section>"""
 
 def page_home(lang):
     h, t, ui = H[lang], T[lang], UI[lang]
@@ -4098,7 +4376,7 @@ def page_home(lang):
     </div>
     <a class="t-img" href="{home}{slug}/">{pic(a, c['imgdir'] + c['img'], c['alt'])}</a>
   </section>""")
-    synths = [x for x in PRODUCTS if x[0] not in ("orrery", "murmur", "lacquer", "halation", "tarnish", "plumb", "pallor", "thrum")]
+    synths = [x for x in PRODUCTS if x[0] not in ("orrery", "murmur", "lacquer", "halation", "tarnish", "plumb", "pallor", "thrum", "at330")]
     cmp_heads = "".join(f"""<div class="cmp-head reveal">{pic(a, cards[s]['imgdir'] + cards[s]['img'], cards[s]['alt'], "(max-width: 900px) 33vw, 380px")}<h3>{n}</h3><p>{PRES[s][lang]['tag']}</p><a class="pill primary small" href="{home}{s}/" style="--accent:{ACCENT[s]}">{ui['learn']}</a></div>""" for s, n, *_ in synths)
     cmp_rows = "".join("".join(f'<div class="cmp-cell"><b>{label}</b><span>{vals[COMPARE_ORDER.index(sl)]}</span></div>' for sl, *_ in synths) for label, vals in COMPARE_ROWS[lang])
     reasons = "\n".join(f'      <div class="reveal"><h3>{k}</h3><p>{v}</p></div>' for k, v in t["reasons"])
@@ -4140,6 +4418,7 @@ def page_home(lang):
   <section class="sec" id="next">
     <div class="wrap"><h2 class="sec-head reveal">{h['next_h']}</h2><p class="lede reveal">{h['next_p']}</p></div>
   </section>
+{team_html(lang, a)}
   </main>"""
     foot = f"      <p>{MARKS[lang]}</p>"
     return shell(lang, "", h["title"], h["description"], body, "at101v/og-image.jpg", foot, "home")

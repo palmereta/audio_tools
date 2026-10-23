@@ -1,0 +1,18 @@
+{
+ "name": "Formant Freeze (Audio In)",
+ "category": "Vocoder",
+ "description": "Freeze (extra): the vowel caught by the bands stays while you play the chords.",
+ "order": 32,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "voc_upper": 1,
+  "voc_lower": 1,
+  "hold": 2,
+  "release": 2.0,
+  "vib_depth": 20,
+  "volume": -3.1
+ },
+ "demo_chords": "Dm Am Bb F",
+ "voice": true
+}

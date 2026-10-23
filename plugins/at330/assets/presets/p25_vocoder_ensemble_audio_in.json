@@ -1,0 +1,16 @@
+{
+ "name": "Vocoder Ensemble (Audio In)",
+ "category": "Vocoder",
+ "description": "Both vocoder tablets with the ensemble: the classic, wide talking chord.",
+ "order": 25,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "voc_upper": 1,
+  "voc_lower": 1,
+  "release": 0.6,
+  "volume": -1.1
+ },
+ "demo_chords": "Am F C G",
+ "voice": true
+}

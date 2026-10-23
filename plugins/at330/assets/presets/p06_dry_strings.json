@@ -1,0 +1,13 @@
+{
+ "name": "Dry Strings",
+ "category": "Strings",
+ "description": "The ensemble switched off (extra): the bare 4' sawtooth, to hear what the ensemble adds.",
+ "order": 6,
+ "params": {
+  "str_ens": 0,
+  "str_tone": 60,
+  "volume": -3.4
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

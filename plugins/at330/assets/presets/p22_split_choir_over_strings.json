@@ -1,0 +1,15 @@
+{
+ "name": "Split Choir over Strings",
+ "category": "Layers",
+ "description": "Strings below the split, choir above: play the left hand as an orchestra and the right as a choir.",
+ "order": 22,
+ "params": {
+  "str_upper": 0,
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "release": 2.0,
+  "volume": -3.2
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

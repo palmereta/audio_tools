@@ -1,0 +1,20 @@
+{
+ "name": "Distant Voices",
+ "category": "Choir",
+ "description": "Choir with the attack stretched and the space wet: voices far away.",
+ "order": 15,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_female_up": 1,
+  "ch_male4_lo": 1,
+  "ch_attack": 1.2,
+  "release": 5.0,
+  "space_mix": 50,
+  "space_size": 90,
+  "ch_level": 70,
+  "volume": -1.6
+ },
+ "demo_chords": "Am Em F C",
+ "voice": false
+}

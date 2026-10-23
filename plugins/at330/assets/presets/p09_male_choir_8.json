@@ -1,0 +1,17 @@
+{
+ "name": "Male Choir 8'",
+ "category": "Choir",
+ "description": "Male voices at 8' over the whole keyboard, vibrato after a short delay.",
+ "order": 9,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_male8_up": 1,
+  "ch_male8_lo": 1,
+  "ch_attack": 0.2,
+  "release": 1.8,
+  "volume": -1.0
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

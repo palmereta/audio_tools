@@ -1,0 +1,19 @@
+{
+ "name": "Sinking Pad",
+ "category": "Pitch and Motion",
+ "description": "Manual Pitch Shift half way down: the whole pad detuned below the keys (move Pitch Shift to bend it).",
+ "order": 40,
+ "params": {
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "ch_male8_lo": 1,
+  "pitch_mode": 2,
+  "pitch_amount": 50,
+  "pitch_set": 1,
+  "release": 2.5,
+  "volume": -6.0
+ },
+ "demo_chords": "Am F C G",
+ "voice": false
+}

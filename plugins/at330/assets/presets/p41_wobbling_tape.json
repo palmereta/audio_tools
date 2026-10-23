@@ -1,0 +1,21 @@
+{
+ "name": "Wobbling Tape",
+ "category": "Pitch and Motion",
+ "description": "Deep, slow vibrato on choir and vocoder with a wide ensemble: an old tape wobbling.",
+ "order": 41,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_female_up": 1,
+  "ch_male8_up": 1,
+  "ch_male4_lo": 1,
+  "vib_rate": 4.5,
+  "vib_depth": 100,
+  "vib_delay": 0,
+  "ens_depth": 150,
+  "release": 2.0,
+  "volume": -3.4
+ },
+ "demo_chords": "Cm Ab Eb Bb",
+ "voice": false
+}

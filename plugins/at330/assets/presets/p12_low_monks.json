@@ -1,0 +1,19 @@
+{
+ "name": "Low Monks",
+ "category": "Choir",
+ "description": "Male 8' alone, slow vibrato, long release: a low drone of voices.",
+ "order": 12,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "ch_male8_up": 1,
+  "ch_male8_lo": 1,
+  "vib_rate": 4.8,
+  "vib_depth": 20,
+  "release": 3.5,
+  "ch_attack": 0.5,
+  "volume": -1.0
+ },
+ "demo_chords": "Em Em C D",
+ "voice": false
+}

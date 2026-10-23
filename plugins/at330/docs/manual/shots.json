@@ -1,0 +1,106 @@
+[
+  {
+    "file": "overview.jpg",
+    "env": {
+      "AT330_PRESET": "17",
+      "AT330_KEYS": "45,52,57,64",
+      "AT330_WAIT": "3"
+    },
+    "wait": 3,
+    "caption_en": "AT330 with Strings and Choir and a chord held: the five sections along the top, the band display of the vocoder, and the keyboard with the split.",
+    "caption_es": "AT330 con Strings and Choir y un acorde sostenido: las cinco secciones arriba, la pantalla de bandas del vocoder y el teclado con la división."
+  },
+  {
+    "file": "strings-choir.jpg",
+    "env": {
+      "AT330_PRESET": "17",
+      "AT330_WAIT": "3"
+    },
+    "wait": 3,
+    "crop": [
+      0.298,
+      0.1,
+      0.34,
+      0.38
+    ],
+    "caption_en": "The STRINGS and CHOIR sections: the tablets say what they are on the first line and the footage and keyboard half on the second; ATTACK, TONE and LEVEL below.",
+    "caption_es": "Las secciones STRINGS y CHOIR: las llaves dicen qué son en el primer renglón y el pie y la mitad del teclado en el segundo; abajo ATTACK, TONE y LEVEL."
+  },
+  {
+    "file": "vocoder.jpg",
+    "env": {
+      "AT330_PRESET": "25",
+      "AT330_KEYS": "45,52,57",
+      "AT330_WAIT": "3"
+    },
+    "wait": 3,
+    "crop": [
+      0.628,
+      0.1,
+      0.27,
+      0.38
+    ],
+    "caption_en": "The VOCODER section with Vocoder Ensemble: the two 8' tablets, ENSEMBLE, HOLD, the band display over the ten bands, the voice level LED and the controls below.",
+    "caption_es": "La sección VOCODER con Vocoder Ensemble: las dos llaves de 8', ENSEMBLE, HOLD, la pantalla de bandas sobre las diez bandas, el LED de nivel de la voz y los controles abajo."
+  },
+  {
+    "file": "pitch-vibrato.jpg",
+    "env": {
+      "AT330_PRESET": "37",
+      "AT330_WAIT": "3"
+    },
+    "wait": 3,
+    "crop": [
+      0.04,
+      0.1,
+      0.27,
+      0.38
+    ],
+    "caption_en": "PITCH SHIFT with Rising Choir (mode AUTO) and VIBRATO next to it.",
+    "caption_es": "PITCH SHIFT con Rising Choir (modo AUTO) y VIBRATO al lado."
+  },
+  {
+    "file": "master.jpg",
+    "env": {
+      "AT330_PRESET": "17",
+      "AT330_WAIT": "3"
+    },
+    "wait": 3,
+    "crop": [
+      0.86,
+      0.1,
+      0.14,
+      0.38
+    ],
+    "caption_en": "The MASTER section: TUNE and VOLUME at the top, the common RELEASE below.",
+    "caption_es": "La sección MASTER: TUNE y VOLUME arriba, el RELEASE común abajo."
+  },
+  {
+    "file": "keyboard.jpg",
+    "env": {
+      "AT330_PRESET": "22",
+      "AT330_KEYS": "48,55,60,64,67",
+      "AT330_WAIT": "3"
+    },
+    "wait": 3,
+    "crop": [
+      0.0,
+      0.575,
+      1.0,
+      0.425
+    ],
+    "caption_en": "The keyboard with a chord held on both sides of the split (LOWER and UPPER, here at C4) and the status line at the bottom.",
+    "caption_es": "El teclado con un acorde sostenido a los dos lados de la división (LOWER y UPPER, acá en C4) y la línea de estado abajo."
+  },
+  {
+    "file": "extended.jpg",
+    "env": {
+      "AT330_PRESET": "17",
+      "AT330_PAGE": "extended",
+      "AT330_WAIT": "3"
+    },
+    "wait": 3,
+    "caption_en": "The Extended page: envelopes and keys, the vocoder extras, and the ensemble and space, each control with a line of help.",
+    "caption_es": "La página Extended: envolventes y teclas, los extras del vocoder, y el ensemble y el espacio, cada control con una línea de ayuda."
+  }
+]

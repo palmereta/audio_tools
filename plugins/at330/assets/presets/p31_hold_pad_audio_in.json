@@ -1,0 +1,18 @@
+{
+ "name": "Hold Pad (Audio In)",
+ "category": "Vocoder",
+ "description": "Vocoder Hold on: each band holds its level for seconds after the voice stops.",
+ "order": 31,
+ "params": {
+  "str_upper": 0,
+  "str_lower": 0,
+  "voc_upper": 1,
+  "voc_lower": 1,
+  "hold": 1,
+  "release": 3.0,
+  "space_mix": 25,
+  "volume": -3.4
+ },
+ "demo_chords": "Am Em F C",
+ "voice": true
+}

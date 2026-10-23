@@ -1,0 +1,14 @@
+{
+ "name": "Short Strings",
+ "category": "Strings",
+ "description": "Fast attack and short release for stabs and rhythmic chords.",
+ "order": 4,
+ "params": {
+  "str_attack": 0.01,
+  "release": 0.18,
+  "str_tone": 70,
+  "volume": 0.0
+ },
+ "demo_chords": "Am Am F G",
+ "voice": false
+}

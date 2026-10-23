@@ -1,0 +1,13 @@
+{
+ "name": "Bright Strings",
+ "category": "Strings",
+ "description": "Tone open: the full buzz of the divider sawtooth through the ensemble.",
+ "order": 3,
+ "params": {
+  "str_tone": 95,
+  "str_attack": 0.08,
+  "volume": -0.4
+ },
+ "demo_chords": "C Am F G",
+ "voice": false
+}

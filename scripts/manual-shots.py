@@ -18,6 +18,7 @@ PRODUCTS = {   # carpeta → (nombre del .app, prefijo de las variables)
     "plumb": ("Plumb", "PLUMB"),
     "pallor": ("Pallor", "PALLOR"),
     "thrum": ("Thrum", "THRUM"),
+    "at330": ("AT330", "AT330"),
 }
 TMP = "/tmp/claude-501/manual-shots"
 DEMO_INPUT = os.path.join(TMP, "murmur-demo-input.wav")
