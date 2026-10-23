@@ -325,13 +325,17 @@ Elegí qué carga un clic: **SOUND + PATTERNS** (todo), **SOUND ONLY** (el kit, 
 
 **SAVE AS...** guarda todo como un preset tuyo, en el género User: kit, efectos, patrones, canción y las rutas de tus muestras. **DELETE** borra el preset de usuario elegido y **OPEN FOLDER** muestra dónde se guardan.
 
-Cada preset está nivelado a unos −18 LUFS, así que podés compararlos sin que gane el que suena más fuerte.
+Cada preset está nivelado a unos −18 LUFS, así que podés compararlos sin que gane el que suena más fuerte, o más bajo cuando sus picos llegarían al techo de la salida: todos tienen picos por debajo de −1 dBFS.
 
 ### En Ableton Live
 
 Live no muestra los presets de fábrica de los plugins (ignora las listas de programas de VST3). La página PRESETS funciona como en todos lados, y los presets de fábrica aparecen además en el navegador de Live en Plug-Ins → Audio Tools Pallor (desplegá el plugin), instalados por el launcher o copiando la carpeta Presets del zip.
 
 Pallor tiene 463 parámetros y Live guarda como mucho 128 de un dispositivo para automatizar y para su panel, y llena el panel solo únicamente cuando un plugin tiene 64 o menos. Hacé clic en **Configure** en el dispositivo de Pallor en Live y mové los controles que quieras automatizar o mapear: se agregan en ese orden. Un buen juego para tocar en vivo: **Pattern**, **Fill**, **Swing**, **Volume**, **Space Return**, **Echo Return**, **Tape Drive** y **Glue Mix**, más **Level**, **Tune**, **Decay** y **Cutoff** de las tres o cuatro voces con las que tocás (Kick, Snare, Closed Hat...). Todo lo demás queda en el panel de Pallor y se guarda con el set.
+
+### En REAPER
+
+REAPER muestra cada preset de fábrica dos veces en el menú de presets: una de la lista propia del plugin y otra como archivo (los .vstpreset que instalan el launcher o la carpeta Presets del zip para Ableton Live, en ~/Library/Audio/Presets/Audio Tools/ en macOS, Documentos\VST3 Presets\Audio Tools\ en Windows y ~/.vst3/presets/Audio Tools/ en Linux). Los dos cargan lo mismo. Si no usás Live, podés borrar ahí la carpeta "Audio Tools Pallor" y cada preset aparece una sola vez.
 
 ## Setup
 

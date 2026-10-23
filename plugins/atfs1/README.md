@@ -3,7 +3,7 @@
 Formant and FM synthesizer based on the Yamaha FS1R (1998): 8 voiced and 8 unvoiced (noise-formant)
 operators per voice, the 88 algorithms, Formant Sequences, a per-voice filter and insertion,
 variation and reverb effects, with a full-screen editor under a working 1U front panel.
-VST3, Audio Unit (macOS) and standalone. Version 1.0.5.
+VST3, Audio Unit (macOS) and standalone. Version 1.0.6.
 
 What the engine implements, and where each law comes from: [`docs/hardware-spec.md`](docs/hardware-spec.md).
 Sources and licences: [`docs/ref/CREDITS.md`](docs/ref/CREDITS.md).

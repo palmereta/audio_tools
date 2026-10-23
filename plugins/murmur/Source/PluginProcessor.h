@@ -13,6 +13,7 @@ public:
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override {}
+    void reset() override { restartPending.store (true); }      // el hilo de audio lo hace al principio del bloque
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
@@ -65,6 +66,7 @@ private:
     int demoPos = 0;
     double sr = 48000.0;
     bool wasBypassed = false;
+    std::atomic<bool> restartPending { false };
     std::vector<PresetEntry> presets;
     int currentProgram = 0;
     void loadFactory();

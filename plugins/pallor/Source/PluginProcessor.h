@@ -28,6 +28,13 @@ public:
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override {}
+    // reset() del host (AudioUnitReset antes de un render, VST3 setProcessing(false)): lo mismo que preparar de nuevo, con
+    // el lock del proceso tomado (QA en REAPER 2026-10-22, re-test: un AU reiniciado así seguía con el estado anterior).
+    void reset() override
+    {
+        const juce::ScopedLock sl (getCallbackLock());
+        if (getSampleRate() > 0.0 && getBlockSize() > 0) prepareToPlay (getSampleRate(), getBlockSize());
+    }
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     // El wrapper VST3 agrega su Bypass y JUCE no llama a processBlock mientras dura: acá se sueltan las notas de la

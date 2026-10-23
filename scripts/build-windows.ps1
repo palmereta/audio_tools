@@ -35,9 +35,11 @@ function Package-Plugin([string]$dir, [string]$product) {
             if ($LASTEXITCODE -ne 0) { throw "atvstpresets failed for $($_.Name)" }
         }
         $presetsEn = "3. Factory presets as files, for Ableton Live and other hosts that list preset files: copy the folders`r`n" +
-                     "   inside Presets\ to %USERPROFILE%\Documents\VST3 Presets\Audio Tools\ (the launcher does this for you).`r`n"
+                     "   inside Presets\ to %USERPROFILE%\Documents\VST3 Presets\Audio Tools\ (the launcher does this for you).`r`n" +
+                     "   REAPER then lists every factory preset twice (the plugin's own list and the files): both are the same.`r`n"
         $presetsEs = "3. Presets de fábrica como archivos (Ableton Live y otros): copiar las carpetas de Presets\ a`r`n" +
-                     "   %USERPROFILE%\Documents\VST3 Presets\Audio Tools\`r`n"
+                     "   %USERPROFILE%\Documents\VST3 Presets\Audio Tools\`r`n" +
+                     "   REAPER muestra entonces cada preset dos veces (la lista del plugin y los archivos): son los mismos.`r`n"
     }
     Copy-Item LICENSE "$out\LICENSE.txt"
 @"

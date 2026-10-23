@@ -3,12 +3,13 @@
 //
 //   pallorrender out.wav --preset "Cold Room" [--bars 8 | --seconds 16] [--bpm 120] [--sr 48000] [--block 512]
 //                [--tail 2] [--set id=valor ...] [--at segundos id=valor ...] [--midi notas.mid] [--sample slot=archivo]
-//                [--stems carpeta] [--export-mid patron.mid --pattern 1A]
+//                [--stems carpeta] [--export-mid patron.mid --pattern 1A] [--with-pattern]
 //   pallorrender --list                     los presets y los juegos de la biblioteca
 //   pallorrender --bench                    CPU de cada preset (8 compases a 48 kHz, bloques de 512)
 //
 // --tail para el transporte al final y deja sonar las colas. --stems escribe además cada bus (Main, Kick, Snare/Clap,
 // Hats/Cymbals, Toms, Perc, FX) con las salidas por voz activadas. --at mueve un parámetro en ese momento.
+// --with-pattern: con --midi el patrón sigue tocando (las notas se suman, como en un DAW con el transporte andando).
 #include "PluginProcessor.h"
 #include "../../../shared/tools/MidiEvents.h"
 
@@ -223,7 +224,7 @@ int main (int argc, char** argv)
         if (args[i] == "--at")
             ats.push_back ({ (int) (args[i + 1].getDoubleValue() * sr), args[i + 2].upToFirstOccurrenceOf ("=", false, false), args[i + 2].fromFirstOccurrenceOf ("=", false, false).getFloatValue() });
     std::vector<dh::MidiEv> midiEvents; double midiLen = 0;
-    if (const auto mf = opt ("--midi", ""); mf.isNotEmpty()) { midiEvents = dh::loadMidiFile (cwd.getChildFile (mf), sr, midiLen); p.setValue ("sync", 0.0f); p.setValue ("run", 0.0f); }
+    if (const auto mf = opt ("--midi", ""); mf.isNotEmpty()) { midiEvents = dh::loadMidiFile (cwd.getChildFile (mf), sr, midiLen); if (! args.contains ("--with-pattern")) { p.setValue ("sync", 0.0f); p.setValue ("run", 0.0f); } }
     double secs = opt ("--seconds", "0").getDoubleValue();
     if (secs <= 0) secs = midiLen > 0 ? midiLen + 0.5 : opt ("--bars", "8").getDoubleValue() * 4.0 * 60.0 / clock.bpm;
     const double tail = opt ("--tail", "0").getDoubleValue();

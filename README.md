@@ -16,20 +16,20 @@ against the hardware and improve.
 | Plugin | Based on | Version | Status |
 |---|---|---|---|
 | [AT20V](plugins/at20v/) | Korg MS-20 (1978), semi-modular monophonic synthesizer | 1.0.7 | Released |
-| [AT101V](plugins/at101v/) | Roland SH-101 (1982), monophonic synthesizer with arpeggiator and sequencer | 1.0.6 | Released |
-| [AT42](plugins/at42/) | Elta Music SOLAR 42 (2023), ambient drone machine | 1.0.6 | Released |
+| [AT101V](plugins/at101v/) | Roland SH-101 (1982), monophonic synthesizer with arpeggiator and sequencer | 1.0.7 | Released |
+| [AT42](plugins/at42/) | Elta Music SOLAR 42 (2023), ambient drone machine | 1.0.7 | Released |
 | [AT700](plugins/at700/) | Roland System-700 (1976), modular synthesizer with analog sequencer | 1.0.5 | Released |
-| [ATFS1](plugins/atfs1/) | Yamaha FS1R (1998), formant and FM synthesizer | 1.0.5 | Released |
+| [ATFS1](plugins/atfs1/) | Yamaha FS1R (1998), formant and FM synthesizer | 1.0.6 | Released |
 | [ATMD](plugins/atmd/) | Moog Minimoog Model D (1970), monophonic synthesizer with the transistor ladder filter | 1.0.3 | Released |
 | [AT303](plugins/at303/) | A classic 1981 bass line synthesizer with sequencer: diode ladder filter, accent and slide | 1.0.3 | Released |
-| [Orrery](plugins/orrery/) | Original: generative MIDI for ambient, dark ambient and drone, eight lanes on their own channels | 1.0.6 | Released |
-| [Murmur](plugins/murmur/) | Original: real-time granular effect, up to 128 grains over a 16-second memory | 1.0.3 | Released |
+| [Orrery](plugins/orrery/) | Original: generative MIDI for ambient, dark ambient and drone, eight lanes on their own channels | 1.0.7 | Released |
+| [Murmur](plugins/murmur/) | Original: real-time granular effect, up to 128 grains over a 16-second memory | 1.0.4 | Released |
 | [Lacquer](plugins/lacquer/) | Original: automatic mastering, live (Learn) or from a file, with a command-line renderer | 1.0.3 | Released |
 | [Halation](plugins/halation/) | Original: delay and reverb in one space, with freeze, shimmer, reverse, grains and more | 1.0.3 | Released |
 | [Tarnish](plugins/tarnish/) | Original: tape, cassette, video, vinyl, AM radio and telephone, with magnetic hysteresis | 1.0.3 | Released |
 | [Plumb](plugins/plumb/) | Original: real-time pitch correction for voice, natural to hard, from 0.67 ms of latency | 1.0.2 | Released |
 | [Thrum](plugins/thrum/) | Original: electric guitar by physical modelling: six guitars with waveguide strings and real pickups, a guitarist that fingers, strums and plays the articulations, thirteen pedals, four amps and a cabinet with movable microphones | 1.0.1 | Released |
-| [Pallor](plugins/pallor/) | Original: drum machine for dark wave, coldwave, post-punk and EBM, analog and 80s digital engines, 80s/90s effects, step sequencer | 1.0.1 | Released |
+| [Pallor](plugins/pallor/) | Original: drum machine for dark wave, coldwave, post-punk and EBM, analog and 80s digital engines, 80s/90s effects, step sequencer | 1.0.2 | Released |
 
 ## AT20V
 

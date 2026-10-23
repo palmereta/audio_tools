@@ -80,26 +80,42 @@ public:
 
     void prepare (double sampleRate, int maxBlock)
     {
-        // La memoria (16 s) se conserva si la frecuencia no cambió: muchos hosts vuelven a llamar a prepareToPlay
-        // (otro tamaño de bloque, un render) y una textura congelada se perdía.
-        const bool keep = std::abs ((float) sampleRate - sr) < 0.5f && (int) recL.size() == (int) (kMaxBufferSec * (float) sampleRate) + 8;
+        const bool sameRate = std::abs ((float) sampleRate - sr) < 0.5f && (int) recL.size() == (int) (kMaxBufferSec * (float) sampleRate) + 8;
         sr = (float) sampleRate;
         bufN = (int) (kMaxBufferSec * sr) + 8;
-        if (! keep) { recL.assign ((size_t) bufN, 0.0f); recR.assign ((size_t) bufN, 0.0f); w = 0; written = 0; }
-        for (auto& g : grains) g.active = false;
+        if (! sameRate) { recL.assign ((size_t) bufN, 0.0f); recR.assign ((size_t) bufN, 0.0f); w = 0; written = 0; }
         wetL.assign ((size_t) std::max (kSub, maxBlock) + kSub, 0.0f); wetR = wetL; dryL = wetL; dryR = wetL; mixT = wetL; duckT = wetL;
-        subPos = 0;
         duckAtt = 1.0f - std::exp (-1.0f / (0.005f * sr)); duckRel = 1.0f - std::exp (-1.0f / (0.3f * sr));
         dly.prepare (sr); rev.prepare (sr);
         fbDcL.setCutoff (25.0f, sr); fbDcR.setCutoff (25.0f, sr);
-        hpL.reset(); hpR.reset(); lpL.reset(); lpR.reset();
-        duckEnv = 0.0f; nextGrain = 0.0; scanSec = 0.0; freePpq = 0.0; lastDiv = -1;
-        for (auto& l : lfoState) { l.phase = 0.0; l.held = 0.0f; l.from = 0.0f; l.to = rng.bipolar(); }
-        mixS.setTime (0.03f, sr); mixS.reset (p.mix);
-        inS.setTime (0.03f, sr); inS.reset (dbToGain (p.inGainDb));
-        outS.setTime (0.03f, sr); outS.reset (dbToGain (p.outGainDb));
-        for (auto& pk : peaks) pk.store (0.0f, std::memory_order_relaxed);
+        mixS.setTime (0.03f, sr); inS.setTime (0.03f, sr); outS.setTime (0.03f, sr);
         for (int i = 0; i < kWin; ++i) win[(size_t) i] = 0.5f - 0.5f * std::cos (kPi * (float) i / (float) (kWin - 1));
+        restart();
+    }
+
+    // Todo como en una instancia nueva, sin reservar memoria (lo llama prepare y, por reset() del host, el hilo de
+    // audio). Los hosts preparan o reinician el plugin antes de un render: lo que quedaba de antes (granos, la memoria,
+    // el azar, la fase de los LFO y de la reverb) hacía que el render dependiera de lo que había sonado y de cuánto
+    // tiempo el host lo había hecho correr en silencio (QA en REAPER 2026-10-22: dos renders iguales, sólo con otro
+    // tamaño de búfer o en otra corrida, no nulaban). La memoria congelada (Freeze o el pedal) se conserva: es el
+    // material, y viaja con la sesión.
+    void restart()
+    {
+        if (! (p.freeze || freezeHold))
+        {
+            std::fill (recL.begin(), recL.end(), 0.0f); std::fill (recR.begin(), recR.end(), 0.0f); w = 0; written = 0;
+            for (auto& pk : peaks) pk.store (0.0f, std::memory_order_relaxed);
+        }
+        for (auto& g : grains) g = Grain {};
+        rng = Rng { 0x6d75726du };
+        subPos = 0; segMod = {};
+        dly.restart(); rev.restart(); dlyIdle = revIdle = true;
+        fbDcL.reset(); fbDcR.reset();
+        hpL.reset(); hpR.reset(); lpL.reset(); lpR.reset();
+        duckEnv = 0.0f; peakAcc = 0.0f; peakCount = 0;
+        nextGrain = 0.0; scanSec = 0.0; freePpq = 0.0; lastDiv = -1;
+        for (auto& l : lfoState) { l.phase = 0.0; l.held = 0.0f; l.from = 0.0f; l.to = rng.bipolar(); }
+        mixS.reset (p.mix); inS.reset (dbToGain (p.inGainDb)); outS.reset (dbToGain (p.outGainDb));
         heldCount = 0;
     }
 

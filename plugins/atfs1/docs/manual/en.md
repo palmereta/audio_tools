@@ -553,6 +553,10 @@ The preset appears under User. It stores the voice, the part and effects, and th
 
 Rename, delete or share them there; they are listed after the factory presets.
 
+### In REAPER
+
+REAPER lists every factory preset twice in the preset menu: once from the plugin's own list and once as a preset file (the .vstpreset files that the launcher or the Presets folder of the zip install for Ableton Live, in ~/Library/Audio/Presets/Audio Tools/ on macOS, Documents\VST3 Presets\Audio Tools\ on Windows and ~/.vst3/presets/Audio Tools/ on Linux). Both load the same settings. If you don't use Live, you can delete the "Audio Tools ATFS1" folder there and each preset appears once.
+
 ## MIDI and controllers
 
 The ATFS1 answers on every MIDI channel.

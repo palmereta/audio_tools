@@ -498,6 +498,10 @@ Todos los presets de Sleep y Meditation usan modo suave, sesiones y fades largos
 
 Para guardar uno propio, apretá **Save**, escribí un nombre y confirmá. Los presets de usuario aparecen bajo User en el menú de presets, y las flechas los recorren después de los de fábrica. Son archivos en `~/Library/Application Support/Audio Tools/Orrery/Presets` en macOS y en `Audio Tools\Orrery\Presets` dentro de tu carpeta AppData\Roaming en Windows. Guardar con un nombre que ya existe reemplaza ese preset. Para borrar uno, borrá su archivo; desaparece la próxima vez que se abra Orrery.
 
+### En REAPER
+
+REAPER muestra cada preset de fábrica dos veces en el menú de presets: una de la lista propia del plugin y otra como archivo (los .vstpreset que instalan el launcher o la carpeta Presets del zip para Ableton Live, en ~/Library/Audio/Presets/Audio Tools/ en macOS, Documentos\VST3 Presets\Audio Tools\ en Windows y ~/.vst3/presets/Audio Tools/ en Linux). Los dos cargan lo mismo. Si no usás Live, podés borrar ahí la carpeta "Audio Tools Orrery" y cada preset aparece una sola vez.
+
 ## Main y satélites
 
 En Ableton Live una pista de sinte que toma su MIDI de otra pista recibe todos sus canales MIDI, así que una sola pista de Orrery mandaría todos los carriles a todos los sintes. Main y satélites lo resuelven dentro de Orrery: una Orrery, la **Main**, tiene la música; cada otra Orrery del set es un **satélite** que toca exactamente un carril de la Main (o unos pocos) en su propia pista. Cada sinte toma entonces su MIDI de un satélite.

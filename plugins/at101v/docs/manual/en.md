@@ -455,6 +455,10 @@ Your DAW project stores the full state of AT101V, including the sequence, the ke
 
 The Seq presets and some Ambient presets start their sequence as soon as they load; most follow the host tempo. For the Arp presets, hold a chord, and press HOLD to leave it running.
 
+### In REAPER
+
+REAPER lists every factory preset twice in the preset menu: once from the plugin's own list and once as a preset file (the .vstpreset files that the launcher or the Presets folder of the zip install for Ableton Live, in ~/Library/Audio/Presets/Audio Tools/ on macOS, Documents\VST3 Presets\Audio Tools\ on Windows and ~/.vst3/presets/Audio Tools/ on Linux). Both load the same settings. If you don't use Live, you can delete the "Audio Tools AT101V" folder there and each preset appears once.
+
 ## MIDI
 
 ### What AT101V responds to

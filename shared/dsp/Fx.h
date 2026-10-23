@@ -122,6 +122,7 @@ struct DelayLine
         return buf[(size_t) r];
     }
     void clear() { std::fill (buf.begin(), buf.end(), 0.0f); }
+    void restart() { clear(); w = 0; }       // como recién preparada (tap() con otra w redondea distinto)
 };
 
 // Delay estéreo ping-pong con tono (pasa bajos en la realimentación) y tiempo suavizado.
@@ -147,6 +148,8 @@ public:
         }
     }
     void reset() { l.clear(); r.clear(); }
+    // Como recién preparado: líneas, filtros y tiempo suavizado (un render tiene que sonar igual que una instancia nueva).
+    void restart() { l.restart(); r.restart(); lpL.reset(); lpR.reset(); hpL.reset(); hpR.reset(); time.reset (fs * 0.375f); }
 private:
     DelayLine l, r; OnePoleLP lpL, lpR, hpL, hpR; Smoother time;
     float fs = 48000.0f;
@@ -227,6 +230,13 @@ public:
         for (auto* d : { &pre, &apL1, &dL1, &apL2, &dL2, &apR1, &dR1, &apR2, &dR2 }) d->clear();
         for (auto& d : inAp) d.clear();
         lastL = lastR = dampL = dampR = bwState = 0;
+    }
+    // Como recién preparada: también la fase del LFO que modula los allpass (reset() la deja donde estaba).
+    void restart()
+    {
+        for (auto* d : { &pre, &apL1, &dL1, &apL2, &dL2, &apR1, &dR1, &apR2, &dR2 }) d->restart();
+        for (auto& d : inAp) d.restart();
+        lastL = lastR = dampL = dampR = bwState = 0; lfoPhase = 0.0f;
     }
 
 private:

@@ -43,6 +43,10 @@
     "First release: a semi-modular synthesizer modeled on the 1978 Korg MS-20, with its full patch bay, plus AT20V FX to play audio through it."
   ],
 
+  "at101v-v1.0.7": [
+    "The mixer levels (Pulse, Saw, Sub Osc, Noise) and Volume follow automation sample by sample, not in steps of 32 samples.",
+    "Manual: why REAPER lists every factory preset twice."
+  ],
   "at101v-v1.0.6": [
     "Automating Mixer Saw, Mixer Pulse and the other knobs is smooth: no more zipper at the host's block rate.",
     "Renders are reproducible: an instance that played before, or an Audio Unit after a reset, sounds exactly like a fresh one; the host-clock sequencer and its MIDI out are identical at any buffer size.",
@@ -77,6 +81,10 @@
     "First release: a monophonic synthesizer modeled on the 1982 Roland SH-101, with arpeggiator, a visual sequencer, polyphony, MIDI Learn and three panel colours."
   ],
 
+  "at42-v1.0.7": [
+    "A second offline render in a row with the Audio Unit (REAPER) sounds the same as the first: the host's reset now returns drones, oscillators and effects to a clean start, as preparing the plugin again already did.",
+    "Manual: why REAPER lists every factory preset twice."
+  ],
   "at42-v1.0.6": [
     "Init plays from the keyboard: VCO A answers MIDI notes with no cables (the drones still wait for their keys).",
     "Bypassing in REAPER while a note is held no longer leaves it stuck.",
@@ -141,6 +149,10 @@
     "First release: a modular synthesizer modeled on the 1976 Roland System-700: the 17-module main console, the duophonic keyboard and the step sequencer, with 137 jacks and up to 8 voices."
   ],
 
+  "atfs1-v1.0.6": [
+    "A second offline render in a row with the Audio Unit (REAPER) sounds the same as the first: the host's reset now returns voices and effects to a clean start, as preparing the plugin again already did.",
+    "Manual: why REAPER lists every factory preset twice."
+  ],
   "atfs1-v1.0.5": [
     "Renders are reproducible: an instance that played before sounds exactly like a fresh one.",
     "A value the host writes (Cutoff 0.6739) comes back exactly after reopening the project instead of rounded.",
@@ -212,6 +224,11 @@
     "First release: a bass line synthesizer with its own sequencer: diode ladder filter, accent and slide, an acid pattern generator, 16 modifications and an Inspect view."
   ],
 
+  "pallor-v1.0.2": [
+    "46 factory presets are 0.6 to 7.1 dB quieter (2.9 dB median) so that their peaks stay below -1 dBFS; 25 of them reached 0 dBFS and the output ceiling flattened them. Their sound is the same.",
+    "The host's reset (an Audio Unit before a render) starts from a clean state, like preparing the plugin again.",
+    "Manual: the preset levels, and why REAPER lists every factory preset twice."
+  ],
   "pallor-v1.0.1": [
     "MIDI out now leaves as late as Pallor's audio (its latency), so a synth or a MIDI recording fed from Pallor is on time instead of 1.6 ms early.",
     "Manual: which controls to add with Configure in Ableton Live (Live keeps 128 of Pallor's 463 parameters), factory presets in Live's browser, and the VST3 for MIDI out in Live and REAPER."
@@ -239,6 +256,12 @@
     "A Stage editor with the guitar, pedals and amps rendered in 3D, a live fretboard, an Inspect view, 69 presets and a manual in English and Spanish."
   ],
 
+  "orrery-v1.0.7": [
+    "Satellites stay in sync when the host prepares the plugin again at the same sample rate, as REAPER does before every offline render: the satellite no longer leaves its drone hanging without a note-off and attacks it again one to nine buffers late.",
+    "When the transport starts, a satellite places itself by the song position even if it was out of step with the transport stopped (REAPER with anticipative FX): its first notes come out on the same samples as the Main's, once, with no zero-length notes.",
+    "A satellite that loses sync in the same buffer in which it started a note no longer leaves that note hanging.",
+    "Manual: why REAPER lists every factory preset twice."
+  ],
   "orrery-v1.0.6": [
     "With Clock on Host, starting the DAW transport starts Orrery and stopping it stops Orrery; the Play button follows. Play with host stopped still plays at Orrery's own tempo. The session fades in only when the transport starts at the beginning of the song.",
     "The same variation now plays the same notes from the same song position whatever the buffer size, a pre-roll or what played before the transport started, in playback and in offline renders (before, REAPER renders changed with the buffer size).",
@@ -277,6 +300,10 @@
     "First release: a generative MIDI instrument for ambient, dark ambient and drone: eight lanes with their own role and channel, played into your DAW, out to hardware through MIDI ports, or linked between instances."
   ],
 
+  "murmur-v1.0.4": [
+    "A render no longer depends on the buffer size or on what played before: preparing the plugin again, or the host's reset before a render, starts from a clean state like a fresh instance (grains, memory, randomness, the LFOs and the reverb). A frozen memory is kept.",
+    "Manual: why REAPER lists every factory preset twice."
+  ],
   "murmur-v1.0.3": [
     "A new instance starts on First Murmur, as the host's preset list says, and its saved state no longer changes on its own.",
     "The output no longer depends on the host's buffer size (the Audio Unit at 64 samples sounded different from 512).",

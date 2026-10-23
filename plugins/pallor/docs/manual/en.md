@@ -325,13 +325,17 @@ Choose what a click loads: **SOUND + PATTERNS** (everything), **SOUND ONLY** (th
 
 **SAVE AS...** keeps everything as a preset of your own, in the User genre: kit, effects, patterns, song, and the paths of your samples. **DELETE** removes the selected user preset and **OPEN FOLDER** shows where they are kept.
 
-Every preset is levelled to about −18 LUFS, so you can compare them without the louder one winning.
+Every preset is levelled to about −18 LUFS, so you can compare them without the louder one winning, or lower where its peaks would reach the output ceiling: every preset peaks below −1 dBFS.
 
 ### In Ableton Live
 
 Live does not show plugins' factory presets (it ignores VST3 program lists). The PRESETS page works as everywhere, and the factory presets also appear in Live's browser under Plug-Ins → Audio Tools Pallor (expand the plugin), installed by the launcher or by copying the Presets folder from the zip.
 
 Pallor has 463 parameters and Live keeps at most 128 of a device for automation and its panel, and fills the panel by itself only when a plugin has 64 or fewer. Click **Configure** on Pallor's device in Live and move the controls you want to automate or map: they are added in that order. A good set for a live performance: **Pattern**, **Fill**, **Swing**, **Volume**, **Space Return**, **Echo Return**, **Tape Drive** and **Glue Mix**, plus **Level**, **Tune**, **Decay** and **Cutoff** of the three or four voices you play with (Kick, Snare, Closed Hat...). Everything else stays in Pallor's own panel and is saved with the set.
+
+### In REAPER
+
+REAPER lists every factory preset twice in the preset menu: once from the plugin's own list and once as a preset file (the .vstpreset files that the launcher or the Presets folder of the zip install for Ableton Live, in ~/Library/Audio/Presets/Audio Tools/ on macOS, Documents\VST3 Presets\Audio Tools\ on Windows and ~/.vst3/presets/Audio Tools/ on Linux). Both load the same settings. If you don't use Live, you can delete the "Audio Tools Pallor" folder there and each preset appears once.
 
 ## Setup
 

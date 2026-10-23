@@ -17,6 +17,14 @@ public:
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override {}
+    // reset() del host (AudioUnitReset antes de un render, VST3 setProcessing(false)): lo mismo que preparar de nuevo, con
+    // el lock del proceso tomado. REAPER hace dos renders seguidos de un AU sin volver a prepararlo, sólo con
+    // AudioUnitReset, y el segundo salía distinto (QA en REAPER 2026-10-22, re-test).
+    void reset() override
+    {
+        const juce::ScopedLock sl (getCallbackLock());
+        if (getSampleRate() > 0.0 && getBlockSize() > 0) prepareToPlay (getSampleRate(), getBlockSize());
+    }
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;

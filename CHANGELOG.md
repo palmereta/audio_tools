@@ -7,16 +7,16 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 | Product | Current version |
 |---|---|
 | [AT20V](#at20v) | 1.0.7 |
-| [AT101V](#at101v) | 1.0.6 |
-| [AT42](#at42) | 1.0.6 |
+| [AT101V](#at101v) | 1.0.7 |
+| [AT42](#at42) | 1.0.7 |
 | [AT700](#at700) | 1.0.5 |
-| [ATFS1](#atfs1) | 1.0.5 |
+| [ATFS1](#atfs1) | 1.0.6 |
 | [ATMD](#atmd) | 1.0.3 |
 | [AT303](#at303) | 1.0.3 |
-| [Pallor](#pallor) | 1.0.1 |
+| [Pallor](#pallor) | 1.0.2 |
 | [Thrum](#thrum) | 1.0.1 |
-| [Orrery](#orrery) | 1.0.6 |
-| [Murmur](#murmur) | 1.0.3 |
+| [Orrery](#orrery) | 1.0.7 |
+| [Murmur](#murmur) | 1.0.4 |
 | [Halation](#halation) | 1.0.3 |
 | [Tarnish](#tarnish) | 1.0.3 |
 | [Plumb](#plumb) | 1.0.2 |
@@ -76,6 +76,11 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 
 ## AT101V
 
+### 1.0.7
+
+- The mixer levels (Pulse, Saw, Sub Osc, Noise) and Volume follow automation sample by sample, not in steps of 32 samples.
+- Manual: why REAPER lists every factory preset twice.
+
 ### 1.0.6
 
 - Automating Mixer Saw, Mixer Pulse and the other knobs is smooth: no more zipper at the host's block rate.
@@ -117,6 +122,11 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 - First release: a monophonic synthesizer modeled on the 1982 Roland SH-101, with arpeggiator, a visual sequencer, polyphony, MIDI Learn and three panel colours.
 
 ## AT42
+
+### 1.0.7
+
+- A second offline render in a row with the Audio Unit (REAPER) sounds the same as the first: the host's reset now returns drones, oscillators and effects to a clean start, as preparing the plugin again already did.
+- Manual: why REAPER lists every factory preset twice.
 
 ### 1.0.6
 
@@ -196,6 +206,11 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 - First release: a modular synthesizer modeled on the 1976 Roland System-700: the 17-module main console, the duophonic keyboard and the step sequencer, with 137 jacks and up to 8 voices.
 
 ## ATFS1
+
+### 1.0.6
+
+- A second offline render in a row with the Audio Unit (REAPER) sounds the same as the first: the host's reset now returns voices and effects to a clean start, as preparing the plugin again already did.
+- Manual: why REAPER lists every factory preset twice.
 
 ### 1.0.5
 
@@ -285,6 +300,12 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 
 ## Pallor
 
+### 1.0.2
+
+- 46 factory presets are 0.6 to 7.1 dB quieter (2.9 dB median) so that their peaks stay below -1 dBFS; 25 of them reached 0 dBFS and the output ceiling flattened them. Their sound is the same.
+- The host's reset (an Audio Unit before a render) starts from a clean state, like preparing the plugin again.
+- Manual: the preset levels, and why REAPER lists every factory preset twice.
+
 ### 1.0.1
 
 - MIDI out now leaves as late as Pallor's audio (its latency), so a synth or a MIDI recording fed from Pallor is on time instead of 1.6 ms early.
@@ -317,6 +338,13 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 - A Stage editor with the guitar, pedals and amps rendered in 3D, a live fretboard, an Inspect view, 69 presets and a manual in English and Spanish.
 
 ## Orrery
+
+### 1.0.7
+
+- Satellites stay in sync when the host prepares the plugin again at the same sample rate, as REAPER does before every offline render: the satellite no longer leaves its drone hanging without a note-off and attacks it again one to nine buffers late.
+- When the transport starts, a satellite places itself by the song position even if it was out of step with the transport stopped (REAPER with anticipative FX): its first notes come out on the same samples as the Main's, once, with no zero-length notes.
+- A satellite that loses sync in the same buffer in which it started a note no longer leaves that note hanging.
+- Manual: why REAPER lists every factory preset twice.
 
 ### 1.0.6
 
@@ -363,6 +391,11 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 - First release: a generative MIDI instrument for ambient, dark ambient and drone: eight lanes with their own role and channel, played into your DAW, out to hardware through MIDI ports, or linked between instances.
 
 ## Murmur
+
+### 1.0.4
+
+- A render no longer depends on the buffer size or on what played before: preparing the plugin again, or the host's reset before a render, starts from a clean state like a fresh instance (grains, memory, randomness, the LFOs and the reverb). A frozen memory is kept.
+- Manual: why REAPER lists every factory preset twice.
 
 ### 1.0.3
 

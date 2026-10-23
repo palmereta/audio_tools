@@ -345,10 +345,12 @@ bool isEffect (Plug& pl) { return pl.ins > 0 && (! pl.p->acceptsMidi() || (! pl.
 std::function<float (juce::int64, int)> testInput (double sr, double untilSec)
 {
     auto state = std::make_shared<std::array<float, 3>> (std::array<float, 3> { 0, 0, 0 });
-    auto rng = std::make_shared<juce::Random> (77);
+    // Un generador por canal: el host pide cada bloque canal por canal, y con uno solo la entrada dependía del tamaño
+    // de los bloques (la prueba de bloques al azar de un efecto comparaba entradas distintas).
+    auto rng = std::make_shared<std::array<juce::Random, 3>> (std::array<juce::Random, 3> { juce::Random (77), juce::Random (78), juce::Random (79) });
     return [=] (juce::int64 i, int ch) -> float {
         if ((double) i / sr >= untilSec) return 0.0f;
-        const float w = rng->nextFloat() * 2.0f - 1.0f;
+        const float w = (*rng)[(size_t) ch % 3].nextFloat() * 2.0f - 1.0f;
         auto& s = *state; s[(size_t) ch % 3] = 0.97f * s[(size_t) ch % 3] + 0.03f * w;
         return 0.25f * (float) std::sin (2.0 * juce::MathConstants<double>::pi * 220.0 * (double) i / sr) + 2.0f * s[(size_t) ch % 3];
     };
@@ -1202,12 +1204,53 @@ void testRepro()
     const auto rc = go (*c);
     const double n2 = nullDb (ra, rc);
     report ("repro", U ("una que ya tocó, preparada de nuevo"), n2 < -100.0 ? "PASS" : "WARN", n2 <= -400.0 ? U ("idénticas") : fmt ("diferencia %.1f dB", n2));
+    // reset() sin volver a preparar: lo que hace un host de AU antes de un render (AudioUnitReset; QA en REAPER
+    // 2026-10-22: el segundo render seguido del AT42 y el ATFS1 AU no nulaba con el primero). Toca, sigue un rato en
+    // silencio (el host corre el plugin parado) y se reinicia.
+    auto f = load (pluginPath);
+    go (*f);
+    { RenderOpts so; if (isEffect (*f)) so.audioIn = [] (juce::int64, int) { return 0.0f; }; render (*f, {}, S (0.37, f->sr), so); }
+    // El host de AU de JUCE no implementa reset(): AudioUnitReset directo, como REAPER antes de un render.
+   #if JUCE_MAC
+    if (auto* au = f->p->getAudioUnitClient()) AudioUnitReset (au->getAudioUnitHandle(), kAudioUnitScope_Global, 0);
+    else
+   #endif
+    f->p->reset();
+    f->ph.ppq = 0;
+    const auto rf = go (*f);
+    const double n4 = nullDb (ra, rf);
+    if (juce::SystemStats::getEnvironmentVariable ("HT_DUMP", "").isNotEmpty()) { writeWav (ra, f->sr, "repro_fresh"); writeWav (rf, f->sr, "repro_reset"); }
+    report ("repro", U ("una que ya tocó, con reset() del host"), n4 < -100.0 ? "PASS" : "WARN", n4 <= -400.0 ? U ("idénticas") : fmt ("diferencia %.1f dB", n4));
     // Bloques al azar de 1 a 512 muestras (y de 0 en VST3) contra bloques fijos de 512: lo mismo.
     auto e = load (pluginPath);
     RenderOpts ro; ro.randomBlocks = true; if (isEffect (*e)) ro.audioIn = testInput (e->sr, 3.5);
     const auto re = render (*e, phrase (e->sr), S (4.5, e->sr), ro);
     const double n3 = nullDb (ra, re);
     report ("repro", U ("bloques al azar contra bloques de 512"), n3 < -100.0 ? "PASS" : "WARN", n3 <= -400.0 ? U ("idénticas") : fmt ("diferencia %.1f dB", n3));
+}
+
+// Zipper (QA en REAPER 2026-10-22, B1/E1): una nota larga (A3) con un parámetro automatizado como en la prueba de REAPER
+// (0,3; 0,7 en 1 s; rampa lineal de 0,7 a 0,3 entre 2 y 4 s; 0,6 en 5 s), el valor fijado por bloque como un host, y la
+// misma nota con el parámetro quieto en 0,3. Escribe los dos WAV (zip_static_<bloque>, zip_auto_<bloque>) para medir la
+// línea a la frecuencia de bloque fuera de este programa. HT_ZIP_PARAM: nombre del parámetro; HT_ZIP_BLOCK: bloque.
+void testZipper()
+{
+    const auto name = juce::SystemStats::getEnvironmentVariable ("HT_ZIP_PARAM", "");
+    const int bs = juce::SystemStats::getEnvironmentVariable ("HT_ZIP_BLOCK", "512").getIntValue();
+    for (int pass = 0; pass < 2; ++pass)
+    {
+        auto pl = load (pluginPath, 48000.0, bs);
+        juce::AudioProcessorParameter* prm = nullptr;
+        for (auto* q : realParams (*pl)) if (q->getName (64) == name) prm = q;
+        if (prm == nullptr) { report ("zipper", name, "FAIL", "no existe ese parámetro"); return; }
+        auto env = [] (double t) { return t < 1.0 ? 0.3 : t < 2.0 ? 0.7 : t < 4.0 ? 0.7 - 0.2 * (t - 2.0) : t < 5.0 ? 0.3 : 0.6; };
+        prm->setValue (0.3f);
+        RenderOpts o; o.block = bs;
+        if (pass == 1) o.perBlock = [&] (juce::int64 pos, int) { prm->setValue ((float) env ((double) pos / pl->sr)); };
+        const auto r = render (*pl, { { 0, on (57, 100) }, { S (6.0, pl->sr), off (57) } }, S (6.5, pl->sr), o);
+        writeWav (r, pl->sr, juce::String (pass == 0 ? "zip_static_" : "zip_auto_") + juce::String (bs));
+    }
+    report ("zipper", name + " @" + juce::String (bs), "PASS", U ("WAV escritos"));
 }
 
 // MIDI de salida atrasado la latencia (QA en Live 2026-10-22, P1: el host compensa el audio pero no el MIDI de salida,
@@ -1875,6 +1918,7 @@ int main (int argc, char** argv)
         else if (t == "progorder") testProgramOrder();
         else if (t == "statebytes") testStateBytes();
         else if (t == "repro") testRepro();
+        else if (t == "zipper") testZipper();
         else if (t == "midilatency") testMidiLatency();
         else if (t == "midisync") testMidiSync();
         else if (t == "freeze") testFreezeState();

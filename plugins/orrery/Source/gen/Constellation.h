@@ -70,13 +70,18 @@ inline bool sameCycle (const Stamp& mine, const Stamp& last, int nLast, double f
     return mine.ns - last.ns < 0.5 * dur;
 }
 
-inline uint64_t hashBlock (int n, const std::vector<OutEvent>& ev)
+// skipOffs: sin los note-off (el bloque en que arranca el transporte: suelta lo que sonaba antes, que depende de la historia
+// de cada instancia, y después todo es una sesión nueva igual para las dos).
+inline uint64_t hashBlock (int n, const std::vector<OutEvent>& ev, bool skipOffs = false)
 {
     uint64_t h = 1469598103934665603ull;
     auto mix = [&h] (uint64_t v) { h ^= v; h *= 1099511628211ull; };
-    mix ((uint64_t) n); mix ((uint64_t) ev.size());
+    mix ((uint64_t) n);
+    if (! skipOffs) mix ((uint64_t) ev.size());
     for (auto& e : ev)
     {
+        const int stt = e.data[0] & 0xF0;
+        if (skipOffs && (stt == 0x80 || (stt == 0x90 && e.data[2] == 0))) continue;
         mix ((uint64_t) (uint32_t) e.offset); mix ((uint64_t) e.size); mix ((uint64_t) (uint8_t) (e.lane + 1));
         for (int i = 0; i < e.size && i < 3; ++i) mix (e.data[i]);
     }
@@ -96,7 +101,7 @@ public:
     std::atomic<double> lastWallMs { -1.0 };    // hora de la máquina del último bloque (en tiempo real; -1 offline)
     int owner = -1;                              // con el lock del registro
 
-    struct DoneInfo { int64_t clk = 0; int n = 0; Stamp st; uint64_t hash = 0; };
+    struct DoneInfo { int64_t clk = 0; int n = 0; Stamp st; uint64_t hash = 0, hashOn = 0; };
 
     void writeCtrl (int64_t block, const Controls& c)
     {
@@ -189,7 +194,7 @@ public:
         if (bus)
         {
             bus->lastWallMs.store (nowMs, std::memory_order_relaxed);
-            MainBus::DoneInfo d; d.clk = clk; d.n = n; d.st = st; d.hash = hashBlock (n, ev);
+            MainBus::DoneInfo d; d.clk = clk; d.n = n; d.st = st; d.hash = hashBlock (n, ev); d.hashOn = hashBlock (n, ev, true);
             bus->writeDone (block, d);
         }
         clk += n; ++block;
@@ -234,6 +239,8 @@ public:
     {
         out.clear();
         curN = n; curFs = fs;
+        const bool startEdge = playing && ! prevPlaying;
+        prevPlaying = playing;
         hist[(size_t) (own % kHist)] = { own, ownClk, n, playing, ppq, bpm, st };
         if (bus != curBus || (bus != nullptr && bus->generation.load() != busGen))
         {
@@ -242,6 +249,7 @@ public:
             holdOff = 0; backoff = 2;
         }
         if (bus == nullptr || ! bus->live.load()) { if (synced) { release (out, mask); synced = false; } staged = false; state.store (Waiting); finish (n, newMask, out); return; }
+        if (startEdge && st.sampleValid && bus->live.load()) startWithTransport (bus, st, newMask);
         if (! synced) trySync (bus, n, fs, st, newMask, out);
         else if (newMask != mask)
         {
@@ -292,7 +300,7 @@ private:
     int64_t own = 0, ownClk = 0, boff = 0, coff = 0;
     int sinceRequest = 1000;
     std::vector<OutEvent> ev;
-    struct Ver { int64_t mb, mclk; int n; uint64_t hash; Stamp st; bool predicted; };
+    struct Ver { int64_t mb, mclk; int n; uint64_t hash, hashOn; Stamp st; bool predicted; };
     std::vector<Ver> ver;                         // bloques de la réplica todavía sin comparar con el Main
     // Por posición del host: la copia del Main ya está en la réplica y empieza en su borde stagedClk (muestras del Main).
     bool staged = false; int64_t stagedBlock = 0, stagedClk = 0;
@@ -303,6 +311,8 @@ private:
     Controls base; bool haveBase = false;         // los últimos controles leídos: la predicción si el Main va atrasado
     int holdOff = 0, backoff = 2; int64_t syncedAt = 0;   // espera entre una pérdida y el próximo intento (bloques)
     int curN = 512; double curFs = 48000.0;
+    bool prevPlaying = false;                     // el transporte en el bloque anterior (para ver cuándo arranca)
+    int64_t startMb = INT64_MIN;                  // el bloque del Main en que arrancó el transporte (se compara sin note-off)
 
     // Un bloque de la réplica: el bloque mb del Main con estos controles.
     void step (int64_t mb, const In& in, const Controls& c, bool predicted)
@@ -311,7 +321,7 @@ private:
         if (c.reset) rep.resetRequest.store (true);
         if (c.panic) rep.panic (ev);
         else rep.process (in.n, in.playing, in.ppq, in.bpm, ev);
-        ver.push_back ({ mb, in.clk + coff, in.n, hashBlock (in.n, ev), in.st, predicted });
+        ver.push_back ({ mb, in.clk + coff, in.n, hashBlock (in.n, ev), hashBlock (in.n, ev, true), in.st, predicted });
     }
     // En tiempo real, un Main que no procesa hace más de 3 bloques (y 60 ms) no va atrasado: está en bypass o congelado.
     static bool mainStalled (MainBus* bus, int n, double fs, double nowMs)
@@ -333,9 +343,18 @@ private:
         OutEvent e; e.offset = off; e.data[0] = s; e.data[1] = d1; e.data[2] = d2; e.size = 3; e.lane = (int8_t) lane;
         out.push_back (e);
     }
+    // El note-off va en la muestra del último note-on de esa nota en este bloque (si lo hay): en 0 quedaba antes del
+    // ataque y la nota seguía sonando (una sincronía que se pierde en el bloque en que la réplica atacó la nota). Un
+    // ataque y su note-off en la misma muestra se descartan juntos (dropZeroLength).
     void release (std::vector<OutEvent>& out, uint32_t m)
     {
-        rep.forEachSounding ([&] (int ch, int note, int lane, int) { if (lane >= 0 && ((m >> lane) & 1u)) put (out, 0, (uint8_t) (0x80 | ch), (uint8_t) note, 0, lane); });
+        rep.forEachSounding ([&] (int ch, int note, int lane, int) {
+            if (lane < 0 || ! ((m >> lane) & 1u)) return;
+            int at = 0;
+            for (const auto& e : out)
+                if ((e.data[0] & 0xF0) == 0x90 && e.data[2] > 0 && (e.data[0] & 0x0F) == ch && e.data[1] == note) at = std::max (at, e.offset);
+            put (out, at, (uint8_t) (0x80 | ch), (uint8_t) note, 0, lane);
+        });
     }
     void attack (std::vector<OutEvent>& out, uint32_t m)
     {
@@ -453,6 +472,47 @@ private:
         lk.unlock();
         request (bus);
     }
+    // El transporte arranca (un render, Play) con el reloj del host: para el Main es una sesión nueva que depende sólo de los
+    // ajustes y de la posición, así que el satélite no necesita copiar nada para seguirlo desde acá. Con el transporte
+    // parado la correspondencia entre los bloques propios y los del Main sale de la hora de cada ciclo, y con "anticipative
+    // FX" de REAPER puede estar corrida unos bloques (parados generan lo mismo y la huella no lo ve), o el satélite puede
+    // estar resincronizándose. Se rehace con la posición: el bloque del Main en que arrancó el transporte (o, si el Main
+    // todavía no llegó, el que sigue a su último bloque parado), y la réplica sigue desde ahí. En ese bloque sólo los
+    // note-off de lo que sonaba antes dependen de la historia de cada uno (y son los de este satélite): se compara sin
+    // ellos. Antes, al empezar un render el satélite perdía la sincronía y volvía a atacar el acorde del drone uno a
+    // nueve bloques tarde (QA en REAPER 2026-10-22, re-test).
+    void startWithTransport (MainBus* bus, const Stamp& st, uint32_t newMask)
+    {
+        const int64_t last = bus->lastBlock.load (std::memory_order_acquire);
+        MainBus::DoneInfo dl;
+        if (last < 0 || bus->readDone (last, dl) != 1) return;
+        int64_t mbs = -1, mclk = 0;
+        if (! dl.st.sampleValid) { mbs = last + 1; mclk = dl.clk + dl.n; }
+        else
+            for (int64_t k = last; k >= 0 && k > last - MainBus::kRing / 2; --k)
+            {
+                MainBus::DoneInfo d, prev;
+                if (bus->readDone (k, d) != 1 || ! d.st.sampleValid) break;
+                if (d.st.hostSample == st.hostSample)
+                {
+                    if (k == 0 || bus->readDone (k - 1, prev) != 1 || ! prev.st.sampleValid) { mbs = k; mclk = d.clk; }
+                    break;
+                }
+            }
+        Controls c;
+        if (mbs < 0 || bus->readCtrl (mbs, c) != 1 || ! c.g.hostClock) return;      // con el reloj propio no hay sesión nueva
+        startMb = mbs;
+        if (synced && mbs == own + boff && mclk == ownClk + coff) return;
+        boff = mbs - own; coff = mclk - ownClk;
+        ver.clear(); hint = kNoHint;
+        if (! synced)
+        {
+            // Lo que sonaba ya se soltó al perder la sincronía; el arranque suelta lo de la réplica y empieza de cero.
+            synced = true; staged = false; haveBase = false; holdOff = 0; syncedAt = own; mask = newMask;
+            dtSum = 0.0; dtN = 0;
+        }
+    }
+
     void begin (uint32_t newMask, std::vector<OutEvent>& out, bool keepVer = false)
     {
         synced = true; staged = false; hint = kNoHint; dtSum = 0.0; dtN = 0; syncedAt = own;
@@ -477,7 +537,7 @@ private:
             const int r = bus->readDone (v.mb, d);
             if (r == 0) break;              // el Main todavía no llegó (procesa después en este ciclo, o va atrasado)
             if (r < 0) { if (v.predicted) { lose (out); return; } continue; }
-            if (d.clk != v.mclk || d.n != v.n || d.hash != v.hash) { lose (out); return; }     // algo se perdió
+            if (d.clk != v.mclk || d.n != v.n || (v.mb == startMb ? d.hashOn != v.hashOn : d.hash != v.hash)) { lose (out); return; }     // algo se perdió
             if (v.predicted)        // los controles que se supusieron tienen que ser los que el Main usó
             {
                 Controls real;

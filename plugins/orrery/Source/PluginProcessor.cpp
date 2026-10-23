@@ -199,16 +199,24 @@ void OrreryProcessor::setValue (const juce::String& id, float v)
 
 void OrreryProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    const bool rateChanged = ! preparedOnce || sampleRate != sr;
+    preparedOnce = true;
     sr = sampleRate;
     gen.prepare (sampleRate);
     preview.prepare ((float) sampleRate, std::max (64, samplesPerBlock) + 64);
     monoR.assign ((size_t) std::max (64, samplesPerBlock) + 64, 0.0f);
     directQ.reserve (8192);
     updateRole (true);
-    // Un Main que se vuelve a preparar (otra frecuencia, otro buffer) empieza otra generación: sus satélites
-    // se resincronizan. Un satélite que se prepara también.
-    if (effRole.load() == RoleMain) Constellation::get().bumpGeneration (regSlot);
-    sat.desync();
+    // Un Main que se vuelve a preparar a otra frecuencia empieza otra generación: sus satélites se resincronizan. Un
+    // satélite que se prepara a otra frecuencia también, y suelta antes lo que suena en sus carriles. Con la misma
+    // frecuencia (otro tamaño de bloque, el pase a render offline de REAPER) la generadora no cambia y los dos siguen a
+    // la par: antes cada render perdía la sincronía, el satélite dejaba el acorde del drone sonando sin note-off y lo
+    // volvía a atacar uno a tres bloques tarde (QA en REAPER 2026-10-22, re-test: 3 ataques en 21 ms, 2 de largo cero).
+    if (rateChanged)
+    {
+        if (effRole.load() == RoleMain) Constellation::get().bumpGeneration (regSlot);
+        satRelease.store (true);
+    }
     if (juce::MessageManager::existsAndIsCurrentThread()) housekeeping();
 }
 
@@ -490,6 +498,7 @@ void OrreryProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         auto& m = reg.members[(size_t) regSlot];
         MainBus* b = reg.mainBus();
         m.follows.store (b); m.seenMs.store (blockStartMs);
+        if (satRelease.exchange (false)) sat.releaseAll (events);      // preparado a otra frecuencia: sus notas se sueltan
         sat.process (b, n, sr, stamp, playing, ppq, bpm, effLanes.load(), genEvents, isNonRealtime() ? -1.0 : blockStartMs);
         m.sync.store (sat.state.load());
         resetPending.store (false);

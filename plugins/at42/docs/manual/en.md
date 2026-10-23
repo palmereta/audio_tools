@@ -565,6 +565,10 @@ The drone chords are tuned to real notes on the oscillators' own tuning curve. M
 
 Your DAW session stores everything, including cables, the sequence and MIDI Learn assignments.
 
+### In REAPER
+
+REAPER lists every factory preset twice in the preset menu: once from the plugin's own list and once as a preset file (the .vstpreset files that the launcher or the Presets folder of the zip install for Ableton Live, in ~/Library/Audio/Presets/Audio Tools/ on macOS, Documents\VST3 Presets\Audio Tools\ on Windows and ~/.vst3/presets/Audio Tools/ on Linux). Both load the same settings. If you don't use Live, you can delete the "Audio Tools AT42" folder there and each preset appears once.
+
 ## MIDI and host sync
 
 ### MIDI

@@ -681,6 +681,77 @@ static void hostClockTests()
     }
 }
 
+// Un render de REAPER con "anticipative FX" después de tocar con el transporte parado (QA en REAPER 2026-10-22, re-test).
+// Parado, cada pista procesa adelantada o atrasada respecto de la otra y la hora del ciclo es la del momento en que se
+// procesa: el satélite queda emparejado con un bloque del Main corrido unos bloques (igual generan lo mismo). Al empezar el
+// render (el host prepara de nuevo a la misma frecuencia) el transporte arranca en la muestra 0 y las pistas siguen sin ir
+// a la par. Lo que saca el satélite en el render tiene que ser lo del Main en su carril: mismas muestras, un solo ataque,
+// sin notas de largo cero.
+static void renderAfterStopped (int stoppedLag, int renderLag, uint32_t seed, int& matched, int& total, int& zero, int& doubleOn, int& resyncs)
+{
+    using namespace sat;
+    Schedule sch (true); sch.steady = true;
+    auto& reg = Constellation::get();
+    const int mainSlot = reg.join();
+    { std::lock_guard<std::mutex> lk (reg.lock); reg.setRoleLocked (mainSlot, RoleMain, 0); }
+    MainBus* bus = reg.members[(size_t) mainSlot].bus.load();
+    Generator gen; gen.prepare (48000.0);
+    MainCore mc; mc.attach (bus);
+    SatelliteCore sc;
+    const uint32_t mask = 1u;                    // el drone
+    const int bs = 512; const double fs = 48000.0, dur = bs / fs * 1.0e9, total_s = 30.0;
+    std::vector<OutEvent> mev, sev;
+    std::vector<E> mlog, slog;
+    auto mainBlock = [&] (int64_t k, bool playing, int64_t hostSample, double ns, bool log) {
+        Controls raw = sch.at (5.0, 5.0 - bs / fs, total_s);
+        const Controls& cur = mc.begin (raw);
+        gen.g = cur.g; gen.lanes = cur.lanes;
+        gen.process (bs, playing, playing ? (double) hostSample / fs * 2.0 : 0.0, 120.0, mev);
+        Stamp st; st.sampleValid = playing; st.hostSample = hostSample; st.ns = ns;
+        mc.end (bs, st, mev, gen);
+        if (log) for (auto& e : mev) mlog.push_back ({ hostSample + e.offset, e.data[0], e.data[1], e.data[2], e.lane });
+        (void) k;
+    };
+    auto satBlock = [&] (bool playing, int64_t hostSample, double ns, bool log) {
+        Stamp st; st.sampleValid = playing; st.hostSample = hostSample; st.ns = ns;
+        sc.process (bus, bs, fs, st, playing, playing ? (double) hostSample / fs * 2.0 : 0.0, 120.0, mask, sev);
+        if (log) for (auto& e : sev) slog.push_back ({ hostSample + e.offset, e.data[0], e.data[1], e.data[2], e.lane });
+    };
+    // Parado, 4 s: el satélite procesa stoppedLag bloques adelante (o atrás) del Main, con la hora de cuando procesa.
+    const int stopped = (int) (4.0 * fs / bs);
+    for (int w = 0; w < stopped + std::abs (stoppedLag); ++w)
+    {
+        const double ns = 1.0e12 + w * dur;
+        const int km = stoppedLag >= 0 ? w - stoppedLag : w, ks = stoppedLag >= 0 ? w : w + stoppedLag;
+        if (km >= 0 && km < stopped) mainBlock (km, false, 0, ns, false);
+        if (ks >= 0 && ks < stopped) satBlock (false, 0, ns, false);
+    }
+    // El render: bloques desde la muestra 0, cada pista a su ritmo (hasta renderLag bloques de diferencia, al azar).
+    std::mt19937 rng (seed);
+    const int64_t blocks = (int64_t) (20.0 * fs / bs);
+    int64_t im = 0, is = 0;
+    while (im < blocks || is < blocks)
+    {
+        const bool canM = im < blocks && im - is < renderLag, canS = is < blocks && is - im < renderLag;
+        const bool doM = canM && (! canS || rng() % 2u == 0);
+        if (doM) { mainBlock (im, true, im * bs, 0.0, true); ++im; }
+        else { satBlock (true, is * bs, 0.0, true); ++is; }
+    }
+    const auto want = laneEvents (mlog, mask, 0);
+    const auto got = laneEvents (slog, mask, 0);
+    matched = 0; sameEvents (want, got, matched); total = (int) std::max (want.size(), got.size());
+    zero = zeroLength (slog);
+    std::map<int, int> on; doubleOn = 0;
+    for (auto& e : slog)
+    {
+        const int stt = e.s & 0xF0, k = (e.s & 15) * 128 + e.d1;
+        if (stt == 0x90 && e.d2 > 0) { if (on[k]++ > 0) ++doubleOn; }
+        else if (stt == 0x80 || stt == 0x90) on[k] = 0;
+    }
+    resyncs = sc.resyncs.load();
+    reg.leave (mainSlot);
+}
+
 int main()
 {
     std::printf ("1. Diez minutos de ambient (7 carriles, Re dórico)\n");
@@ -833,6 +904,20 @@ int main()
     }
 
     constellationTests();
+    std::printf ("19. Render con anticipative FX después de tocar con el transporte parado (satélite corrido unos bloques)\n");
+    {
+        bool all = true;
+        for (int sl : { -3, -1, 0, 2, 4 })
+            for (int rl : { 1, 4, 12 })
+            {
+                int m = 0, t = 0, z = 0, d = 0, r = 0;
+                renderAfterStopped (sl, rl, 1000u + (uint32_t) (sl + 10) * 31u + (uint32_t) rl, m, t, z, d, r);
+                const bool ok = m == t && t > 3 && z == 0 && d == 0;
+                if (! ok || (sl == -3 && rl == 12)) std::printf ("  parado %+d bloques, render hasta %2d: %d de %d iguales, largo cero %d, doble ataque %d, resincronizaciones %d\n", sl, rl, m, t, z, d, r);
+                all = all && ok;
+            }
+        check (all, "en el render el satélite saca lo del Main en su carril, a la muestra, un ataque, sin largo cero");
+    }
     leadLagTests();
     hostClockTests();
     std::printf ("\n%s (%d fallas)\n", fails == 0 ? "TODO OK" : "HAY FALLAS", fails);

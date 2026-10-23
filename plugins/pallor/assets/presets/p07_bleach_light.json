@@ -54,7 +54,7 @@
   "m_exciter": 30,
   "m_comp": 35,
   "autofill": 2,
-  "m_volume": -0.1
+  "m_volume": -1.0
  },
  "patterns": [
   {

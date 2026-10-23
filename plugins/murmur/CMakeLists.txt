@@ -1,5 +1,5 @@
 # Murmur — granular en tiempo real: la entrada en un búfer, granos que vuelan como una bandada.
-set(MURMUR_VERSION 1.0.3)
+set(MURMUR_VERSION 1.0.4)
 
 if(APPLE)
     set(MURMUR_FORMATS VST3 AU Standalone)

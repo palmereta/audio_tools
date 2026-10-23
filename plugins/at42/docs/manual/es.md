@@ -565,6 +565,10 @@ Los acordes de los drones están afinados en notas reales sobre la curva de afin
 
 La sesión de tu DAW guarda todo, incluidos los cables, la secuencia y las asignaciones de MIDI Learn.
 
+### En REAPER
+
+REAPER muestra cada preset de fábrica dos veces en el menú de presets: una de la lista propia del plugin y otra como archivo (los .vstpreset que instalan el launcher o la carpeta Presets del zip para Ableton Live, en ~/Library/Audio/Presets/Audio Tools/ en macOS, Documentos\VST3 Presets\Audio Tools\ en Windows y ~/.vst3/presets/Audio Tools/ en Linux). Los dos cargan lo mismo. Si no usás Live, podés borrar ahí la carpeta "Audio Tools AT42" y cada preset aparece una sola vez.
+
 ## MIDI y sincronía
 
 ### MIDI

@@ -71,6 +71,11 @@ bool MurmurProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 void MurmurProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     sr = sampleRate;
+    // Los parámetros actuales antes de preparar: los suavizados arrancan en su valor, en una instancia nueva y en una
+    // que el host vuelve a preparar para un render (si no, la nueva subía desde los valores por defecto).
+    for (size_t k = 0; k < raw.size(); ++k) vals[k] = raw[k]->load();
+    applyParams (vals.data(), eng);
+    restartPending.store (false);
     eng.prepare (sampleRate, std::max (64, samplesPerBlock));
     tmpL.assign ((size_t) std::max (64, samplesPerBlock) + 64, 0.0f); tmpR = tmpL;
 }
@@ -98,6 +103,7 @@ void MurmurProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     const double t0 = juce::Time::getMillisecondCounterHiRes();
     for (size_t k = 0; k < raw.size(); ++k) vals[k] = raw[k]->load();
     applyParams (vals.data(), eng);
+    if (restartPending.exchange (false)) eng.restart();      // reset() del host (AudioUnitReset antes de un render)
 
     HostInfo host;
     if (auto* ph = getPlayHead())

@@ -3,7 +3,7 @@
 # El nombre del producto está sólo acá: cambiarlo antes de publicar es cambiar PALLOR_NAME (y los artefactos se
 # llaman igual; los ids de los parámetros, los presets y el estado no dependen de él).
 set(PALLOR_NAME "Pallor")
-set(PALLOR_VERSION 1.0.1)
+set(PALLOR_VERSION 1.0.2)
 
 if(APPLE)
     set(PALLOR_FORMATS VST3 AU Standalone)

@@ -36,9 +36,13 @@ package() {
         PRESETS_EN="4. Factory presets as files, for Ableton Live and other hosts that list preset files: copy the
    folders inside Presets/ to ~/Library/Audio/Presets/Audio Tools/
    (In Live: Browser > Plug-Ins, unfold \"Audio Tools $PRODUCT\" to see them; the launcher does this for you.)
+   REAPER then lists every factory preset twice (the plugin's own list and the files): both are the same.
+   If you don't use Live, skip this step.
 "
         PRESETS_ES="4. Presets de fábrica como archivos (Ableton Live y otros): copiar las carpetas de Presets/ a
    ~/Library/Audio/Presets/Audio Tools/
+   REAPER muestra entonces cada preset dos veces (la lista del plugin y los archivos): son los mismos.
+   Si no usás Live, este paso no hace falta.
 "
     fi
     cp LICENSE "$OUT/LICENSE.txt"

@@ -456,6 +456,10 @@ Los presets de Stretch esperan que aprietes Freeze. Gated Choir no suena hasta q
 
 En Ableton Live, que no muestra la lista de programas propia de un plugin, los presets de fábrica aparecen en el navegador de Live en **Plug-Ins**, **Audio Tools Murmur** (desplegá el plugin). Los instala el launcher; con el zip, copiá las carpetas de su carpeta **Presets** a `~/Library/Audio/Presets/Audio Tools/` (macOS). Tus presets propios quedan en la carpeta de arriba y en el menú de Murmur.
 
+### En REAPER
+
+REAPER muestra cada preset de fábrica dos veces en el menú de presets: una de la lista propia del plugin y otra como archivo (los .vstpreset que instalan el launcher o la carpeta Presets del zip para Ableton Live, en ~/Library/Audio/Presets/Audio Tools/ en macOS, Documentos\VST3 Presets\Audio Tools\ en Windows y ~/.vst3/presets/Audio Tools/ en Linux). Los dos cargan lo mismo. Si no usás Live, podés borrar ahí la carpeta "Audio Tools Murmur" y cada preset aparece una sola vez.
+
 ## Recetas
 
 ### Nube de voz

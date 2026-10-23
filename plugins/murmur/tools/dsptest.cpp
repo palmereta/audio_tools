@@ -187,6 +187,52 @@ int main()
         }
         check (worst == 0.0f, "bit a bit iguales");
     }
+    std::printf ("11. Bloques al azar, y una instancia que ya sonó y el host volvió a preparar o reiniciar, contra una nueva\n");
+    {
+        // QA en REAPER 2026-10-22 (re-test): dos renders con "First Murmur" (reverb 0,25) no nulaban entre corridas ni entre
+        // tamaños de búfer: prepare conservaba la memoria, el azar, la fase de la reverb y el estado de sus filtros, y el
+        // host hace correr el plugin en silencio un tiempo que varía antes del render.
+        auto make = [] (Engine& e) {
+            e.p.mix = 0.5f; e.p.sizeMs = 180.0f; e.p.density = 18.0f; e.p.spray = 0.35f; e.p.pan = 0.6f; e.p.revMix = 0.25f; e.p.delayMix = 0.15f;
+            e.p.lfo[0] = { 0.7f, 0.5f, 0, LDrift, TPitch };
+            e.prepare (48000.0, 1024);
+        };
+        auto diff = [] (const Run& a, const Run& b) {
+            float d = 0.0f; for (size_t i = 0; i < std::min (a.L.size(), b.L.size()); ++i) d = std::max (d, std::max (std::fabs (a.L[i] - b.L[i]), std::fabs (a.R[i] - b.R[i])));
+            return d;
+        };
+        Engine a; make (a); const auto ra = run (a, 4.0, 2.5, 48000.0, 512);
+        // Bloques de 1 a 1024 al azar.
+        Engine b; make (b);
+        Run rb; { std::vector<float> il (1024), ir (1024), ol (1024), orr (1024); dh::Rng br (77); HostInfo h;
+            for (int pos = 0, total = 4 * 48000; pos < total;)
+            {
+                const int n = std::min (1 + (int) (br.unipolar() * 1024.0f), total - pos);
+                for (int i = 0; i < n; ++i) { const double t = (pos + i) / 48000.0; il[(size_t) i] = ir[(size_t) i] = t < 2.5 ? 0.5f * (float) std::sin (2.0 * 3.14159265 * 220.0 * t) : 0.0f; }
+                b.process (il.data(), ir.data(), ol.data(), orr.data(), n, h);
+                rb.L.insert (rb.L.end(), ol.begin(), ol.begin() + n); rb.R.insert (rb.R.end(), orr.begin(), orr.begin() + n);
+                pos += n;
+            } }
+        const float d1 = diff (ra, rb);
+        std::printf ("  bloques al azar contra 512: diferencia máxima %.3g\n", d1);
+        check (d1 == 0.0f, "bloques al azar: bit a bit iguales");
+        // Sonó, siguió en silencio un rato, y el host lo preparó de nuevo (con otro tamaño de bloque).
+        Engine c; make (c); run (c, 3.0, 3.0, 48000.0, 256); run (c, 1.37, 0.0, 48000.0, 64);
+        c.prepare (48000.0, 333); const auto rc = run (c, 4.0, 2.5, 48000.0, 512);
+        const float d2 = diff (ra, rc);
+        std::printf ("  preparada de nuevo después de sonar: diferencia máxima %.3g\n", d2);
+        check (d2 == 0.0f, "preparada de nuevo = nueva");
+        // Lo mismo con reset() del host (AudioUnitReset): restart() sin volver a preparar.
+        Engine d; make (d); run (d, 2.0, 2.0, 48000.0, 128); run (d, 0.81, 0.0, 48000.0, 128);
+        d.restart(); const auto rd = run (d, 4.0, 2.5, 48000.0, 512);
+        const float d3 = diff (ra, rd);
+        std::printf ("  reiniciada después de sonar: diferencia máxima %.3g\n", d3);
+        check (d3 == 0.0f, "reiniciada = nueva");
+        // Congelada: la memoria se conserva al preparar de nuevo.
+        Engine f; make (f); run (f, 2.0, 2.0); f.p.freeze = true; run (f, 0.2, 0.0); f.prepare (48000.0, 512);
+        const auto rf = run (f, 1.0, 0.0);
+        check (rms (rf.L, 0.2, 1.0) > 0.02f, "congelada: la memoria sigue después de preparar de nuevo");
+    }
     std::printf ("\n%s (%d fallas)\n", fails == 0 ? "TODO OK" : "HAY FALLAS", fails);
     return fails == 0 ? 0 : 1;
 }

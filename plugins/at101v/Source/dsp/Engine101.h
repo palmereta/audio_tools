@@ -185,7 +185,7 @@ public:
             vc.driftRng = Rng (0x1234u + (uint32_t) v * 77u);
         }
         if (! chorus0.empty()) { chorus = chorus0; delay = delay0; reverb = reverb0; decL = dec0L; decR = dec0R; }
-        sh = 0.0f; ageCounter = 0; sampleCount = 0;
+        sh = 0.0f; ageCounter = 0; sampleCount = 0; gainPrevValid = false;
         arp.restart();
         lastHostStep = -1; hostGateOffPending = false; hostGateOffAt = 0.0;
         prevSeqPlay = false; prevArp = 0; seqPos = -1; seqTranspose = 0; seqTiePending = false;
@@ -261,6 +261,9 @@ public:
 
 private:
     static constexpr int kSub = 32;
+    static constexpr int kGains = 5;                     // Pulse, Saw, Sub, Noise, Volume
+    std::array<float, kGains> gainPrev {};
+    bool gainPrevValid = false;
 
     struct Voice
     {
@@ -656,15 +659,20 @@ private:
         const int subWave = (int) std::lround (p[(size_t) P::sub_wave]);
         const bool vcaGate = p[(size_t) P::vca_mode] > 0.5f;
         const float pwAmt = p[(size_t) P::pw];
-        const float mPulse = sq (p[(size_t) P::mix_pulse]), mSaw = sq (p[(size_t) P::mix_saw]);
-        const float mSub = sq (p[(size_t) P::mix_sub]), mNoise = sq (p[(size_t) P::mix_noise]) * 1.6f;
+        // Niveles del mezclador y volumen: una rampa por muestra (sobremuestreada) desde el valor del tramo anterior. Con
+        // un valor fijo por tramo de 32 muestras cada cambio era un escalón (QA en REAPER 2026-10-22, B1: automatizar
+        // Mixer Pulse / Saw).
+        const std::array<float, kGains> gainNow { sq (p[(size_t) P::mix_pulse]), sq (p[(size_t) P::mix_saw]), sq (p[(size_t) P::mix_sub]),
+                                                  sq (p[(size_t) P::mix_noise]) * 1.6f, sq (p[(size_t) P::volume]) * 1.8f };
+        if (! gainPrevValid) { gainPrev = gainNow; gainPrevValid = true; }
+        std::array<float, kGains> gainStep {};
+        for (int k = 0; k < kGains; ++k) gainStep[(size_t) k] = (gainNow[(size_t) k] - gainPrev[(size_t) k]) / (float) std::max (1, n * os);
         const float res = cal101::resK (p[(size_t) P::vcf_res]);
         const float envOct = 10.0f * p[(size_t) P::vcf_env];
         const float modOct = 3.0f * p[(size_t) P::vcf_mod];
         const float kybd = p[(size_t) P::vcf_kybd];
         const float vcoMod = 12.0f * cal101::vcoModOct (p[(size_t) P::vco_mod]);
         const float tuneSt = (p[(size_t) P::tune] - 0.5f);
-        const float vol = sq (p[(size_t) P::volume]) * 1.8f;
         const float baseCut = std::log2 (cal101::cutoffHz (p[(size_t) P::vcf_freq]));
         const float aC = rcCoef (cal101::attackTau (p[(size_t) P::env_a]), fs);
         const float dC = rcCoef (cal101::decayTau (p[(size_t) P::env_d]), fs);
@@ -771,6 +779,9 @@ private:
                 for (int j = 0; j < os; ++j)
                 {
                     const float t = (float) (j + 1) * invOs;
+                    const float gk = (float) (i * os + j + 1);
+                    const float mPulse = gainPrev[0] + gainStep[0] * gk, mSaw = gainPrev[1] + gainStep[1] * gk, mSub = gainPrev[2] + gainStep[2] * gk;
+                    const float mNoise = gainPrev[3] + gainStep[3] * gk, vol = gainPrev[4] + gainStep[4] * gk;
                     v.vco.process (v.pwPrev + (pwv - v.pwPrev) * t, subWave);
                     const float mix = mPulse * v.vco.pulse + mSaw * v.vco.saw + mSub * v.vco.sub + (mNoise + 2.0e-4f) * v.vco.noise;   // piso de ruido: arranca la autooscilación
                     const float fc = v.cutPrev + (cut - v.cutPrev) * t;
@@ -788,6 +799,7 @@ private:
         const float polyG = isPoly() ? 0.7f : 1.0f;
         decL.process (osL.data(), L, n, uni * polyG);
         decR.process (osR.data(), R, n, uni * polyG);
+        gainPrev = gainNow;
         sampleCount += n;
     }
 

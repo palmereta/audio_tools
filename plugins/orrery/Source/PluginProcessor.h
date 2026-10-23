@@ -169,6 +169,8 @@ private:
     std::vector<float> monoR;                     // la vista previa en una pista mono
     std::vector<dh::orr::OutEvent> events;
     double sr = 48000.0;
+    bool preparedOnce = false;
+    std::atomic<bool> satRelease { false };     // el satélite suelta sus notas en el próximo bloque (se preparó a otra frecuencia)
     std::atomic<bool> panicRequest { false };
     bool wasRunning = false;
     double clockBeat = 0.0;

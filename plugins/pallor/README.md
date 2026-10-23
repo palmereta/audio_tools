@@ -4,7 +4,7 @@ A drum machine for dark wave, coldwave, post-punk, minimal wave, EBM, synthpop, 
 italo/hi-NRG, witch house, 90s darkwave/trip-hop and dark ambient: an original design, not a recreation. Sixteen
 voices with an analog-circuit engine and an 80s digital playback engine each, the studio effects of the period
 and a step sequencer. VST3 instrument, Audio Unit (macOS), standalone app, and `pallorrender`, a command-line
-renderer, on macOS, Windows and Linux (VST3, LV2). Version 1.0.0. Manual in English and Spanish (`docs/manual/`,
+renderer, on macOS, Windows and Linux (VST3, LV2). Version 1.0.2. Manual in English and Spanish (`docs/manual/`,
 inside the plugin and on the website).
 
 The product name lives only in `PALLOR_NAME` in `CMakeLists.txt` (product, plugin name, bundle id); parameter ids,

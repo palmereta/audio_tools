@@ -47,8 +47,10 @@ package() {
         done
         PRESETS_EN="4. Factory presets as files, for hosts that list preset files (Bitwig and others): copy the
    folders inside Presets/ to ~/.vst3/presets/Audio Tools/
+   REAPER then lists every factory preset twice (the plugin's own list and the files): both are the same.
 "
         PRESETS_ES="4. Presets de fábrica como archivos: copiar las carpetas de Presets/ a ~/.vst3/presets/Audio Tools/
+   REAPER muestra entonces cada preset dos veces (la lista del plugin y los archivos): son los mismos.
 "
     fi
     cp LICENSE "$OUT/LICENSE.txt"

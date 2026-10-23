@@ -1,5 +1,5 @@
 # ATFS1 — síntesis de formantes y FM basada en el Yamaha FS1R (1998).
-set(ATFS1_VERSION 1.0.5)
+set(ATFS1_VERSION 1.0.6)
 
 if(APPLE)
     set(ATFS1_FORMATS VST3 AU Standalone)
