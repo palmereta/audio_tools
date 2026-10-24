@@ -56,7 +56,7 @@ In Ableton Live, the factory presets appear in Live's browser under Plug-Ins →
 
 ### Your first sound
 
-AT42 opens with the Init preset. Play a MIDI note (or a plate of the touch controller) and VCO A answers through its normalled path, keyboard pitch and envelope A, with no cables. Drone voices 1 and 2 are up in the mixer too, but their envelopes stay closed until something opens them, just like the hardware with no key pressed.
+AT42 opens with the Init preset. Play a MIDI note (or a plate of the touch controller) and VCO A answers through its normalled path, keyboard pitch and envelope A, with no cables. All six drone voices are up in the mixer too, but their envelopes stay closed until something opens them, just like the hardware with no key pressed.
 
 1. Click and hold drone key 1, at the bottom right under DRONE KEYS. Drone 1 sounds while you hold it and fades when you let go. MIDI note C1 does the same.
 2. To keep it sounding, click the **hold** button of DRONE 1 (the light grey button at the left of the voice).
@@ -81,7 +81,8 @@ The lower bar shows the keyboard's mode, scale and root, a MIDI IN light, the ca
 - Buttons latch: click for on, click again for off.
 - Two-position switches flip with each click. Three-position switches go to the part you click: upper, middle or lower.
 - Right-click any panel control for MIDI Learn.
-- Every control and setting is a host parameter you can automate.
+- The orbs: hover over one, or press on it and drag, to shade it with your hand (see The orbs and ambient light).
+- Every control and setting is a host parameter you can automate, including the hand over each orb (Drone 1, 2, 4 and 5 Hand).
 
 ## Drone voices 1, 2, 4 and 5
 
@@ -120,10 +121,16 @@ The amber LED follows the envelope. The jacks are **gate** (input), **env** (out
 The orb at the lower right of each classic voice is a photo-sensitive dome. A light-dependent resistor sits in parallel with the TUNE control of every oscillator whose MOD is on: more light, higher pitch. Three things light it.
 
 - The ambient light, set by Ambient Light on the Settings page, the same for all orbs. At its default, switching MOD on already raises the pitch by a couple of semitones, so tune with MOD on if you plan to use it.
-- Your hand: hovering the mouse over an orb casts a shadow. The closer to the centre, the darker the orb and the lower the pitch.
+- Your hand: the mouse over an orb casts a shadow. The closer to the centre, the darker the orb and the lower the pitch. Hover to shade it lightly, or press on the orb (a finger on a touch screen) to cover it and drag to move the hand away or onto another orb. When you let go of the button the shadow follows the pointer again; on a touch screen it lifts. The knobs, buttons and jacks around the orb don't cast a shadow.
 - The red LED inside, driven by the cv jack and scaled by the cv knob. Like a real LED it only lights with positive voltage, a little above 1.5 V, so the unipolar LFOs (0 to 10 V) suit it well. The dome turns red as it lights.
 
 The resistor reacts quickly to more light and slowly to less, so the pitch jumps up and glides back over a fraction of a second. An LFO into cv therefore gives a breathing, lopsided movement rather than a plain vibrato.
+
+The orb only changes the sound of oscillators with MOD on. While the pointer is on an orb a bubble shows the hand (0 to 10) and how many oscillators of that voice have MOD on; if none has, it says to turn MOD on. With the factory light, MOD on with no hand raises an oscillator by about 2.6 semitones and a hand right over the centre brings it back down by about 2.4.
+
+The hand is also a host parameter for each orb: Drone 1 Hand, Drone 2 Hand, Drone 4 Hand and Drone 5 Hand, from 0 (no hand) to 10 (covered). Moving the mouse over an orb writes it, so your host can record it in an automation lane; you can also draw it or assign it a MIDI CC. It is not saved in presets and does not mark a preset as modified.
+
+Presets with MOD on: Cathedral of A, Low Choir, Microtonal Fog, Shimmer Garden, Breathing Orbs, Tape Memory and Reverse Hymn. In the five that are not orb presets by name, one or two high oscillators per voice have MOD on and are tuned so that the ambient light brings them to the note of the chord: the hand bends them down from there.
 
 ### Triggering the drones
 
@@ -506,7 +513,7 @@ Click **SETTINGS** for everything the hardware lacks or hides in its firmware, i
 | TUNING | Analog, Chromatic | drone oscillators in semitones |
 | RELEASE | 8 s, 30 s | longest drone release |
 
-With Chromatic, each TUNE knob steps in semitones relative to A 440 Hz. VOLT still transposes the voice, so keep it fully counter-clockwise for concert pitch; the orb still bends MOD oscillators.
+With Chromatic, each oscillator sounds on the nearest semitone of A 440 Hz, after VOLT: the drones stay at concert pitch at any VOLT setting up to half travel, and turning VOLT moves them in semitone steps (past half, the cross-modulation bends them again). The bubble of a TUNE knob shows the note that sounds. The orb still bends MOD oscillators.
 
 ### SYNC
 
@@ -576,7 +583,8 @@ REAPER lists every factory preset twice in the preset menu: once from the plugin
 - Notes play the touch keyboard, in semitones and ignoring the scale. Note C3 is 0 V at v/oct, transposed by OCTAVE. Velocity is the pressure in Pressure mode.
 - With MIDI Drone Keys at C1-F1, notes C1 to F1 play drone keys 1 to 6 instead of the keyboard. Set it to Off to free them.
 - Pitch bend moves the keyboard's v/oct by up to the BEND range (2 semitones by default).
-- The mod wheel (CC 1) moves the joystick's Y axis unless CC 1 is learned elsewhere. At minimum the stick goes to the top, at maximum to the bottom.
+- The sustain pedal (CC 64) holds notes and drone keys released while it is down, until you lift it.
+- The mod wheel (CC 1) moves the joystick's Y axis unless CC 1 is learned elsewhere. At minimum the stick sits at the centre; raising the wheel moves it up, to the top at maximum.
 - All Notes Off (CC 123) and All Sound Off (CC 120) release every note and drone key.
 
 MIDI Learn works on every panel control and setting.
@@ -608,7 +616,7 @@ Under SYNC, LFO A, LFO B and the pulser can follow your DAW. With Host, the rate
 2. Turn on MOD for two or three oscillators of DRONE 1.
 3. Patch LFO A out into DRONE 1's cv jack. Set LFO A's wave fully left, its rate low and its speed switch to /6.
 4. Raise DRONE 1's cv knob until the orb glows red at the top of each cycle. The MOD oscillators rise with the light and sink back slowly.
-5. Hover the mouse over the orb to pull the pitch down by hand.
+5. Hover the mouse over the orb, or press on it and drag, to pull the pitch down by hand.
 
 ### Siren and birds
 
@@ -658,11 +666,11 @@ Under SYNC, LFO A, LFO B and the pulser can follow your DAW. With Host, the rate
 
 ## Tips and troubleshooting
 
-- **Init's drones are silent.** By design: their envelopes wait for a key. Press drone key 1 or 2, play C1 or C#1, or turn on hold for DRONE 1 or 2. Other MIDI notes play VCO A.
+- **Init's drones are silent.** By design: their envelopes wait for a key. Press any drone key, play C1 to F1, or turn on a voice's hold. Other MIDI notes play VCO A.
 - **The plates or MIDI notes are silent.** The keyboard only sends voltages. Raise VCO A or B in the mixer and check that no cable has taken over the envelope's gate.
 - **MIDI notes C1 to F1 don't play the keyboard.** They play the drone keys; set MIDI Drone Keys to Off.
-- **The drone pitch moves with the mouse.** The pointer shades the orbs, and MOD oscillators follow the light. Move away from the orb or turn MOD off.
-- **The drones won't stay in tune.** Lower Drone Drift, turn MOD off, or use Chromatic with VOLT fully counter-clockwise.
+- **The drone pitch moves with the mouse.** The pointer over an orb shades it, and MOD oscillators follow the light. Move away from the orb or turn MOD off. If your host recorded it, check the Drone N Hand automation lanes.
+- **The drones won't stay in tune.** Lower Drone Drift, turn MOD off, or use Chromatic.
 - **The arpeggiator or sequencer doesn't move.** Check MODE, SOURCE and any cable in the keyboard's clock jack. The sequencer needs a recorded sequence and a held plate (or ARP HOLD).
 - **EXT IN, PREAMP or Piezo Percussion are silent.** They need audio at the plugin's input: route it in your DAW, or pick an input device in the standalone app and allow microphone access on macOS.
 - **Too loud or distorted.** Lower MASTER, dist and gain, Mixer Drive or OUTPUT. The soft limiter catches peaks but is not meant to work constantly.

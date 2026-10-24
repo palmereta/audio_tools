@@ -128,6 +128,8 @@ public:
         for (auto& a : aps) a = 0.0f;
         fb1 = fb2 = env = held = lfo = ph1 = ph2 = 0.0f; revPh = 0.0f; revCount = 0; crushCount = 0; crushHold = 0.0f;
         sv1 = sv2 = {};
+        lfoPh = envGate = recon = 0.0f;             // también esto: al cambiar de programa no queda nada del anterior
+        for (auto& a : apz) a = 0.0f;
     }
 
     void load (int cart, int prog)

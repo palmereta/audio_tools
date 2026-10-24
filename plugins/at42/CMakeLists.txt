@@ -1,5 +1,5 @@
 # AT42 — máquina de drones basada en la familia Elta SOLAR 42 (2023-2025), superset 42N.
-set(AT42_VERSION 1.0.7)
+set(AT42_VERSION 1.0.8)
 
 if(APPLE)
     set(AT42_FORMATS VST3 AU Standalone)

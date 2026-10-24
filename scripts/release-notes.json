@@ -81,6 +81,20 @@
     "First release: a monophonic synthesizer modeled on the 1982 Roland SH-101, with arpeggiator, a visual sequencer, polyphony, MIDI Learn and three panel colours."
   ],
 
+  "at42-v1.0.8": [
+    "The orbs respond to a click and a drag, not only to hovering: press on an orb (or touch it on a touch screen) to cover it with your hand, drag to move the hand away or onto another orb. The pointer gets a hand cursor over the orbs, and a bubble shows the hand and how many oscillators of that voice have MOD on, or tells you to turn MOD on when none has.",
+    "The hand over each orb is a host parameter (Drone 1, 2, 4 and 5 Hand): your DAW records it in automation lanes, you can draw it or MIDI-learn it. Old projects open with no hand, exactly as they sounded.",
+    "Reaching for the MOD buttons or the cv knob next to an orb no longer shades it and bends the drone.",
+    "Cathedral of A, Low Choir, Shimmer Garden, Tape Memory and Reverse Hymn now have MOD on for one or two high oscillators, tuned so the chord is unchanged: the hand over the orb bends them down. Seven presets use the orbs now.",
+    "Drone Tuning Chromatic is at concert pitch with VOLT at its default: the pitch that sounds, after VOLT, is what snaps to the semitone (it was 1.6 semitones flat). The knob bubble shows the note that sounds.",
+    "Init: all six drone keys are audible (keys 3 to 6 had their mixer channels at zero).",
+    "The sustain pedal (CC 64) holds keyboard notes and drone keys.",
+    "Master and the mixer levels and pans follow automation sample by sample: no zipper on fast moves (sidebands 30 dB lower).",
+    "Panel labels that the knobs, buttons and jacks covered can be read again (attack, release and cv of the drones, the bottom row's wave, rate, offsets, pulser and steps, the VCO jacks, x10/fm/am, the effector's cv x/y/z and more); the VOICE MIXER and ENVELOPE tabs no longer sit under knobs and jacks.",
+    "Ten presets that had drifted quiet are re-leveled to about -17 dBFS like the rest, by 1 to 8.6 dB (Swarm and Microtonal Fog were the lowest); Init by 1.2 dB.",
+    "Host parameter names: \"Drone 3 Rate x10\" instead of \"Drone 3 x1 0\". Changing Oversampling no longer allocates memory on the audio thread.",
+    "Manual: the orbs (hover, press and drag, MOD, the Hand parameters, which presets use them), Chromatic, the sustain pedal and the mod wheel direction."
+  ],
   "at42-v1.0.7": [
     "A second offline render in a row with the Audio Unit (REAPER) sounds the same as the first: the host's reset now returns drones, oscillators and effects to a clean start, as preparing the plugin again already did.",
     "Manual: why REAPER lists every factory preset twice."

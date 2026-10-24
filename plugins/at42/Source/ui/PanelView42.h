@@ -86,6 +86,7 @@ public:
             g.drawEllipse (juce::Rectangle<float> (16.0f, 16.0f).withCentre (jacks[(size_t) hoverJack].base), 2.0f);
         }
         drawBubble (g);
+        drawOrbHint (g);
     }
 
     // ───────── ratón ─────────
@@ -109,12 +110,23 @@ public:
             repaint();
             return;
         }
+        // Apoyar el mouse (o el dedo) sobre un orbe es la mano encima: tapa la luz; arrastrando se la lleva.
+        if (const int o = orbAt (e.position); o >= 0)
+        {
+            proc.gesture.end();
+            mouseOrb = o; hintOrb = o;
+            if (auto* p = handPrm ((size_t) o)) { p->beginChangeGesture(); orbGesture = p; }
+            pressHands (e.position);
+            return;
+        }
         if (const int pl = plateAt (e.position); pl >= 0) { mousePlate = pl; proc.platePress (pl, platePressure (pl, e.position)); repaint(); return; }
         for (auto& k : dkeys)
             if (k.box.contains (e.position)) { mouseKey = k.key; proc.droneKeyUi[(size_t) k.key].store (true); repaint(); return; }
         if (joyBox.contains (e.position)) { draggingJoy = true; setJoy (e.position); return; }
         if (slotBox.contains (e.position)) { cartridgeMenu(); return; }
         if (displayBox.contains (e.position)) { menuPage = (menuPage + (e.mods.isPopupMenu() ? kPages - 1 : 1)) % kPages; repaint(); return; }
+        // Panel libre: la mano apretada puede llegar arrastrando hasta un orbe (o pasar cerca de uno).
+        if (! e.mods.isPopupMenu()) { proc.gesture.end(); mouseOrb = kFreeHand; pressHands (e.position); }
     }
 
     void mouseDrag (const juce::MouseEvent& e) override
@@ -129,6 +141,7 @@ public:
             return;
         }
         if (draggingJoy) { setJoy (e.position); return; }
+        if (mouseOrb != -1) { pressHands (e.position); const int o = orbAt (e.position); if (o != hintOrb) hintOrb = o >= 0 ? o : (mouseOrb >= 0 ? mouseOrb : -1); return; }
         if (mousePlate >= 0)
         {
             const int pl = plateAt (e.position);
@@ -162,6 +175,15 @@ public:
     void mouseUp (const juce::MouseEvent& e) override
     {
         if (drag.active) { finishCable (e.position); return; }
+        if (mouseOrb != -1)
+        {
+            if (orbGesture != nullptr) { orbGesture->endChangeGesture(); orbGesture = nullptr; }
+            mouseOrb = -1;
+            // Con el mouse la mano sigue encima (sombra según la distancia); un dedo que se levanta se la lleva toda.
+            if (e.source.isTouch()) { releaseHands(); hintOrb = -1; }
+            else hoverHands (e.position, false);
+            return;
+        }
         if (active != nullptr && active->kind == Kind::Knob)
         {
             if (active->id == "kb_enc" && ! encMoved) menuPage = (menuPage + 1) % kPages;
@@ -178,21 +200,25 @@ public:
     {
         auto* c = ctlAt (e.position);
         if (c != hover) { hover = c; repaint(); }
-        // La mano sobre un orbe le hace sombra (más cerca del centro, más oscuro).
-        for (size_t i = 0; i < orbs.size(); ++i)
-        {
-            const float d = e.position.getDistanceFrom (orbs[i].c) / std::max (1.0f, orbs[i].r * 2.2f);
-            proc.orbShade[i].store (juce::jlimit (0.0f, 0.95f, 1.0f - d));
-        }
         const int j = jackAt (e.position);
-        setMouseCursor (c != nullptr || j >= 0 || plateAt (e.position) >= 0 || joyBox.contains (e.position) || slotBox.contains (e.position)
+        // La mano sobre un orbe le hace sombra (más cerca del centro, más oscuro). Sobre una perilla, un botón o un jack
+        // vecino no: buscar el MOD 5 o la perilla cv ya no desafina el drone (auditoría 2026-10-24).
+        const bool onControl = c != nullptr || j >= 0;
+        hoverHands (e.position, onControl);
+        const int o = onControl ? -1 : orbAt (e.position);
+        if (o != hintOrb) hintOrb = o;
+        setMouseCursor (c != nullptr || j >= 0 || o >= 0 || plateAt (e.position) >= 0 || joyBox.contains (e.position) || slotBox.contains (e.position)
                         ? juce::MouseCursor::PointingHandCursor : juce::MouseCursor::NormalCursor);
     }
 
-    void mouseExit (const juce::MouseEvent&) override { for (auto& s : proc.orbShade) s.store (0.0f); hover = nullptr; repaint(); }
+    void mouseExit (const juce::MouseEvent&) override { if (mouseOrb == -1) { releaseHands(); hintOrb = -1; } hover = nullptr; repaint(); }
     // La sombra de la mano sobre una fotocelda baja la luz del orbe y desafina el oscilador: al cerrar la ventana no
-    // puede quedar puesta (el drone seguía torcido y un render sonaba distinto).
-    ~PanelView42() override { for (auto& s : proc.orbShade) s.store (0.0f); }
+    // puede quedar puesta (el drone seguía torcido y un render sonaba distinto). Sólo se quita la que puso el mouse.
+    ~PanelView42() override
+    {
+        if (orbGesture != nullptr) { orbGesture->endChangeGesture(); orbGesture = nullptr; }
+        releaseHands();
+    }
 
     void mouseDoubleClick (const juce::MouseEvent& e) override
     {
@@ -255,6 +281,10 @@ private:
     float stepAccum = 0.0f, encDrag = 0.0f, encAngle = 0.0f;
     bool encMoved = false, showBubble = false, draggingJoy = false;
     int bubbleTimer = 0, mousePlate = -1, mouseKey = -1, hoverJack = -1, colorCycle = 0, menuPage = 0;
+    int mouseOrb = -1, hintOrb = -1;                       // orbe apretado (kFreeHand: panel libre) y orbe con el globo
+    static constexpr int kFreeHand = -2;
+    std::array<bool, 4> handOwned {};                      // manos que puso el mouse (y tiene que sacar)
+    juce::RangedAudioParameter* orbGesture = nullptr;
     double lastTime = 0.0;
     static constexpr int kPages = 17;
 
@@ -333,6 +363,53 @@ private:
         for (auto& c : ctls) if (c.box.contains (p)) return &c;
         return nullptr;
     }
+
+    // ── orbes: la mano ──
+    int orbAt (juce::Point<float> p) const
+    {
+        for (size_t i = 0; i < orbs.size(); ++i) if (p.getDistanceFrom (orbs[i].c) < orbs[i].r * 1.05f) return (int) i;
+        return -1;
+    }
+    // 1 en el centro del orbe, 0,44 en su borde, nada a 1,8 radios (antes llegaba a 2,2 y alcanzaba a los controles vecinos).
+    float handAt (size_t i, juce::Point<float> p) const
+    {
+        return juce::jlimit (0.0f, 1.0f, 1.0f - p.getDistanceFrom (orbs[i].c) / std::max (1.0f, orbs[i].r * 1.8f));
+    }
+    static size_t orbIndex (int voice) { return (size_t) (voice <= 2 ? voice - 1 : voice - 2); }
+    juce::RangedAudioParameter* handPrm (size_t i) const
+    {
+        return i < 4 ? proc.apvts.getParameter (panelParam42 ((int) AT42Processor::handParam[i]).id) : nullptr;
+    }
+    float handValue (size_t i) const { return i < 4 ? proc.value (AT42Processor::handParam[i]) : 0.0f; }
+    // El mouse escribe el parámetro como cualquier control (gesto incluido): queda en la automatización del host.
+    void setHand (size_t i, float v)
+    {
+        auto* p = handPrm (i);
+        if (p == nullptr) return;
+        const float cur = p->getValue();
+        if (std::abs (cur - v) < 0.004f && ! (v == 0.0f && cur != 0.0f)) return;
+        if (p != orbGesture) proc.gesture.touch (p);
+        p->setValueNotifyingHost (v);
+        handOwned[i] = v > 0.0f;
+    }
+    void hoverHands (juce::Point<float> p, bool onControl)
+    {
+        for (size_t i = 0; i < orbs.size() && i < 4; ++i)
+        {
+            const float v = onControl ? 0.0f : handAt (i, p);
+            if (v > 0.0f || handOwned[i]) setHand (i, v);
+        }
+    }
+    // Apretado: la mano apoyada tapa más (todo en el centro, 0,7 en el borde).
+    void pressHands (juce::Point<float> p)
+    {
+        for (size_t i = 0; i < orbs.size() && i < 4; ++i)
+        {
+            const float v = juce::jlimit (0.0f, 1.0f, handAt (i, p) * 1.6f);
+            if (v > 0.0f || handOwned[i]) setHand (i, v);
+        }
+    }
+    void releaseHands() { for (size_t i = 0; i < 4; ++i) if (handOwned[i]) setHand (i, 0.0f); }
 
     int jackAt (juce::Point<float> p) const
     {
@@ -607,7 +684,7 @@ private:
         for (auto& o : orbs)
         {
             const float led = proc.live.orbLed[(size_t) o.voice].load(), light = proc.live.orbLight[(size_t) o.voice].load();
-            const float shade = proc.orbShade[(size_t) (o.voice <= 2 ? o.voice - 1 : o.voice - 2)].load();
+            const float shade = 0.95f * handValue (orbIndex (o.voice));
             // LED rojo interno: el domo se tiñe desde adentro.
             if (led > 0.01f)
             {
@@ -619,8 +696,10 @@ private:
             // Sombra de la mano.
             if (shade > 0.02f)
             {
+                // La cúpula se ve desde 8° de inclinación: el borde queda más abajo que el centro alto. Antes la sombra
+                // (centrada arriba y más baja) dejaba una medialuna clara abajo.
                 g.setColour (juce::Colours::black.withAlpha (0.35f * shade));
-                g.fillEllipse (juce::Rectangle<float> (o.r * 2.0f, o.r * 1.7f).withCentre (o.c));
+                g.fillEllipse (juce::Rectangle<float> (o.r * 1.96f, o.r * 1.9f).withCentre (o.c + juce::Point<float> (0.0f, o.r * 0.06f)));
             }
             juce::ignoreUnused (light);
         }
@@ -702,7 +781,10 @@ private:
         if (juce::String (panelParam42 (c->param).id).contains ("_tune") && proc.apvts.getRawParameterValue ("chromatic") != nullptr
             && proc.apvts.getRawParameterValue ("chromatic")->load() > 0.5f && value.endsWith (" Hz"))
         {
-            const float hz = value.getFloatValue();
+            // Lo que suena: la cromática cuantiza después de VOLT (1.0.8).
+            const auto voltId = juce::String (panelParam42 (c->param).id).upToFirstOccurrenceOf ("_", false, false) + "_volt";
+            const int vi = paramIndexOf (voltId);
+            const float hz = vi >= 0 ? ClassicVoice::chromaticHz (value.getFloatValue() * ClassicVoice::voltScale (proc.value ((P42) vi))) : value.getFloatValue();
             if (hz > 0.0f)
             {
                 const int midi = (int) std::lround (69.0 + 12.0 * std::log2 (hz / 440.0));
@@ -716,6 +798,37 @@ private:
         g.setColour (juce::Colour (0xf0161617)); g.fillRoundedRectangle (r, 5.0f);
         g.setColour (juce::Colour (0xff3a3a3d)); g.drawRoundedRectangle (r, 5.0f, 1.0f);
         g.setColour (juce::Colour (0xffb9b6ad)); g.setFont (f1); g.drawText (title.toUpperCase(), r.withHeight (20.0f).translated (0, 2), juce::Justification::centred);
+        g.setColour (juce::Colours::white); g.setFont (f2); g.drawText (value, r.withTrimmedTop (18.0f), juce::Justification::centred);
+    }
+
+    static int paramIndexOf (const juce::String& id) { for (int i = 0; i < kNumP42; ++i) if (id == panelParam42 (i).id) return i; return -1; }
+    int modsOn (int voice) const
+    {
+        const int base = voice == 1 ? (int) P42::d1_mute1 : voice == 2 ? (int) P42::d2_mute1 : voice == 4 ? (int) P42::d4_mute1 : (int) P42::d5_mute1;
+        int n = 0;
+        for (int k = 0; k < 5; ++k) if (proc.value ((P42) (base + 2 * k + 1)) > 0.5f) ++n;
+        return n;
+    }
+    juce::Rectangle<float> orbHintArea (size_t i) const
+    {
+        const auto& o = orbs[i];
+        return juce::Rectangle<float> (230.0f, 48.0f).withCentre ({ o.c.x, o.c.y - o.r - 30.0f }).constrainedWithin (getLocalBounds().toFloat().reduced (4.0f));
+    }
+    // Globo del orbe: qué hace la mano y, si la voz no tiene ningún MOD encendido, que hace falta encenderlo.
+    void drawOrbHint (juce::Graphics& g) const
+    {
+        if (hintOrb < 0 || hintOrb >= (int) orbs.size() || drag.active) return;
+        const auto& o = orbs[(size_t) hintOrb];
+        const int n = modsOn (o.voice);
+        const juce::String title = "DRONE " + juce::String (o.voice) + " ORB";
+        const juce::String value = n == 0 ? juce::String ("Turn on MOD to hear the orb")
+                                          : "Hand " + juce::String (handValue ((size_t) hintOrb) * 10.0f, 1) + "  ·  MOD on " + juce::String (n) + (n == 1 ? " osc" : " oscs");
+        const auto f1 = col42::font (11.0f), f2 = col42::font (13.0f);
+        const float w = std::max (juce::GlyphArrangement::getStringWidth (f1, title), juce::GlyphArrangement::getStringWidth (f2, value)) + 22.0f;
+        auto r = juce::Rectangle<float> (w, 40.0f).withCentre (orbHintArea ((size_t) hintOrb).getCentre()).constrainedWithin (getLocalBounds().toFloat().reduced (4.0f));
+        g.setColour (juce::Colour (0xf0161617)); g.fillRoundedRectangle (r, 5.0f);
+        g.setColour (n == 0 ? juce::Colour (0xffd8352b) : juce::Colour (0xff3a3a3d)); g.drawRoundedRectangle (r, 5.0f, 1.0f);
+        g.setColour (juce::Colour (0xffb9b6ad)); g.setFont (f1); g.drawText (title, r.withHeight (20.0f).translated (0, 2), juce::Justification::centred);
         g.setColour (juce::Colours::white); g.setFont (f2); g.drawText (value, r.withTrimmedTop (18.0f), juce::Justification::centred);
     }
 
@@ -752,8 +865,11 @@ private:
         for (size_t i = 0; i < orbs.size(); ++i)
         {
             const auto& o = orbs[i];
-            const int sig = (int) (L.orbLed[(size_t) o.voice].load() * 40.0f) * 100 + (int) (proc.orbShade[i].load() * 40.0f);
+            const int sig = (int) (L.orbLed[(size_t) o.voice].load() * 40.0f) * 100 + (int) (handValue (orbIndex (o.voice)) * 40.0f);
             mark (sigOrb, i, sig, juce::Rectangle<float> (o.r * 2.6f, o.r * 2.4f).withCentre (o.c));
+            // El globo: aparece, cambia de texto (MOD, mano) o se va.
+            const int hs = hintOrb == (int) i ? 1 + modsOn (o.voice) * 1000 + (int) (handValue (orbIndex (o.voice)) * 100.0f) * 10 : 0;
+            mark (sigHint, i, hs, orbHintArea (i).expanded (60.0f, 4.0f));
         }
         for (size_t i = 0; i < bars.size(); ++i)
         {
@@ -798,7 +914,7 @@ private:
         for (const auto& r : dirty) repaint (r);
     }
 
-    std::vector<int> sigCtl, sigLed, sigOrb, sigBar, sigPlate, sigKey, sigMisc;
+    std::vector<int> sigCtl, sigLed, sigOrb, sigHint, sigBar, sigPlate, sigKey, sigMisc;
     int shownPanel = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PanelView42)

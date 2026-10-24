@@ -56,7 +56,7 @@ En Ableton Live, los presets de fábrica aparecen en el navegador de Live en Plu
 
 ### Tu primer sonido
 
-El AT42 abre con el preset Init. Tocá una nota MIDI (o una placa del controlador táctil) y responde el VCO A por su camino normalizado, altura del teclado y envolvente A, sin cables. Las voces drone 1 y 2 también están subidas en el mezclador, pero sus envolventes quedan cerradas hasta que algo las abra, igual que el hardware sin ninguna tecla apretada.
+El AT42 abre con el preset Init. Tocá una nota MIDI (o una placa del controlador táctil) y responde el VCO A por su camino normalizado, altura del teclado y envolvente A, sin cables. Las seis voces drone también están subidas en el mezclador, pero sus envolventes quedan cerradas hasta que algo las abra, igual que el hardware sin ninguna tecla apretada.
 
 1. Hacé clic y mantené apretada la tecla drone 1, abajo a la derecha, bajo DRONE KEYS. El drone 1 suena mientras la mantenés y se apaga despacio al soltarla. La nota MIDI C1 hace lo mismo.
 2. Para que siga sonando, encendé el botón **hold** de DRONE 1 (el botón gris claro a la izquierda de la voz).
@@ -81,7 +81,8 @@ La barra de abajo muestra el modo, la escala y la tónica del teclado, una luz M
 - Los botones quedan trabados: un clic enciende, otro apaga.
 - Las llaves de dos posiciones cambian con cada clic. Las de tres posiciones van a la parte donde hacés clic: arriba, al medio o abajo.
 - Clic derecho sobre cualquier control del panel abre MIDI Learn.
-- Cada control y cada ajuste es un parámetro del host que podés automatizar.
+- Los orbes: pasá el mouse por encima, o apretá sobre uno y arrastrá, para hacerle sombra con la mano (ver Los orbes y la luz ambiente).
+- Cada control y cada ajuste es un parámetro del host que podés automatizar, también la mano sobre cada orbe (Drone 1, 2, 4 y 5 Hand).
 
 ## Voces drone 1, 2, 4 y 5
 
@@ -120,10 +121,16 @@ El LED ámbar sigue a la envolvente. Los jacks son **gate** (entrada), **env** (
 El orbe de abajo a la derecha de cada voz clásica es una cúpula fotosensible. Una fotorresistencia queda en paralelo con el control TUNE de cada oscilador que tiene MOD encendido: más luz, más agudo. Tres cosas lo iluminan.
 
 - La luz ambiente, que se fija con Ambient Light en la página de ajustes y es la misma para todos los orbes. Con su valor por defecto, encender MOD ya sube la altura un par de semitonos, así que afiná con MOD encendido si lo vas a usar.
-- Tu mano: pasar el mouse sobre un orbe le hace sombra. Cuanto más cerca del centro, más oscuro el orbe y más grave la altura.
+- Tu mano: el mouse sobre un orbe le hace sombra. Cuanto más cerca del centro, más oscuro el orbe y más grave la altura. Pasá por encima para una sombra suave, o apretá sobre el orbe (un dedo en una pantalla táctil) para taparlo y arrastrá para alejar la mano o llevarla a otro orbe. Al soltar el botón la sombra vuelve a seguir al puntero; en una pantalla táctil se levanta. Las perillas, los botones y los jacks que rodean al orbe no le hacen sombra.
 - El LED rojo de adentro, que maneja el jack cv escalado por la perilla cv. Como un LED de verdad, sólo enciende con tensión positiva, apenas por encima de 1,5 V, por eso los LFO unipolares (0 a 10 V) le quedan tan bien. La cúpula se tiñe de rojo cuando se enciende.
 
 La fotorresistencia reacciona rápido cuando hay más luz y despacio cuando hay menos, así que la altura salta hacia arriba y vuelve deslizándose en una fracción de segundo. Por eso un LFO en cv no da un vibrato común sino un movimiento que respira, un poco rengo.
+
+El orbe sólo cambia el sonido de los osciladores con MOD encendido. Con el puntero sobre un orbe, un globo muestra la mano (0 a 10) y cuántos osciladores de esa voz tienen MOD encendido; si no hay ninguno, avisa que hay que encender MOD. Con la luz de fábrica, MOD encendido sin mano sube un oscilador unos 2,6 semitonos y la mano justo sobre el centro lo vuelve a bajar unos 2,4.
+
+La mano también es un parámetro del host para cada orbe: Drone 1 Hand, Drone 2 Hand, Drone 4 Hand y Drone 5 Hand, de 0 (sin mano) a 10 (tapado). Mover el mouse sobre un orbe lo escribe, así que el host puede grabarlo en un carril de automatización; también se puede dibujar o asignar a un CC con MIDI Learn. No se guarda en los presets ni los marca como modificados.
+
+Presets con MOD encendido: Cathedral of A, Low Choir, Microtonal Fog, Shimmer Garden, Breathing Orbs, Tape Memory y Reverse Hymn. En los cinco que no son de orbes por nombre, uno o dos osciladores agudos por voz tienen MOD encendido y están afinados para que la luz ambiente los lleve a la nota del acorde: desde ahí, la mano los baja.
 
 ### Cómo se disparan los drones
 
@@ -506,7 +513,7 @@ Hacé clic en **SETTINGS** para ver todo lo que el hardware no tiene o esconde e
 | TUNING | Analog, Chromatic | osciladores drone en semitonos |
 | RELEASE | 8 s, 30 s | release más largo de los drones |
 
-Con Chromatic, cada perilla TUNE avanza en semitonos respecto de A 440 Hz. VOLT igual transpone la voz, así que dejalo todo a la izquierda para afinación de concierto; el orbe sigue doblando los osciladores con MOD.
+Con Chromatic, cada oscilador suena en el semitono de A 440 Hz más cercano, después de VOLT: los drones quedan afinados con cualquier VOLT hasta la mitad del recorrido, y al girar VOLT se mueven de a semitonos (pasada la mitad, la modulación cruzada los vuelve a doblar). El globo de una perilla TUNE muestra la nota que suena. El orbe sigue doblando los osciladores con MOD.
 
 ### SYNC
 
@@ -576,7 +583,8 @@ REAPER muestra cada preset de fábrica dos veces en el menú de presets: una de 
 - Las notas tocan el teclado táctil, en semitonos y sin la escala. La nota C3 es 0 V en v/oct, transpuesta por OCTAVE. La velocity es la presión en el modo Pressure.
 - Con MIDI Drone Keys en C1-F1, las notas de C1 a F1 tocan las teclas drone 1 a 6 en lugar del teclado. Ponelo en Off para liberarlas.
 - El pitch bend mueve el v/oct del teclado hasta el rango de BEND (2 semitonos por defecto).
-- La rueda de modulación (CC 1) mueve el eje Y del joystick, salvo que el CC 1 esté aprendido en otro control. Al mínimo la palanca va arriba, al máximo abajo.
+- El pedal de sustain (CC 64) sostiene las notas y las teclas drone que se sueltan con el pedal apretado, hasta levantarlo.
+- La rueda de modulación (CC 1) mueve el eje Y del joystick, salvo que el CC 1 esté aprendido en otro control. Al mínimo la palanca queda al centro; al subir la rueda sube, hasta arriba del todo al máximo.
 - All Notes Off (CC 123) y All Sound Off (CC 120) sueltan todas las notas y teclas drone.
 
 MIDI Learn funciona en cada control del panel y cada ajuste.
@@ -608,7 +616,7 @@ En SYNC, LFO A, LFO B y el pulser pueden seguir a tu DAW. En Host se ignoran la 
 2. Encendé MOD en dos o tres osciladores de DRONE 1.
 3. Enchufá el out del LFO A en el jack cv de DRONE 1. Poné wave del LFO A todo a la izquierda, rate bajo y la llave de velocidad en /6.
 4. Subí la perilla cv de DRONE 1 hasta que el orbe se ponga rojo en la cima de cada ciclo. Los osciladores con MOD suben con la luz y bajan despacio.
-5. Pasá el mouse sobre el orbe para bajar la altura con la mano.
+5. Pasá el mouse sobre el orbe, o apretá sobre él y arrastrá, para bajar la altura con la mano.
 
 ### Sirena y pájaros
 
@@ -658,11 +666,11 @@ En SYNC, LFO A, LFO B y el pulser pueden seguir a tu DAW. En Host se ignoran la 
 
 ## Consejos y problemas frecuentes
 
-- **Los drones de Init no suenan.** Es a propósito: sus envolventes esperan una tecla. Apretá la tecla drone 1 o 2, tocá C1 o C#1, o encendé hold en DRONE 1 o 2. Las demás notas MIDI tocan el VCO A.
+- **Los drones de Init no suenan.** Es a propósito: sus envolventes esperan una tecla. Apretá cualquier tecla drone, tocá de C1 a F1, o encendé el hold de una voz. Las demás notas MIDI tocan el VCO A.
 - **Las placas o las notas MIDI no suenan.** El teclado sólo manda tensiones. Subí VCO A o B en el mezclador y fijate que ningún cable haya tomado el gate de la envolvente.
 - **Las notas MIDI de C1 a F1 no tocan el teclado.** Tocan las teclas drone; poné MIDI Drone Keys en Off.
-- **La altura del drone se mueve con el mouse.** El puntero le hace sombra a los orbes, y los osciladores con MOD siguen la luz. Alejate del orbe o apagá MOD.
-- **Los drones no se quedan afinados.** Bajá Drone Drift, apagá MOD, o usá Chromatic con VOLT todo a la izquierda.
+- **La altura del drone se mueve con el mouse.** El puntero sobre un orbe le hace sombra, y los osciladores con MOD siguen la luz. Alejate del orbe o apagá MOD. Si el host lo grabó, mirá los carriles de automatización Drone N Hand.
+- **Los drones no se quedan afinados.** Bajá Drone Drift, apagá MOD, o usá Chromatic.
 - **El arpegiador o el secuenciador no avanzan.** Revisá MODE, SOURCE y cualquier cable en el jack clock del teclado. El secuenciador necesita una secuencia grabada y una placa apretada (o ARP HOLD).
 - **EXT IN, PREAMP o Piezo Percussion no suenan.** Necesitan audio en la entrada del plugin: rutealo en tu DAW, o elegí un dispositivo de entrada en la aplicación independiente y permití el micrófono en macOS.
 - **Suena demasiado fuerte o distorsionado.** Bajá MASTER, dist y gain, Mixer Drive u OUTPUT. El limitador suave agarra los picos, pero no está pensado para trabajar todo el tiempo.

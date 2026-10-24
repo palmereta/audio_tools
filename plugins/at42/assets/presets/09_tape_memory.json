@@ -16,9 +16,9 @@
   "d4_tune3": 0.2656,
   "d4_mute3": 0,
   "d4_mod3": 0,
-  "d4_tune4": 0.5703,
+  "d4_tune4": 0.4236,
   "d4_mute4": 0,
-  "d4_mod4": 0,
+  "d4_mod4": 1,
   "d4_tune5": 0.5863,
   "d4_mute5": 0,
   "d4_mod5": 0,
@@ -39,9 +39,9 @@
   "d5_tune4": 0.3391,
   "d5_mute4": 0,
   "d5_mod4": 0,
-  "d5_tune5": 0.6861,
+  "d5_tune5": 0.5518,
   "d5_mute5": 0,
-  "d5_mod5": 0,
+  "d5_mod5": 1,
   "mix_vol1": 0.0,
   "mix_vol2": 0.0,
   "mix_vol3": 0.0,
@@ -65,7 +65,7 @@
   "flt_freq_l": 0.6,
   "flt_freq_r": 0.62,
   "flt_res_l": 0.1,
-  "master": 0.519
+  "master": 0.774
  },
  "settings": {
   "vintage": 0.4

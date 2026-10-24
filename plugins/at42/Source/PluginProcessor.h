@@ -61,7 +61,8 @@ public:
 
     // Interacción en vivo (editor → audio).
     std::array<std::atomic<bool>, 7> droneKeyUi {};
-    std::array<std::atomic<float>, 4> orbShade {};
+    // La mano sobre los orbes de los drones 1, 2, 4 y 5: parámetros del host (automatizables, MIDI Learn).
+    static constexpr dh::P42 handParam[4] { dh::P42::d1_hand, dh::P42::d2_hand, dh::P42::d4_hand, dh::P42::d5_hand };
     void platePress (int plate, float pressure);
     void plateRelease (int plate);
     std::atomic<int> uiKeysOctave { 0 };
@@ -129,6 +130,11 @@ private:
     std::array<std::pair<int, float>, 64> plateBuf {};
     std::array<int, 128> midiPlateNote {};
     std::array<bool, 7> midiDrone {};
+    // Pedal (CC64): las notas soltadas con el pedal apretado quedan sonando hasta levantarlo.
+    bool sustainOn = false;
+    std::array<bool, 128> sustained {};
+    void releaseNote (int n);
+    void clearHeld() { engine.keys.clear(); midiDrone.fill (false); sustainOn = false; sustained.fill (false); }
     std::atomic<int> pendingCmd { 0 };
     std::array<int, 16> pendingSeq {}; std::atomic<int> pendingSeqCount { -1 };
 

@@ -34,6 +34,8 @@ for f in sorted(os.listdir(PRESETS)):
     for it in range(3):
         d = json.load(open(path))
         rms, peak = measure(path)
+        # Sin entrada de audio no suena (Piezo Percussion): se deja como está (antes lo subía a MASTER 10).
+        if rms < -100.0: break
         vol = d["panel"].get("master", 0.75)
         # Ganancia ∝ volume²: cuánto mover el slider para llegar al objetivo.
         gain_db = min(TARGET_RMS - rms, MAX_PEAK - peak)

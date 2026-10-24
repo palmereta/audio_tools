@@ -17,7 +17,7 @@ against the hardware and improve.
 |---|---|---|---|
 | [AT20V](plugins/at20v/) | Korg MS-20 (1978), semi-modular monophonic synthesizer | 1.0.7 | Released |
 | [AT101V](plugins/at101v/) | Roland SH-101 (1982), monophonic synthesizer with arpeggiator and sequencer | 1.0.7 | Released |
-| [AT42](plugins/at42/) | Elta Music SOLAR 42 (2023), ambient drone machine | 1.0.7 | Released |
+| [AT42](plugins/at42/) | Elta Music SOLAR 42 (2023), ambient drone machine | 1.0.8 | Released |
 | [AT700](plugins/at700/) | Roland System-700 (1976), modular synthesizer with analog sequencer | 1.0.5 | Released |
 | [ATFS1](plugins/atfs1/) | Yamaha FS1R (1998), formant and FM synthesizer | 1.0.6 | Released |
 | [ATMD](plugins/atmd/) | Moog Minimoog Model D (1970), monophonic synthesizer with the transistor ladder filter | 1.0.3 | Released |
@@ -77,7 +77,8 @@ Technical notes: [`plugins/at101v/README.md`](plugins/at101v/README.md) and
 
 - Four drone voices of five negistor-style sawtooth oscillators (the original tune ranges and pot
   curve), VOLT with supply coupling (cross-modulation past half travel) and light-dependent pitch
-  from photo orbs (ambient light, mouse shadow, internal LED driven by CV).
+  from photo orbs (ambient light, the hand: hover, press or drag the mouse or a finger, or automate the Drone N Hand
+  parameters, and an internal LED driven by CV).
 - Two Papa Srapa noise voices (square modulator, tone oscillator, FM, AM, noise, sample and hold),
   two AS3340-style VCOs with six waveforms, linear FM and sync, ADSR envelopes with hold and loop.
 - 10-channel pan mixer, dual 12 dB Polivoks filter (LP/BP) with stereo distortion, and a dual
@@ -85,7 +86,7 @@ Technical notes: [`plugins/at101v/README.md`](plugins/at101v/README.md) and
 - LFO A/B, joystick, 5-step sequencer with pulser, preamp and envelope follower, touch keyboard with
   19 scales, arpeggiator and 16-step sequencer, six drone keys, and a 62-jack patch bay with the
   hardware's normals.
-- Extensions: MIDI (notes, drone keys, bend, mod wheel, learn), host sync, chromatic drone tuning,
+- Extensions: MIDI (notes, drone keys, bend, sustain pedal, mod wheel, learn), host sync, chromatic drone tuning,
   30 s releases, stereo width, presets with cables, random patch, four panel colours.
 - 28 presets plus Init.
 

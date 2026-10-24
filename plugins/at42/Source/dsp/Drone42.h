@@ -98,6 +98,19 @@ public:
         return 1.0f / (a + b * (1.0f - clampf (x, 0.0f, 1.0f)));
     }
 
+    // Cuánto escala VOLT la frecuencia de TUNE (1 con VOLT en cero; < 1 al bajar la fuente), sin la caída por las
+    // descargas. La misma cuenta que process() hace con la fuente Vs.
+    static float voltScale (float volt)
+    {
+        const float vs0 = 14.0f - 4.4f * volt;
+        const float r = clampf ((vs0 - 9.0f) / (vs0 - 1.5f), 0.02f, 0.9f);
+        constexpr float lnNom = 0.91629073f;
+        return lnNom / -std::log (r);
+    }
+
+    // Afinación cromática: el semitono más cercano a A 440 de la frecuencia que suena (después de VOLT).
+    static float chromaticHz (float hz) { return 440.0f * std::exp2 (std::round (12.0f * std::log2 (hz / 440.0f)) / 12.0f); }
+
     // gateIn en voltios (≥ 1 V = alto); cvIn en voltios; ambient 0..1; shade 0..1 (mano sobre el orbe).
     inline float process (float gateIn, float cvIn, float ambient, float shade)
     {
@@ -143,10 +156,13 @@ public:
     // Una vez por bloque: afinación de cada oscilador y coeficientes de la envolvente.
     void updateBlock()
     {
+        // Cromática: se cuantiza lo que suena después de VOLT (antes se cuantizaba TUNE y VOLT lo corría: con VOLT en su
+        // valor por defecto, 1,5, los drones quedaban 157 centésimos abajo de la nota; auditoría 2026-10-24).
+        const float vScale = chromatic ? voltScale (volt) : 1.0f;
         for (int i = 0; i < 5; ++i)
         {
             float hz = tuneHz (i, tune[(size_t) i]);
-            if (chromatic) hz = 440.0f * std::exp2 (std::round (12.0f * std::log2 (hz / 440.0f)) / 12.0f);
+            if (chromatic) hz = chromaticHz (hz * vScale) / vScale;
             baseHz[(size_t) i] = hz;
         }
         const float relMax = longRelease > 0.5f ? 30.0f : 8.0f;

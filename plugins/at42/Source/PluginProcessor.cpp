@@ -20,6 +20,7 @@ AT42Processor::AT42Processor()
     rescanUserPresets();
     if (! presets.empty()) loadPreset (0);
     { juce::StringArray g; for (auto& e : extParams42()) if (e.global) g.add (e.id); tracker.ignore (g); }   // ajustes de sesión: no "modifican" el preset
+    { juce::StringArray g; for (auto h : handParam) g.add (panelParam42 ((int) h).id); tracker.ignore (g); }    // la mano es interpretación, no patch
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout AT42Processor::createLayout()
@@ -83,6 +84,7 @@ void AT42Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
     outR.assign ((size_t) currentBlock + 64, 0.0f);
     inCopy.assign ((size_t) (currentBlock + 64) * 2, 0.0f);
     hostGap.prepare (sampleRate);
+    sustainOn = false; sustained.fill (false);      // preparado de nuevo = instancia nueva, también el pedal
     freePpq = 0.0;                 // el reloj libre (LFO sincronizados con el host parado) arranca de cero
 }
 
@@ -92,15 +94,15 @@ void AT42Processor::handleMidi (const juce::MidiMessage& m)
     if (m.isNoteOn())
     {
         const int n = m.getNoteNumber();
+        sustained[(size_t) n] = false;
         if (droneMap && n >= 24 && n <= 29) { midiDrone[(size_t) (n - 23)] = true; return; }
         engine.keys.press (n - 48, m.getFloatVelocity(), n >= 60, -1);
     }
     else if (m.isNoteOff())
     {
-        // Se suelta por las dos vías: si "MIDI Drone Keys" cambió con la tecla apretada, el note-off igual la encuentra.
         const int n = m.getNoteNumber();
-        if (n >= 24 && n <= 29) midiDrone[(size_t) (n - 23)] = false;
-        engine.keys.release (n - 48);
+        if (sustainOn) { sustained[(size_t) n] = true; return; }     // el pedal la sostiene
+        releaseNote (n);
     }
     else if (m.isPitchWheel())
     {
@@ -110,7 +112,13 @@ void AT42Processor::handleMidi (const juce::MidiMessage& m)
     else if (m.isController())
     {
         const int cc = m.getControllerNumber(), val = m.getControllerValue();
-        if (cc == 120 || cc == 123) { engine.keys.clear(); midiDrone.fill (false); return; }     // antes que un CC aprendido
+        if (cc == 120 || cc == 123) { clearHeld(); return; }     // antes que un CC aprendido
+        if (cc == 64)
+        {
+            sustainOn = val >= 64;
+            if (! sustainOn) for (int k = 0; k < 128; ++k) if (sustained[(size_t) k]) { sustained[(size_t) k] = false; releaseNote (k); }
+            return;
+        }
         // El aprendizaje no toma el pedal ni los mensajes de modo de canal (los hosts los mandan al parar).
         if (learning.load() && cc != 64 && cc < 120) { pendingLearnCc.store (cc); learning.store (false); return; }
         const int target = ccMap[(size_t) cc].load();
@@ -123,7 +131,14 @@ void AT42Processor::handleMidi (const juce::MidiMessage& m)
         // CC1 en 0 lo mandaba al tope (+5 V) y subir la rueda lo bajaba.
         if (cc == 1) setValue (P42::joy_y, 0.5f - 0.5f * (float) val / 127.0f);
     }
-    else if (m.isAllNotesOff() || m.isAllSoundOff()) { engine.keys.clear(); midiDrone.fill (false); }
+    else if (m.isAllNotesOff() || m.isAllSoundOff()) clearHeld();
+}
+
+// Se suelta por las dos vías: si "MIDI Drone Keys" cambió con la tecla apretada, el note-off igual la encuentra.
+void AT42Processor::releaseNote (int n)
+{
+    if (n >= 24 && n <= 29) midiDrone[(size_t) (n - 23)] = false;
+    engine.keys.release (n - 48);
 }
 
 void AT42Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
@@ -135,9 +150,10 @@ void AT42Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     wasBypassed = false;
     // El host dejó de llamar (REAPER con el plugin en bypass) y vuelve: un note-off pudo perderse en el hueco. Se
     // sueltan el teclado (y con él el arpegiador) y los drones tocados por MIDI (QA en DAWs 2026-10-22, X1).
-    if (hostGap.check (getPlayHead(), n, isNonRealtime())) { engine.keys.clear(); midiDrone.fill (false); }
+    if (hostGap.check (getPlayHead(), n, isNonRealtime())) clearHeld();
     const int wantOs = kOversampling42[juce::jlimit (0, 2, (int) apvts.getRawParameterValue ("quality")->load())];
-    { if (wantOs != engine.oversampling()) engine.prepare (currentSr, currentBlock, wantOs); latency.request ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0)); }
+    // Cambiar el sobremuestreo vuelve a empezar las voces sin reservar memoria (antes, prepare() en el hilo de audio).
+    { if (wantOs != engine.oversampling()) engine.restart (wantOs); latency.request ((int) std::lround (dh::halfbandChainDelay (engine.oversampling()) * 1.0)); }
     if ((int) outL.size() < n) { outL.resize ((size_t) n); outR.resize ((size_t) n); }
     if (! midi.isEmpty()) midiInFlash.store (true);
 
@@ -154,7 +170,6 @@ void AT42Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     };
     applyExt42 (get, engine.st, engine.keys);
     for (int j = 0; j < jk42::kNumJacks; ++j) engine.patch.src[(size_t) j] = patchAtomic[(size_t) j].load (std::memory_order_relaxed);
-    for (int i = 0; i < 4; ++i) engine.shade[(size_t) i] = orbShade[(size_t) i].load();
     engine.joyX = value (P42::joy_x) * 2.0f - 1.0f;
     engine.joyY = 1.0f - value (P42::joy_y) * 2.0f;
 
@@ -164,7 +179,7 @@ void AT42Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
         engine.keys.recording = ! engine.keys.recording;
         if (engine.keys.recording) { engine.keys.seqCount = 0; engine.keys.seqNotes.fill (-1); }
     }
-    else if (c == CmdPanic) { engine.keys.clear(); midiDrone.fill (false); }
+    else if (c == CmdPanic) clearHeld();
     if (const int sc = pendingSeqCount.exchange (-1); sc >= 0)
     {
         engine.keys.seqCount = sc;
@@ -242,7 +257,7 @@ void AT42Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
         if (! dh::isFiniteF (sum))
         {
             std::fill (outL.begin(), outL.begin() + n, 0.0f); std::fill (outR.begin(), outR.begin() + n, 0.0f);
-            engine.prepare (currentSr, currentBlock, engine.oversampling());
+            engine.restart (engine.oversampling());          // sin reservar memoria en el hilo de audio
         }
     }
 
@@ -281,7 +296,7 @@ void AT42Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
 void AT42Processor::processBlockBypassed (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
 {
     buffer.clear();
-    if (! wasBypassed) { engine.keys.clear(); midiDrone.fill (false); wasBypassed = true; }
+    if (! wasBypassed) { clearHeld(); wasBypassed = true; }
     midi.clear();
 }
 

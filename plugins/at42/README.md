@@ -6,7 +6,7 @@ The panel graphics are original: no Elta logos or artwork.
 
 | | |
 |---|---|
-| Version | `AT42_VERSION` in `CMakeLists.txt` (1.0.0) |
+| Version | `AT42_VERSION` in `CMakeLists.txt` (1.0.8) |
 | Plugin codes | manufacturer `Atls`, plugin `At42` (instrument with optional stereo audio input) |
 | Hardware reference | [`docs/hardware-spec.md`](docs/hardware-spec.md), sources in [`docs/ref/CREDITS.md`](docs/ref/CREDITS.md) |
 | Offline render | `build/plugins/at42/at42render_artefacts/Release/at42render preset.json out.wav [--keys 1,2] [--notes "0:2,7:2"]` |
@@ -15,7 +15,7 @@ The panel graphics are original: no Elta logos or artwork.
 
 ```
 tools/panel42.py             panel in mm → assets/layout42.json, Source/dsp/Jacks42.generated.h (jacks and normals),
-                             Source/dsp/Params42.generated.h (194 panel parameters), silkscreen42.png
+                             Source/dsp/Params42.generated.h (198 panel parameters, 4 of them the hand over the orbs), silkscreen42.png
 Source/dsp/Drone42.h         negistor drone oscillator, classic voice (5 osc, VOLT coupling, LDR orb, AR), Papa Srapa voice
 Source/dsp/Vco42.h           AS3340-style VCO (6 waves, linear FM, sync), ADSR with hold/loop, Polivoks filter, distortion
 Source/dsp/Modules42.h       LFO A/B, 5-step sequencer, envelope follower, touch keyboard (19 scales, arp, 16-step seq)
@@ -54,9 +54,17 @@ Editor self-test: `AT42_SNAPSHOT=/tmp/x.png AT42_TAB=0|1 AT42_PRESET=n AT42_PANE
 | Presets | leveled to ≈ −17 dBFS RMS (Piezo Percussion needs an audio input and is left at MASTER 7) |
 | CPU (standalone, Apple Silicon, 2x) | 10-20 % of one core for the whole instrument; 1x halves it |
 | Validation | pluginval strictness 8 (VST3 + AU on macOS, VST3 with GUI on Windows), auval |
+| Audit fixes (1.0.8) | Orbs: press and drag act as the hand (and touch), Hand parameters per orb (automation, MIDI Learn), no shade from the controls around them; Chromatic on A440 with VOLT at its default (was -157 cents); master and mixer gains smoothed per sample (staircase sidebands -56 → -87 dB); hidden silkscreen labels moved (`tools/panel42.py`, 117 → 0 overlaps by the occlusion check); 1.0.7 states load with every value and render bit-identical apart from Chromatic |
 | DAW QA fixes (1.0.6) | `at42proctest` P1-P10 (tools/proctest.cpp): an instance prepared again after playing renders bit-identical to a fresh one (was +4.1 dB apart), state byte-stable, fresh = program 0, Init plays a MIDI chord (-23 dBFS RMS), notes released after a host gap (running, stopped, arpeggiator); athosttest VST3 + AU 0 FAIL besides the two self-playing presets (Pulser Ritual, Arp Constellation), pluginval strictness 10 on the VST3 |
 
 ## Trampas
+
+- **Labels hidden by the parts**: the camera is tilted 8°, so a knob 10 mm tall hides about 1.4 mm of silkscreen
+  above its skirt and a jack row hides the labels just above it. Labels of a knob row go below the knobs or beside the
+  jacks; the 1.0.8 check (`audiotools-private/qa/at42-audit-2026-10-24/tools/labelcheck42.py`) models each part from
+  its lathe profile in `scene42.py`.
+- **The leveling tool and Piezo Percussion**: with no audio input the preset is silent and `level_presets.py` pushed
+  MASTER to 10; it now skips silent presets.
 
 - **Shimmer ran away**: the octave-up signal went back into a reverb with a decay near 1, so the loop
   gain passed 1 and the preset hit the limiter (−2.7 dBFS RMS at the lowest MASTER). The feedback

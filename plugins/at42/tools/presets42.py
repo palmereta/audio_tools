@@ -23,21 +23,28 @@ def volt_scale(volt):
     r = (vs - 9.0) / (vs - 1.5)
     return math.log(1 / 0.4) / math.log(1 / r)
 
-def tune_for(i, note, volt):
-    f = hz(note) / volt_scale(volt)
+def ldr_mul(ambient):
+    """Con MOD encendido la luz ambiente sube el oscilador (Drone42.h: 1 + 0,65·luz^0,8): +264 centésimos con la de fábrica."""
+    return 1.0 + 0.65 * ambient ** 0.8
+
+def tune_for(i, note, volt, mul=1.0):
+    f = hz(note) / volt_scale(volt) / mul
+    if not (LO[i] * 1.0001 <= f <= HI[i] * 0.9999): print(f"  ojo: {note} fuera del rango del oscilador {i + 1}, queda al borde")
     f = min(max(f, LO[i] * 1.0001), HI[i] * 0.9999)
     a, b = 1 / HI[i], 1 / LO[i] - 1 / HI[i]
     return round(1.0 - (1.0 / f - a) / b, 4)
 
 presets = []
 
-def drone(v, notes, volt=0.15, mute=(), mod=(), att=0.3, rls=0.55, cv=0.5, hold=True):
+def drone(v, notes, volt=0.15, mute=(), mod=(), att=0.3, rls=0.55, cv=0.5, hold=True, orb=(), ambient=0.18):
+    """mod: MOD encendido tal cual (la luz sube esos osciladores). orb: MOD encendido con TUNE compensado, así con la luz
+    ambiente suena la nota pedida y la mano sobre el orbe la baja (1.0.8)."""
     d = {f"d{v}_volt": volt, f"d{v}_att": att, f"d{v}_rls": rls, f"d{v}_cv": cv, f"d{v}_hold": 1 if hold else 0}
     for i, n in enumerate(notes):
         if n is None: d[f"d{v}_mute{i+1}"] = 1; continue
-        d[f"d{v}_tune{i+1}"] = tune_for(i, n, volt)
+        d[f"d{v}_tune{i+1}"] = tune_for(i, n, volt, ldr_mul(ambient) if (i + 1) in orb else 1.0)
         d[f"d{v}_mute{i+1}"] = 1 if (i + 1) in mute else 0
-        d[f"d{v}_mod{i+1}"] = 1 if (i + 1) in mod else 0
+        d[f"d{v}_mod{i+1}"] = 1 if (i + 1) in mod or (i + 1) in orb else 0
     return d
 
 def mix(**vols):
@@ -64,15 +71,16 @@ def preset(name, cat, panel=None, settings=None, cables=None, keyseq=None, demo_
 # ───────── Init ─────────
 # El teclado toca VCO A por su camino normalizado (CV y EG A sin cables): con sólo los drones en el mezclador, Init
 # quedaba mudo con MIDI (QA en DAWs 2026-10-22, C1).
-preset("Init", "Init", [mix(d1=0.6, d2=0.6, vcoa=0.6)], demo_keys="1")
+# Las seis teclas drone suenan (1.0.8): antes 3 a 6 tenían el mezclador en cero y no se oía nada.
+preset("Init", "Init", [mix(d1=0.6, d2=0.6, vcoa=0.6, d3=0.45, d4=0.6, d5=0.6, d6=0.45)], demo_keys="1")
 
 # ───────── Drones ─────────
 preset("Cathedral of A", "Drone",
-       [drone(1, ["A1", "E2", "A3", "C5", "E6"]), drone(2, ["A1", "B2", "E3", "G4", "B5"], mute=(5,)),
+       [drone(1, ["A1", "E2", "A3", "C5", "E6"], orb=(4,)), drone(2, ["A1", "B2", "E3", "G4", "B5"], mute=(5,), orb=(4,)),
         mix(d1=(0.62, 0.3), d2=(0.55, 0.7)), fx("Cathedral", 1, x=0.55, y=0.35, z=0.8, blend=0.55)],
        flt_freq_l=0.8, flt_freq_r=0.8)
 preset("Low Choir", "Drone",
-       [drone(1, ["D1", "A1", "D3", "F4", "A5"], volt=0.25, att=0.55, rls=0.7), drone(4, ["D1", "D2", "A3", "D5", "F6"], volt=0.25, att=0.6, rls=0.7, mute=(1,)),
+       [drone(1, ["D1", "A1", "D3", "F4", "A5"], volt=0.25, att=0.55, rls=0.7, orb=(4,)), drone(4, ["D1", "D2", "A3", "D5", "F6"], volt=0.25, att=0.6, rls=0.7, mute=(1,), orb=(4,)),
         mix(d1=(0.6, 0.25), d4=(0.6, 0.75)), fx("Infinity", 1, x=0.4, y=0.3, z=0.75, blend=0.5)],
        flt_freq_l=0.62, flt_freq_r=0.66, flt_res_l=0.2, flt_res_r=0.2, demo_keys="1,4")
 preset("Swarm", "Drone",
@@ -95,7 +103,7 @@ preset("Volt Storm", "Drone",
 
 # ───────── Ambient ─────────
 preset("Shimmer Garden", "Ambient",
-       [drone(1, ["G1", "D2", "G3", "B4", "F#6"], att=0.7, rls=0.8), drone(2, ["E1", "B1", "D4", "F#4", "A5"], att=0.75, rls=0.8),
+       [drone(1, ["G1", "D2", "G3", "B4", "F#6"], att=0.7, rls=0.8, orb=(4, 5)), drone(2, ["E1", "B1", "D4", "F#4", "A5"], att=0.75, rls=0.8, orb=(5,)),
         mix(d1=(0.5, 0.25), d2=(0.5, 0.75)), fx("Cathedral", 1, x=0.75, y=0.25, z=0.9, blend=0.7)],
        flt_freq_l=0.74, flt_freq_r=0.76, settings={"long_rel": 1})
 preset("Breathing Orbs", "Ambient",
@@ -103,7 +111,7 @@ preset("Breathing Orbs", "Ambient",
         mix(d1=(0.55, 0.3), d2=(0.5, 0.7)), fx("Infinity", 1, x=0.45, y=0.35, z=0.8, blend=0.55)],
        cables=[cable("lfoa_out", "d1_cvin"), cable("lfoa_out", "d2_cvin", "yellow")], lfoa_rate=0.12, lfoa_wave=0.0, d1_cv=0.55, d2_cv=0.45)
 preset("Tape Memory", "Ambient",
-       [drone(4, ["C2", "G2", "E3", "B4", "D6"], att=0.6, rls=0.75), drone(5, ["A1", "E2", "C4", "G4", "E6"], att=0.6, rls=0.75),
+       [drone(4, ["C2", "G2", "E3", "B4", "D6"], att=0.6, rls=0.75, orb=(4,)), drone(5, ["A1", "E2", "C4", "G4", "E6"], att=0.6, rls=0.75, orb=(5,)),
         mix(d4=(0.55, 0.3), d5=(0.55, 0.7)), fx("Time", 3, x=0.55, y=0.2, z=0.45, blend=0.5)],
        flt_freq_l=0.6, flt_freq_r=0.62, flt_res_l=0.1, settings={"vintage": 0.4}, demo_keys="4,5")
 preset("Ocean of Noise", "Ambient",
@@ -113,7 +121,7 @@ preset("Ocean of Noise", "Ambient",
        cables=[cable("lfoa_out", "flt_cvl", "blue"), cable("lfob_out", "flt_cvr", "white")], lfoa_rate=0.15, lfob_rate=0.05, lfob_speed=0,
        flt_mod_l=0.25, flt_mod_r=0.25, demo_keys="3,6")
 preset("Reverse Hymn", "Ambient",
-       [drone(1, ["F1", "C2", "F3", "A4", "C6"], att=0.5, rls=0.6), drone(2, ["D#1", "A#1", "G3", "D5", "G6"], att=0.5, rls=0.6),
+       [drone(1, ["F1", "C2", "F3", "A4", "C6"], att=0.5, rls=0.6, orb=(4,)), drone(2, ["D#1", "A#1", "G3", "D5", "G6"], att=0.5, rls=0.6, orb=(4,)),
         mix(d1=(0.55, 0.2), d2=(0.5, 0.8)), fx("Ochre", 3, x=0.7, y=0.55, z=0.3, blend=0.6)])
 
 # ───────── Sci-fi (Papa Srapa) ─────────
@@ -192,9 +200,15 @@ preset("Crushed Choir", "Experimental", [drone(1, ["C1", "G1", "D#3", "G4", "C6"
        mix(d1=(0.55, 0.3), d5=(0.55, 0.7)), fx("Digital", 2, x=0.45, y=0.3, z=0.6, blend=0.55)], demo_keys="1,5")
 
 os.makedirs(OUT, exist_ok=True)
+# MASTER lo fija tools/level_presets.py: se conserva al regenerar (si no, todos volvían a 7,5 y había que nivelar de nuevo).
+masters = {}
 for f in os.listdir(OUT):
-    if f.endswith(".json"): os.remove(os.path.join(OUT, f))
+    if f.endswith(".json"):
+        d = json.load(open(os.path.join(OUT, f)))
+        if "master" in d.get("panel", {}): masters[d["name"]] = d["panel"]["master"]
+        os.remove(os.path.join(OUT, f))
 for i, p in enumerate(presets):
     slug = re.sub(r"[^a-z0-9]+", "_", p["name"].lower()).strip("_")
+    if p["name"] in masters and "master" not in p["panel"]: p["panel"]["master"] = masters[p["name"]]
     json.dump(p, open(os.path.join(OUT, f"{i:02d}_{slug}.json"), "w"), indent=1)
 print(len(presets), "presets")

@@ -2568,7 +2568,7 @@ PRES = {
 },
 "at42": {
     "en": dict(tag="Twenty oscillators. One slow storm.",
-        highlights=[("at42/hl-orbs", "Light you can play.", "With MOD on, each drone follows its orb: ambient light, the shadow of your mouse and the red LED inside."),
+        highlights=[("at42/hl-orbs", "Light you can play.", "Hover over an orb, or press and drag, and your hand shades it: with MOD on, the drone follows the light, the red LED inside and the hand, which your DAW can also automate."),
                     ("at42/hl-effector", "Thirteen cartridges.", "Two effect engines with 39 programs: shimmer, reverse delays, ring mods, crushers and more."),
                     ("at42/hl-touch", "Twelve plates and a screen.", "19 scales, an arpeggiator and a 16-step sequencer on the touch keyboard."),
                     ("at42/hl-patch", "Sixty-two jacks.", "Every control voltage is patchable, and the internal normals keep it playing without a single cable."),
@@ -2577,7 +2577,7 @@ PRES = {
         colours=[("cream", "Cream", "#e6d8c4"), ("black", "Black", "#1e1e20"), ("maize", "Maize", "#d99a22"), ("blue", "Blue", "#2c5a88")],
         film_cap="AT42 rendered in 3D: the light orbs breathe with the drone, the touch plates light up and the joystick moves. The sound is the engine playing Cathedral of A, a drone preset."),
     "es": dict(tag="Veinte osciladores. Una tormenta lenta.",
-        highlights=[("at42/hl-orbs", "Luz que se toca.", "Con MOD encendido, cada drone sigue a su orbe: la luz ambiente, la sombra del mouse y el LED rojo de adentro."),
+        highlights=[("at42/hl-orbs", "Luz que se toca.", "Pasá el mouse sobre un orbe, o apretá y arrastrá, y tu mano le hace sombra: con MOD encendido, el drone sigue a la luz, al LED rojo de adentro y a la mano, que el DAW también puede automatizar."),
                     ("at42/hl-effector", "Trece cartuchos.", "Dos motores de efectos con 39 programas: shimmer, delays invertidos, ring mod, crushers y más."),
                     ("at42/hl-touch", "Doce placas y una pantalla.", "19 escalas, arpegiador y secuenciador de 16 pasos en el teclado táctil."),
                     ("at42/hl-patch", "Sesenta y dos jacks.", "Cada tensión de control se puede patchear, y las conexiones internas lo hacen sonar sin un solo cable."),
@@ -3588,9 +3588,11 @@ def facts_html(items):
 def presets_html(items):
     return "\n".join(f'      <div class="reveal"><div class="count">{n}</div><h3>{k}</h3><p>{v}</p></div>' for n, k, v in items)
 
+# Los videos llevan ?v=<hash>: Cloudflare guardó una vez el puntero de Git LFS (133 bytes) de pallor.mp4 en vez del
+# video (2026-10-24) y el token de la API no puede purgar la caché; con la URL atada al contenido no se repite.
 def player_html(a, slug, cap, aria):
     return f"""<video data-player preload="metadata" playsinline poster="{a}img/{slug}/film-poster.jpg" aria-label="{html.escape(aria)}">
-          <source src="{a}video/{slug}.mp4" type="video/mp4">
+          <source src="{a}video/{slug}.mp4?v={asset_v(f"video/{slug}.mp4")}" type="video/mp4">
         </video>"""
 
 # Demos de Orrery: la pantalla del plugin grabada con ORRERY_RECORD (ver plugins/orrery/README.md) y el
@@ -3601,7 +3603,7 @@ def demos_html(a, t, lang):
     import json
     meta = json.load(open(os.path.join(WEB, "assets", "samples", "samples.json")))
     items = [(d, html.escape(meta[f"orrery/{d}"]["title"][lang]), html.escape(meta[f"orrery/{d}"]["desc"][lang])) for d in ORRERY_DEMOS]
-    tabs = "".join(f'<button class="demo-tab" type="button" role="tab" aria-selected="{"true" if i == 0 else "false"}" data-src="{a}video/orrery-demo-{d}.mp4" '
+    tabs = "".join(f'<button class="demo-tab" type="button" role="tab" aria-selected="{"true" if i == 0 else "false"}" data-src="{a}video/orrery-demo-{d}.mp4?v={asset_v(f"video/orrery-demo-{d}.mp4")}" '
                    f'data-poster="{a}img/orrery/demo/{d}.jpg" data-cap="{ti}. {de}">{ti}</button>' for i, (d, ti, de) in enumerate(items))
     d0, t0, de0 = items[0]
     return f"""  <section class="sec" id="demos">
@@ -3611,7 +3613,7 @@ def demos_html(a, t, lang):
       <div class="demo-tabs reveal" role="tablist" aria-label="{t['demo_tabs']}">{tabs}</div>
       <figure class="film-frame demo-frame reveal" data-demo>
         <video data-player preload="metadata" playsinline poster="{a}img/orrery/demo/{d0}.jpg" aria-label="{t0}">
-          <source src="{a}video/orrery-demo-{d0}.mp4" type="video/mp4">
+          <source src="{a}video/orrery-demo-{d0}.mp4?v={asset_v(f"video/orrery-demo-{d0}.mp4")}" type="video/mp4">
         </video>
         <figcaption data-demo-cap>{t0}. {de0}</figcaption>
       </figure>
@@ -4204,7 +4206,7 @@ def page_product(slug, lang):
   </section>""" if has_film else ""
     film_dialog = f"""<dialog class="film-modal" aria-label="{ui['film_h']}">
     <button class="film-close" type="button" aria-label="{ui['close']}">×</button>
-    <video data-player preload="none" playsinline poster="{a}img/{slug}/film-poster.jpg"><source src="{a}video/{slug}.mp4" type="video/mp4"></video>
+    <video data-player preload="none" playsinline poster="{a}img/{slug}/film-poster.jpg"><source src="{a}video/{slug}.mp4?v={asset_v(f"video/{slug}.mp4")}" type="video/mp4"></video>
   </dialog>""" if has_film else ""
     os_text = t.get("os_p") or (t["license_p1"] + " " + t["license_p2"])
     os_link = (S if slug == "at20v" else t)[lang]["os_link"] if slug == "at20v" else t["os_link"]
@@ -4310,7 +4312,7 @@ MARKS = {"en": "Korg and MS-20 are trademarks of Korg Inc. Roland, SH-101 and Sy
 
 # ── Equipo (portada, sección #team) ──
 # Pedido del usuario (2026-10-23): roles musicales, aptitudes técnicas, y solo el LinkedIn y el email de Alejandro.
-# El "Javier" del pedido es Martín Ezequiel Ferraro (lo aclaró el usuario).
+# El "Javier" del pedido es Martín Ezequiel Ferraro (lo aclaró el usuario). Ingeniero de sonido: pedido del 2026-10-24.
 # Sin foto ("photo": None) se muestra la inicial.
 DH = '<a href="https://digitalhub.com.ar">Digital Hub</a>'
 TEAM = {
@@ -4322,7 +4324,7 @@ TEAM = {
                   links=[("LinkedIn", "https://www.linkedin.com/in/alejandro-s-duarte/"), ("alejandro@digitalhub.com.ar", "mailto:alejandro@digitalhub.com.ar")]),
              dict(name="Guillermo Silvero Ortiz", photo="guillermo", role="Producer, composer and drummer", tech="Product and project management",
                   bio="Twenty years across different areas of IT and a Project Management expert. He plays the instruments with a drummer's ear and keeps every release on track."),
-             dict(name="Martín Ezequiel Ferraro", photo="martin", role="Music producer, composer and musician", tech="",
+             dict(name="Martín Ezequiel Ferraro", photo="martin", role="Music producer, composer and musician", tech="Sound engineer",
                   bio="He composes and plays with the instruments, and checks that each one sounds and feels right in real music."),
            ]),
 "es": dict(h="Quiénes hacen Audio Tools",
@@ -4333,7 +4335,7 @@ TEAM = {
                   links=[("LinkedIn", "https://www.linkedin.com/in/alejandro-s-duarte/"), ("alejandro@digitalhub.com.ar", "mailto:alejandro@digitalhub.com.ar")]),
              dict(name="Guillermo Silvero Ortiz", photo="guillermo", role="Productor, compositor y baterista", tech="Gestión de producto y proyectos",
                   bio="20 años en distintas áreas de sistemas y experto en Project Management. Toca los instrumentos con oído de baterista y ordena cada lanzamiento."),
-             dict(name="Martín Ezequiel Ferraro", photo="martin", role="Productor musical, compositor y músico", tech="",
+             dict(name="Martín Ezequiel Ferraro", photo="martin", role="Productor musical, compositor y músico", tech="Ingeniero de sonido",
                   bio="Compone y toca con los instrumentos, y comprueba que cada uno suene y responda bien en música de verdad."),
            ]),
 }

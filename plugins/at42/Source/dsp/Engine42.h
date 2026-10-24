@@ -48,7 +48,7 @@ public:
     PatchState42 patch;
     TouchKeys keys;
     std::array<bool, 7> droneKey {};                   // 1..6 (teclas drone, pantalla o MIDI)
-    std::array<float, 4> shade {};                      // sombra de la mano sobre cada orbe (drones 1, 2, 4, 5)
+    std::array<float, 4> shade {};                      // sombra de la mano sobre cada orbe (drones 1, 2, 4, 5): d*_hand × 0,95
     float joyX = 0.0f, joyY = 0.0f;                     // posición del joystick, −1..1
 
     // Estado visible (LEDs, orbes, barras).
@@ -67,6 +67,7 @@ public:
         fsBase = (float) sampleRate;
         os = std::max (1, oversampling);
         fs = fsBase * (float) os;
+        maxBlockBase = maxBlock;
         // Todos los módulos vuelven a nuevos (fases, envolventes, filtros, efectos, azar): una instancia preparada de
         // nuevo después de tocar suena igual que una recién creada (QA en DAWs 2026-10-22; athosttest repro +4,1 dB).
         // Los ajustes (p, st, patch, la secuencia grabada) quedan.
@@ -81,14 +82,40 @@ public:
         for (auto* v : classicPtrs()) v->prepare (fs, (uint32_t) (seed += 101));
         papa3.prepare (fs, 0x3333u); papa6.prepare (fs, 0x6666u);
         decL.prepare (os); decR.prepare (os);
-        osL.assign ((size_t) (maxBlock + 64) * (size_t) os, 0.0f);
-        osR.assign ((size_t) (maxBlock + 64) * (size_t) os, 0.0f);
+        // Lugar para el sobremuestreo más alto: cambiarlo después (restart) no reserva memoria en el hilo de audio.
+        osL.assign ((size_t) (maxBlock + 64) * 4, 0.0f);
+        osR.assign ((size_t) (maxBlock + 64) * 4, 0.0f);
         fxL.prepare (fsBase, 1.0f); fxR.prepare (fsBase, 1.0f + 0.03f * st.mismatch);
         fxL.setReconstruction (14000.0f); fxR.setReconstruction (13600.0f);
         fltL.reset(); fltR.reset();
         for (auto& d : dcDrone) { d.reset(); d.setCutoff (6.0f, fs); }
         dcL.reset(); dcR.reset(); dcL.setCutoff (4.0f, fsBase); dcR.setCutoff (4.0f, fsBase);
         jv.fill (0.0f);
+        gainSnap = gainSnapMaster = true;
+        gainCoef = 1.0f - std::exp (-1.0f / (0.004f * fs));          // 4 ms: sin escalones de 32 muestras al automatizar
+        masterCoef = 1.0f - std::exp (-1.0f / (0.004f * fsBase));
+    }
+
+    // Vuelve a empezar con otro sobremuestreo (o después de un NaN) sin reservar memoria: lo puede llamar el hilo de
+    // audio. Las voces y los filtros vuelven a nuevos; el efector se vacía. Las notas apretadas y los ajustes quedan.
+    void restart (int oversampling)
+    {
+        os = std::clamp (oversampling, 1, 4);
+        fs = fsBase * (float) os;
+        d1 = d2 = d4 = d5 = ClassicVoice {}; papa3 = papa6 = PapaVoice {};
+        vcoA = vcoB = Vco42 {}; egA = egB = Adsr42 {}; fltL = fltR = Polivoks {};
+        fxL.reset(); fxR.reset();
+        lfoA = lfoB = pulser = Lfo42 {}; seq = Seq5 {}; ef = EnvFollower {};
+        fxCv = {}; preSig = 0.0f; view = {};
+        int seed = 11;
+        for (auto* v : classicPtrs()) v->prepare (fs, (uint32_t) (seed += 101));
+        papa3.prepare (fs, 0x3333u); papa6.prepare (fs, 0x6666u);
+        decL.prepare (os); decR.prepare (os);
+        for (auto& d : dcDrone) { d.reset(); d.setCutoff (6.0f, fs); }
+        dcL.reset(); dcR.reset();
+        jv.fill (0.0f);
+        gainSnap = true;
+        gainCoef = 1.0f - std::exp (-1.0f / (0.004f * fs));
     }
 
     int oversampling() const { return os; }
@@ -97,7 +124,7 @@ public:
     void render (float* L, float* R, const float* inL, const float* inR, int n)
     {
         fxR.setMismatch (1.0f + 0.03f * st.mismatch);      // el ajuste actúa en vivo (antes sólo al preparar)
-        if ((int) osL.size() < n * os) { osL.resize ((size_t) (n * os)); osR.resize ((size_t) (n * os)); }
+        if ((int) osL.size() < n * os) { osL.resize ((size_t) (n * os)); osR.resize ((size_t) (n * os)); }     // sólo si n > maxBlock
         updateControls();
         const double ppqPerBase = st.bpm / 60.0 / fsBase;
         for (int i = 0; i < n; ++i)
@@ -122,18 +149,20 @@ public:
         fxR.load (cartR, (int) p[(size_t) P42::fx_prog_r]);
         const float blend = p[(size_t) P42::fx_blend];
         const float master = p[(size_t) P42::master] * p[(size_t) P42::master] * 1.6f;
+        if (gainSnapMaster) { masterS = master; gainSnapMaster = false; }
         for (int i = 0; i < n; ++i)
         {
+            masterS += (master - masterS) * masterCoef;              // por muestra (antes, escalones cada 32 muestras)
             const float x = clampf (p[(size_t) P42::fx_x] + fxCv[0] * 0.1f, 0.0f, 1.0f);
             const float y = clampf (p[(size_t) P42::fx_y] + fxCv[1] * 0.1f, 0.0f, 1.0f);
             const float z = clampf (p[(size_t) P42::fx_z] + fxCv[2] * 0.1f, 0.0f, 1.0f);
             const float wl = fxL.process (L[i], x, y, z), wr = fxR.process (R[i], x, y * 1.01f, z);
             float l = L[i] * (1.0f - 0.5f * blend) + wl * blend * 1.1f;
             float r = R[i] * (1.0f - 0.5f * blend) + wr * blend * 1.1f;
-            if (st.vintageNoise > 0.0f) { l += noise.bipolar() * 0.004f * st.vintageNoise * master; r += noise.bipolar() * 0.004f * st.vintageNoise * master; }
+            if (st.vintageNoise > 0.0f) { l += noise.bipolar() * 0.004f * st.vintageNoise * masterS; r += noise.bipolar() * 0.004f * st.vintageNoise * masterS; }
             // Capacitor de salida: la distorsión asimétrica y los filtros saturados también dejan DC.
-            L[i] = softLimit (dcL.process (l) * master * st.outputGain);
-            R[i] = softLimit (dcR.process (r) * master * st.outputGain);
+            L[i] = softLimit (dcL.process (l) * masterS * st.outputGain);
+            R[i] = softLimit (dcR.process (r) * masterS * st.outputGain);
         }
     }
 
@@ -157,8 +186,11 @@ private:
     std::array<float, 3> fxCv {};
     Rng noise { 5 };
     float preSig = 0.0f;
-    // Coeficientes de control (se recalculan por bloque).
-    std::array<float, 10> panL {}, panR {}, vol {};
+    // Coeficientes de control (se recalculan por bloque) y su versión suavizada muestra a muestra.
+    std::array<float, 10> panL {}, panR {}, vol {}, panLS {}, panRS {}, volS {};
+    float masterS = 0.0f, gainCoef = 0.01f, masterCoef = 0.01f;
+    bool gainSnap = true, gainSnapMaster = true;
+    int maxBlockBase = 512;
 
     std::array<ClassicVoice*, 4> classicPtrs() { return { &d1, &d2, &d4, &d5 }; }
 
@@ -194,6 +226,8 @@ private:
             }
             v.chromatic = st.chromatic; v.drift = st.drift; v.longRelease = st.longRelease ? 1.0f : 0.0f;
         };
+        // La mano sobre cada orbe: parámetros d*_hand (los escribe el panel o la automatización).
+        shade = { 0.95f * P (P42::d1_hand), 0.95f * P (P42::d2_hand), 0.95f * P (P42::d4_hand), 0.95f * P (P42::d5_hand) };
         setClassic (d1, (int) P42::d1_tune1); setClassic (d2, (int) P42::d2_tune1);
         setClassic (d4, (int) P42::d4_tune1); setClassic (d5, (int) P42::d5_tune1);
         d1.volt = P (P42::d1_volt); d1.att = P (P42::d1_att); d1.rls = P (P42::d1_rls); d1.cvAmt = P (P42::d1_cv); d1.hold = B (P42::d1_hold);
@@ -217,6 +251,7 @@ private:
             panR[(size_t) c] = std::sin (pan * 1.5707963f);
             vol[(size_t) c] = v * v * 1.4f;
         }
+        if (gainSnap) { volS = vol; panLS = panL; panRS = panR; gainSnap = false; gainSnapMaster = true; }
     }
 
     static int mutes (int tuneBase)
@@ -290,7 +325,14 @@ private:
                                a * vcaA * 0.9f, b * vcaB * 0.9f, clampf (preSig, -1.5f, 1.5f),
                                dcDrone[3].process (s4), dcDrone[4].process (s5), dcDrone[5].process (s6) };
         float l = 0.0f, r = 0.0f;
-        for (int c = 0; c < 10; ++c) { const float v = ch[c] * vol[(size_t) c]; l += v * panL[(size_t) c]; r += v * panR[(size_t) c]; }
+        for (int c = 0; c < 10; ++c)
+        {
+            // Volumen y paneo siguen al bloque muestra a muestra (con el valor quieto dan exactamente lo mismo que antes).
+            volS[(size_t) c] += (vol[(size_t) c] - volS[(size_t) c]) * gainCoef;
+            panLS[(size_t) c] += (panL[(size_t) c] - panLS[(size_t) c]) * gainCoef;
+            panRS[(size_t) c] += (panR[(size_t) c] - panRS[(size_t) c]) * gainCoef;
+            const float v = ch[c] * volS[(size_t) c]; l += v * panLS[(size_t) c]; r += v * panRS[(size_t) c];
+        }
         // El bus suma con algo de saturación (lo que los dueños elogian del original).
         const float dr = 0.4f + 2.5f * st.busDrive;
         l = fastTanh (l * dr) / dr * 1.2f; r = fastTanh (r * dr) / dr * 1.2f;

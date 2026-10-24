@@ -2113,7 +2113,8 @@
     "1",
     "2",
     "3"
-   ]
+   ],
+   "lside": "right"
   },
   {
    "id": "fx_prog_r",
@@ -2124,7 +2125,8 @@
     "1",
     "2",
     "3"
-   ]
+   ],
+   "lside": "right"
   },
   {
    "id": "lfoa_speed",
@@ -2135,7 +2137,8 @@
     "/6",
     "x1",
     "x10"
-   ]
+   ],
+   "lside": "left"
   },
   {
    "id": "seq_stages",
@@ -2146,7 +2149,8 @@
     "3",
     "4",
     "5"
-   ]
+   ],
+   "lside": "right"
   },
   {
    "id": "seq_gate1",
@@ -2156,7 +2160,8 @@
    "legends": [
     "",
     "gate"
-   ]
+   ],
+   "lside": "right"
   },
   {
    "id": "seq_gate2",
@@ -2166,7 +2171,8 @@
    "legends": [
     "",
     "gate"
-   ]
+   ],
+   "lside": "right"
   },
   {
    "id": "seq_gate3",
@@ -2176,7 +2182,8 @@
    "legends": [
     "",
     "gate"
-   ]
+   ],
+   "lside": "right"
   },
   {
    "id": "seq_gate4",
@@ -2186,7 +2193,8 @@
    "legends": [
     "",
     "gate"
-   ]
+   ],
+   "lside": "right"
   },
   {
    "id": "seq_gate5",
@@ -2196,7 +2204,8 @@
    "legends": [
     "",
     "gate"
-   ]
+   ],
+   "lside": "right"
   },
   {
    "id": "lfob_speed",
@@ -2207,38 +2216,39 @@
     "/6",
     "x1",
     "x10"
-   ]
+   ],
+   "lside": "left"
   }
  ],
  "leds": [
   {
    "id": "d1_gate",
-   "x": 12.8,
-   "y": 100.2,
+   "x": 7.2,
+   "y": 100.9,
    "color": "amber"
   },
   {
    "id": "d2_gate",
-   "x": 94.1,
-   "y": 100.2,
+   "x": 88.5,
+   "y": 100.9,
    "color": "amber"
   },
   {
    "id": "d4_gate",
-   "x": 337.90000000000003,
-   "y": 100.2,
+   "x": 332.3,
+   "y": 100.9,
    "color": "amber"
   },
   {
    "id": "d5_gate",
-   "x": 419.2,
-   "y": 100.2,
+   "x": 413.59999999999997,
+   "y": 100.9,
    "color": "amber"
   },
   {
    "id": "d3_gate",
-   "x": 12.8,
-   "y": 163.7,
+   "x": 7.2,
+   "y": 164.4,
    "color": "amber"
   },
   {
@@ -2249,8 +2259,8 @@
   },
   {
    "id": "d6_gate",
-   "x": 419.2,
-   "y": 163.7,
+   "x": 413.59999999999997,
+   "y": 164.4,
    "color": "amber"
   },
   {
@@ -2856,7 +2866,8 @@
    "x1": 84.5,
    "y1": 115.4,
    "tab": "above",
-   "tabw": 17.5
+   "tabw": 17.5,
+   "tfs": 3.0
   },
   {
    "title": "DRONE 2",
@@ -2865,7 +2876,8 @@
    "x1": 165.8,
    "y1": 115.4,
    "tab": "above",
-   "tabw": 17.5
+   "tabw": 17.5,
+   "tfs": 3.0
   },
   {
    "title": "DRONE 4",
@@ -2874,7 +2886,8 @@
    "x1": 409.6,
    "y1": 115.4,
    "tab": "above",
-   "tabw": 17.5
+   "tabw": 17.5,
+   "tfs": 3.0
   },
   {
    "title": "DRONE 5",
@@ -2883,7 +2896,8 @@
    "x1": 490.9,
    "y1": 115.4,
    "tab": "above",
-   "tabw": 17.5
+   "tabw": 17.5,
+   "tfs": 3.0
   },
   {
    "title": "DRONE 3",
@@ -2892,7 +2906,8 @@
    "x1": 84.5,
    "y1": 181.5,
    "tab": "tr",
-   "tabw": 17.8
+   "tabw": 17.8,
+   "tfs": 3.0
   },
   {
    "title": "DRONE 6",
@@ -2901,7 +2916,8 @@
    "x1": 490.9,
    "y1": 181.5,
    "tab": "tr",
-   "tabw": 17.8
+   "tabw": 17.8,
+   "tfs": 3.0
   },
   {
    "title": "VCO A",
@@ -2910,7 +2926,8 @@
    "x1": 165.9,
    "y1": 181.5,
    "tab": "tl",
-   "tabw": 15.0
+   "tabw": 15.0,
+   "tfs": 3.0
   },
   {
    "title": "VCO B",
@@ -2919,7 +2936,8 @@
    "x1": 409.9,
    "y1": 181.5,
    "tab": "tl",
-   "tabw": 15.0
+   "tabw": 15.0,
+   "tfs": 3.0
   },
   {
    "title": "ENVELOPE A",
@@ -2928,7 +2946,8 @@
    "x1": 234.39999999999998,
    "y1": 181.5,
    "tab": "bl",
-   "tabw": 23.0
+   "tabw": 11.6,
+   "tfs": 2.2
   },
   {
    "title": "ENVELOPE B",
@@ -2937,7 +2956,8 @@
    "x1": 332.1,
    "y1": 181.5,
    "tab": "br",
-   "tabw": 23.0
+   "tabw": 11.6,
+   "tfs": 2.2
   },
   {
    "title": "DUAL EFFECTOR",
@@ -2946,7 +2966,8 @@
    "x1": 328.6,
    "y1": 109.7,
    "tab": "top",
-   "tabw": null
+   "tabw": null,
+   "tfs": 3.0
   },
   {
    "title": "VOICE MIXER",
@@ -2954,8 +2975,9 @@
    "y0": 110.4,
    "x1": 328.6,
    "y1": 146.6,
-   "tab": "bottom",
-   "tabw": null
+   "tab": "below",
+   "tabw": 24.0,
+   "tfs": 3.0
   },
   {
    "title": "LFO A",
@@ -2964,7 +2986,8 @@
    "x1": 60.5,
    "y1": 212.2,
    "tab": "bottomband",
-   "tabw": null
+   "tabw": null,
+   "tfs": 3.0
   },
   {
    "title": "JOYSTICK",
@@ -2973,7 +2996,8 @@
    "x1": 123.2,
    "y1": 212.2,
    "tab": "bottomband",
-   "tabw": null
+   "tabw": null,
+   "tfs": 3.0
   },
   {
    "title": "5 STEP SEQUENCER",
@@ -2982,7 +3006,8 @@
    "x1": 316.3,
    "y1": 212.2,
    "tab": "bottomband",
-   "tabw": null
+   "tabw": null,
+   "tfs": 3.0
   },
   {
    "title": "PREAMP",
@@ -2991,7 +3016,8 @@
    "x1": 355.5,
    "y1": 212.2,
    "tab": "bottomband",
-   "tabw": null
+   "tabw": null,
+   "tfs": 3.0
   },
   {
    "title": "ENVELOPE FOLLOWER",
@@ -3000,7 +3026,8 @@
    "x1": 433.5,
    "y1": 212.2,
    "tab": "bottomband",
-   "tabw": null
+   "tabw": null,
+   "tfs": 3.0
   },
   {
    "title": "LFO B",
@@ -3009,7 +3036,8 @@
    "x1": 490.9,
    "y1": 212.2,
    "tab": "bottomband",
-   "tabw": null
+   "tabw": null,
+   "tfs": 3.0
   }
  ],
  "bars": [

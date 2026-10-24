@@ -81,6 +81,20 @@
     "Primera versión: un sintetizador monofónico basado en el Roland SH-101 de 1982, con arpegiador, secuenciador visual, polifonía, MIDI Learn y tres colores de panel."
   ],
 
+  "at42-v1.0.8": [
+    "Los orbes responden al clic y al arrastre, no sólo al pasar el mouse: apretá sobre un orbe (o tocalo en una pantalla táctil) para taparlo con la mano y arrastrá para alejarla o llevarla a otro orbe. Sobre los orbes el puntero es una mano, y un globo muestra la mano y cuántos osciladores de esa voz tienen MOD encendido, o avisa que hay que encender MOD si no hay ninguno.",
+    "La mano sobre cada orbe es un parámetro del host (Drone 1, 2, 4 y 5 Hand): el DAW la graba en carriles de automatización, y se puede dibujar o asignar con MIDI Learn. Los proyectos viejos abren sin mano, sonando exactamente igual.",
+    "Ir a buscar los botones MOD o la perilla cv al lado de un orbe ya no le hace sombra ni dobla el drone.",
+    "Cathedral of A, Low Choir, Shimmer Garden, Tape Memory y Reverse Hymn tienen ahora MOD encendido en uno o dos osciladores agudos, afinados para que el acorde no cambie: la mano sobre el orbe los baja. Siete presets usan los orbes.",
+    "Drone Tuning Chromatic queda afinado con VOLT en su valor por defecto: lo que se cuantiza es la altura que suena, después de VOLT (estaba 1,6 semitonos abajo). El globo de la perilla muestra la nota que suena.",
+    "Init: las seis teclas drone suenan (las teclas 3 a 6 tenían el mezclador en cero).",
+    "El pedal de sustain (CC 64) sostiene las notas del teclado y las teclas drone.",
+    "Master y los niveles y paneos del mezclador siguen la automatización muestra a muestra: sin escalones en los movimientos rápidos (bandas laterales 30 dB más bajas).",
+    "Los rótulos del panel que tapaban las perillas, los botones y los jacks se leen otra vez (att, rls y cv de los drones, wave, rate, offsets, pulser y steps de la fila de abajo, los jacks de los VCO, x10/fm/am, cv x/y/z del efector y más); las pestañas VOICE MIXER y ENVELOPE ya no quedan debajo de perillas y jacks.",
+    "Diez presets que habían quedado bajos se nivelaron a unos -17 dBFS como los demás, entre 1 y 8,6 dB (Swarm y Microtonal Fog eran los más bajos); Init, 1,2 dB.",
+    "Nombres de parámetros en el host: \"Drone 3 Rate x10\" en lugar de \"Drone 3 x1 0\". Cambiar el sobremuestreo ya no reserva memoria en el hilo de audio.",
+    "Manual: los orbes (pasar el mouse, apretar y arrastrar, MOD, los parámetros Hand, qué presets los usan), Chromatic, el pedal de sustain y el sentido de la rueda de modulación."
+  ],
   "at42-v1.0.7": [
     "Un segundo render offline seguido con el Audio Unit (REAPER) suena igual que el primero: el reinicio del host ahora devuelve drones, osciladores y efectos a un arranque limpio, como ya lo hacía preparar el plugin de nuevo.",
     "Manual: por qué REAPER muestra cada preset de fábrica dos veces."
