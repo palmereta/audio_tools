@@ -23,7 +23,7 @@ package() {
         cp -R "$f" "$OUT/"
     done
     # Herramientas de línea de comandos del producto (p. ej. lacquerrender).
-    for t in lacquerrender halationrender tarnishrender at303render plumbrender thrumrender pallorrender at330render; do
+    for t in lacquerrender halationrender tarnishrender at303render plumbrender thrumrender pallorrender at330render devicentirender; do
         for f in "$R/$t" "$R/${t}_artefacts/Release/$t"; do [ -x "$f" ] && cp "$f" "$OUT/" && break; done
     done
     # Presets como archivos (.vstpreset) para los hosts que no muestran la lista de programas del VST3 (Live).
@@ -122,4 +122,5 @@ ONLY=${1:-}
 [ -z "$ONLY" ] || [ "$ONLY" = pallor ] && package pallor Pallor
 [ -z "$ONLY" ] || [ "$ONLY" = thrum ] && package thrum Thrum
 [ -z "$ONLY" ] || [ "$ONLY" = at330 ] && package at330 AT330
+[ -z "$ONLY" ] || [ "$ONLY" = devicenti ] && package devicenti DeVicenti
 exit 0

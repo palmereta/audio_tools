@@ -53,6 +53,7 @@ add_subdirectory(plugins/plumb)
 add_subdirectory(plugins/pallor)
 add_subdirectory(plugins/thrum)
 add_subdirectory(plugins/at330)
+add_subdirectory(plugins/devicenti)
 
 # Pruebas de los plugins compilados, como un DAW: tools/hosttest (athosttest).
 add_subdirectory(tools/hosttest)

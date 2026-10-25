@@ -277,6 +277,14 @@
     "Extras the original did not have: per-key envelopes (Poly, the default), velocity, Freeze, formant shift, vocoder response, pitch bend both ways, mod-wheel vibrato, a movable split, a switchable strings ensemble and a plate reverb.",
     "A rendered panel in oiled walnut with every knob and tablet, the band display and the keyboard; an Extended page; 45 presets and a manual in English and Spanish."
   ],
+  "devicenti-v1.0.0": [
+    "First release: an original FM groovebox for downtempo, trip hop, acid jazz, ambient and dark ambient, one orange unit you play and program from its panel.",
+    "Four tracks, each a four-operator FM voice in eight algorithms with a sub layer, noise, a saturating filter, drive and fold, a drum machine of eight FM lanes with choke groups, or a MIDI track that plays an external synth.",
+    "A 64-step sequencer with 16 patterns: step locks on almost every parameter, conditions and probability, micro timing, retrigs, slides and ties, per-track length, speed and swing, a song chain and a direct jump between patterns.",
+    "Chord mode with scale-aware chords, voicings and inversions, eight chord memory slots you record by holding CHORD and playing, a strum and an arpeggiator; MIDI in from a controller with a fixed CC map, MIDI learn and CC feedback, and MIDI out to drive other instruments.",
+    "One insert per track (overdrive and fold, bitcrush and lo-fi, chorus, phaser, ring modulator, a comb tuned to the pattern root), AGE tape drift, a dub-ready delay and a spring, plate, hall or void reverb with freeze and shimmer, and a master bus with tape, glue, duck and a limiter.",
+    "The unit rendered in 3D with every knob, key, LED and screen working, back pages for everything else, 82 presets in banks for each genre (seven of them are the sound demos) and a manual in English and Spanish."
+  ],
 
   "orrery-v1.0.7": [
     "Satellites stay in sync when the host prepares the plugin again at the same sample rate, as REAPER does before every offline render: the satellite no longer leaves its drone hanging without a note-off and attacks it again one to nine buffers late.",

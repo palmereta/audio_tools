@@ -19,6 +19,7 @@ PRODUCTS = {   # carpeta → (nombre del .app, prefijo de las variables)
     "pallor": ("Pallor", "PALLOR"),
     "thrum": ("Thrum", "THRUM"),
     "at330": ("AT330", "AT330"),
+    "devicenti": ("DeVicenti", "DV"),
 }
 TMP = "/tmp/claude-501/manual-shots"
 DEMO_INPUT = os.path.join(TMP, "murmur-demo-input.wav")
@@ -80,6 +81,10 @@ def take(folder, shot):
     env = dict(os.environ)
     env.update({k: str(v) for k, v in shot.get("env", {}).items()})
     env[f"{prefix}_SNAPSHOT"] = png
+    if folder == "devicenti":
+        # Settings in a scratch home, never the real one; no DV_PLAY (it would play through the speakers).
+        env["HOME"] = env.get("DV_HOME", os.path.join(os.path.dirname(ROOT), "audiotools-private", "qa", "scratch-home-devicenti"))
+        os.makedirs(env["HOME"], exist_ok=True)
     if folder == "murmur": env["MURMUR_DEMO_INPUT"] = demo_input()
     if folder == "halation": env["HALATION_DEMO_INPUT"] = demo_input_halation()
     if folder == "tarnish": env["TARNISH_DEMO_INPUT"] = demo_input_halation()

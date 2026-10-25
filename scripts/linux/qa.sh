@@ -58,7 +58,7 @@ for l in "$B"/plugins/${ONLY:-*}/*_artefacts/Release/LV2/*.lv2; do
 done
 
 # ── pruebas unitarias (lacquertest tarda: su referencia ×8 de pico verdadero es por fuerza bruta, ~20 min en el host)
-for t in at330/at330test pallor/pallortest thrum/thrumtest plumb/plumbtest tarnish/tarnishtest at303/at303test halation/halationtest lacquer/lacquertest; do
+for t in devicenti/devicentitest at330/at330test pallor/pallortest thrum/thrumtest plumb/plumbtest tarnish/tarnishtest at303/at303test halation/halationtest lacquer/lacquertest; do
     d=${t%/*}; n=${t#*/}
     [ -z "$ONLY" ] || [ "$ONLY" = "$d" ] || continue
     # juce_add_console_app deja el ejecutable en <n>_artefacts/Release/ (algunos CMakeLists lo sacan a la carpeta del plugin).

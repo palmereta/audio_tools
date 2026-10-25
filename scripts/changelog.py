@@ -19,10 +19,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NOTES = {"en": os.path.join(ROOT, "scripts", "release-notes.json"),
          "es": os.path.join(ROOT, "scripts", "release-notes.es.json")}
 # El orden del sitio (NAV_GROUPS de build-web.py): sintetizadores, después herramientas y efectos, y el launcher.
-ORDER = ["at20v", "at101v", "at42", "at700", "atfs1", "atmd", "at303", "pallor", "thrum", "at330",
+ORDER = ["at20v", "at101v", "at42", "at700", "atfs1", "atmd", "at303", "pallor", "thrum", "at330", "devicenti",
          "orrery", "murmur", "halation", "tarnish", "plumb", "lacquer", "launcher"]
 NAMES = {"orrery": "Orrery", "murmur": "Murmur", "halation": "Halation", "tarnish": "Tarnish", "plumb": "Plumb",
-         "lacquer": "Lacquer", "pallor": "Pallor", "thrum": "Thrum", "launcher": "Audio Tools Launcher"}
+         "lacquer": "Lacquer", "pallor": "Pallor", "thrum": "Thrum", "devicenti": "DeVicenti", "launcher": "Audio Tools Launcher"}
 REPO_URL = "https://github.com/palmereta/audio_tools"
 SITE_URL = "https://audiotools.com.ar"
 

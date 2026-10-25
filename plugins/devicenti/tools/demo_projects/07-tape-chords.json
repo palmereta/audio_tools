@@ -1,0 +1,894 @@
+{
+ "name": "Tape Chords",
+ "category": "Acid Jazz",
+ "order": 130,
+ "description": "D Dorian, 88 BPM: four chord-memory shapes (minor 9, major 9, minor 11, 7 flat 9) on a tine piano over a fretless bass, with AGE rising from clean to worn tape.",
+ "params": {
+  "tempo": 88,
+  "swing": 50,
+  "pattern": 1,
+  "t1_level": -1.0,
+  "t2_level": -5.0,
+  "t3_level": -60.0,
+  "t4_level": -60.0,
+  "delay_time": 7,
+  "delay_fb": 0.3,
+  "reverb_size": 0.5,
+  "reverb_decay": 2.2,
+  "tape": 0.35,
+  "glue": 0.3
+ },
+ "tracks": [
+  {
+   "machine": "TONE",
+   "sounds": {
+    "0": {
+     "algo": 2,
+     "ftype": 1,
+     "ins_type": 3,
+     "a_ratio": 1.0,
+     "a_level": 0.8,
+     "a_att": 0.002,
+     "a_dec": 1.4,
+     "a_sus": 0.0,
+     "a_rel": 0.5,
+     "a_fb": 0.0,
+     "a_vel": 0.15,
+     "a_ks": 0.0,
+     "a_detune": 0.0,
+     "a_fixed": 0.0,
+     "a_curve": 0.0,
+     "a_delay": 0.0,
+     "a_loop": 0,
+     "a_tscale": 1.0,
+     "b_ratio": 14.0,
+     "b_level": 0.25,
+     "b_att": 0.001,
+     "b_dec": 0.12,
+     "b_sus": 0.0,
+     "b_rel": 0.06,
+     "b_fb": 0.0,
+     "b_vel": 0.4,
+     "b_ks": 0.2,
+     "b_detune": 0.0,
+     "b_fixed": 0.0,
+     "b_curve": 0.0,
+     "b_delay": 0.0,
+     "b_loop": 0,
+     "b_tscale": 1.0,
+     "c_ratio": 1.0,
+     "c_level": 0.55,
+     "c_att": 0.002,
+     "c_dec": 1.8,
+     "c_sus": 0.0,
+     "c_rel": 0.6,
+     "c_fb": 0.0,
+     "c_vel": 0.2,
+     "c_ks": 0.0,
+     "c_detune": 4.0,
+     "c_fixed": 0.0,
+     "c_curve": 0.0,
+     "c_delay": 0.0,
+     "c_loop": 0,
+     "c_tscale": 1.0,
+     "d_ratio": 1.0,
+     "d_level": 0.3,
+     "d_att": 0.002,
+     "d_dec": 0.8,
+     "d_sus": 0.15,
+     "d_rel": 0.3,
+     "d_fb": 0.05,
+     "d_vel": 0.4,
+     "d_ks": 0.0,
+     "d_detune": 0.0,
+     "d_fixed": 0.0,
+     "d_curve": 0.0,
+     "d_delay": 0.0,
+     "d_loop": 0,
+     "d_tscale": 1.0,
+     "cutoff": 3600.0,
+     "reso": 0.08,
+     "ktrk": 0.5,
+     "drive": 0.12,
+     "age": 0.0,
+     "ins_amt": 0.25,
+     "ins_p1": 0.3,
+     "ins_p2": 0.6,
+     "ins_mix": 0.8,
+     "voices": 12,
+     "amp_att": 0.002,
+     "amp_dec": 0.3,
+     "amp_sus": 1.0,
+     "amp_rel": 0.45,
+     "vel_amp": 0.7,
+     "strum": 0.012,
+     "hum_vel": 0.4,
+     "hum_time": 0.3,
+     "level": -4.0,
+     "send_reverb": 0.3,
+     "send_delay": 0.08,
+     "lfo2_dest": 2,
+     "lfo2_depth": 0.0,
+     "lfo2_rate": 4.5,
+     "lfo2_sync": 0,
+     "lfo2_shape": 0,
+     "lfo2_mode": 0,
+     "lfo2_fade": 0.0,
+     "lfo2_phase": 0.0
+    }
+   }
+  },
+  {
+   "machine": "TONE",
+   "sounds": {
+    "0": {
+     "algo": 0,
+     "ftype": 0,
+     "ins_type": 0,
+     "a_ratio": 1.0,
+     "a_level": 0.8,
+     "a_att": 0.008,
+     "a_dec": 0.6,
+     "a_sus": 0.8,
+     "a_rel": 0.2,
+     "a_fb": 0.0,
+     "a_vel": 0.3,
+     "a_ks": 0.0,
+     "a_detune": 0.0,
+     "a_fixed": 0.0,
+     "a_curve": 0.0,
+     "a_delay": 0.0,
+     "a_loop": 0,
+     "a_tscale": 1.0,
+     "b_ratio": 1.0,
+     "b_level": 0.25,
+     "b_att": 0.01,
+     "b_dec": 0.5,
+     "b_sus": 0.4,
+     "b_rel": 0.2,
+     "b_fb": 0.0,
+     "b_vel": 0.5,
+     "b_ks": 0.0,
+     "b_detune": 0.0,
+     "b_fixed": 0.0,
+     "b_curve": 0.0,
+     "b_delay": 0.0,
+     "b_loop": 0,
+     "b_tscale": 1.0,
+     "c_ratio": 1.0,
+     "c_level": 0.1,
+     "c_att": 0.002,
+     "c_dec": 0.5,
+     "c_sus": 1.0,
+     "c_rel": 0.2,
+     "c_fb": 0.0,
+     "c_vel": 0.3,
+     "c_ks": 0.0,
+     "c_detune": 0.0,
+     "c_fixed": 0.0,
+     "c_curve": 0.0,
+     "c_delay": 0.0,
+     "c_loop": 0,
+     "c_tscale": 1.0,
+     "cutoff": 900.0,
+     "reso": 0.12,
+     "ktrk": 0.5,
+     "fenv": 0.15,
+     "f_att": 0.002,
+     "f_dec": 0.4,
+     "f_sus": 0.0,
+     "f_rel": 0.2,
+     "vmode": 2,
+     "glide": 0.12,
+     "glide_mode": 1,
+     "sub_level": 0.3,
+     "lowmono": 1,
+     "age": 0.3,
+     "amp_att": 0.006,
+     "amp_dec": 0.5,
+     "amp_sus": 1.0,
+     "amp_rel": 0.2,
+     "level": -2.0
+    }
+   }
+  },
+  {
+   "machine": "TONE",
+   "sounds": {
+    "0": {
+     "algo": 3,
+     "ftype": 1,
+     "ins_type": 3,
+     "a_ratio": 1.0,
+     "a_level": 0.65,
+     "a_att": 0.7,
+     "a_dec": 2.0,
+     "a_sus": 0.9,
+     "a_rel": 1.4,
+     "a_fb": 0.0,
+     "a_vel": 0.3,
+     "a_ks": 0.0,
+     "a_detune": 0.0,
+     "a_fixed": 0.0,
+     "a_curve": 0.0,
+     "a_delay": 0.0,
+     "a_loop": 0,
+     "a_tscale": 1.0,
+     "b_ratio": 2.0,
+     "b_level": 0.45,
+     "b_att": 0.8,
+     "b_dec": 2.0,
+     "b_sus": 0.9,
+     "b_rel": 1.4,
+     "b_fb": 0.0,
+     "b_vel": 0.3,
+     "b_ks": 0.0,
+     "b_detune": 0.0,
+     "b_fixed": 0.0,
+     "b_curve": 0.0,
+     "b_delay": 0.0,
+     "b_loop": 0,
+     "b_tscale": 1.0,
+     "c_ratio": 1.0,
+     "c_level": 0.55,
+     "c_att": 0.75,
+     "c_dec": 2.0,
+     "c_sus": 0.9,
+     "c_rel": 1.4,
+     "c_fb": 0.0,
+     "c_vel": 0.3,
+     "c_ks": 0.0,
+     "c_detune": 8.0,
+     "c_fixed": 0.0,
+     "c_curve": 0.0,
+     "c_delay": 0.0,
+     "c_loop": 0,
+     "c_tscale": 1.0,
+     "d_ratio": 1.0,
+     "d_level": 0.22,
+     "d_att": 1.0,
+     "d_dec": 3.0,
+     "d_sus": 0.6,
+     "d_rel": 1.5,
+     "d_fb": 0.15,
+     "d_vel": 0.3,
+     "d_ks": 0.0,
+     "d_detune": 0.0,
+     "d_fixed": 0.0,
+     "d_curve": 0.0,
+     "d_delay": 0.0,
+     "d_loop": 0,
+     "d_tscale": 1.0,
+     "cutoff": 2200.0,
+     "reso": 0.08,
+     "unison": 2,
+     "uni_detune": 10.0,
+     "uni_spread": 0.7,
+     "age": 0.6,
+     "ins_amt": 0.4,
+     "ins_p1": 0.3,
+     "ins_p2": 0.6,
+     "voices": 12,
+     "amp_att": 0.7,
+     "amp_dec": 0.5,
+     "amp_sus": 1.0,
+     "amp_rel": 1.4,
+     "level": -10.0,
+     "send_reverb": 0.4,
+     "lfo2_dest": 87,
+     "lfo2_depth": 0.06,
+     "lfo2_rate": 0.08,
+     "lfo2_sync": 0,
+     "lfo2_shape": 0,
+     "lfo2_mode": 0,
+     "lfo2_fade": 0.0,
+     "lfo2_phase": 0.0
+    }
+   }
+  },
+  {
+   "machine": "TONE",
+   "sounds": {
+    "0": {
+     "algo": 7,
+     "ftype": 1,
+     "ins_type": 0,
+     "a_ratio": 1.0,
+     "a_level": 0.12,
+     "a_att": 2.0,
+     "a_dec": 3.0,
+     "a_sus": 1.0,
+     "a_rel": 3.0,
+     "a_fb": 0.0,
+     "a_vel": 0.3,
+     "a_ks": 0.0,
+     "a_detune": 0.0,
+     "a_fixed": 0.0,
+     "a_curve": 0.0,
+     "a_delay": 0.0,
+     "a_loop": 0,
+     "a_tscale": 1.0,
+     "cutoff": 7000.0,
+     "reso": 0.1,
+     "noise_level": 0.85,
+     "noise_decay": 10.0,
+     "noise_freq": 2600.0,
+     "noise_q": 1.2,
+     "noise_mode": 1,
+     "noise_env": 1,
+     "age": 0.4,
+     "voices": 4,
+     "amp_att": 1.8,
+     "amp_dec": 0.5,
+     "amp_sus": 1.0,
+     "amp_rel": 3.0,
+     "level": -2.0,
+     "send_reverb": 0.6,
+     "send_delay": 0.25,
+     "pan": -0.35,
+     "lfo1_dest": 78,
+     "lfo1_depth": 0.3,
+     "lfo1_rate": 0.09,
+     "lfo1_sync": 0,
+     "lfo1_shape": 5,
+     "lfo1_mode": 0,
+     "lfo1_fade": 0.0,
+     "lfo1_phase": 0.0,
+     "lfo2_dest": 2,
+     "lfo2_depth": 0.25,
+     "lfo2_rate": 0.17,
+     "lfo2_sync": 0,
+     "lfo2_shape": 5,
+     "lfo2_mode": 0,
+     "lfo2_fade": 0.0,
+     "lfo2_phase": 0.0
+    }
+   }
+  }
+ ],
+ "patterns": [
+  {
+   "index": 0,
+   "length": 64,
+   "root": 2,
+   "scale": 18,
+   "tracks": [
+    {
+     "length": 64,
+     "steps": [
+      {
+       "lane": 0,
+       "i": 0,
+       "notes": [
+        50
+       ],
+       "vel": 86,
+       "len": 120,
+       "chord": {
+        "kind": "memory",
+        "type": 0,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.0,
+        "vintage": 0.0
+       }
+      },
+      {
+       "lane": 0,
+       "i": 11,
+       "notes": [
+        50
+       ],
+       "vel": 66,
+       "len": 48,
+       "chord": {
+        "kind": "memory",
+        "type": 0,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.0
+       }
+      },
+      {
+       "lane": 0,
+       "i": 16,
+       "notes": [
+        55
+       ],
+       "vel": 86,
+       "len": 120,
+       "chord": {
+        "kind": "memory",
+        "type": 3,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.14,
+        "vintage": 0.0
+       }
+      },
+      {
+       "lane": 0,
+       "i": 27,
+       "notes": [
+        55
+       ],
+       "vel": 66,
+       "len": 48,
+       "chord": {
+        "kind": "memory",
+        "type": 3,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.14
+       }
+      },
+      {
+       "lane": 0,
+       "i": 32,
+       "notes": [
+        48
+       ],
+       "vel": 86,
+       "len": 120,
+       "chord": {
+        "kind": "memory",
+        "type": 1,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.29,
+        "vintage": 0.0
+       }
+      },
+      {
+       "lane": 0,
+       "i": 43,
+       "notes": [
+        48
+       ],
+       "vel": 66,
+       "len": 48,
+       "chord": {
+        "kind": "memory",
+        "type": 1,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.29
+       }
+      },
+      {
+       "lane": 0,
+       "i": 48,
+       "notes": [
+        45
+       ],
+       "vel": 86,
+       "len": 120,
+       "chord": {
+        "kind": "memory",
+        "type": 3,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.43,
+        "vintage": 0.0
+       }
+      },
+      {
+       "lane": 0,
+       "i": 59,
+       "notes": [
+        45
+       ],
+       "vel": 66,
+       "len": 48,
+       "chord": {
+        "kind": "memory",
+        "type": 3,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.43
+       }
+      }
+     ]
+    },
+    {
+     "length": 64,
+     "steps": [
+      {
+       "lane": 0,
+       "i": 0,
+       "notes": [
+        38
+       ],
+       "vel": 96,
+       "len": 84
+      },
+      {
+       "lane": 0,
+       "i": 10,
+       "notes": [
+        45
+       ],
+       "vel": 80,
+       "len": 48
+      },
+      {
+       "lane": 0,
+       "i": 16,
+       "notes": [
+        43
+       ],
+       "vel": 96,
+       "len": 84
+      },
+      {
+       "lane": 0,
+       "i": 26,
+       "notes": [
+        50
+       ],
+       "vel": 80,
+       "len": 48
+      },
+      {
+       "lane": 0,
+       "i": 32,
+       "notes": [
+        36
+       ],
+       "vel": 96,
+       "len": 84
+      },
+      {
+       "lane": 0,
+       "i": 42,
+       "notes": [
+        43
+       ],
+       "vel": 80,
+       "len": 48
+      },
+      {
+       "lane": 0,
+       "i": 48,
+       "notes": [
+        33
+       ],
+       "vel": 96,
+       "len": 84
+      },
+      {
+       "lane": 0,
+       "i": 58,
+       "notes": [
+        40
+       ],
+       "vel": 80,
+       "len": 48
+      }
+     ]
+    },
+    {
+     "length": 64,
+     "steps": []
+    },
+    {
+     "length": 64,
+     "steps": []
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "length": 64,
+   "root": 2,
+   "scale": 18,
+   "tracks": [
+    {
+     "length": 64,
+     "steps": [
+      {
+       "lane": 0,
+       "i": 0,
+       "notes": [
+        50
+       ],
+       "vel": 86,
+       "len": 120,
+       "chord": {
+        "kind": "memory",
+        "type": 0,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.57,
+        "vintage": 0.0
+       }
+      },
+      {
+       "lane": 0,
+       "i": 11,
+       "notes": [
+        50
+       ],
+       "vel": 66,
+       "len": 48,
+       "chord": {
+        "kind": "memory",
+        "type": 0,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.57
+       }
+      },
+      {
+       "lane": 0,
+       "i": 16,
+       "notes": [
+        55
+       ],
+       "vel": 86,
+       "len": 120,
+       "chord": {
+        "kind": "memory",
+        "type": 3,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.71,
+        "vintage": 0.0
+       }
+      },
+      {
+       "lane": 0,
+       "i": 27,
+       "notes": [
+        55
+       ],
+       "vel": 66,
+       "len": 48,
+       "chord": {
+        "kind": "memory",
+        "type": 3,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.71
+       }
+      },
+      {
+       "lane": 0,
+       "i": 32,
+       "notes": [
+        48
+       ],
+       "vel": 86,
+       "len": 120,
+       "chord": {
+        "kind": "memory",
+        "type": 1,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.86,
+        "vintage": 1.0
+       }
+      },
+      {
+       "lane": 0,
+       "i": 43,
+       "notes": [
+        48
+       ],
+       "vel": 66,
+       "len": 48,
+       "chord": {
+        "kind": "memory",
+        "type": 1,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 0.86
+       }
+      },
+      {
+       "lane": 0,
+       "i": 48,
+       "notes": [
+        45
+       ],
+       "vel": 86,
+       "len": 120,
+       "chord": {
+        "kind": "memory",
+        "type": 3,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 1.0,
+        "vintage": 1.0
+       }
+      },
+      {
+       "lane": 0,
+       "i": 59,
+       "notes": [
+        45
+       ],
+       "vel": 66,
+       "len": 48,
+       "chord": {
+        "kind": "memory",
+        "type": 3,
+        "size": 3,
+        "voicing": 0
+       },
+       "locks": {
+        "age": 1.0
+       }
+      }
+     ]
+    },
+    {
+     "length": 64,
+     "steps": [
+      {
+       "lane": 0,
+       "i": 0,
+       "notes": [
+        38
+       ],
+       "vel": 96,
+       "len": 84
+      },
+      {
+       "lane": 0,
+       "i": 10,
+       "notes": [
+        45
+       ],
+       "vel": 80,
+       "len": 48
+      },
+      {
+       "lane": 0,
+       "i": 16,
+       "notes": [
+        43
+       ],
+       "vel": 96,
+       "len": 84
+      },
+      {
+       "lane": 0,
+       "i": 26,
+       "notes": [
+        50
+       ],
+       "vel": 80,
+       "len": 48
+      },
+      {
+       "lane": 0,
+       "i": 32,
+       "notes": [
+        36
+       ],
+       "vel": 96,
+       "len": 84
+      },
+      {
+       "lane": 0,
+       "i": 42,
+       "notes": [
+        43
+       ],
+       "vel": 80,
+       "len": 48
+      },
+      {
+       "lane": 0,
+       "i": 48,
+       "notes": [
+        33
+       ],
+       "vel": 96,
+       "len": 84
+      },
+      {
+       "lane": 0,
+       "i": 58,
+       "notes": [
+        40
+       ],
+       "vel": 80,
+       "len": 48
+      }
+     ]
+    },
+    {
+     "length": 64,
+     "steps": []
+    },
+    {
+     "length": 64,
+     "steps": []
+    }
+   ]
+  }
+ ],
+ "chain": [
+  [
+   0,
+   1,
+   0,
+   0
+  ],
+  [
+   1,
+   1,
+   0,
+   0
+  ]
+ ],
+ "fx": {
+  "delay_mode": 0,
+  "reverb_mode": 1,
+  "delay_tone": 0.5,
+  "reverb_damp": 0.45,
+  "tape_noise": 0.25
+ },
+ "chord_mem": [
+  [
+   0,
+   3,
+   7,
+   10,
+   14
+  ],
+  [
+   0,
+   4,
+   7,
+   11,
+   14
+  ],
+  [
+   0,
+   3,
+   7,
+   10,
+   17
+  ],
+  [
+   0,
+   4,
+   7,
+   10,
+   13
+  ]
+ ]
+}

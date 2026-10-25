@@ -277,6 +277,14 @@
     "Lo que el original no tenía: envolventes por tecla (Poly, por defecto), velocity, Freeze, corrimiento de formantes, respuesta del vocoder, pitch bend para los dos lados, vibrato con la rueda de modulación, división del teclado movible, ensemble de las cuerdas apagable y una reverb de placa.",
     "Un panel renderizado en nogal aceitado con cada perilla y cada llave, el visor de bandas y el teclado; una página Extended; 45 presets y un manual en inglés y castellano."
   ],
+  "devicenti-v1.0.0": [
+    "Primera versión: una groovebox FM original para downtempo, trip hop, acid jazz, ambient y dark ambient, una sola máquina naranja que se toca y se programa desde su panel.",
+    "Cuatro pistas, cada una una voz FM de cuatro operadores en ocho algoritmos con sub, ruido, un filtro que satura, drive y fold, una batería de ocho carriles FM con grupos de choke, o una pista MIDI que toca un sinte externo.",
+    "Un secuenciador de 64 pasos con 16 patrones: locks por paso en casi todos los parámetros, condiciones y probabilidad, micro timing, retrigs, slides y ligaduras, largo, velocidad y swing por pista, una cadena de canción y salto directo entre patrones.",
+    "Modo acorde con acordes según la escala, voicings e inversiones, ocho memorias de acorde que se graban manteniendo CHORD y tocando, un rasgueo y un arpegiador; MIDI de entrada desde un controlador con un mapa de CC fijo, MIDI learn y CC de vuelta, y MIDI de salida para manejar otros instrumentos.",
+    "Un insert por pista (overdrive y fold, bitcrush y lo-fi, chorus, phaser, modulador en anillo, un comb afinado a la tónica del patrón), AGE con deriva de cinta, un delay listo para dub y una reverb de resorte, placa, sala o void con freeze y shimmer, y un bus master con cinta, glue, duck y limitador.",
+    "La máquina renderizada en 3D con cada perilla, tecla, LED y pantalla funcionando, páginas de fondo para todo lo demás, 82 presets en bancos por género (siete son las demos de sonido) y un manual en inglés y castellano."
+  ],
 
   "orrery-v1.0.7": [
     "Los satélites siguen sincronizados cuando el host vuelve a preparar el plugin a la misma frecuencia de muestreo, como hace REAPER antes de cada render offline: el satélite ya no deja su drone colgado sin note-off ni lo vuelve a atacar uno a nueve buffers tarde.",

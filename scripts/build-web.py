@@ -169,6 +169,9 @@ WINTH = f"Thrum-{VTH}-Windows.zip"
 VA330 = version("at330")
 MACA330 = f"AT330-{VA330}-macOS.zip"
 WINA330 = f"AT330-{VA330}-Windows.zip"
+VDV = version("devicenti")
+MACDV = f"DeVicenti-{VDV}-macOS.zip"
+WINDV = f"DeVicenti-{VDV}-Windows.zip"
 
 # ───────────────────────── AT20V (y textos de la portada sobre código abierto) ─────────────────────────
 T = {
@@ -411,6 +414,10 @@ H = {
              what="Strings, a choir and a vocoder, in one keyboard.",
              body="The string section through a four-BBD ensemble, a choir of three voices through a bank of seven formant filters, and a ten-band vocoder that makes the keys speak. Recreated from the service documentation of a 1979 string, choir and vocoder keyboard, with the extras it never had: an envelope per key, Freeze, formant shift and an external carrier.",
              alt="A wood-sided keyboard rendered in 3D at an angle on a dark surface: a charcoal panel with sections of knobs and coloured tablets, a lit ten-band display and a keyboard"),
+        dict(slug="devicenti", name="DeVicenti", year="2026", img="hero", imgdir="devicenti/", ver=VDV, mac=MACDV, win=WINDV,
+             what="An FM groovebox for slow, heavy music.",
+             body="Four tracks that are a four-operator FM voice, a kit of eight FM drums or a MIDI sender, a 64-step sequencer with locks on every step, and a sound path of saturating filter, tape wear, inserts, delay and reverb. Made for downtempo, trip hop, acid jazz, ambient and dark ambient. An original instrument, in one orange unit.",
+             alt="An orange groovebox rendered in 3D at an angle on a dark surface: a cream plate with a blue block, four yellow and orange operator blocks with black knobs, and sixteen white step keys along the front"),
     ],
     about="About", dl_mac="macOS", dl_win="Windows", formats="VST3, Audio Unit and standalone app. Free.",
     hero_alt="Close-up of the blue AT101V rendered in 3D: sliders with black caps and the white AT101V logo",
@@ -489,6 +496,10 @@ H = {
              what="Cuerdas, un coro y un vocoder, en un solo teclado.",
              body="La sección de cuerdas por un ensemble de cuatro BBD, un coro de tres voces por un banco de siete filtros de formantes y un vocoder de diez bandas que hace hablar a las teclas. Recreado a partir de la documentación de servicio de un teclado de cuerdas, coro y vocoder de 1979, con lo que nunca tuvo: una envolvente por tecla, Freeze, corrimiento de formantes y una portadora externa.",
              alt="Un teclado con laterales de madera renderizado en 3D, en ángulo sobre una superficie oscura: un panel carbón con secciones de perillas y pulsadores de colores, una pantalla de diez bandas encendida y un teclado"),
+        dict(slug="devicenti", name="DeVicenti", year="2026", img="hero", imgdir="devicenti/", ver=VDV, mac=MACDV, win=WINDV,
+             what="Una groovebox de FM para música lenta y pesada.",
+             body="Cuatro pistas que son una voz de FM de cuatro operadores, un kit de ocho tambores de FM o un emisor MIDI, un secuenciador de 64 pasos con locks en cada paso, y un camino de sonido con filtro saturante, desgaste de cinta, inserts, delay y reverb. Hecha para downtempo, trip hop, acid jazz, ambient y dark ambient. Un instrumento original, en una sola unidad naranja.",
+             alt="Una groovebox naranja renderizada en 3D, en ángulo sobre una superficie oscura: una placa crema con un bloque celeste, cuatro bloques de operadores amarillos y naranjas con perillas negras, y dieciséis teclas blancas de paso en el frente"),
     ],
     about="Ver más", dl_mac="macOS", dl_win="Windows", formats="VST3, Audio Unit y aplicación independiente. Gratis.",
     hero_alt="Primer plano del AT101V azul renderizado en 3D: faders con capuchones negros y el logo AT101V en blanco",
@@ -2213,6 +2224,139 @@ A330T = {
 ),
 }
 
+DVT = {
+"en": dict(
+    title="DeVicenti — free FM groovebox plugin for downtempo, trip hop, acid jazz and ambient | Audio Tools",
+    description="DeVicenti is a free, open-source FM groovebox plugin for macOS, Windows and Linux: four tracks that are a four-operator FM voice with eight algorithms, a kit of eight FM drums or a MIDI sender, a 64-step sequencer with step locks, conditions, chords and an arpeggiator, a saturating filter with AGE, inserts, delay, reverb and a master bus, MIDI in and out, and 82 presets for slow, heavy music.",
+    listen_p="Every clip shows one sound of DeVicenti, rendered offline by its own engine with no edits, with no drums or only a few. They are all at the same loudness, except the two ambient clips, which are four decibels quieter on purpose. There are no samples anywhere in DeVicenti.",
+    sound_h="Four tracks, one sound path.",
+    sound_p1="Each track is a TONE voice of four operators and eight algorithms with a clean sub layer, unison and a noise layer; a KIT of eight small FM drums, each with its own steps; or a MIDI sender for another synth. The sound goes through a filter that stays heavy at high resonance, DRIVE and FOLD, and AGE, a tape stage with wow, flutter and hiss, then one insert, a delay and a reverb.",
+    sound_p2="It is made for slow music: downtempo, trip hop, acid jazz, ambient and dark ambient, with hard, heavy synths. The default tempo is 88 BPM, the default swing is a lazy 56 percent and the factory presets are whole projects, with their sounds, patterns and effects, in banks named for those genres.",
+    spec=[("Tracks", "Four: TONE (four-operator FM), KIT (eight FM drum lanes) or MIDI (notes, chords and locks sent out)"),
+          ("Voice", "Eight algorithms, a ratio table with bell and metal values, feedback on any operator, an envelope macro from click to pad, a sub layer, unison and noise"),
+          ("Sequencer", "16 patterns of up to 64 steps, step locks on almost every parameter, conditions and probability, chords and an arpeggiator, a song chain"),
+          ("Effects", "Seven-position filter, DRIVE, FOLD, AGE, six inserts, a delay with three modes, a reverb with four modes plus freeze and shimmer, and a master with tape, glue, duck and limit"),
+          ("MIDI", "In with a fixed CC map, MIDI learn, relative CCs and feedback; out from MIDI tracks or as a double of the notes; MIDI clock in the standalone"),
+          ("Sound", "82 presets, 64 automatable parameters, main stereo output and four optional track outputs")],
+    flow_h="The whole machine, on one unit.",
+    flow_p="The editor shows the unit in perspective: speed and swing, the algorithm and data knobs with a small display, the four operator blocks, the filter row and sixteen step keys. FUNC gives every knob and key a second layer, so nothing hides in menus. Behind the panel, thirteen pages show every value at once.",
+    flow_caption="Basement Boom, a trip hop project: the unit in the plugin window.",
+    room_h="A sequencer that keeps changing.",
+    room_p="Hold a step and turn any knob: the value belongs to that step. Conditions, probability, retriggers and chords sit on the same keys, and every track can have its own length and speed.",
+    room_facts=[("Locks on every step.", "Cutoff, resonance, drive, AGE, sends, operator levels and ratios, pitch, even the delay feedback and the reverb decay can be locked to a step. A step with only locks changes the notes that are still sounding."),
+                ("Conditions and probability.", "FILL, PRE, NEI, 1ST, LAST, A:B and BAR, plus a percentage. With tracks of 11, 13 and 16 steps, a pattern keeps changing for minutes."),
+                ("Chords that follow the key.", "A step holds a scale degree and plays the chord on it, with a type, a size, a voicing and an inversion. Chord memory keeps eight shapes of your own, quantised to the scale."),
+                ("Songs and jumps.", "A chain of up to 16 rows of pattern and repeats, queued pattern changes and a direct jump. The SEQ page shows every track and every drum lane at once.")],
+    room_caption="The SEQ page: every track and every KIT lane of a pattern, 64 steps.",
+    mods_h="Effects for dark music.",
+    mods_p="One insert per track, a delay and a reverb, and a master bus, all on the FX page.",
+    mods_facts=[("Six inserts.", "Overdrive and fold, bitcrush and lo-fi, chorus and ensemble, phaser, ring modulator, and a comb resonator tuned to the pattern root for drones."),
+                ("Delay and reverb.", "Tape, dub and ping-pong delays; spring, plate, hall and a very long void reverb, with freeze and shimmer, and a way to feed the delay into the reverb."),
+                ("AGE and TAPE.", "AGE wears a track like an old cassette. TAPE on the master adds wow, flutter, hiss and vinyl crackle."),
+                ("GLUE, DUCK and LIMIT.", "A bus compressor, a sidechain from the kick that makes pads pump, and a soft limiter.")],
+    mods_caption="The FX page: the two sends, the master bus and the insert of the selected track.",
+    origin_h="Where it came from.",
+    origin_p="DeVicenti started as concept art by Bruno de Vicenti: two orange machines in an ad from another decade. We took one, kept its layout and its colours, added the sequencer it was missing and made it an instrument you can play. The name is his.",
+    origin_concept_cap="The starting point: concept art by Bruno de Vicenti.",
+    origin_sketch_cap="The sketch for the plugin: one unit, every section annotated.",
+    alt_concept="Concept art by Bruno de Vicenti: two orange machines with knobs, keys and small screens, seen in perspective in a retro advertisement.",
+    alt_sketch="Pencil and marker sketch of DeVicenti with notes on each section.",
+    slow_h="Play it, or let it play others.",
+    slow_p="Play a track from a controller with a fixed CC map, MIDI learn and relative encoders, and record what you play into the pattern. A track can also be a MIDI machine that sends its steps, chords and locks to a hardware synth or another plugin from your DAW.",
+    presets_h="Seventy-five presets.",
+    presets=[("2", "Init", "Init, MIDI Out"),
+             ("12", "Trip Hop", "Basement Boom, Damp Hum, Slow Sag, Tine Haze, Velvet Tine, Dust Strings, Thin Voice, Bristol Kit, Sleepwalk Kit, Cracked Vinyl Kit…"),
+             ("12", "Downtempo", "Rolling Under, Warm Floor, Round Walk, Soft Vapor, Long Porch, Glass Pluck, Bamboo, Slow Choir, Dub Whistle…"),
+             ("12", "Acid Jazz", "Funk Tine, Wah Keys, Late Set EP, Sunday Organ, Church Drive, Pocket Slap, Round Fretless, Horn Section, Vibe Mallet…"),
+             ("12", "Ambient", "Slow Tide, Cold Dawn, Wide Room, Held Breath, Glass Rain, Soft Chime, Paper Piano, Aurora, Frozen Lake…"),
+             ("13", "Dark Ambient", "Black Cavern, Iron Breath, Cold Furnace, Under Water, Rusted Choir, Rite Bell, Hollow Gong, Distant Clang, Last Light…"),
+             ("12", "Heavy", "Iron Growl, Basalt, Low Press, Concrete Sub, Hammer Stab, Slag Stab, Fold Lead, Wobble Drive, Anvil Kit, Dub Slab…")],
+    dl_h=f"Download DeVicenti {VDV}.",
+    dl_p="Free, no account, no subscription.",
+    mac_h="macOS", mac_req="macOS 11 or later. Apple silicon and Intel in one universal binary.",
+    mac_fmt="VST3, Audio Unit, standalone app and devicentirender",
+    mac_steps=["Unzip the file.", "Copy <code>DeVicenti.vst3</code> to <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copy <code>DeVicenti.component</code> to <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "Rescan plugins in your DAW and put DeVicenti on an instrument track."],
+    win_h="Windows", win_req="Windows 10 or 11, 64-bit.", win_fmt="VST3, standalone app and devicentirender",
+    win_steps=["Unzip the file.", "Copy <code>DeVicenti.vst3</code> to <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Rescan plugins in your DAW and put DeVicenti on an instrument track."],
+    file_label="file",
+    dl_note="The builds are not code-signed yet. macOS may refuse to open them until you run <code>xattr -dr com.apple.quarantine</code> on the installed files, and Windows SmartScreen may ask you to confirm the first time. Every package includes an INSTALL.txt with the exact steps and the renderer's options.",
+    os_p="DeVicenti is free software under the GNU Affero General Public License v3, like the JUCE framework it is built on. You can use it, study it, change it and share it. The source code is on <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, with every release.",
+    os_link="Why Audio Tools is open source",
+    trademark="Audio Tools is an independent project. DeVicenti is an original instrument: its algorithms, panel, name and logo are our own, it contains no samples, and no brand names appear in it.",
+    photo_credit="The instrument in the pictures is a 3D render made for this page; the screenshots show the real interface. Every sound on this page comes from DeVicenti's own engine.",
+    hero_alt="An orange groovebox rendered in 3D at an angle on a dark surface: a cream plate with a blue block, four yellow and orange operator blocks with black knobs, and sixteen white step keys along the front.",
+    alt_ui="DeVicenti with the Basement Boom preset", alt_room="DeVicenti's SEQ page", alt_frozen="DeVicenti's FX page",
+),
+"es": dict(
+    title="DeVicenti — plugin gratis de groovebox de FM para downtempo, trip hop, acid jazz y ambient | Audio Tools",
+    description="DeVicenti es un plugin libre y de código abierto de groovebox de FM para macOS, Windows y Linux: cuatro pistas que son una voz de FM de cuatro operadores con ocho algoritmos, un kit de ocho tambores de FM o un emisor MIDI, un secuenciador de 64 pasos con step locks, condiciones, acordes y arpegiador, un filtro saturante con AGE, inserts, delay, reverb y un bus master, MIDI de entrada y de salida, y 82 presets para música lenta y pesada.",
+    listen_p="Cada clip muestra un sonido de DeVicenti, renderizado sin conexión por su propio motor y sin edición, sin batería o con muy poca. Todos están a la misma sonoridad, salvo los dos clips de ambient, que están cuatro decibeles más bajos a propósito. En DeVicenti no hay muestras en ningún lado.",
+    sound_h="Cuatro pistas, un camino de sonido.",
+    sound_p1="Cada pista es una voz TONE de cuatro operadores y ocho algoritmos con una capa de sub limpia, unison y una capa de ruido; un KIT de ocho pequeños tambores de FM, cada uno con sus propios pasos; o un emisor MIDI para otro sinte. El sonido pasa por un filtro que se mantiene pesado con mucha resonancia, DRIVE y FOLD, y AGE, una etapa de cinta con wow, flutter y soplido, y después un insert, un delay y una reverb.",
+    sound_p2="Está hecho para música lenta: downtempo, trip hop, acid jazz, ambient y dark ambient, con sintes duros y pesados. El tempo por defecto es 88 BPM, el swing por defecto es un perezoso 56 por ciento y los presets de fábrica son proyectos enteros, con sus sonidos, patrones y efectos, en bancos con el nombre de esos géneros.",
+    spec=[("Pistas", "Cuatro: TONE (FM de cuatro operadores), KIT (ocho voces de batería de FM) o MIDI (notas, acordes y locks que salen)"),
+          ("Voz", "Ocho algoritmos, una tabla de ratios con valores de campana y de metal, feedback en cualquier operador, una macro de envolvente de click a pad, una capa de sub, unison y ruido"),
+          ("Secuenciador", "16 patrones de hasta 64 pasos, step locks en casi todos los parámetros, condiciones y probabilidad, acordes y arpegiador, una cadena de canción"),
+          ("Efectos", "Filtro de siete posiciones, DRIVE, FOLD, AGE, seis inserts, un delay de tres modos, una reverb de cuatro modos con freeze y shimmer, y un master con tape, glue, duck y limit"),
+          ("MIDI", "Entrada con mapa de CC fijo, MIDI learn, CC relativos y feedback; salida desde pistas MIDI o como doble de las notas; reloj MIDI en la independiente"),
+          ("Sonido", "82 presets, 64 parámetros automatizables, salida estéreo principal y cuatro salidas de pista opcionales")],
+    flow_h="La máquina entera, en una sola unidad.",
+    flow_p="El editor muestra la unidad en perspectiva: velocidad y swing, las perillas de algoritmo y datos con una pantallita, los cuatro bloques de operadores, la fila del filtro y dieciséis teclas de paso. FUNC le da a cada perilla y tecla una segunda capa, así nada se esconde en menús. Detrás del panel, trece páginas muestran todos los valores a la vez.",
+    flow_caption="Basement Boom, un proyecto de trip hop: la unidad en la ventana del plugin.",
+    room_h="Un secuenciador que no deja de cambiar.",
+    room_p="Sostené un paso y girá cualquier perilla: el valor es de ese paso. Las condiciones, la probabilidad, los retrigs y los acordes están en las mismas teclas, y cada pista puede tener su propio largo y su propia velocidad.",
+    room_facts=[("Locks en cada paso.", "El corte, la resonancia, el drive, AGE, los envíos, los niveles y ratios de los operadores, la altura, hasta la realimentación del delay y el decay de la reverb se pueden bloquear en un paso. Un paso sólo de locks cambia las notas que siguen sonando."),
+                ("Condiciones y probabilidad.", "FILL, PRE, NEI, 1ST, LAST, A:B y BAR, más un porcentaje. Con pistas de 11, 13 y 16 pasos, un patrón sigue cambiando durante minutos."),
+                ("Acordes que siguen la tonalidad.", "Un paso tiene un grado de la escala y toca el acorde sobre él, con tipo, tamaño, voicing e inversión. La memoria de acordes guarda ocho formas propias, cuantizadas a la escala."),
+                ("Canciones y saltos.", "Una cadena de hasta 16 filas de patrón y repeticiones, cambios de patrón en cola y un salto directo. La página SEQ muestra todas las pistas y todas las voces de batería a la vez.")],
+    room_caption="La página SEQ: todas las pistas y todas las voces del KIT de un patrón, 64 pasos.",
+    mods_h="Efectos para música oscura.",
+    mods_p="Un insert por pista, un delay y una reverb, y un bus master, todo en la página FX.",
+    mods_facts=[("Seis inserts.", "Overdrive y fold, bitcrush y lo-fi, chorus y ensemble, phaser, modulador en anillo, y un resonador de peine afinado a la raíz del patrón para drones."),
+                ("Delay y reverb.", "Delays tape, dub y ping-pong; reverbs spring, plate, hall y una void larguísima, con freeze y shimmer, y una forma de alimentar la reverb con el delay."),
+                ("AGE y TAPE.", "AGE gasta una pista como un casete viejo. TAPE en el master suma wow, flutter, soplido y crepitar de vinilo."),
+                ("GLUE, DUCK y LIMIT.", "Un compresor de bus, un sidechain desde el bombo que hace bombear a los pads, y un limitador suave.")],
+    mods_caption="La página FX: los dos envíos, el bus master y el insert de la pista seleccionada.",
+    origin_h="De dónde salió.",
+    origin_p="DeVicenti nació de un arte conceptual de Bruno de Vicenti: dos máquinas naranjas en un aviso de otra década. Tomamos una, conservamos su disposición y sus colores, le sumamos el secuenciador que le faltaba y la convertimos en un instrumento que se puede tocar. El nombre es suyo.",
+    origin_concept_cap="El punto de partida: arte conceptual de Bruno de Vicenti.",
+    origin_sketch_cap="El boceto del plugin: una sola unidad, con cada sección anotada.",
+    alt_concept="Arte conceptual de Bruno de Vicenti: dos máquinas naranjas con perillas, teclas y pantallitas, en perspectiva, en un aviso retro.",
+    alt_sketch="Boceto en lápiz y marcador de DeVicenti, con notas en cada sección.",
+    slow_h="Tocalo, o dejá que toque a otros.",
+    slow_p="Tocá una pista desde un controlador con un mapa de CC fijo, MIDI learn y encoders relativos, y grabá lo que tocás en el patrón. Una pista también puede ser una máquina MIDI que manda sus pasos, acordes y locks a un sinte de hardware o a otro plugin de tu DAW.",
+    presets_h="Setenta y cinco presets.",
+    presets=[("2", "Init", "Init, MIDI Out"),
+             ("12", "Trip Hop", "Basement Boom, Damp Hum, Slow Sag, Tine Haze, Velvet Tine, Dust Strings, Thin Voice, Bristol Kit, Sleepwalk Kit, Cracked Vinyl Kit…"),
+             ("12", "Downtempo", "Rolling Under, Warm Floor, Round Walk, Soft Vapor, Long Porch, Glass Pluck, Bamboo, Slow Choir, Dub Whistle…"),
+             ("12", "Acid Jazz", "Funk Tine, Wah Keys, Late Set EP, Sunday Organ, Church Drive, Pocket Slap, Round Fretless, Horn Section, Vibe Mallet…"),
+             ("12", "Ambient", "Slow Tide, Cold Dawn, Wide Room, Held Breath, Glass Rain, Soft Chime, Paper Piano, Aurora, Frozen Lake…"),
+             ("13", "Dark Ambient", "Black Cavern, Iron Breath, Cold Furnace, Under Water, Rusted Choir, Rite Bell, Hollow Gong, Distant Clang, Last Light…"),
+             ("12", "Heavy", "Iron Growl, Basalt, Low Press, Concrete Sub, Hammer Stab, Slag Stab, Fold Lead, Wobble Drive, Anvil Kit, Dub Slab…")],
+    dl_h=f"Descargá DeVicenti {VDV}.",
+    dl_p="Gratis, sin cuenta, sin suscripción.",
+    mac_h="macOS", mac_req="macOS 11 o posterior. Apple silicon e Intel en un solo binario universal.",
+    mac_fmt="VST3, Audio Unit, aplicación independiente y devicentirender",
+    mac_steps=["Descomprimí el archivo.", "Copiá <code>DeVicenti.vst3</code> a <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copiá <code>DeVicenti.component</code> a <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "Volvé a escanear los plugins en tu DAW y poné DeVicenti en una pista de instrumento."],
+    win_h="Windows", win_req="Windows 10 u 11, de 64 bits.", win_fmt="VST3, aplicación independiente y devicentirender",
+    win_steps=["Descomprimí el archivo.", "Copiá <code>DeVicenti.vst3</code> a <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Volvé a escanear los plugins en tu DAW y poné DeVicenti en una pista de instrumento."],
+    file_label="archivo",
+    dl_note="Los builds todavía no están firmados. macOS puede negarse a abrirlos hasta que corras <code>xattr -dr com.apple.quarantine</code> sobre los archivos instalados, y SmartScreen de Windows puede pedirte que confirmes la primera vez. Cada paquete trae un INSTALL.txt con los pasos exactos y las opciones del render.",
+    os_p="DeVicenti es software libre bajo la GNU Affero General Public License v3, como el framework JUCE sobre el que está hecho. Lo podés usar, estudiar, modificar y compartir. El código fuente está en <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, con cada versión.",
+    os_link="Por qué Audio Tools es de código abierto",
+    trademark="Audio Tools es un proyecto independiente. DeVicenti es un instrumento original: sus algoritmos, su panel, su nombre y su logo son propios, no contiene muestras y no aparecen nombres de marcas.",
+    photo_credit="El instrumento de las imágenes es un render 3D hecho para esta página; las capturas muestran la interfaz real. Todos los sonidos de esta página salen del motor propio de DeVicenti.",
+    hero_alt="Una groovebox naranja renderizada en 3D, en ángulo sobre una superficie oscura: una placa crema con un bloque celeste, cuatro bloques de operadores amarillos y naranjas con perillas negras, y dieciséis teclas blancas de paso en el frente.",
+    alt_ui="DeVicenti con el preset Basement Boom", alt_room="La página SEQ de DeVicenti", alt_frozen="La página FX de DeVicenti",
+),
+}
+
 A3 = {
 "en": dict(
     title="AT303 — free bass line synthesizer with a diode ladder filter and step sequencer | Audio Tools",
@@ -2371,6 +2515,10 @@ CPU_A330 = (1.3, 2.0, 4.3)          # Apple M4 a 48 kHz: cuerdas con un acorde d
 WINCPU_A330 = (3.4, 6.0, 15.3)      # Ryzen 9 5900XT: lo mismo con at330test.exe (pc50 sin otra carga)
 DISK_A330 = (47, 16)                # instalado: VST3 + AU + app en macOS, VST3 + exe en Windows
 UICPU_A330 = 2                      # athosttest --tests editor, con el editor a la vista (M4)
+CPU_DV = (4.4, 6.3, 3.7)            # Apple M4 a 48 kHz (QA de la versión): promedio de los 82 presets / el peor preset / 16 voces
+WINCPU_DV = (9.4, 14.0, 6.8)        # Ryzen 9 5900XT: promedio de los 82 presets / el peor preset / 16 voces
+DISK_DV = (67, 31)                  # instalado: VST3 + AU + app en macOS, VST3 + exe en Windows (medido en los zips 1.0.0)
+UICPU_DV = None                     # sin medir: la nota omite la frase del editor
 UICPU_HA = 8
 DISK_FS1 = (80, 24)
 CPU = {
@@ -2390,6 +2538,7 @@ CPU = {
     "pallor": [("padef", CPU_PA[0], WINCPU_PA[0]), ("paheavy", CPU_PA[1], WINCPU_PA[1]), ("paworst", CPU_PA[2], WINCPU_PA[2])],
     "thrum": [("thavg", CPU_TH[0], WINCPU_TH[0]), ("thheavy", CPU_TH[1], WINCPU_TH[1]), ("thworst", CPU_TH[2], WINCPU_TH[2])],
     "at330": [("a330str", CPU_A330[0], WINCPU_A330[0]), ("a330all", CPU_A330[1], WINCPU_A330[1]), ("a330keys", CPU_A330[2], WINCPU_A330[2])],
+    "devicenti": [("dvtyp", CPU_DV[0], WINCPU_DV[0]), ("dvheavy", CPU_DV[1], WINCPU_DV[1]), ("dvworst", CPU_DV[2], WINCPU_DV[2])],
 }
 CPU_LABEL = {
     "en": {"mono": "Mono patch, 4x", "poly8": "8 voices with delay and reverb, 4x", "poly12": "12 voices, 8x (the heaviest setting)",
@@ -2406,7 +2555,8 @@ CPU_LABEL = {
            "plnat": "Natural Lead, Tight mode, formants preserved", "plhard": "Hard Tune, Tight mode", "plthroat": "Throat Down: formants moved",
            "padef": "Night Shift Mercury, sequencer running", "paheavy": "Ash Choir Pulse, the heaviest factory preset", "paworst": "All 16 voices digital on every other step, every effect on",
            "thavg": "Average of the 69 factory presets, each playing its phrase", "thheavy": "The heaviest factory preset", "thworst": "Strummed chords, high-gain amp at 8x, delay and hall",
-           "a330str": "Strings, an 8-note chord", "a330all": "Everything on: 16 notes, vocoder and reverb", "a330keys": "All 49 keys held with everything on"},
+           "a330str": "Strings, an 8-note chord", "a330all": "Everything on: 16 notes, vocoder and reverb", "a330keys": "All 49 keys held with everything on",
+           "dvtyp": "Average of the 82 factory presets", "dvheavy": "The heaviest factory preset", "dvworst": "All 16 voices sounding"},
     "es": {"mono": "Patch mono, 4x", "poly8": "8 voces con delay y reverb, 4x", "poly12": "12 voces, 8x (el ajuste más pesado)",
            "poly6": "Pad de 6 voces, 4x", "poly6x8": "Pad de 6 voces, 8x", "drones": "Dos voces drone con efectos, 2x",
            "all2": "Todas las voces y el efector, 2x", "all4": "Todas las voces y el efector, 4x",
@@ -2421,10 +2571,11 @@ CPU_LABEL = {
            "plnat": "Natural Lead, modo Tight, formantes preservados", "plhard": "Hard Tune, modo Tight", "plthroat": "Throat Down: formantes movidos",
            "padef": "Night Shift Mercury, con el secuenciador corriendo", "paheavy": "Ash Choir Pulse, el preset de fábrica más pesado", "paworst": "Las 16 voces digitales en un paso de cada dos, todos los efectos prendidos",
            "thavg": "Promedio de los 69 presets de fábrica, cada uno tocando su frase", "thheavy": "El preset de fábrica más pesado", "thworst": "Acordes rasgueados, amplificador de alta ganancia a ×8, delay y sala",
-           "a330str": "Cuerdas, un acorde de 8 notas", "a330all": "Todo prendido: 16 notas, vocoder y reverb", "a330keys": "Las 49 teclas apretadas con todo prendido"},
+           "a330str": "Cuerdas, un acorde de 8 notas", "a330all": "Todo prendido: 16 notas, vocoder y reverb", "a330keys": "Las 49 teclas apretadas con todo prendido",
+           "dvtyp": "Promedio de los 82 presets de fábrica", "dvheavy": "El preset de fábrica más pesado", "dvworst": "Las 16 voces sonando"},
 }
-UI_CPU = {"at20v": 15, "at101v": 5, "at42": 11, "at700": 8, "atfs1": UICPU_FS1, "orrery": 4, "murmur": UICPU_MM, "atmd": 6, "lacquer": UICPU_LQ, "halation": UICPU_HA, "tarnish": UICPU_TN, "at303": UICPU_A3, "plumb": UICPU_PL, "pallor": UICPU_PA, "thrum": UICPU_TH, "at330": UICPU_A330}          # lo que suma el editor abierto en el M4 (% de un núcleo)
-DISK = {"at20v": (219, 73), "at101v": (71, 24), "at42": (125, 42), "at700": (78, 26), "atfs1": DISK_FS1, "orrery": DISK_OR, "murmur": DISK_MM, "atmd": DISK_MD, "lacquer": DISK_LQ, "halation": DISK_HA, "tarnish": DISK_TN, "at303": DISK_A3, "plumb": DISK_PL, "pallor": DISK_PA, "thrum": DISK_TH, "at330": DISK_A330}
+UI_CPU = {"at20v": 15, "at101v": 5, "at42": 11, "at700": 8, "atfs1": UICPU_FS1, "orrery": 4, "murmur": UICPU_MM, "atmd": 6, "lacquer": UICPU_LQ, "halation": UICPU_HA, "tarnish": UICPU_TN, "at303": UICPU_A3, "plumb": UICPU_PL, "pallor": UICPU_PA, "thrum": UICPU_TH, "at330": UICPU_A330, "devicenti": UICPU_DV}          # lo que suma el editor abierto en el M4 (% de un núcleo)
+DISK = {"at20v": (219, 73), "at101v": (71, 24), "at42": (125, 42), "at700": (78, 26), "atfs1": DISK_FS1, "orrery": DISK_OR, "murmur": DISK_MM, "atmd": DISK_MD, "lacquer": DISK_LQ, "halation": DISK_HA, "tarnish": DISK_TN, "at303": DISK_A3, "plumb": DISK_PL, "pallor": DISK_PA, "thrum": DISK_TH, "at330": DISK_A330, "devicenti": DISK_DV}
 
 REQ = {
 "en": dict(
@@ -2438,7 +2589,7 @@ REQ = {
     cpu_note="Percentage of one CPU core at 48 kHz, sound engine only. With the editor open, the interface adds about {ui} % on the M4. Hosts run each instrument on one core, so single-core speed is what counts.",
     cpu_cols=("Setting", "Apple M4", "AMD Ryzen 9 5900XT"),
     disk="Disk space: {mac} MB on macOS (all formats), {win} MB on Windows.",
-    heavy={"at303": "", "pallor": "", "thrum": "", "at330": "", "at20v": "The 12-voice, 8x setting needs the recommended processor.", "at101v": "", "at42": "", "at700": "Eight voices at 4x need the recommended processor.", "atfs1": "Thirty-two voices with every operator need the recommended processor.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
+    heavy={"at303": "", "pallor": "", "thrum": "", "at330": "", "devicenti": "", "at20v": "The 12-voice, 8x setting needs the recommended processor.", "at101v": "", "at42": "", "at700": "Eight voices at 4x need the recommended processor.", "atfs1": "Thirty-two voices with every operator need the recommended processor.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
 ),
 "es": dict(
     min_h="Mínimo", rec_h="Recomendado", cpu_h="Carga de CPU medida",
@@ -2451,7 +2602,7 @@ REQ = {
     cpu_note="Porcentaje de un núcleo de CPU a 48 kHz, sólo el motor de sonido. Con el editor abierto, la interfaz suma alrededor de {ui} % en el M4. Los DAW corren cada instrumento en un núcleo, así que lo que cuenta es la velocidad de un núcleo.",
     cpu_cols=("Ajuste", "Apple M4", "AMD Ryzen 9 5900XT"),
     disk="Espacio en disco: {mac} MB en macOS (todos los formatos), {win} MB en Windows.",
-    heavy={"at303": "", "pallor": "", "thrum": "", "at330": "", "at20v": "El ajuste de 12 voces a 8x necesita el procesador recomendado.", "at101v": "", "at42": "", "at700": "Ocho voces a 4x necesitan el procesador recomendado.", "atfs1": "Treinta y dos voces con todos los operadores necesitan el procesador recomendado.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
+    heavy={"at303": "", "pallor": "", "thrum": "", "at330": "", "devicenti": "", "at20v": "El ajuste de 12 voces a 8x necesita el procesador recomendado.", "at101v": "", "at42": "", "at700": "Ocho voces a 4x necesitan el procesador recomendado.", "atfs1": "Treinta y dos voces con todos los operadores necesitan el procesador recomendado.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
 ),
 }
 
@@ -2750,6 +2901,26 @@ PRES = {
         stats=[("45", "", "presets en cinco grupos"), ("44", "", "parámetros automatizables"), ("0", "", "muestras de latencia"), ("1,3", "%", "de un núcleo para un acorde de cuerdas de 8 notas, en un Apple M4")],
         film_cap="El AT330 renderizado en 3D en nogal aceitado: las llaves del coro se prenden a tiempo, el visor de diez bandas sigue el sonido y las teclas tocan los acordes. El sonido es el AT330 tocando Rain on Neon, acordes menores lentos a 64 BPM."),
 },
+"devicenti": {
+    "en": dict(tag="An FM groovebox for slow, heavy music.",
+        highlights=[("devicenti/hl-top", "One unit, four tracks.", "Each track is a four-operator FM voice, a kit of eight FM drums or a MIDI sender, all on one orange panel. FUNC gives every knob and key a second layer."),
+                    ("devicenti/hl-close", "Four operators, five knobs each.", "Eight algorithms, a ratio table with bell and metal values, feedback on any operator and an envelope macro that walks from a click to a pad."),
+                    ("devicenti/hl-keys", "Locks on every step.", "Hold a step and turn any knob: the value belongs to that step. Conditions, probability and chords sit on the same sixteen keys."),
+                    ("devicenti/hl-filter", "Weight and wear.", "A filter that stays heavy at high resonance, a clean sub, DRIVE and FOLD, and AGE, a tape stage with wow, flutter and hiss."),
+                    ("devicenti/hl-ui", "The real unit, in the plugin.", "The editor draws the unit in perspective, with the top bar for presets, MIDI learn and a manual inside the plugin."),
+                    ("devicenti/hl-pages", "Thirteen pages behind the panel.", "Every field of the sound, the sequencer, the effects and the MIDI settings at once, grouped in columns.")],
+        stats=[("82", "", "presets in six genre banks and an Init bank"), ("4", "", "tracks: FM voice, drum kit or MIDI"), ("64", "", "steps per pattern, 16 patterns"), ("64", "", "automatable parameters")],
+        film_cap="DeVicenti rendered in 3D: the playhead runs over the sixteen steps and the knobs sweep. The sound is DeVicenti playing Half-Light, half-time trip hop at 80 BPM."),
+    "es": dict(tag="Una groovebox de FM para música lenta y pesada.",
+        highlights=[("devicenti/hl-top", "Una unidad, cuatro pistas.", "Cada pista es una voz de FM de cuatro operadores, un kit de ocho tambores de FM o un emisor MIDI, todo en un solo panel naranja. FUNC le da a cada perilla y tecla una segunda capa."),
+                    ("devicenti/hl-close", "Cuatro operadores, cinco perillas cada uno.", "Ocho algoritmos, una tabla de ratios con valores de campana y de metal, feedback en cualquier operador y una macro de envolvente que va de un click a un pad."),
+                    ("devicenti/hl-keys", "Locks en cada paso.", "Sostené un paso y girá cualquier perilla: el valor es de ese paso. Las condiciones, la probabilidad y los acordes están en las mismas dieciséis teclas."),
+                    ("devicenti/hl-filter", "Peso y desgaste.", "Un filtro que se mantiene pesado con mucha resonancia, un sub limpio, DRIVE y FOLD, y AGE, una etapa de cinta con wow, flutter y soplido."),
+                    ("devicenti/hl-ui", "La unidad real, en el plugin.", "El editor dibuja la unidad en perspectiva, con la barra superior para presets, MIDI learn y un manual dentro del plugin."),
+                    ("devicenti/hl-pages", "Trece páginas detrás del panel.", "Todos los campos del sonido, del secuenciador, de los efectos y de los ajustes MIDI a la vez, agrupados en columnas.")],
+        stats=[("82", "", "presets en seis bancos de géneros y un banco Init"), ("4", "", "pistas: voz de FM, kit de batería o MIDI"), ("64", "", "pasos por patrón, 16 patrones"), ("64", "", "parámetros automatizables")],
+        film_cap="DeVicenti renderizado en 3D: la posición de reproducción recorre los dieciséis pasos y las perillas se mueven. El sonido es DeVicenti tocando Half-Light, trip hop a medio tiempo a 80 BPM."),
+},
 "pallor": {
     "en": dict(tag="The cold drum machine.",
         highlights=[("pallor/hl-close", "Pads that glow.", "Sixteen pale pads lit from inside with every hit, from the sequencer, from MIDI or from your hand."),
@@ -3024,6 +3195,40 @@ SPECS = {
            ("Control", ["45 presets de fábrica en cinco grupos; 44 parámetros automatizables; 0 muestras de latencia"]),
            ("Formatos", ["Instrumento VST3, Audio Unit (macOS), LV2 (Linux) y aplicación independiente", "at330render: render por línea de comandos"])],
 },
+"devicenti": {
+    "en": [("Tracks", ["Four tracks, each a TONE voice, a KIT or a MIDI sender",
+                       "TONE: four operators A to D with eight algorithms (STACK, FORK, PAIRS, FAN, CROWN, STACK+SINE, DIAMOND, CHOIR), a 24-value ratio table, feedback on any operator, a harmonic shape per operator and an envelope macro from click to pad",
+                       "KIT: eight FM drum lanes (kick, snare, clap, closed and open hat, two toms, percussion), each a full voice with its own steps, locks, conditions and choke group"]),
+           ("Sound path", ["Filter with seven positions (LP24, LP12, BP, HP, NOTCH, PEAK, OFF), a base and width pair, DRIVE, FOLD and CRUSH",
+                           "A clean sub layer, unison of up to four voices, a noise layer, a pitch envelope, glide and low-end mono",
+                           "AGE, a tape stage with wow, flutter, drift and hiss; two LFOs per track and a matrix of eight modulation slots"]),
+           ("Sequencer", ["16 patterns of up to 64 steps; per-track length, speed from 1/8x to 2x and swing; 19 scales",
+                          "Step locks, conditions (FILL, PRE, NEI, 1ST, LAST, A:B, BAR), probability, micro timing, retrigs, slides, ties and patch swap",
+                          "Chord mode with five voicings and nine chord types, eight chord memory slots, a strum, an arpeggiator, a song chain and a direct jump between patterns"]),
+           ("Effects", ["One insert per track: overdrive and fold, bitcrush and lo-fi, chorus and ensemble, phaser, ring modulator or comb resonator",
+                        "Delay: tape, dub or ping-pong, with freeze; reverb: spring, plate, hall or void, with freeze and shimmer",
+                        "Master bus: TAPE, GLUE, DUCK (sidechain from the kick) and LIMIT"]),
+           ("MIDI", ["In: OMNI or one channel per track, a fixed CC map for every knob, MIDI learn, relative CCs, CC feedback, program change, a harmony channel, live recording",
+                     "Out: MIDI tracks send notes, chords and locks as CC; the other tracks can double their notes; MIDI clock in and out in the standalone"]),
+           ("Control", ["82 presets that are whole projects; 64 automatable parameters; FUNC reaches the second layer of every knob and key, so nothing hides in menus"]),
+           ("Formats", ["Instrument VST3, Audio Unit (macOS), LV2 (Linux) and standalone app", "devicentirender: command-line renderer"])],
+    "es": [("Pistas", ["Cuatro pistas, cada una una voz TONE, un KIT o un emisor MIDI",
+                       "TONE: cuatro operadores A a D con ocho algoritmos (STACK, FORK, PAIRS, FAN, CROWN, STACK+SINE, DIAMOND, CHOIR), una tabla de 24 ratios, feedback en cualquier operador, una forma armónica por operador y una macro de envolvente de click a pad",
+                       "KIT: ocho voces de batería de FM (bombo, redoblante, clap, hi-hat cerrado y abierto, dos toms, percusión), cada una una voz completa con sus pasos, locks, condiciones y grupo de choke"]),
+           ("Camino de sonido", ["Filtro de siete posiciones (LP24, LP12, BP, HP, NOTCH, PEAK, OFF), un par base y width, DRIVE, FOLD y CRUSH",
+                                 "Una capa de sub limpia, unison de hasta cuatro voces, una capa de ruido, una envolvente de altura, glide y graves en mono",
+                                 "AGE, una etapa de cinta con wow, flutter, deriva y soplido; dos LFO por pista y una matriz de ocho ranuras de modulación"]),
+           ("Secuenciador", ["16 patrones de hasta 64 pasos; largo, velocidad de 1/8x a 2x y swing por pista; 19 escalas",
+                             "Step locks, condiciones (FILL, PRE, NEI, 1ST, LAST, A:B, BAR), probabilidad, micro timing, retrigs, slides, ligaduras y cambio de patch",
+                             "Modo de acordes con cinco voicings y nueve tipos de acorde, ocho ranuras de memoria de acordes, un strum, un arpegiador, una cadena de canción y un salto directo entre patrones"]),
+           ("Efectos", ["Un insert por pista: overdrive y fold, bitcrush y lo-fi, chorus y ensemble, phaser, modulador en anillo o resonador de peine",
+                        "Delay: tape, dub o ping-pong, con freeze; reverb: spring, plate, hall o void, con freeze y shimmer",
+                        "Bus master: TAPE, GLUE, DUCK (sidechain desde el bombo) y LIMIT"]),
+           ("MIDI", ["Entrada: OMNI o un canal por pista, un mapa de CC fijo para cada perilla, MIDI learn, CC relativos, CC feedback, program change, un canal de armonía, grabación en vivo",
+                     "Salida: las pistas MIDI mandan notas, acordes y locks como CC; las demás pueden duplicar sus notas; reloj MIDI de entrada y de salida en la independiente"]),
+           ("Control", ["82 presets que son proyectos completos; 64 parámetros automatizables; FUNC llega a la segunda capa de cada perilla y tecla, así nada se esconde en menús"]),
+           ("Formatos", ["Instrumento VST3, Audio Unit (macOS), LV2 (Linux) y aplicación independiente", "devicentirender: render por línea de comandos"])],
+},
 "pallor": {
     "en": [("Voices", ["Sixteen: kick, snare, clap, rim, closed and open hat, crash, ride, four toms, cowbell, clave, tambourine and FX",
                        "Analog engine: 44 circuit models in twelve families (bridged-T, VCO, six-square metal, noise, hexagonal, FM and more), each calibrated against published measurements",
@@ -3173,6 +3378,7 @@ PRODUCTS = [  # slug, nombre, año, mac, win, versión
     ("pallor", "Pallor", "2026", MACPA, WINPA, VPA),
     ("thrum", "Thrum", "2026", MACTH, WINTH, VTH),
     ("at330", "AT330", "1979", MACA330, WINA330, VA330),
+    ("devicenti", "DeVicenti", "2026", MACDV, WINDV, VDV),
 ]
 # Un producto entra a la web cuando sus dos zips están en web/downloads: así se puede publicar uno mientras el
 # siguiente sigue en preparación con su texto ya escrito.
@@ -3180,7 +3386,7 @@ PRODUCTS = [p for p in PRODUCTS if all(os.path.exists(os.path.join(WEB, "downloa
 RELEASED = {p[0] for p in PRODUCTS}
 # Menú de productos (encabezado): grupos y color de cada uno. Las miniaturas son web/assets/img/nav/<slug>.jpg.
 NAV_GROUPS = [(g, [x for x in sl if x in RELEASED]) for g, sl in
-              [("synths", ["at20v", "at101v", "at42", "at700", "atfs1", "atmd", "at303", "pallor", "thrum", "at330"]), ("tools", ["orrery", "murmur", "halation", "tarnish", "plumb", "lacquer"])]]
+              [("synths", ["at20v", "at101v", "at42", "at700", "atfs1", "atmd", "at303", "pallor", "thrum", "at330", "devicenti"]), ("tools", ["orrery", "murmur", "halation", "tarnish", "plumb", "lacquer"])]]
 # El mismo orden en el carrusel de la portada, las fichas y el launcher: sintetizadores a la izquierda,
 # herramientas y efectos a la derecha (pedido del usuario, 2026-10-19).
 _ORDER = [s for _, sl in NAV_GROUPS for s in sl]
@@ -3188,10 +3394,10 @@ PRODUCTS.sort (key=lambda p: _ORDER.index (p[0]) if p[0] in _ORDER else len (_OR
 NAV_LABELS = {"en": {"synths": "Synthesizers", "tools": "Tools and effects", "button": "Plugins", "all": "All plugins", "close": "Close menu"},
               "es": {"synths": "Sintetizadores", "tools": "Herramientas y efectos", "button": "Plugins", "all": "Todos los plugins", "close": "Cerrar el menú"}}
 # La imagen grande de cada página de producto (web/assets/img/<nombre>-1200.jpg); el launcher la usa en su ficha.
-HERO_IMG = {"at20v": "render-hero", "pallor": "pallor/hero", "thrum": "thrum/hero", "at330": "at330/hero", "at303": "at303/hero", "at101v": "at101v/hero-grey", "at42": "at42/hero-blue", "at700": "at700/hero", "atfs1": "atfs1/hero", "orrery": "orrery/hero", "murmur": "murmur/hero", "atmd": "atmd/hero", "lacquer": "lacquer/hero", "halation": "halation/hero", "tarnish": "tarnish/hero", "plumb": "plumb/hero"}
+HERO_IMG = {"at20v": "render-hero", "pallor": "pallor/hero", "thrum": "thrum/hero", "at330": "at330/hero", "devicenti": "devicenti/hero", "at303": "at303/hero", "at101v": "at101v/hero-grey", "at42": "at42/hero-blue", "at700": "at700/hero", "atfs1": "atfs1/hero", "orrery": "orrery/hero", "murmur": "murmur/hero", "atmd": "atmd/hero", "lacquer": "lacquer/hero", "halation": "halation/hero", "tarnish": "tarnish/hero", "plumb": "plumb/hero"}
 ACCENT = {"at20v": "#d24a35", "at101v": "#3a7bd5", "at42": "#ea8c3f", "at700": "#e0b341", "atfs1": "#a9c83c", "orrery": "#f2c878",
-          "murmur": "#f3a27e", "atmd": "#e8743b", "lacquer": "#e0563f", "halation": "#b8a5ff", "tarnish": "#3e8c84", "at303": "#f2a03d", "plumb": "#9db4c8", "pallor": "#e0709c", "thrum": "#e8a33d", "at330": "#e2a43b"}
-TEXTS = lambda slug, lang: {"at20v": T, "at101v": S, "at42": Q, "at700": Z, "atfs1": F, "orrery": O, "murmur": M, "atmd": D, "lacquer": LQ, "halation": HA, "tarnish": TN, "at303": A3, "plumb": PL, "pallor": PA, "thrum": TH, "at330": A330T}[slug][lang]
+          "murmur": "#f3a27e", "atmd": "#e8743b", "lacquer": "#e0563f", "halation": "#b8a5ff", "tarnish": "#3e8c84", "at303": "#f2a03d", "plumb": "#9db4c8", "pallor": "#e0709c", "thrum": "#e8a33d", "at330": "#e2a43b", "devicenti": "#e8792b"}
+TEXTS = lambda slug, lang: {"at20v": T, "at101v": S, "at42": Q, "at700": Z, "atfs1": F, "orrery": O, "murmur": M, "atmd": D, "lacquer": LQ, "halation": HA, "tarnish": TN, "at303": A3, "plumb": PL, "pallor": PA, "thrum": TH, "at330": A330T, "devicenti": DVT}[slug][lang]
 
 # Visitas y descargas: Pulse (analytics.digitalhub.com.ar, la analítica propia), sitio "Audio Tools". Sólo carga en el
 # dominio real, así las pruebas locales no cuentan. Las descargas llegan como eventos (ver site.js); el panel es privado.
@@ -3655,13 +3861,15 @@ def specs_rows(slug, lang):
     pct = lambda v: ("&lt; 0,01" if lang == "es" else "&lt; 0.01") if v < 0.01 else dec(v)     # el generador de Orrery
     cols = r["cpu_cols"]
     table = (f'<table class="cpu-table"><thead><tr><th>{cols[0]}</th><th>{cols[1]}</th><th>{cols[2]}</th></tr></thead><tbody>'
-             + "".join(f"<tr><td>{CPU_LABEL[lang][k]}</td><td>{pct(m)} %</td><td>{pct(w) + ' %' if w is not None else '&mdash;'}</td></tr>" for k, m, w in CPU[slug])
+             + "".join(f"<tr><td>{CPU_LABEL[lang][k]}</td><td>{pct(m) + ' %' if m is not None else '&mdash;'}</td><td>{pct(w) + ' %' if w is not None else '&mdash;'}</td></tr>" for k, m, w in CPU[slug])
              + "</tbody></table>")
     cpu_note = r["cpu_note"].format(ui=UI_CPU[slug])
     if UI_CPU[slug] is None:
         cpu_note = re.sub(r" (With the editor open|Con el editor abierto)[^.]*\.", "", r["cpu_note"])
     unmeasured = ""
-    if any(w is None for _, _, w in CPU[slug]):
+    if all(m is None and w is None for _, m, w in CPU[slug]):
+        unmeasured = " Not measured yet." if lang == "en" else " Todavía sin medir."
+    elif all(w is None for _, _, w in CPU[slug]):
         unmeasured = " Windows is not measured yet." if lang == "en" else " Windows todavía no está medido."
     out = []
     for g, items in rows:
@@ -4004,6 +4212,48 @@ def page_product(slug, lang):
       <p class="lede center reveal">{t['slow_p']}</p>
     </div>
   </section>"""
+    elif slug == "devicenti":
+        sound_img = ("devicenti/hl-filter", t["hero_alt"])
+        mid = f"""
+  <section class="sec statement" id="flow">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{t['flow_h']}</h2>
+      <p class="lede center reveal">{t['flow_p']}</p>
+      <figure class="statement-img reveal">{pic(a, "devicenti/ui-overview", t["alt_ui"])}<figcaption>{t['flow_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec deep" id="room">
+    <div class="wrap split">
+      <div class="reveal"><h2 class="sec-head">{t['room_h']}</h2><p class="lede">{t['room_p']}</p><ul class="facts">
+{facts_html(t['room_facts'])}
+        </ul></div>
+      <figure class="reveal">{pic(a, "devicenti/ui-seq", t["alt_room"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['room_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec" id="modules">
+    <div class="wrap split reverse">
+      <div class="reveal"><h2 class="sec-head">{t['mods_h']}</h2><p class="lede">{t['mods_p']}</p><ul class="facts">
+{facts_html(t['mods_facts'])}
+        </ul></div>
+      <figure class="reveal">{pic(a, "devicenti/ui-fx", t["alt_frozen"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['mods_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec statement" id="slow">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{t['slow_h']}</h2>
+      <p class="lede center reveal">{t['slow_p']}</p>
+    </div>
+  </section>
+  <section class="sec deep" id="origin">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{t['origin_h']}</h2>
+      <p class="lede reveal">{t['origin_p']}</p>
+      <div class="origin-grid">
+        <figure class="reveal">{pic(a, "devicenti/origin-concept", t["alt_concept"])}<figcaption>{t['origin_concept_cap']}</figcaption></figure>
+        <figure class="reveal">{pic(a, "devicenti/origin-sketch", t["alt_sketch"])}<figcaption>{t['origin_sketch_cap']}</figcaption></figure>
+      </div>
+    </div>
+  </section>"""
     elif slug == "pallor":
         sound_img = ("pallor/hl-close", t["hero_alt"])
         mid = f"""
@@ -4303,7 +4553,7 @@ def page_product(slug, lang):
   {film_dialog}"""
     foot = f"      <p>{t['trademark']}</p>\n      <p>{t['photo_credit']}</p>"
     title = t["title_20"] if slug == "at20v" else t["title"]
-    og = {"at20v": "og-image.jpg", "pallor": "pallor/og-image.jpg", "thrum": "thrum/og-image.jpg", "at330": "at330/og-image.jpg", "at303": "at303/og-image.jpg", "at101v": "at101v/og-image.jpg", "at42": "at42/og-image.jpg", "at700": "at700/og-image.jpg", "atfs1": "atfs1/og-image.jpg", "orrery": "orrery/og-image.jpg", "murmur": "murmur/og-image.jpg", "atmd": "atmd/og-image.jpg", "lacquer": "lacquer/og-image.jpg", "halation": "halation/og-image.jpg", "tarnish": "tarnish/og-image.jpg", "plumb": "plumb/og-image.jpg"}[slug]
+    og = {"at20v": "og-image.jpg", "pallor": "pallor/og-image.jpg", "thrum": "thrum/og-image.jpg", "at330": "at330/og-image.jpg", "devicenti": "devicenti/og-image.jpg", "at303": "at303/og-image.jpg", "at101v": "at101v/og-image.jpg", "at42": "at42/og-image.jpg", "at700": "at700/og-image.jpg", "atfs1": "atfs1/og-image.jpg", "orrery": "orrery/og-image.jpg", "murmur": "murmur/og-image.jpg", "atmd": "atmd/og-image.jpg", "lacquer": "lacquer/og-image.jpg", "halation": "halation/og-image.jpg", "tarnish": "tarnish/og-image.jpg", "plumb": "plumb/og-image.jpg"}[slug]
     return shell(lang, slug + "/", title, t["description"], body, og, foot, "p-" + slug)
 
 # Las marcas de los instrumentos originales, al pie de la portada y del changelog.
@@ -4378,7 +4628,7 @@ def page_home(lang):
     </div>
     <a class="t-img" href="{home}{slug}/">{pic(a, c['imgdir'] + c['img'], c['alt'])}</a>
   </section>""")
-    synths = [x for x in PRODUCTS if x[0] not in ("orrery", "murmur", "lacquer", "halation", "tarnish", "plumb", "pallor", "thrum", "at330")]
+    synths = [x for x in PRODUCTS if x[0] not in ("orrery", "murmur", "lacquer", "halation", "tarnish", "plumb", "pallor", "thrum", "at330", "devicenti")]
     cmp_heads = "".join(f"""<div class="cmp-head reveal">{pic(a, cards[s]['imgdir'] + cards[s]['img'], cards[s]['alt'], "(max-width: 900px) 33vw, 380px")}<h3>{n}</h3><p>{PRES[s][lang]['tag']}</p><a class="pill primary small" href="{home}{s}/" style="--accent:{ACCENT[s]}">{ui['learn']}</a></div>""" for s, n, *_ in synths)
     cmp_rows = "".join("".join(f'<div class="cmp-cell"><b>{label}</b><span>{vals[COMPARE_ORDER.index(sl)]}</span></div>' for sl, *_ in synths) for label, vals in COMPARE_ROWS[lang])
     reasons = "\n".join(f'      <div class="reveal"><h3>{k}</h3><p>{v}</p></div>' for k, v in t["reasons"])

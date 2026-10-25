@@ -22,7 +22,7 @@ function Package-Plugin([string]$dir, [string]$product) {
     Get-ChildItem "$r\*_artefacts\Release\VST3\*.vst3" | ForEach-Object { Copy-Item -Recurse $_.FullName $out }
     Get-ChildItem "$r\*_artefacts\Release\Standalone\*.exe" | ForEach-Object { Copy-Item $_.FullName $out }
     # Herramientas de línea de comandos del producto (p. ej. lacquerrender).
-    foreach ($t in @("lacquerrender", "halationrender", "tarnishrender", "at303render", "plumbrender", "thrumrender", "pallorrender")) {
+    foreach ($t in @("lacquerrender", "halationrender", "tarnishrender", "at303render", "plumbrender", "thrumrender", "pallorrender", "devicentirender")) {
         foreach ($f in @("$r\$t.exe", "$r\${t}_artefacts\Release\$t.exe")) { if (Test-Path $f) { Copy-Item $f $out; break } }
     }
     # Presets como archivos (.vstpreset) para los hosts que no muestran la lista de programas del VST3 (Ableton Live):
@@ -82,6 +82,7 @@ Package-Plugin "at303" "AT303"
 Package-Plugin "plumb" "Plumb"
 Package-Plugin "pallor" "Pallor"
 Package-Plugin "thrum" "Thrum"
+Package-Plugin "devicenti" "DeVicenti"
 
 # The launcher (tools/launcher): one .exe that installs and updates the plugins from web/downloads/manifest.json.
 function Package-Launcher {

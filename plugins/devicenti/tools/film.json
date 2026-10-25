@@ -1,0 +1,51 @@
+{
+  "title": "DeVicenti",
+  "tagline": "An FM groovebox for slow, heavy music.",
+  "fps": 24,
+  "bpm": 84,
+  "shots": [
+    {
+      "name": "open",
+      "beats": 8
+    },
+    {
+      "name": "ops",
+      "beats": 8
+    },
+    {
+      "name": "steps",
+      "beats": 8
+    },
+    {
+      "name": "filter",
+      "beats": 8
+    },
+    {
+      "name": "hero",
+      "beats": 12
+    },
+    {
+      "name": "end",
+      "beats": 8,
+      "in": "dissolve"
+    }
+  ],
+  "poster": {
+    "shot": "hero",
+    "frame": 100
+  },
+  "audio": {
+    "cmd": [
+      "build-devicenti-rel/plugins/devicenti/devicentirender_artefacts/Release/devicentirender",
+      "{out}",
+      "--project",
+      "plugins/devicenti/tools/demo_projects/film-half-light.json",
+      "--song",
+      "--seconds",
+      "{seconds}",
+      "--tail",
+      "2"
+    ],
+    "start": 0.0
+  }
+}

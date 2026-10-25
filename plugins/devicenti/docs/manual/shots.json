@@ -1,0 +1,118 @@
+[
+  {
+    "file": "overview.jpg",
+    "env": {
+      "DV_PRESET": "2"
+    },
+    "wait": 3,
+    "caption_en": "DeVicenti with the Basement Boom preset: the unit in perspective under the top bar.",
+    "caption_es": "DeVicenti con el preset Basement Boom: la unidad en perspectiva bajo la barra superior."
+  },
+  {
+    "file": "func.jpg",
+    "env": {
+      "DV_PRESET": "2",
+      "DV_FUNC": "1"
+    },
+    "wait": 3,
+    "caption_en": "FUNC latched: the second layer of every knob and key is active.",
+    "caption_es": "FUNC trabado: la segunda capa de cada perilla y tecla está activa.",
+    "crop": [
+      0.12,
+      0.06,
+      0.72,
+      0.42
+    ]
+  },
+  {
+    "file": "operators.jpg",
+    "env": {
+      "DV_PRESET": "2"
+    },
+    "wait": 3,
+    "crop": [
+      0.17,
+      0.25,
+      0.58,
+      0.4
+    ],
+    "caption_en": "The four operator blocks: A and B above, C and D below.",
+    "caption_es": "Los cuatro bloques de operadores: A y B arriba, C y D abajo."
+  },
+  {
+    "file": "rec-held.jpg",
+    "env": {
+      "DV_PRESET": "2",
+      "DV_REC": "1",
+      "DV_HOLD": "3"
+    },
+    "wait": 3,
+    "caption_en": "A step held in grid record: the display shows the step's fields and the knobs now write locks.",
+    "caption_es": "Un paso sostenido en grabación de grilla: la pantalla muestra los campos del paso y las perillas ahora escriben locks."
+  },
+  {
+    "file": "page-voice.jpg",
+    "env": {
+      "DV_PRESET": "2",
+      "DV_PAGE": "VOICE",
+      "DV_TRACK": "1"
+    },
+    "wait": 3,
+    "caption_en": "The VOICE page for a KIT lane.",
+    "caption_es": "La página VOICE para una voz de KIT."
+  },
+  {
+    "file": "page-seq.jpg",
+    "env": {
+      "DV_PRESET": "2",
+      "DV_PAGE": "SEQ",
+      "DV_TRACK": "1"
+    },
+    "wait": 3,
+    "caption_en": "The SEQ page: every track and every KIT lane of the pattern, 64 steps.",
+    "caption_es": "La página SEQ: todas las pistas y todas las voces del KIT del patrón, 64 pasos."
+  },
+  {
+    "file": "page-fx.jpg",
+    "env": {
+      "DV_PRESET": "2",
+      "DV_PAGE": "FX",
+      "DV_TRACK": "2"
+    },
+    "wait": 3,
+    "caption_en": "The FX page: the two sends, the master bus and the insert of the selected track.",
+    "caption_es": "La página FX: los dos envíos, el bus master y el insert de la pista seleccionada."
+  },
+  {
+    "file": "page-midi.jpg",
+    "env": {
+      "DV_PRESET": "2",
+      "DV_PAGE": "MIDI"
+    },
+    "wait": 3,
+    "caption_en": "The MIDI page: input mode, CC mode, feedback, clock and the channels of each track.",
+    "caption_es": "La página MIDI: modo de entrada, modo de CC, feedback, reloj y los canales de cada pista."
+  },
+  {
+    "file": "page-ops.jpg",
+    "env": {
+      "DV_PRESET": "2",
+      "DV_PAGE": "OPS",
+      "DV_TRACK": "2"
+    },
+    "wait": 3,
+    "caption_en": "The OPS page: the four operators in full.",
+    "caption_es": "La página OPS: los cuatro operadores completos."
+  },
+  {
+    "file": "page-chord-scale.jpg",
+    "env": {
+      "DV_PRESET": "2",
+      "DV_PAGE": "CHORD/SCALE",
+      "DV_TRACK": "2"
+    },
+    "wait": 3,
+    "caption_en": "The CHORD/SCALE page: root, scale, lengths, chord settings and the eight chord memory slots.",
+    "caption_es": "La página CHORD/SCALE: raíz, escala, largos, ajustes de acordes y las ocho ranuras de memoria de acordes."
+  }
+]
