@@ -1,4 +1,4 @@
-"""DeVicenti: the demo clips for 1.0.0, short and sound-first (each shows one sound or one effect, like the other
+"""DeviceNTI V: the demo clips for 1.0.0, short and sound-first (each shows one sound or one effect, like the other
 plugins' showcase clips). Seven projects written to tools/demo_projects/ and rendered by demos.py; each is also a
 factory preset (presets.py appends them to their banks), so what the clip plays is one click away in the plugin.
 

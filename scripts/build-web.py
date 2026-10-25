@@ -170,8 +170,8 @@ VA330 = version("at330")
 MACA330 = f"AT330-{VA330}-macOS.zip"
 WINA330 = f"AT330-{VA330}-Windows.zip"
 VDV = version("devicenti")
-MACDV = f"DeVicenti-{VDV}-macOS.zip"
-WINDV = f"DeVicenti-{VDV}-Windows.zip"
+MACDV = f"DeviceNTI-V-{VDV}-macOS.zip"      # 1.0.0 se llamaba DeVicenti (DeVicenti-1.0.0-*.zip)
+WINDV = f"DeviceNTI-V-{VDV}-Windows.zip"
 
 # ───────────────────────── AT20V (y textos de la portada sobre código abierto) ─────────────────────────
 T = {
@@ -414,7 +414,7 @@ H = {
              what="Strings, a choir and a vocoder, in one keyboard.",
              body="The string section through a four-BBD ensemble, a choir of three voices through a bank of seven formant filters, and a ten-band vocoder that makes the keys speak. Recreated from the service documentation of a 1979 string, choir and vocoder keyboard, with the extras it never had: an envelope per key, Freeze, formant shift and an external carrier.",
              alt="A wood-sided keyboard rendered in 3D at an angle on a dark surface: a charcoal panel with sections of knobs and coloured tablets, a lit ten-band display and a keyboard"),
-        dict(slug="devicenti", name="DeVicenti", year="2026", img="hero", imgdir="devicenti/", ver=VDV, mac=MACDV, win=WINDV,
+        dict(slug="devicenti", name="DeviceNTI V", year="2026", img="hero", imgdir="devicenti/", ver=VDV, mac=MACDV, win=WINDV,
              what="An FM groovebox for slow, heavy music.",
              body="Four tracks that are a four-operator FM voice, a kit of eight FM drums or a MIDI sender, a 64-step sequencer with locks on every step, and a sound path of saturating filter, tape wear, inserts, delay and reverb. Made for downtempo, trip hop, acid jazz, ambient and dark ambient. An original instrument, in one orange unit.",
              alt="An orange groovebox rendered in 3D at an angle on a dark surface: a cream plate with a blue block, four yellow and orange operator blocks with black knobs, and sixteen white step keys along the front"),
@@ -496,7 +496,7 @@ H = {
              what="Cuerdas, un coro y un vocoder, en un solo teclado.",
              body="La sección de cuerdas por un ensemble de cuatro BBD, un coro de tres voces por un banco de siete filtros de formantes y un vocoder de diez bandas que hace hablar a las teclas. Recreado a partir de la documentación de servicio de un teclado de cuerdas, coro y vocoder de 1979, con lo que nunca tuvo: una envolvente por tecla, Freeze, corrimiento de formantes y una portadora externa.",
              alt="Un teclado con laterales de madera renderizado en 3D, en ángulo sobre una superficie oscura: un panel carbón con secciones de perillas y pulsadores de colores, una pantalla de diez bandas encendida y un teclado"),
-        dict(slug="devicenti", name="DeVicenti", year="2026", img="hero", imgdir="devicenti/", ver=VDV, mac=MACDV, win=WINDV,
+        dict(slug="devicenti", name="DeviceNTI V", year="2026", img="hero", imgdir="devicenti/", ver=VDV, mac=MACDV, win=WINDV,
              what="Una groovebox de FM para música lenta y pesada.",
              body="Cuatro pistas que son una voz de FM de cuatro operadores, un kit de ocho tambores de FM o un emisor MIDI, un secuenciador de 64 pasos con locks en cada paso, y un camino de sonido con filtro saturante, desgaste de cinta, inserts, delay y reverb. Hecha para downtempo, trip hop, acid jazz, ambient y dark ambient. Un instrumento original, en una sola unidad naranja.",
              alt="Una groovebox naranja renderizada en 3D, en ángulo sobre una superficie oscura: una placa crema con un bloque celeste, cuatro bloques de operadores amarillos y naranjas con perillas negras, y dieciséis teclas blancas de paso en el frente"),
@@ -2226,9 +2226,9 @@ A330T = {
 
 DVT = {
 "en": dict(
-    title="DeVicenti — free FM groovebox plugin for downtempo, trip hop, acid jazz and ambient | Audio Tools",
-    description="DeVicenti is a free, open-source FM groovebox plugin for macOS, Windows and Linux: four tracks that are a four-operator FM voice with eight algorithms, a kit of eight FM drums or a MIDI sender, a 64-step sequencer with step locks, conditions, chords and an arpeggiator, a saturating filter with AGE, inserts, delay, reverb and a master bus, MIDI in and out, and 82 presets for slow, heavy music.",
-    listen_p="Every clip shows one sound of DeVicenti, rendered offline by its own engine with no edits, with no drums or only a few. They are all at the same loudness, except the two ambient clips, which are four decibels quieter on purpose. There are no samples anywhere in DeVicenti.",
+    title="DeviceNTI V — free FM groovebox plugin for downtempo, trip hop, acid jazz and ambient | Audio Tools",
+    description="DeviceNTI V is a free, open-source FM groovebox plugin for macOS, Windows and Linux: four tracks that are a four-operator FM voice with eight algorithms, a kit of eight FM drums or a MIDI sender, a 64-step sequencer with step locks, conditions, chords and an arpeggiator, a saturating filter with AGE, inserts, delay, reverb and a master bus, MIDI in and out, and 82 presets for slow, heavy music.",
+    listen_p="Every clip shows one sound of DeviceNTI V, rendered offline by its own engine with no edits, with no drums or only a few. They are all at the same loudness, except the two ambient clips, which are four decibels quieter on purpose. There are no samples anywhere in DeviceNTI V.",
     sound_h="Four tracks, one sound path.",
     sound_p1="Each track is a TONE voice of four operators and eight algorithms with a clean sub layer, unison and a noise layer; a KIT of eight small FM drums, each with its own steps; or a MIDI sender for another synth. The sound goes through a filter that stays heavy at high resonance, DRIVE and FOLD, and AGE, a tape stage with wow, flutter and hiss, then one insert, a delay and a reverb.",
     sound_p2="It is made for slow music: downtempo, trip hop, acid jazz, ambient and dark ambient, with hard, heavy synths. The default tempo is 88 BPM, the default swing is a lazy 56 percent and the factory presets are whole projects, with their sounds, patterns and effects, in banks named for those genres.",
@@ -2256,11 +2256,11 @@ DVT = {
                 ("GLUE, DUCK and LIMIT.", "A bus compressor, a sidechain from the kick that makes pads pump, and a soft limiter.")],
     mods_caption="The FX page: the two sends, the master bus and the insert of the selected track.",
     origin_h="Where it came from.",
-    origin_p="DeVicenti started as concept art by Bruno de Vicenti: two orange machines in an ad from another decade. We took one, kept its layout and its colours, added the sequencer it was missing and made it an instrument you can play. The name is his.",
+    origin_p="DeviceNTI V started as concept art by Bruno de Vicenti: two orange machines in an ad from another decade. We took one, kept its layout and its colours, added the sequencer it was missing and made it an instrument you can play. The name DeviceNTI V comes from his (until version 1.0.0 it was called DeVicenti).",
     origin_concept_cap="The starting point: concept art by Bruno de Vicenti.",
     origin_sketch_cap="The sketch for the plugin: one unit, every section annotated.",
     alt_concept="Concept art by Bruno de Vicenti: two orange machines with knobs, keys and small screens, seen in perspective in a retro advertisement.",
-    alt_sketch="Pencil and marker sketch of DeVicenti with notes on each section.",
+    alt_sketch="The original pencil and marker sketch of the instrument, with notes on each section.",
     slow_h="Play it, or let it play others.",
     slow_p="Play a track from a controller with a fixed CC map, MIDI learn and relative encoders, and record what you play into the pattern. A track can also be a MIDI machine that sends its steps, chords and locks to a hardware synth or another plugin from your DAW.",
     presets_h="Seventy-five presets.",
@@ -2271,29 +2271,29 @@ DVT = {
              ("12", "Ambient", "Slow Tide, Cold Dawn, Wide Room, Held Breath, Glass Rain, Soft Chime, Paper Piano, Aurora, Frozen Lake…"),
              ("13", "Dark Ambient", "Black Cavern, Iron Breath, Cold Furnace, Under Water, Rusted Choir, Rite Bell, Hollow Gong, Distant Clang, Last Light…"),
              ("12", "Heavy", "Iron Growl, Basalt, Low Press, Concrete Sub, Hammer Stab, Slag Stab, Fold Lead, Wobble Drive, Anvil Kit, Dub Slab…")],
-    dl_h=f"Download DeVicenti {VDV}.",
+    dl_h=f"Download DeviceNTI V {VDV}.",
     dl_p="Free, no account, no subscription.",
     mac_h="macOS", mac_req="macOS 11 or later. Apple silicon and Intel in one universal binary.",
     mac_fmt="VST3, Audio Unit, standalone app and devicentirender",
-    mac_steps=["Unzip the file.", "Copy <code>DeVicenti.vst3</code> to <code>~/Library/Audio/Plug-Ins/VST3</code>.",
-               "Copy <code>DeVicenti.component</code> to <code>~/Library/Audio/Plug-Ins/Components</code>.",
-               "Rescan plugins in your DAW and put DeVicenti on an instrument track."],
+    mac_steps=["Unzip the file.", "Copy <code>DeviceNTI V.vst3</code> to <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copy <code>DeviceNTI V.component</code> to <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "Rescan plugins in your DAW and put DeviceNTI V on an instrument track."],
     win_h="Windows", win_req="Windows 10 or 11, 64-bit.", win_fmt="VST3, standalone app and devicentirender",
-    win_steps=["Unzip the file.", "Copy <code>DeVicenti.vst3</code> to <code>C:\\Program Files\\Common Files\\VST3</code>.",
-               "Rescan plugins in your DAW and put DeVicenti on an instrument track."],
+    win_steps=["Unzip the file.", "Copy <code>DeviceNTI V.vst3</code> to <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Rescan plugins in your DAW and put DeviceNTI V on an instrument track."],
     file_label="file",
     dl_note="The builds are not code-signed yet. macOS may refuse to open them until you run <code>xattr -dr com.apple.quarantine</code> on the installed files, and Windows SmartScreen may ask you to confirm the first time. Every package includes an INSTALL.txt with the exact steps and the renderer's options.",
-    os_p="DeVicenti is free software under the GNU Affero General Public License v3, like the JUCE framework it is built on. You can use it, study it, change it and share it. The source code is on <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, with every release.",
+    os_p="DeviceNTI V is free software under the GNU Affero General Public License v3, like the JUCE framework it is built on. You can use it, study it, change it and share it. The source code is on <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, with every release.",
     os_link="Why Audio Tools is open source",
-    trademark="Audio Tools is an independent project. DeVicenti is an original instrument: its algorithms, panel, name and logo are our own, it contains no samples, and no brand names appear in it.",
-    photo_credit="The instrument in the pictures is a 3D render made for this page; the screenshots show the real interface. Every sound on this page comes from DeVicenti's own engine.",
+    trademark="Audio Tools is an independent project. DeviceNTI V is an original instrument: its algorithms, panel, name and logo are our own, it contains no samples, and no brand names appear in it.",
+    photo_credit="The instrument in the pictures is a 3D render made for this page; the screenshots show the real interface. Every sound on this page comes from DeviceNTI V's own engine.",
     hero_alt="An orange groovebox rendered in 3D at an angle on a dark surface: a cream plate with a blue block, four yellow and orange operator blocks with black knobs, and sixteen white step keys along the front.",
-    alt_ui="DeVicenti with the Basement Boom preset", alt_room="DeVicenti's SEQ page", alt_frozen="DeVicenti's FX page",
+    alt_ui="DeviceNTI V with the Basement Boom preset", alt_room="DeviceNTI V's SEQ page", alt_frozen="DeviceNTI V's FX page",
 ),
 "es": dict(
-    title="DeVicenti — plugin gratis de groovebox de FM para downtempo, trip hop, acid jazz y ambient | Audio Tools",
-    description="DeVicenti es un plugin libre y de código abierto de groovebox de FM para macOS, Windows y Linux: cuatro pistas que son una voz de FM de cuatro operadores con ocho algoritmos, un kit de ocho tambores de FM o un emisor MIDI, un secuenciador de 64 pasos con step locks, condiciones, acordes y arpegiador, un filtro saturante con AGE, inserts, delay, reverb y un bus master, MIDI de entrada y de salida, y 82 presets para música lenta y pesada.",
-    listen_p="Cada clip muestra un sonido de DeVicenti, renderizado sin conexión por su propio motor y sin edición, sin batería o con muy poca. Todos están a la misma sonoridad, salvo los dos clips de ambient, que están cuatro decibeles más bajos a propósito. En DeVicenti no hay muestras en ningún lado.",
+    title="DeviceNTI V — plugin gratis de groovebox de FM para downtempo, trip hop, acid jazz y ambient | Audio Tools",
+    description="DeviceNTI V es un plugin libre y de código abierto de groovebox de FM para macOS, Windows y Linux: cuatro pistas que son una voz de FM de cuatro operadores con ocho algoritmos, un kit de ocho tambores de FM o un emisor MIDI, un secuenciador de 64 pasos con step locks, condiciones, acordes y arpegiador, un filtro saturante con AGE, inserts, delay, reverb y un bus master, MIDI de entrada y de salida, y 82 presets para música lenta y pesada.",
+    listen_p="Cada clip muestra un sonido de DeviceNTI V, renderizado sin conexión por su propio motor y sin edición, sin batería o con muy poca. Todos están a la misma sonoridad, salvo los dos clips de ambient, que están cuatro decibeles más bajos a propósito. En DeviceNTI V no hay muestras en ningún lado.",
     sound_h="Cuatro pistas, un camino de sonido.",
     sound_p1="Cada pista es una voz TONE de cuatro operadores y ocho algoritmos con una capa de sub limpia, unison y una capa de ruido; un KIT de ocho pequeños tambores de FM, cada uno con sus propios pasos; o un emisor MIDI para otro sinte. El sonido pasa por un filtro que se mantiene pesado con mucha resonancia, DRIVE y FOLD, y AGE, una etapa de cinta con wow, flutter y soplido, y después un insert, un delay y una reverb.",
     sound_p2="Está hecho para música lenta: downtempo, trip hop, acid jazz, ambient y dark ambient, con sintes duros y pesados. El tempo por defecto es 88 BPM, el swing por defecto es un perezoso 56 por ciento y los presets de fábrica son proyectos enteros, con sus sonidos, patrones y efectos, en bancos con el nombre de esos géneros.",
@@ -2321,11 +2321,11 @@ DVT = {
                 ("GLUE, DUCK y LIMIT.", "Un compresor de bus, un sidechain desde el bombo que hace bombear a los pads, y un limitador suave.")],
     mods_caption="La página FX: los dos envíos, el bus master y el insert de la pista seleccionada.",
     origin_h="De dónde salió.",
-    origin_p="DeVicenti nació de un arte conceptual de Bruno de Vicenti: dos máquinas naranjas en un aviso de otra década. Tomamos una, conservamos su disposición y sus colores, le sumamos el secuenciador que le faltaba y la convertimos en un instrumento que se puede tocar. El nombre es suyo.",
+    origin_p="DeviceNTI V nació de un arte conceptual de Bruno de Vicenti: dos máquinas naranjas en un aviso de otra década. Tomamos una, conservamos su disposición y sus colores, le sumamos el secuenciador que le faltaba y la convertimos en un instrumento que se puede tocar. El nombre DeviceNTI V viene del suyo (hasta la versión 1.0.0 se llamó DeVicenti).",
     origin_concept_cap="El punto de partida: arte conceptual de Bruno de Vicenti.",
     origin_sketch_cap="El boceto del plugin: una sola unidad, con cada sección anotada.",
     alt_concept="Arte conceptual de Bruno de Vicenti: dos máquinas naranjas con perillas, teclas y pantallitas, en perspectiva, en un aviso retro.",
-    alt_sketch="Boceto en lápiz y marcador de DeVicenti, con notas en cada sección.",
+    alt_sketch="El boceto original en lápiz y marcador del instrumento, con notas en cada sección.",
     slow_h="Tocalo, o dejá que toque a otros.",
     slow_p="Tocá una pista desde un controlador con un mapa de CC fijo, MIDI learn y encoders relativos, y grabá lo que tocás en el patrón. Una pista también puede ser una máquina MIDI que manda sus pasos, acordes y locks a un sinte de hardware o a otro plugin de tu DAW.",
     presets_h="Setenta y cinco presets.",
@@ -2336,24 +2336,24 @@ DVT = {
              ("12", "Ambient", "Slow Tide, Cold Dawn, Wide Room, Held Breath, Glass Rain, Soft Chime, Paper Piano, Aurora, Frozen Lake…"),
              ("13", "Dark Ambient", "Black Cavern, Iron Breath, Cold Furnace, Under Water, Rusted Choir, Rite Bell, Hollow Gong, Distant Clang, Last Light…"),
              ("12", "Heavy", "Iron Growl, Basalt, Low Press, Concrete Sub, Hammer Stab, Slag Stab, Fold Lead, Wobble Drive, Anvil Kit, Dub Slab…")],
-    dl_h=f"Descargá DeVicenti {VDV}.",
+    dl_h=f"Descargá DeviceNTI V {VDV}.",
     dl_p="Gratis, sin cuenta, sin suscripción.",
     mac_h="macOS", mac_req="macOS 11 o posterior. Apple silicon e Intel en un solo binario universal.",
     mac_fmt="VST3, Audio Unit, aplicación independiente y devicentirender",
-    mac_steps=["Descomprimí el archivo.", "Copiá <code>DeVicenti.vst3</code> a <code>~/Library/Audio/Plug-Ins/VST3</code>.",
-               "Copiá <code>DeVicenti.component</code> a <code>~/Library/Audio/Plug-Ins/Components</code>.",
-               "Volvé a escanear los plugins en tu DAW y poné DeVicenti en una pista de instrumento."],
+    mac_steps=["Descomprimí el archivo.", "Copiá <code>DeviceNTI V.vst3</code> a <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copiá <code>DeviceNTI V.component</code> a <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "Volvé a escanear los plugins en tu DAW y poné DeviceNTI V en una pista de instrumento."],
     win_h="Windows", win_req="Windows 10 u 11, de 64 bits.", win_fmt="VST3, aplicación independiente y devicentirender",
-    win_steps=["Descomprimí el archivo.", "Copiá <code>DeVicenti.vst3</code> a <code>C:\\Program Files\\Common Files\\VST3</code>.",
-               "Volvé a escanear los plugins en tu DAW y poné DeVicenti en una pista de instrumento."],
+    win_steps=["Descomprimí el archivo.", "Copiá <code>DeviceNTI V.vst3</code> a <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Volvé a escanear los plugins en tu DAW y poné DeviceNTI V en una pista de instrumento."],
     file_label="archivo",
     dl_note="Los builds todavía no están firmados. macOS puede negarse a abrirlos hasta que corras <code>xattr -dr com.apple.quarantine</code> sobre los archivos instalados, y SmartScreen de Windows puede pedirte que confirmes la primera vez. Cada paquete trae un INSTALL.txt con los pasos exactos y las opciones del render.",
-    os_p="DeVicenti es software libre bajo la GNU Affero General Public License v3, como el framework JUCE sobre el que está hecho. Lo podés usar, estudiar, modificar y compartir. El código fuente está en <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, con cada versión.",
+    os_p="DeviceNTI V es software libre bajo la GNU Affero General Public License v3, como el framework JUCE sobre el que está hecho. Lo podés usar, estudiar, modificar y compartir. El código fuente está en <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, con cada versión.",
     os_link="Por qué Audio Tools es de código abierto",
-    trademark="Audio Tools es un proyecto independiente. DeVicenti es un instrumento original: sus algoritmos, su panel, su nombre y su logo son propios, no contiene muestras y no aparecen nombres de marcas.",
-    photo_credit="El instrumento de las imágenes es un render 3D hecho para esta página; las capturas muestran la interfaz real. Todos los sonidos de esta página salen del motor propio de DeVicenti.",
+    trademark="Audio Tools es un proyecto independiente. DeviceNTI V es un instrumento original: sus algoritmos, su panel, su nombre y su logo son propios, no contiene muestras y no aparecen nombres de marcas.",
+    photo_credit="El instrumento de las imágenes es un render 3D hecho para esta página; las capturas muestran la interfaz real. Todos los sonidos de esta página salen del motor propio de DeviceNTI V.",
     hero_alt="Una groovebox naranja renderizada en 3D, en ángulo sobre una superficie oscura: una placa crema con un bloque celeste, cuatro bloques de operadores amarillos y naranjas con perillas negras, y dieciséis teclas blancas de paso en el frente.",
-    alt_ui="DeVicenti con el preset Basement Boom", alt_room="La página SEQ de DeVicenti", alt_frozen="La página FX de DeVicenti",
+    alt_ui="DeviceNTI V con el preset Basement Boom", alt_room="La página SEQ de DeviceNTI V", alt_frozen="La página FX de DeviceNTI V",
 ),
 }
 
@@ -2515,8 +2515,8 @@ CPU_A330 = (1.3, 2.0, 4.3)          # Apple M4 a 48 kHz: cuerdas con un acorde d
 WINCPU_A330 = (3.4, 6.0, 15.3)      # Ryzen 9 5900XT: lo mismo con at330test.exe (pc50 sin otra carga)
 DISK_A330 = (47, 16)                # instalado: VST3 + AU + app en macOS, VST3 + exe en Windows
 UICPU_A330 = 2                      # athosttest --tests editor, con el editor a la vista (M4)
-CPU_DV = (4.4, 6.3, 3.7)            # Apple M4 a 48 kHz (QA de la versión): promedio de los 82 presets / el peor preset / 16 voces
-WINCPU_DV = (9.4, 14.0, 6.8)        # Ryzen 9 5900XT: promedio de los 82 presets / el peor preset / 16 voces
+CPU_DV = (4.3, 6.2, 3.7)            # Apple M4 a 48 kHz (QA de la versión): promedio de los 82 presets / el peor preset / 16 voces
+WINCPU_DV = (9.5, 14.0, 6.9)        # Ryzen 9 5900XT: promedio de los 82 presets / el peor preset / 16 voces
 DISK_DV = (67, 31)                  # instalado: VST3 + AU + app en macOS, VST3 + exe en Windows (medido en los zips 1.0.0)
 UICPU_DV = None                     # sin medir: la nota omite la frase del editor
 UICPU_HA = 8
@@ -2910,7 +2910,7 @@ PRES = {
                     ("devicenti/hl-ui", "The real unit, in the plugin.", "The editor draws the unit in perspective, with the top bar for presets, MIDI learn and a manual inside the plugin."),
                     ("devicenti/hl-pages", "Thirteen pages behind the panel.", "Every field of the sound, the sequencer, the effects and the MIDI settings at once, grouped in columns.")],
         stats=[("82", "", "presets in six genre banks and an Init bank"), ("4", "", "tracks: FM voice, drum kit or MIDI"), ("64", "", "steps per pattern, 16 patterns"), ("64", "", "automatable parameters")],
-        film_cap="DeVicenti rendered in 3D: the playhead runs over the sixteen steps and the knobs sweep. The sound is DeVicenti playing Half-Light, half-time trip hop at 80 BPM."),
+        film_cap="DeviceNTI V rendered in 3D: the playhead runs over the sixteen steps and the knobs sweep. The sound is DeviceNTI V playing Half-Light, half-time trip hop at 80 BPM."),
     "es": dict(tag="Una groovebox de FM para música lenta y pesada.",
         highlights=[("devicenti/hl-top", "Una unidad, cuatro pistas.", "Cada pista es una voz de FM de cuatro operadores, un kit de ocho tambores de FM o un emisor MIDI, todo en un solo panel naranja. FUNC le da a cada perilla y tecla una segunda capa."),
                     ("devicenti/hl-close", "Cuatro operadores, cinco perillas cada uno.", "Ocho algoritmos, una tabla de ratios con valores de campana y de metal, feedback en cualquier operador y una macro de envolvente que va de un click a un pad."),
@@ -2919,7 +2919,7 @@ PRES = {
                     ("devicenti/hl-ui", "La unidad real, en el plugin.", "El editor dibuja la unidad en perspectiva, con la barra superior para presets, MIDI learn y un manual dentro del plugin."),
                     ("devicenti/hl-pages", "Trece páginas detrás del panel.", "Todos los campos del sonido, del secuenciador, de los efectos y de los ajustes MIDI a la vez, agrupados en columnas.")],
         stats=[("82", "", "presets en seis bancos de géneros y un banco Init"), ("4", "", "pistas: voz de FM, kit de batería o MIDI"), ("64", "", "pasos por patrón, 16 patrones"), ("64", "", "parámetros automatizables")],
-        film_cap="DeVicenti renderizado en 3D: la posición de reproducción recorre los dieciséis pasos y las perillas se mueven. El sonido es DeVicenti tocando Half-Light, trip hop a medio tiempo a 80 BPM."),
+        film_cap="DeviceNTI V renderizado en 3D: la posición de reproducción recorre los dieciséis pasos y las perillas se mueven. El sonido es DeviceNTI V tocando Half-Light, trip hop a medio tiempo a 80 BPM."),
 },
 "pallor": {
     "en": dict(tag="The cold drum machine.",
@@ -3378,7 +3378,7 @@ PRODUCTS = [  # slug, nombre, año, mac, win, versión
     ("pallor", "Pallor", "2026", MACPA, WINPA, VPA),
     ("thrum", "Thrum", "2026", MACTH, WINTH, VTH),
     ("at330", "AT330", "1979", MACA330, WINA330, VA330),
-    ("devicenti", "DeVicenti", "2026", MACDV, WINDV, VDV),
+    ("devicenti", "DeviceNTI V", "2026", MACDV, WINDV, VDV),
 ]
 # Un producto entra a la web cuando sus dos zips están en web/downloads: así se puede publicar uno mientras el
 # siguiente sigue en preparación con su texto ya escrito.
@@ -3548,6 +3548,8 @@ def write_manifest():
     order = [sl for _, sls in NAV_GROUPS for sl in sls]
     names = {s: n for s, n, *_ in PRODUCTS}
     vers = {s: v for s, *_, v in PRODUCTS}
+    # The zip names from PRODUCTS, not from the display name: "DeviceNTI V" packages as DeviceNTI-V-<versión>-<SO>.zip.
+    zips = {s: (mac, win) for s, _, _, mac, win, _ in PRODUCTS}
     products = []
     cards = {c["slug"]: c for c in H["en"]["cards"]}
     for sl in order:
@@ -3564,9 +3566,9 @@ def write_manifest():
             "page": SITE_URL + sl + "/",
             "manual": SITE_URL + sl + "/manual/" if manual_web.has_manual(sl) else None,
             "samples": launcher_samples(sl, previous),
-            "macos": zip_asset(f"{n}-{v}-macOS.zip", n, "macos", previous),
-            "windows": zip_asset(f"{n}-{v}-Windows.zip", n, "windows", previous),
-            "linux": zip_asset(f"{n}-{v}-Linux.zip", n, "linux", previous),
+            "macos": zip_asset(zips[sl][0], n, "macos", previous),
+            "windows": zip_asset(zips[sl][1], n, "windows", previous),
+            "linux": zip_asset(zips[sl][0].replace("-macOS.zip", "-Linux.zip"), n, "linux", previous),
         })
     data = {
         "schema": 1, "generated": None, "site": SITE_URL, "donate_url": SUPPORT_COFFEE_URL,

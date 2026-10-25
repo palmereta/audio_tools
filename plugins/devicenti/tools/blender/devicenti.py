@@ -1,6 +1,6 @@
-"""DeVicenti: the unit in Blender, built from the front-panel table (tools/blender/panel.json, written by
+"""DeviceNTI V (slug devicenti): the unit in Blender, built from the front-panel table (tools/blender/panel.json, written by
 `devicentirender --panel-json`). Original design: an orange case, a cream plate, coloured zones, black knobs, white
-keys, the DEVICENTI wordmark and the Audio Tools script; no other marks.
+keys, the DEVICENTI V wordmark and the Audio Tools script; no other marks.
 
 Modes (blender -b -P devicenti.py -- --mode ui --out out [--samples 160] [--scale 2]):
   --mode ui      the plugin view in 3/4 perspective: bg.png (keys up, LEDs off, screens dark, knobs without pointer),
@@ -192,7 +192,7 @@ def build_case():
         y = 70.0 + i * 11.5
         b = prism("Vent%d" % i, [(-0.02, y), (-0.02, y + 4.2), (0.6, y + 4.2), (0.6, y)], 14.0, 38.0, MAT["vent"])
     # Wordmark and script on the orange rim.
-    text("DEVICENTI", 14.5, 412.6, 11.0, MAT["word"], "LEFT", z=CASE_Z + 0.05, track=0.16, fnt=F_WORD)
+    text("DEVICENTI V", 14.5, 412.6, 11.0, MAT["word"], "LEFT", z=CASE_Z + 0.05, track=0.16, fnt=F_WORD)
     text("Audio Tools", 284.0, 411.8, 9.6, MAT["word"], "RIGHT", z=CASE_Z + 0.05, track=0.02, fnt=F_SCRIPT)
 
 def build_zones():

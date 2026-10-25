@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: basic pieces shared by the voice, the buses and the effects. No JUCE; deterministic; no allocation
+// DeviceNTI V: basic pieces shared by the voice, the buses and the effects. No JUCE; deterministic; no allocation
 // after prepare. Sine by table (no std::sin per sample: the Windows CRT is several times slower), the TPT
 // state-variable filter, one-poles, a Hermite delay line, a hash for decisions tied to position, and the 97-tap
 // half-band decimator that brings the 2x voice down to the host rate with an exact 24-sample delay.

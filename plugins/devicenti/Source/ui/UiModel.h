@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the rendered unit (assets/ui, made by tools/blender/devicenti.py and tools/pack_ui.py). The background
+// DeviceNTI V: the rendered unit (assets/ui, made by tools/blender/devicenti.py and tools/pack_ui.py). The background
 // image is the unit in 3/4 perspective; every control comes with the homography of its top plane (local millimetres,
 // origin at the control's centre, u right, v towards the front → image pixels), so the editor draws knob pointers
 // and screens in perspective and hit-tests through the inverse. Keys and LEDs also have a crop rectangle and their

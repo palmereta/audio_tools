@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the engine (plan §5, §13), no JUCE: the plugin, devicentirender and devicentitest all use it.
+// DeviceNTI V: the engine (plan §5, §13), no JUCE: the plugin, devicentirender and devicentitest all use it.
 //
 // Per block: the sequencer gives the steps of the block (sample-exact, chained windows), MIDI input is mapped to
 // tracks (channels 1-4 or OMNI to the focused track; KIT lanes by a GM-like map), both become timed note starts in
@@ -135,7 +135,7 @@ public:
         for (auto& ss : sendSm) ss = { -1.0f, -1.0f };
         seq.reset(); seq.clearRolls();
         startQ.clear(); offQ.clear();
-        absNow = 0; serial = 0; wasPlaying = false; havePpq = false; freePpq = 0.0;
+        absNow = 0; serial = 0; wasPlaying = false; havePpq = false; freePpq = 0.0; jumpTol = lastHostN = lastHostRate = 0.0;
         loudT.fill (0); idleT.fill (false); loudD = loudR = 0; idleD = idleR = false; lastBusy = 0;
         for (auto& m : mod) m = TrackMod();
         for (auto& b : busTrig) b = BusTrig();
@@ -154,6 +154,7 @@ public:
     void process (float* const* outs, int n, const HostTime& ht, const EngineParams& P, const MidiIn* midiIn, int nMidi, std::vector<MidiOut>* midiOut)
     {
         midiOutV.clear(); recOut.clear();
+        { const double r = ht.bpm / 60.0 / sr; jumpTol = lastHostN * std::max (lastHostRate, r); lastHostN = n; lastHostRate = r; seq.jumpTol = jumpTol; }
         for (int i0 = 0; i0 < n; i0 += kChunk)
         {
             const int m = std::min (kChunk, n - i0);
@@ -237,6 +238,10 @@ private:
         return -1;
     }
     bool wasPlaying = false, havePpq = false; double lastPpqEnd = 0, freePpq = 0.0;
+    // A tempo change inside a host block (REAPER puts tempo markers anywhere) moves the next block's position away
+    // from the end extrapolated with the old tempo by up to that block's length in beats: not a jump (DAW QA
+    // 2026-10-25: a marker 120 -> 90 at 4.1 s cut every sounding note as if the transport had jumped).
+    double jumpTol = 0.0, lastHostN = 0.0, lastHostRate = 0.0;
     bool smoothInit = false;
     std::vector<MidiIn> chunkMidi;
     std::vector<MidiOut> midiOutV;
@@ -253,10 +258,11 @@ private:
     std::array<BusTrig, kTracks> busTrig {};
     // Smoothed automatable values per track (control rate).
     std::array<TrackAuto, kTracks> sm {};
-    float smSwing = 0.56f;
     struct Drone { int n = 0; int notes[12] {}; };
     std::array<Drone, kTracks> drone {};
-    struct Arp { int n = 0; int notes[16] {}; int idx = 0; int dir = 1; int64_t lastTick = INT64_MIN; };
+    // phase: the tick the arp counts from, the first one at or after the note that started it (a chord pressed on a
+    // step plays its lowest note on that step: DAW QA DV5).
+    struct Arp { int n = 0; int notes[16] {}; int idx = 0; int dir = 1; int64_t lastTick = INT64_MIN, phase = 0; };
     std::array<Arp, kTracks> arp {};
     bool freezeLocks = true;                 // any step of the bank locks the reverb freeze (refreshFreezeLocks)
     struct FxLock { float v; int64_t until; };
@@ -268,6 +274,11 @@ private:
         Lock locks[kMaxLocks]; int nLocks = 0; bool lockOnly = false; bool legatoOk = true; bool droneNote = false;
     };
     std::vector<StartEv> startQ;
+    // Doubled tracks: the MIDI notes that went out for each key played in (track · 128 + key), so its note-off releases
+    // those (DAW QA 2026-10-25: chord mode sent the key three times and one note-off; a KIT key on a GM alias got the
+    // lane's note on and the key's note off; with Thru on every key went out twice).
+    struct PlayedOut { uint8_t n = 0; uint8_t note[16] {}; };
+    std::array<PlayedOut, kTracks * 128> playedOut {};
     struct OffEv { int64_t at; uint8_t d[2]; };
     std::vector<OffEv> offQ;
 
@@ -326,7 +337,6 @@ private:
             snd[SEND_DELAY] = s.dly; snd[SEND_REVERB] = s.rev; snd[INS_AMT] = s.ins;
             for (int o = 0; o < 4; ++o) snd[opParam (o, oLevel)] = s.op[o];
         }
-        smSwing += (cur.swing - smSwing) * (snap ? 1.0f : k);
     }
 
     // ── note starts ──
@@ -575,18 +585,20 @@ private:
             return;
         }
         if (! trackAudible (t)) return;
-        // MIDI out (MIDI machine, or doubling).
-        if (tr.machine == kMidiMachine || tr.doubleMidi)
+        // MIDI out (MIDI machine, or doubling). A note played in with Thru on already went out as played (midiEvent).
+        if ((tr.machine == kMidiMachine || tr.doubleMidi) && ! (e.source == 1 && proj->midi.thru && tr.machine != kMidiMachine))
         {
             const int ch = (tr.outChannel - 1) & 15;
             int note = e.note;
             if (tr.machine == kKit) note = proj->sounds[(size_t) t][(size_t) e.lane].i (LANE_NOTE);
+            else if (e.source == 1) note = std::clamp ((int) std::lround (e.pitch), 0, 127);     // chord mode: each chord note
             if (tr.machine == kMidiMachine) locksToCc (e, offset);
             // Retrigger of a note still on: its note-off first.
             for (size_t i = 0; i < offQ.size(); ++i)
                 if (offQ[i].d[0] == (0x80 | ch) && offQ[i].d[1] == note) { pushMidi (offset, offQ[i].d[0], offQ[i].d[1], 0); offQ.erase (offQ.begin() + (long) i); break; }
             pushMidi (offset, (uint8_t) (0x90 | ch), (uint8_t) note, (uint8_t) std::clamp ((int) std::lround (e.vel * 127.0f), 1, 127));
             if (e.gate > 0 && e.source != 1) offQ.push_back ({ absNow + e.gate, { (uint8_t) (0x80 | ch), (uint8_t) note } });
+            if (e.source == 1) { auto& po = playedOut[(size_t) (t * 128 + (e.note & 127))]; if (po.n < 16) po.note[po.n++] = (uint8_t) note; }
         }
         startVoices (e, ppq, bpm, playing);
     }
@@ -646,7 +658,7 @@ private:
                 return;
             }
             const Sound& snd = proj->sounds[(size_t) t][0];
-            if (snd.i (ARP_MODE) > 0) { arpAdd (t, note); recordNote (t, 0, note, m.d[2], ppq, playing); return; }
+            if (snd.i (ARP_MODE) > 0) { arpAdd (t, note, ppq); recordNote (t, 0, note, m.d[2], ppq, playing); return; }
             int notes[16]; int nn = 0;
             if (tr.chordPlay)
             {
@@ -676,7 +688,14 @@ private:
             auto& h = held[(size_t) (t * 128 + note)]; if (h > 0) --h;
             if (proj->sounds[(size_t) t][0].i (ARP_MODE) > 0) arpRemove (t, note);
             if (! sustainOn[(size_t) t]) releaseNote (t, note, 1);
-            if (tr.doubleMidi && tr.machine != kMidiMachine && ! proj->midi.thru) pushMidi (offset, (uint8_t) (0x80 | ((tr.outChannel - 1) & 15)), (uint8_t) note, 0);
+            if (tr.doubleMidi && tr.machine != kMidiMachine && ! proj->midi.thru)
+            {
+                // The note-offs of exactly the notes that went out for this key (a chord, a KIT lane's note).
+                auto& po = playedOut[(size_t) (t * 128 + note)];
+                if (po.n == 0) pushMidi (offset, (uint8_t) (0x80 | ((tr.outChannel - 1) & 15)), (uint8_t) note, 0);
+                for (int i = 0; i < po.n; ++i) pushMidi (offset, (uint8_t) (0x80 | ((tr.outChannel - 1) & 15)), po.note[i], 0);
+                po.n = 0;
+            }
             recordOff (t, note, ppq, playing);
         }
         else if (st == 0xE0) { const int v = (m.d[1] | (m.d[2] << 7)) - 8192; md.bend = (float) v / 8192.0f; if (tr.machine == kMidiMachine) pushMidi (offset, (uint8_t) (0xE0 | ((tr.outChannel - 1) & 15)), m.d[1], m.d[2]); }
@@ -734,10 +753,12 @@ private:
     }
 
     // ── arpeggiator (MIDI-in notes of a TONE track) ──
-    void arpAdd (int t, int note)
+    static double arpDiv (const Sound& snd) { return std::max (1.0 / 16.0, divisionBeats (std::max (1, snd.i (ARP_RATE)))); }
+    void arpAdd (int t, int note, double ppq)
     {
         auto& a = arp[(size_t) t];
         for (int i = 0; i < a.n; ++i) if (a.notes[i] == note) return;
+        if (a.n == 0) a.phase = (int64_t) std::ceil (ppq / arpDiv (proj->sounds[(size_t) t][0]) - 1e-9);
         if (a.n < 16) { a.notes[a.n++] = note; std::sort (a.notes, a.notes + a.n); }
     }
     void arpRemove (int t, int note)
@@ -745,37 +766,40 @@ private:
         auto& a = arp[(size_t) t];
         int k = 0; for (int i = 0; i < a.n; ++i) if (a.notes[i] != note) a.notes[k++] = a.notes[i];
         a.n = k;
+        if (a.n == 0) a.lastTick = INT64_MIN;
     }
-    void arpBlock (int t, double ppq0, double rate, int n, double bpm, bool playing)
+    // The arp ticks between samples [from, to) of the chunk (ppq0, abs0: its start). processChunk calls this after the
+    // MIDI events of a position and up to the next one, so the notes held at each tick are the ones that sound.
+    void arpTicks (int t, double ppq0, int64_t abs0, double rate, int from, int to, double bpm)
     {
         auto& a = arp[(size_t) t];
         const Sound& snd = proj->sounds[(size_t) t][0];
         const int mode = snd.i (ARP_MODE);
-        if (mode == 0 || a.n == 0) return;
-        const double div = std::max (1.0 / 16.0, divisionBeats (std::max (1, snd.i (ARP_RATE))));
+        if (mode == 0 || a.n == 0 || to <= from) return;
+        const double div = arpDiv (snd);
         const int range = std::clamp (snd.i (ARP_RANGE), 1, 4);
         const int total = a.n * range;
-        const int64_t k0 = (int64_t) std::ceil (ppq0 / div - 1e-9), k1 = (int64_t) std::ceil ((ppq0 + n * rate) / div - 1e-9);
+        const int64_t k0 = (int64_t) std::ceil ((ppq0 + from * rate) / div - 1e-9), k1 = (int64_t) std::ceil ((ppq0 + to * rate) / div - 1e-9);
         for (int64_t k = k0; k < k1; ++k)
         {
             if (k == a.lastTick) continue;
             a.lastTick = k;
+            const int64_t u = k - a.phase;      // steps since the arp started
             int idx;
             switch (mode)
             {
-                case 2: idx = total - 1 - (int) (((k % total) + total) % total); break;
-                case 3: { const int per = std::max (1, 2 * total - 2); const int u = (int) (((k % per) + per) % per); idx = u < total ? u : per - u; break; }
+                case 2: idx = total - 1 - (int) (((u % total) + total) % total); break;
+                case 3: { const int per = std::max (1, 2 * total - 2); const int w = (int) (((u % per) + per) % per); idx = w < total ? w : per - w; break; }
                 case 4: idx = (int) (hashUni (77, (uint64_t) k, (uint64_t) t) * total); break;
-                default: idx = (int) (((k % total) + total) % total); break;
+                default: idx = (int) (((u % total) + total) % total); break;
             }
             idx = std::clamp (idx, 0, total - 1);
             const int note = a.notes[idx % a.n] + 12 * (idx / a.n);
             StartEv s; s.track = t; s.note = note; s.pitch = (float) note; s.vel = 0.8f; s.source = 2;
             s.gate = (int) (div * 0.8 * 60.0 / bpm * sr);
-            s.at = absNow + (int64_t) std::llround (((double) k * div - ppq0) / rate);
+            s.at = abs0 + (int64_t) std::llround (((double) k * div - ppq0) / rate);
             pushStart (s);
         }
-        (void) playing;
     }
 
     void processChunk (float* const* outs, int n, const HostTime& ht, const EngineParams& P, int chunkOffset);
@@ -816,7 +840,7 @@ inline void Engine::processChunk (float* const* outs, int n, const HostTime& ht,
     freePpq = playing ? ht.ppq + n * rate : freePpq + n * rate;
 
     // Transport: stop or jump → the sequencer's notes go.
-    const bool jumped = playing && havePpq && std::fabs (ht.ppq - lastPpqEnd) > std::max (4.0 * rate, 1e-6) ;
+    const bool jumped = playing && havePpq && std::fabs (ht.ppq - lastPpqEnd) > std::max (4.0 * rate, 1e-6) + jumpTol;
     if ((wasPlaying && ! playing) || jumped)
     {
         for (auto& v : voices) if (v.source == 0) v.release();
@@ -832,21 +856,20 @@ inline void Engine::processChunk (float* const* outs, int n, const HostTime& ht,
     wasPlaying = playing; havePpq = playing; lastPpqEnd = ht.ppq + n * rate;
 
     // Sequencer.
-    SeqSettings st; st.pattern = std::clamp (P.pattern, 0, kPatterns - 1); st.song = P.song; st.fill = P.fill; st.seed = proj->seed;
+    SeqSettings st; st.pattern = std::clamp (P.pattern, 0, kPatterns - 1); st.song = P.song; st.fill = P.fill; st.seed = proj->seed; st.swing = P.swing;
     if (playing)
     {
         auto emit = [&] (const SeqEvent& e) { if (proj->track[(size_t) e.track].mute) return; queueStep (e, ht.ppq, rate, bpm); };
         seq.advance (ht.ppq, n, rate, st, emit);
         seq.flushRolls (ht.ppq, n, rate, emit);
     }
-    for (int t = 0; t < kTracks; ++t) arpBlock (t, ppq0, rate, n, bpm, playing);
 
     // Clear scratch.
     for (auto& tb : tbuf) for (auto& b : tb) std::fill (b.begin(), b.begin() + n, 0.0f);
     for (auto& b : buf) std::fill (b.begin(), b.begin() + n, 0.0f);
 
     size_t mi = 0;
-    int pos = 0;
+    int pos = 0, arpDone = 0;
     int64_t abs0 = absNow;
     while (pos < n)
     {
@@ -855,7 +878,8 @@ inline void Engine::processChunk (float* const* outs, int n, const HostTime& ht,
         // the stopped transport's free timeline) goes back to 0, so what comes next sounds the same whatever played
         // before (a project reopened, a second render, a fresh instance).
         if (absNow % kCtl == 0 && absNow != 0 && absNow - lastBusy >= 256 && startQ.empty() && offQ.empty() && activeSlots() == 0
-            && std::all_of (fxLock.begin(), fxLock.end(), [] (const auto& f) { return f.until < 0; }))
+            && std::all_of (fxLock.begin(), fxLock.end(), [] (const auto& f) { return f.until < 0; })
+            && std::all_of (arp.begin(), arp.end(), [] (const Arp& a) { return a.n == 0; }))     // held arp notes count from their phase
         {
             const int64_t shift = absNow;
             abs0 -= shift; absNow = 0; lastBusy -= shift; loudD -= shift; loudR -= shift;
@@ -876,6 +900,13 @@ inline void Engine::processChunk (float* const* outs, int n, const HostTime& ht,
         }
         // Events at this position: MIDI first, then queued starts and MIDI note-offs.
         while (mi < chunkMidi.size() && chunkMidi[mi].offset <= pos) { midiEvent (chunkMidi[mi], chunkOffset + pos, ppqHere, bpm, playing); ++mi; }
+        // Arp ticks from here up to the next MIDI event, with this position's notes already in (DAW QA DV5: the whole
+        // chunk used to be scheduled before its MIDI, so a chord pressed on a tick played a step late).
+        if (const int horizon = mi < chunkMidi.size() ? std::max (pos + 1, chunkMidi[mi].offset) : n; horizon > arpDone)
+        {
+            for (int t = 0; t < kTracks; ++t) arpTicks (t, ppq0, abs0, rate, std::max (pos, arpDone), horizon, bpm);
+            arpDone = horizon;
+        }
         while (! startQ.empty() && startQ.front().at <= absNow) { const StartEv e = startQ.front(); startQ.erase (startQ.begin()); execStart (e, chunkOffset + pos, ppqHere, bpm, playing); }
         for (size_t i = 0; i < offQ.size();)
             if (offQ[i].at <= absNow) { pushMidi (chunkOffset + pos, offQ[i].d[0], offQ[i].d[1], 0); offQ.erase (offQ.begin() + (long) i); }

@@ -1,4 +1,4 @@
-"""DeVicenti factory banks: Trip Hop, Downtempo, Acid Jazz, Ambient, Dark Ambient, Heavy (genre-recipes.md §1-§6).
+"""DeviceNTI V factory banks: Trip Hop, Downtempo, Acid Jazz, Ambient, Dark Ambient, Heavy (genre-recipes.md §1-§6).
 
 Each preset features one sound (its name) inside a short arrangement of its genre: two patterns of four bars (A and
 B), a chain A A B A (the last B with its fill), the genre's kit, bass, keys and pad or lead. The featured sound takes

@@ -10,10 +10,11 @@ $vcvars = Join-Path $vs "VC\Auxiliary\Build\vcvars64.bat"
 cmd /c "call `"$vcvars`" && cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build"
 if ($LASTEXITCODE -ne 0) { throw "build failed" }
 
-function Package-Plugin([string]$dir, [string]$product) {
+# $file: the zip's name without spaces when the product name has them (DeviceNTI V -> DeviceNTI-V-1.0.1-Windows.zip).
+function Package-Plugin([string]$dir, [string]$product, [string]$file = $product) {
     $upper = $dir.ToUpper()
     $ver = (Select-String -Path "plugins\$dir\CMakeLists.txt" -Pattern "^set\(${upper}_VERSION (.*)\)").Matches[0].Groups[1].Value
-    $name = "$product-$ver-Windows"
+    $name = "$file-$ver-Windows"
     $out = "dist\$name"
     Remove-Item -Recurse -Force $out, "dist\$name.zip" -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Force $out, web\downloads | Out-Null
@@ -82,7 +83,7 @@ Package-Plugin "at303" "AT303"
 Package-Plugin "plumb" "Plumb"
 Package-Plugin "pallor" "Pallor"
 Package-Plugin "thrum" "Thrum"
-Package-Plugin "devicenti" "DeVicenti"
+Package-Plugin "devicenti" "DeviceNTI V" "DeviceNTI-V"
 
 # The launcher (tools/launcher): one .exe that installs and updates the plugins from web/downloads/manifest.json.
 function Package-Launcher {

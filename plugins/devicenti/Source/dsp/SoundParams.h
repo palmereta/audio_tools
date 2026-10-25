@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the sound. A sound is a flat array of floats, one per parameter in the table below. That one table is
+// DeviceNTI V: the sound. A sound is a flat array of floats, one per parameter in the table below. That one table is
 // the whole sound model: the engine reads it, step locks address it by index, the LFO and modulation-matrix
 // destinations are indexes into it, presets store it by key, and patch swap copies it. The keys are stable: the
 // 3D panel of phase 2 and the saved state are built on them. Never reorder or reuse a key; add new ones at the end

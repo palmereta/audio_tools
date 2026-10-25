@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""DeVicenti factory presets (plan §5.9, §13; audiotools-private/vicenti/genre-recipes.md).
+"""DeviceNTI V factory presets (plan §5.9, §13; audiotools-private/vicenti/genre-recipes.md).
 
     python3 plugins/devicenti/tools/presets.py            writes assets/presets/*.json
 
@@ -689,7 +689,7 @@ def make_all():
         P.chord(3, 16 * b, 0 if b == 0 else 5, 4, 4, 0, VC["drop2"], len=8 * 12, vel=90)
         P.trig(3, 16 * b + 10, notes=degree_note(NOTE["A"], SCALE["minor"], 4, 3), vel=100, len=24)
         P.lock(3, 16 * b + 10, cutoff=600.0 if b == 0 else 3000.0)
-    presets.append(project("MIDI Out", "Init", 1, "Track 4 is a MIDI machine on channel 1 (notes, chords, a lock as CC 74); track 2 sounds and doubles on channel 2. Route a DAW MIDI track's input from DeVicenti.",
+    presets.append(project("MIDI Out", "Init", 1, "Track 4 is a MIDI machine on channel 1 (notes, chords, a lock as CC 74); track 2 sounds and doubles on channel 2. Route a DAW MIDI track's input from DeviceNTI V.",
                            84, 56, [kit_track(kit_bristol()), tone(bass_heavy_detuned(), double=1, out_channel=2), tone(ep_tine()), {"machine": "MIDI", "out_channel": 1, "sounds": {"0": {}}}],
                            [P], fx=fxs(), params={"t1_level": 0.0, "t2_level": -4.0}))
     from genre_presets import genre_banks

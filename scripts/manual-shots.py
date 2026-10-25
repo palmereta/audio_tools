@@ -11,7 +11,7 @@ import json, os, subprocess, sys, time
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PRODUCTS = {   # carpeta → (nombre del .app, prefijo de las variables)
+PRODUCTS = {   # carpeta → (target de CMake, prefijo de las variables[, nombre del .app si no es el del target])
     "at20v": ("AT20V", "AT20V"), "at101v": ("AT101V", "AT101V"), "at42": ("AT42", "AT42"), "at700": ("AT700", "AT700"),
     "atfs1": ("ATFS1", "ATFS1"), "orrery": ("Orrery", "ORRERY"), "murmur": ("Murmur", "MURMUR"),
     "atmd": ("ATMD", "ATMD"), "lacquer": ("Lacquer", "LACQUER"), "halation": ("Halation", "HALATION"), "tarnish": ("Tarnish", "TARNISH"), "at303": ("AT303", "AT303"),
@@ -19,15 +19,16 @@ PRODUCTS = {   # carpeta → (nombre del .app, prefijo de las variables)
     "pallor": ("Pallor", "PALLOR"),
     "thrum": ("Thrum", "THRUM"),
     "at330": ("AT330", "AT330"),
-    "devicenti": ("DeVicenti", "DV"),
+    "devicenti": ("DeVicenti", "DV", "DeviceNTI V"),
 }
 TMP = "/tmp/claude-501/manual-shots"
 DEMO_INPUT = os.path.join(TMP, "murmur-demo-input.wav")
 
 
-def app_binary(folder, name):
+def app_binary(folder, name, app=None):
     # BUILD=<carpeta> usa otro build (por defecto build/).
-    return os.path.join(ROOT, os.environ.get("BUILD", "build"), "plugins", folder, f"{name}_artefacts", "Release", "Standalone", f"{name}.app", "Contents", "MacOS", name)
+    app = app or name
+    return os.path.join(ROOT, os.environ.get("BUILD", "build"), "plugins", folder, f"{name}_artefacts", "Release", "Standalone", f"{app}.app", "Contents", "MacOS", app)
 
 
 def demo_input():
@@ -74,8 +75,8 @@ def demo_samples_pallor():
 
 
 def take(folder, shot):
-    name, prefix = PRODUCTS[folder]
-    binary = app_binary(folder, name)
+    name, prefix, *app = PRODUCTS[folder]
+    binary = app_binary(folder, name, *app)
     png = os.path.join(TMP, f"{folder}-{shot['file']}.png")
     if os.path.exists(png): os.remove(png)
     env = dict(os.environ)

@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the project (sounds, patterns, chain, chord memory, effect modes, MIDI settings) to and from JSON.
+// DeviceNTI V: the project (sounds, patterns, chain, chord memory, effect modes, MIDI settings) to and from JSON.
 // The same format is the factory preset file (tools/presets.py writes it), the user preset file and the part of the
 // plugin state that is not a host parameter. Only values that differ from the defaults are written; numbers are
 // rounded to 6 significant digits, so saving, loading and saving again gives the same bytes. Parameter keys are the

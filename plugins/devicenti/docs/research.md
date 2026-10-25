@@ -1,6 +1,8 @@
-# DeVicenti: research, design decisions and test plan
+# DeviceNTI V: research, design decisions and test plan
 
-DeVicenti is an original FM groovebox: four tracks, each a four-operator FM voice (TONE), a drum machine of eight FM
+(Called DeVicenti until version 1.0.0.)
+
+DeviceNTI V is an original FM groovebox: four tracks, each a four-operator FM voice (TONE), a drum machine of eight FM
 lanes (KIT) or a MIDI sender (MIDI), a 64-step sequencer with step locks and conditions, per-track inserts, two send
 effects and a master bus. It is aimed at downtempo, trip hop, acid jazz, ambient and dark ambient, with heavy, hard
 synths (the user's direction of 2026-10-24). This file is the research behind it; the user interface, parameter
@@ -44,7 +46,7 @@ Plugin landscape: Arturia DX7 V, Native Instruments FM8, Dexed (free DX7 model, 
 Ableton Operator (no sequencer). None is a free, open (AGPL), Linux-capable FM synth with a built-in four-track step
 sequencer, locks and conditions.
 
-### 1.4 What DeVicenti does not copy
+### 1.4 What DeviceNTI V does not copy
 The reference's algorithm diagrams, its C/A/B1/B2 grouping, the revolving B ratio, the X/Y MIX, the bipolar HARM mapping,
 parameter names, screen layouts and the PCM attack samples. The UI and manual say **step lock**, **step condition**
 and **patch swap**; no product names.
@@ -56,7 +58,7 @@ file (written for this plugin from genre references, practice and Chowning 1973)
 FM recipes, effect chains and demo blueprints per genre, and ranks the engine requirements (its §9). How each was
 answered in phase 1:
 
-| Requirement (recipes §9) | DeVicenti |
+| Requirement (recipes §9) | DeviceNTI V |
 |---|---|
 | Clean mono phase-coherent sub, out of drive and inserts, mono below 120 Hz | SUB layer at the host rate, sine or triangle, −1/−2 oct, follows the amp envelope, delayed by the voice latency so it is phase-locked to the FM layer; added after the insert and the tape; low-end mono (side high-passed at 120 Hz, 2 poles) |
 | Asymmetric saturation + fold + crush, no aliasing at the far end | DRIVE 0-36 dB asymmetric cubic soft clip and FOLD (triangle folder), both with first-order ADAA inside a local 2x→4x→2x stage (33-tap half-bands); CRUSH (bits and sample-and-hold); DC blocker after |

@@ -569,6 +569,7 @@ void DeVicentiProcessor::getStateInformation (juce::MemoryBlock& destData)
     state.setProperty ("program", currentProgram, nullptr);
     state.setProperty ("presetSnapshot", tracker.toString(), nullptr);
     state.setProperty ("project", projectJson (true), nullptr);
+    state.setProperty ("songMode", songMode.load(), nullptr);     // the SONG page switch is session state, like the MIDI settings
     juce::String lr;
     { const juce::SpinLock::ScopedLockType l (learnLock); for (auto& kv : learned) lr << kv.first << "=" << kv.second << ";"; }
     state.setProperty ("learn", lr, nullptr);
@@ -585,6 +586,7 @@ void DeVicentiProcessor::setStateInformation (const void* data, int sizeInBytes)
     apvts.replaceState (state);
     currentPresetName = state.getProperty ("preset", "Init").toString();
     currentProgram = juce::jlimit (0, std::max (0, (int) presets.size() - 1), (int) state.getProperty ("program", 0));
+    songMode.store ((bool) state.getProperty ("songMode", false));
     if (pj.isNotEmpty()) { const auto v = juce::JSON::parse (pj); editProject ([&] (Project& pr) { pio::projectFromVar (v, pr, true); }, dAll, 0xFFFF); }
     {
         const juce::SpinLock::ScopedLockType l (learnLock); learned.clear();
@@ -617,6 +619,7 @@ void DeVicentiProcessor::loadFactory()
 
 juce::File DeVicentiProcessor::userPresetDir()
 {
+    // The folder keeps the 1.0.0 name (the plugin was renamed DeviceNTI V in 1.0.1): the presets users saved stay found.
     const auto base = juce::File::getSpecialLocation (juce::File::userApplicationDataDirectory);
    #if JUCE_MAC
     return base.getChildFile ("Application Support/Audio Tools/DeVicenti/Presets");

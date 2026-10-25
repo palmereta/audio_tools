@@ -11,10 +11,11 @@ set -e
 cd "$(dirname "$0")/.."
 
 package() {
-    DIR=$1; PRODUCT=$2
+    # FILE: the zip's name without spaces when the product name has them (DeviceNTI V -> DeviceNTI-V-1.0.1-macOS.zip).
+    DIR=$1; PRODUCT=$2; FILE=${3:-$2}
     UPPER=$(echo "$DIR" | tr a-z A-Z)
     VER=$(sed -n "s/^set(${UPPER}_VERSION \(.*\))/\1/p" "plugins/$DIR/CMakeLists.txt")
-    NAME="$PRODUCT-$VER-macOS"
+    NAME="$FILE-$VER-macOS"
     OUT="dist/$NAME"
     rm -rf "$OUT" "dist/$NAME.zip"; mkdir -p "$OUT" web/downloads
     R="${BUILD:-build}/plugins/$DIR"
@@ -55,7 +56,7 @@ $PRODUCT $VER by Audio Tools - macOS 11+ (Apple Silicon and Intel)
 ${PRESETS_EN}$PRODUCT.app is the standalone version.
 
 The binaries are ad-hoc signed and not notarized. If macOS blocks them, run:
-  xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/$PRODUCT*.vst3 ~/Library/Audio/Plug-Ins/Components/$PRODUCT*.component
+  xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/"$PRODUCT"*.vst3 ~/Library/Audio/Plug-Ins/Components/"$PRODUCT"*.component
 
 --- Español ---
 1. Copiar los .vst3 a ~/Library/Audio/Plug-Ins/VST3/
@@ -122,5 +123,5 @@ ONLY=${1:-}
 [ -z "$ONLY" ] || [ "$ONLY" = pallor ] && package pallor Pallor
 [ -z "$ONLY" ] || [ "$ONLY" = thrum ] && package thrum Thrum
 [ -z "$ONLY" ] || [ "$ONLY" = at330 ] && package at330 AT330
-[ -z "$ONLY" ] || [ "$ONLY" = devicenti ] && package devicenti DeVicenti
+[ -z "$ONLY" ] || [ "$ONLY" = devicenti ] && package devicenti "DeviceNTI V" DeviceNTI-V
 exit 0

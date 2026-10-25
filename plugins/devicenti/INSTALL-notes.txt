@@ -1,0 +1,16 @@
+
+--- DeviceNTI V: updating from DeVicenti 1.0.0 / actualizar desde DeVicenti 1.0.0 ---
+Version 1.0.0 was called DeVicenti. It is the same plugin under a new name: projects saved with
+1.0.0 open in DeviceNTI V unchanged, and the presets you saved are still in the preset browser.
+If you installed 1.0.0 by hand, delete the old copies (DeVicenti.vst3, DeVicenti.component,
+DeVicenti.app or DeVicenti.exe, DeVicenti.lv2, and the "Audio Tools DeVicenti" preset folder)
+before installing this one, so your DAW does not list the plugin twice. If the launcher installed
+1.0.0, its update replaces it for you. The standalone app starts once with the default audio
+settings.
+
+La versión 1.0.0 se llamaba DeVicenti. Es el mismo plugin con otro nombre: los proyectos de la
+1.0.0 abren igual y los presets que guardaste siguen en el navegador. Si instalaste la 1.0.0 a
+mano, borrá las copias viejas (DeVicenti.vst3, .component, .app o .exe, .lv2 y la carpeta de
+presets "Audio Tools DeVicenti") antes de instalar esta, para que el DAW no lo muestre dos veces.
+Si la 1.0.0 la instaló el launcher, la actualización la reemplaza sola. La app standalone arranca
+una vez con el audio por defecto.

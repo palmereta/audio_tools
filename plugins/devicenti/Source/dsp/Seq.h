@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the sequencer (plan §5.5, §13; genre-recipes §8). No JUCE.
+// DeviceNTI V: the sequencer (plan §5.5, §13; genre-recipes §8). No JUCE.
 //
 // Data: 16 patterns, each with a master length (1-64 sixteenths), a scale (root + one of 19 scales; the first 16 are
 // Orrery's list, so chord follow agrees), a swing (50-80 %) and four tracks. A track has a length (1-64), a speed
@@ -81,7 +81,8 @@ inline const char* speedName (int i) { static const char* n[7] = { "1/8x", "1/4x
 
 struct Pattern
 {
-    uint8_t length = 16, root = 9, scale = 1, swing = 50;      // root pitch class (9 = A), scale index, swing %
+    uint8_t length = 16, root = 9, scale = 1, swing = 50;      // root pitch class (9 = A), scale index; swing: unused since
+                                                               // 1.0.1 (the host Swing parameter is the swing, SeqSettings)
     std::array<TrackPat, kTracks> t {};
     std::array<PoolLock, kPoolLocks> pool {};
     uint16_t nLocks = 0;
@@ -199,6 +200,8 @@ struct SeqSettings
     bool fill = false;
     uint32_t seed = 1;
     int rootOverride = -1, scaleOverride = -1;   // harmony follow
+    float swing = 0.5f;         // the host Swing parameter (0.5-0.8): the swing of every pattern (1.0.1; before, the
+                                // never-saved pattern swing was read and the host Swing did nothing: DAW QA DV1)
 };
 
 struct Segment
@@ -236,9 +239,10 @@ public:
     // Direct jump: the next window starts a new chain at its first position with pattern p.
     void jumpTo (int p) { jumpPattern = std::clamp (p, 0, kPatterns - 1); jumpPending = true; }
 
+    double jumpTol = 0.0;     // set by the engine every host block
     template <typename F> void advance (double c0, int n, double rate, const SeqSettings& st, F&& emit)
     {
-        const double tol = std::max (2.0 * rate, 1e-7);
+        const double tol = std::max (2.0 * rate, 1e-7) + jumpTol;     // jumpTol: see Engine (tempo change inside a block)
         double w0;
         if (haveLast && std::fabs (c0 - lastC1) <= tol) w0 = lastW1;
         else { nSeg = 0; w0 = c0 - 0.5 * rate; }
@@ -391,7 +395,7 @@ private:
     void gather (const Segment& s, int segIdx, double w0, double w1, const SeqSettings& st, int& nc)
     {
         const Pattern& pt = bank->p[(size_t) s.pat];
-        const float swing = clampf ((float) pt.swing * 0.01f, 0.5f, 0.8f);
+        const float swing = clampf (st.swing, 0.5f, 0.8f);
         for (int tr = 0; tr < kTracks; ++tr)
         {
             if (s.muteMask & (1 << tr)) continue;
@@ -417,13 +421,14 @@ private:
                     const double nominal = s.start + (double) i * sb;
                     double t = nominal;
                     const float amt = (float) tp.swing * 0.01f;
-                    if (amt > 0.0f && swing > 0.5001f) t += amt * (swingWarp (nominal, swing) - nominal);
+                    // Swing counts from the segment's start (on the bar, except after a direct jump), so a pattern's
+                    // first step is never swung late.
+                    if (amt > 0.0f && swing > 0.5001f) { const double rel = nominal - s.start; t += amt * (swingWarp (rel, swing) - rel); }
                     t += (double) sp.micro / 48.0 * sb;
                     if (nc < kCand) cand[(size_t) nc++] = { nominal, t, tr, lane, idx, segIdx, g };
                 }
             }
         }
-        (void) st;
     }
 
     template <typename F> void fire (const Cand& c, const SeqSettings& st, double w0, double w1, F&& emit)

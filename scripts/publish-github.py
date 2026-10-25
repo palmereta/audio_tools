@@ -149,15 +149,17 @@ RELEASE_NOTES = {k: v for k, v in json.load(open(_rn, encoding="utf-8")).items()
 
 
 def versions():
-    """{tag: (producto, versión)} de cada plugin y del launcher, leídos de sus CMakeLists en REF."""
-    names = dict(re.findall(r"package (\w+) (\w+)", git("show", f"{REF}:scripts/package-macos.sh")))
+    """{tag: (producto, versión, nombre de los zips)} de cada plugin y del launcher, leídos de sus CMakeLists en REF.
+    package-macos.sh dice `package <carpeta> <Producto> [<nombre del zip>]`; el producto puede ir entre comillas
+    ("DeviceNTI V") y entonces el zip lleva otro nombre, sin espacios (DeviceNTI-V-<versión>-<SO>.zip)."""
     out = {}
-    for d, product in names.items():
+    for d, quoted, plain, file in re.findall(r'package (\w+) (?:"([^"]+)"|(\S+))(?: (\S+))?\s*$', git("show", f"{REF}:scripts/package-macos.sh"), re.M):
+        product = quoted or plain
         cm = git("show", f"{REF}:plugins/{d}/CMakeLists.txt", check=False)
         m = re.search(rf"set\({d.upper()}_VERSION (.+?)\)", cm)
-        if m: out[f"{d}-v{m.group(1)}"] = (product, m.group(1))
+        if m: out[f"{d}-v{m.group(1)}"] = (product, m.group(1), file or product)
     m = re.search(r"set\(LAUNCHER_VERSION (.+?)\)", git("show", f"{REF}:tools/launcher/CMakeLists.txt"))
-    if m: out[f"launcher-v{m.group(1)}"] = ("AudioToolsLauncher", m.group(1))
+    if m: out[f"launcher-v{m.group(1)}"] = ("AudioToolsLauncher", m.group(1), "AudioToolsLauncher")
     return out
 
 
@@ -208,7 +210,7 @@ def main():
 
     # ── 3 y 4. Tags y releases ──
     remote_tags = {l.split("\t")[1][len("refs/tags/"):] for l in wgit("ls-remote", "--tags", "origin", check=False).splitlines() if "\t" in l and not l.endswith("^{}")}
-    for tag, (product, ver) in sorted(versions().items()):
+    for tag, (product, ver, file) in sorted(versions().items()):
         if tag not in remote_tags:
             print(f"tag {tag} → {commit[:12]}")
             if not DRY:
@@ -216,7 +218,7 @@ def main():
         status, rel = api("GET", f"/repos/{OWNER}/{REPO}/releases/tags/{tag}")
         if status == 404:
             title = f"{'Audio Tools Launcher' if product == 'AudioToolsLauncher' else product} {ver}"
-            linux = os.path.exists(os.path.join(ROOT, "web", "downloads", f"{product}-{ver}-Linux.zip"))
+            linux = os.path.exists(os.path.join(ROOT, "web", "downloads", f"{file}-{ver}-Linux.zip"))
             systems = ("macOS (11+, universal), Windows (10/11 x64) and Linux (x86_64, glibc 2.35+)" if linux
                        else "macOS (11+, universal) and Windows (10/11 x64)")
             notes = (f"{title} for {systems}. Unzip and follow INSTALL.txt, or install it "
@@ -234,7 +236,7 @@ def main():
         assert isinstance(rel, dict)
         have = {a["name"] for a in rel.get("assets", [])}
         for plat in ("macOS", "Windows", "Linux"):
-            name = f"{product}-{ver}-{plat}.zip"
+            name = f"{file}-{ver}-{plat}.zip"
             path = os.path.join(ROOT, "web", "downloads", name)
             if name in have: continue
             if not os.path.exists(path): print(f"  falta {name} en web/downloads"); continue

@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the unit in 3/4 perspective (plan §8, phase 2). The background is the Blender render; on it the view
+// DeviceNTI V: the unit in 3/4 perspective (plan §8, phase 2). The background is the Blender render; on it the view
 // draws what changes: knob pointers and the screens through each plane's homography, pressed and lit keys and lit
 // LEDs as sprites rendered at the same pixels. Every control is hit-tested through the inverse homography of its top
 // plane (and of its base, for knobs), so the click lands where the control is seen.

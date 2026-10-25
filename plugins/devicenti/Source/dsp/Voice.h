@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: one voice (plan §5.2, §5.3, §13.1). Everything up to the amp envelope runs at twice the host rate and is
+// DeviceNTI V: one voice (plan §5.2, §5.3, §13.1). Everything up to the amp envelope runs at twice the host rate and is
 // brought down by the voice's own half-band decimator (exactly 24 samples of delay):
 //
 //   four operators A..D (8 algorithms, own ADSR, feedback on any operator, harmonics morph, fixed-frequency mode)

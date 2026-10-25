@@ -31,7 +31,7 @@ against the hardware and improve.
 | [Thrum](plugins/thrum/) | Original: electric guitar by physical modelling: six guitars with waveguide strings and real pickups, a guitarist that fingers, strums and plays the articulations, thirteen pedals, four amps and a cabinet with movable microphones | 1.0.1 | Released |
 | [Pallor](plugins/pallor/) | Original: drum machine for dark wave, coldwave, post-punk and EBM, analog and 80s digital engines, 80s/90s effects, step sequencer | 1.0.2 | Released |
 | [AT330](plugins/at330/) | Roland VP-330 (1979), strings, choir and 10-band vocoder with a BBD ensemble | 1.0.0 | Released |
-| [DeVicenti](plugins/devicenti/) | Original: FM groovebox for downtempo, trip hop, acid jazz, ambient and dark ambient: four tracks of four-operator FM with sub, an FM drum machine per track or MIDI out, a 64-step sequencer with step locks, conditions and chord mode, inserts, tape and dub effects | 1.0.0 | Released |
+| [DeviceNTI V](plugins/devicenti/) | Original: FM groovebox for downtempo, trip hop, acid jazz, ambient and dark ambient: four tracks of four-operator FM with sub, an FM drum machine per track or MIDI out, a 64-step sequencer with step locks, conditions and chord mode, inserts, tape and dub effects | 1.0.0 | Released |
 
 ## AT20V
 
@@ -250,7 +250,7 @@ Technical notes: [`plugins/at303/README.md`](plugins/at303/README.md) and the re
 Technical notes: [`plugins/at330/README.md`](plugins/at330/README.md) and the research behind it,
 [`plugins/at330/docs/research.md`](plugins/at330/docs/research.md).
 
-## DeVicenti
+## DeviceNTI V
 
 - An original FM groovebox for downtempo, trip hop, acid jazz, ambient and dark ambient: four tracks, each a
   four-operator FM voice (eight algorithms, sub, noise, a saturating ladder or state-variable filter, drive and fold
@@ -261,7 +261,7 @@ Technical notes: [`plugins/at330/README.md`](plugins/at330/README.md) and the re
 - One insert per track, AGE tape drift, a delay (tape, dub, ping-pong) and a reverb (spring, plate, hall, void) on
   sends, and a master bus with tape, glue, duck and a limiter.
 - MIDI in with a fixed CC map, learn, relative modes and CC feedback; MIDI out from MIDI tracks and doubled tracks;
-  MIDI clock in the standalone. 4.4 % of one M4 core on average over the 82 presets, 3.7 % with 16 voices.
+  MIDI clock in the standalone. 4.3 % of one M4 core on average over the 82 presets, 3.7 % with 16 voices.
 - The window is the unit rendered in 3D (Blender, built from the panel table) with every knob, key, LED and screen
   working, back pages for everything else and the manual.
 

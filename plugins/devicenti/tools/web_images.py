@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Website images for DeVicenti: the Blender photos (hero.jpg 2400x1350, top.jpg, close.jpg, keys.jpg, filter.jpg, made by
+"""Website images for DeviceNTI V: the Blender photos (hero.jpg 2400x1350, top.jpg, close.jpg, keys.jpg, filter.jpg, made by
 tools/blender/devicenti.py --mode photos) and the editor screenshots taken from the standalone with DV_SNAPSHOT at scale 3
 (3360 x 2490), which are left in /tmp/claude-501/devicenti-shots: overview.png (Basement Boom, the unit), seq.png (the SEQ
 page) and fx.png (the FX page). Writes web/assets/img/devicenti/ in the sizes scripts/build-web.py expects (jpg + webp) and
 the menu thumbnail.
 
     HOME=<scratch home> DV_SNAPSHOT=/tmp/claude-501/devicenti-shots/overview.png DV_SNAP_SCALE=3 DV_SNAP_QUIT=1 DV_PRESET=2 \\
-        build-devicenti/plugins/devicenti/DeVicenti_artefacts/Release/Standalone/DeVicenti.app/Contents/MacOS/DeVicenti
+        "build-devicenti/plugins/devicenti/DeVicenti_artefacts/Release/Standalone/DeviceNTI V.app/Contents/MacOS/DeviceNTI V"
         (the same with DV_PAGE=SEQ DV_TRACK=1 for seq.png, and DV_PAGE=FX DV_TRACK=2 for fx.png)
     python3 plugins/devicenti/tools/web_images.py <folder with hero.jpg top.jpg close.jpg keys.jpg filter.jpg>
 """

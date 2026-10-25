@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti editor (phase 2): a thin top bar (preset browser, MIDI learn, the back pages, MIDI settings, settings,
+// DeviceNTI V editor (phase 2): a thin top bar (preset browser, MIDI learn, the back pages, MIDI settings, settings,
 // save) over the unit in 3/4 perspective (ui/UnitView), or over a back page (ui/Pages). The window keeps the
 // render's proportions and scales from 60 % to 160 %; the render is made at 2x, so it stays sharp on HiDPI screens.
 //

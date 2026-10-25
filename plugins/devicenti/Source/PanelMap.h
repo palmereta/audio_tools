@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the front panel as data (plan §8). One table lists every control of the single unit: its id, the
+// DeviceNTI V: the front panel as data (plan §8). One table lists every control of the single unit: its id, the
 // silkscreen label and the small FUNC label, what it does turned and with FUNC held, its fixed MIDI CC (main layer
 // and FUNC layer), and where it sits on the panel: millimetres from the top-left corner of the case (300 × 426 mm,
 // the proportions of art/single-front.png). `devicentirender --panel-json` exports this table; the Blender script

@@ -19,13 +19,14 @@ strip_all() {
 }
 
 package() {
-    DIR=$1; PRODUCT=$2
+    # FILE: the zip's name without spaces when the product name has them (DeviceNTI V -> DeviceNTI-V-1.0.1-Linux.zip).
+    DIR=$1; PRODUCT=$2; FILE=${3:-$2}
     UPPER=$(echo "$DIR" | tr a-z A-Z)
     VER=$(sed -n "s/^set(${UPPER}_VERSION \(.*\))/\1/p" "plugins/$DIR/CMakeLists.txt")
-    NAME="$PRODUCT-$VER-Linux"
+    NAME="$FILE-$VER-Linux"
     OUT="$DIST/$NAME"
     # También las versiones anteriores: build-linux.sh trae a web/downloads todo lo que hay en dist/.
-    rm -rf "$DIST/$PRODUCT"-*-Linux "$DIST/$PRODUCT"-*-Linux.zip; mkdir -p "$OUT"
+    rm -rf "$DIST/$FILE"-*-Linux "$DIST/$FILE"-*-Linux.zip; mkdir -p "$OUT"
     R="$BUILD/plugins/$DIR"
     # Todas las variantes del plugin (p. ej. AT20V y AT20V FX). La standalone es un ejecutable sin extensión.
     for f in "$R"/*_artefacts/Release/VST3/*.vst3 "$R"/*_artefacts/Release/LV2/*.lv2 "$R"/*_artefacts/Release/Standalone/*; do
@@ -60,7 +61,7 @@ $PRODUCT $VER by Audio Tools - Linux x86_64 (glibc 2.35 or later: Ubuntu 22.04, 
 1. Copy the .vst3 folders to ~/.vst3/
 2. Copy the .lv2 folders to ~/.lv2/
 3. Rescan plugins in your DAW (REAPER: Options > Preferences > Plug-ins > VST > Re-scan).
-${PRESETS_EN}$PRODUCT is the standalone version: run ./$PRODUCT (ALSA or JACK).
+${PRESETS_EN}$PRODUCT is the standalone version: run ./"$PRODUCT" (ALSA or JACK).
 
 From a terminal, inside this folder:
   mkdir -p ~/.vst3 ~/.lv2 && cp -r *.vst3 ~/.vst3/ && cp -r *.lv2 ~/.lv2/
@@ -71,7 +72,7 @@ They use the libraries every Linux desktop has (ALSA, FreeType, fontconfig, X11;
 --- Español ---
 1. Copiar las carpetas .vst3 a ~/.vst3/
 2. Copiar las carpetas .lv2 a ~/.lv2/
-3. Reescanear los plugins en el DAW. $PRODUCT es la versión standalone (./$PRODUCT, con ALSA o JACK).
+3. Reescanear los plugins en el DAW. $PRODUCT es la versión standalone (./"$PRODUCT", con ALSA o JACK).
 ${PRESETS_ES}
 Free and open source software under the GNU AGPL v3 (see LICENSE.txt).
 TXT
@@ -131,5 +132,5 @@ ONLY=${1:-}
 [ -z "$ONLY" ] || [ "$ONLY" = pallor ] && package pallor Pallor
 [ -z "$ONLY" ] || [ "$ONLY" = thrum ] && package thrum Thrum
 [ -z "$ONLY" ] || [ "$ONLY" = at330 ] && package at330 AT330
-[ -z "$ONLY" ] || [ "$ONLY" = devicenti ] && package devicenti DeVicenti
+[ -z "$ONLY" ] || [ "$ONLY" = devicenti ] && package devicenti "DeviceNTI V" DeviceNTI-V
 exit 0

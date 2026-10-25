@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""DeVicenti: the Blender UI renders (tools/blender/devicenti.py --mode ui) → assets/ui.
+"""DeviceNTI V: the Blender UI renders (tools/blender/devicenti.py --mode ui) → assets/ui.
 
     python3 tools/pack_ui.py <render dir>
 

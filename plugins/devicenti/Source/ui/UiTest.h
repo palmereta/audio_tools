@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the editor's self-test (DV_UITEST=/path/report.txt in the standalone). Real mouse events go to the unit
+// DeviceNTI V: the editor's self-test (DV_UITEST=/path/report.txt in the standalone). Real mouse events go to the unit
 // view at the projected positions of the controls, so it checks the hit areas against the render as well as the
 // panel's behaviour: every control is found where it is drawn, knobs turn their targets (main layer, FUNC layer, a
 // lock on a held step), the keys select, record, hold and change patterns, the display steps through fields.

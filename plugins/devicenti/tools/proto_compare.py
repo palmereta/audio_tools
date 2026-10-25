@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""DeVicenti: the C++ engine against the Python prototype (plan §7, phase 1: "port the prototype's patch values
+"""DeviceNTI V: the C++ engine against the Python prototype (plan §7, phase 1: "port the prototype's patch values
 first and compare spectra and envelopes: levels within 1 dB, envelope times within 5 %").
 
     /Volumes/Docs/Applications/pyaudio-venv/bin/python plugins/devicenti/tools/proto_compare.py [--build build-devicenti]
 
-Each prototype patch (audiotools-private/vicenti/sound/proto/dv_patches.py) is translated to DeVicenti's keys and one
+Each prototype patch (audiotools-private/vicenti/sound/proto/dv_patches.py) is translated to DeviceNTI V's keys and one
 note is rendered by both: the prototype's offline kernel (4x) and the plugin through devicentirender (2x, no effects,
 AGE off in both, no LFOs). Reported per patch: the median level difference over the frames above −40 dB, the time
-to fall 20 dB from the peak, and the spectral centroid. Known differences by design: the drive curve (DeVicenti's
+to fall 20 dB from the peak, and the spectral centroid. Known differences by design: the drive curve (DeviceNTI V's
 goes to 36 dB, the prototype's to 18 dB), the resonance curve and per-stage saturation of the ladder, and the
 feedback's pitch limit (stricter at 2x).
 """
@@ -26,7 +26,7 @@ HS = {"sine": 0, "saw": 1, "square": 2, "organ": 3, "reed": 4, "bell": 5}
 
 
 def convert(s):
-    """Prototype sound dict → DeVicenti sound keys (one-to-one where the semantics match)."""
+    """Prototype sound dict → DeviceNTI V sound keys (one-to-one where the semantics match)."""
     d = {"algo": s["algo"] - 1}
     for k, n in zip("abcd", "ABCD"):
         o = s["ops"][n]

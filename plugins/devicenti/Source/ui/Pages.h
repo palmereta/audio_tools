@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the back pages, the small display enlarged into full editors (plan §7 phase 2): every field of a page
+// DeviceNTI V: the back pages, the small display enlarged into full editors (plan §7 phase 2): every field of a page
 // at once, grouped, as rows you drag (left-right or up-down), scroll or click (choices step on a click). SEQ is the
 // pattern's step grid (all tracks, all KIT lanes, 64 steps); SETTINGS holds the window size and the help text.
 

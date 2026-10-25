@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: edits of a pattern's steps and step locks (the panel, the SEQ page and live recording). No JUCE. A step
+// DeviceNTI V: edits of a pattern's steps and step locks (the panel, the SEQ page and live recording). No JUCE. A step
 // keeps its locks contiguous in the pattern's lock pool, so every change rebuilds the pool in (track, lane, step)
 // order; the pool holds at most kPoolLocks.
 

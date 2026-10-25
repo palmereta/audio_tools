@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the master bus (plan §13.2): TAPE → GLUE → LIMIT → volume, and the DUCK envelope.
+// DeviceNTI V: the master bus (plan §13.2): TAPE → GLUE → LIMIT → volume, and the DUCK envelope.
 //   TAPE   wow and flutter (a modulated read of a 1.5 ms base delay, always present: constant latency), soft tape
 //          saturation, hiss and vinyl crackle (Poisson ticks and pops shaped by a short filter, plus surface
 //          noise), everything a closed function of the absolute position.

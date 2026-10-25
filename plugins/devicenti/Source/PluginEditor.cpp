@@ -71,7 +71,7 @@ void DeVicentiEditor::TopBar::paint (juce::Graphics& g)
     hits.clear();
     auto r = b.reduced (10 * s, 4 * s);
     g.setColour (Theme::ink()); g.setFont (Theme::font (15.0f * s));
-    g.drawText ("Audio Tools DeVicenti", r.removeFromLeft (180 * s), juce::Justification::centredLeft);
+    g.drawText ("Audio Tools DeviceNTI V", r.removeFromLeft (196 * s), juce::Justification::centredLeft);
     if (ed.page >= 0)
     {
         auto back = r.removeFromLeft (110 * s).reduced (2 * s, 1 * s);

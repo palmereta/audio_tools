@@ -277,6 +277,18 @@
     "Lo que el original no tenía: envolventes por tecla (Poly, por defecto), velocity, Freeze, corrimiento de formantes, respuesta del vocoder, pitch bend para los dos lados, vibrato con la rueda de modulación, división del teclado movible, ensemble de las cuerdas apagable y una reverb de placa.",
     "Un panel renderizado en nogal aceitado con cada perilla y cada llave, el visor de bandas y el teclado; una página Extended; 45 presets y un manual en inglés y castellano."
   ],
+  "devicenti-v1.0.1": [
+    "Ahora se llama DeviceNTI V; los proyectos de la 1.0.0 abren igual y los presets que guardaste siguen en el navegador de presets.",
+    "El parámetro Swing (la perilla SWING, el CC 9 y la automatización) ahora le da swing al secuenciador; en la 1.0.0 todos los patrones sonaban derechos. Los 50 presets de fábrica escritos con swing (52 a 60 por ciento) ahora suenan con él; las siete demos de sonido son derechas y suenan igual que antes.",
+    "Arpegiador: un acorde tocado en un paso hace sonar su primera nota, la más grave, en ese paso y después sube en orden; soltar en un paso ya no agrega una nota.",
+    "Los cambios de tempo en medio de un bloque de audio (los marcadores de tempo de REAPER) ya no cortan las notas que suenan como si el transporte hubiera saltado.",
+    "Las pistas que doblan sus notas a la salida MIDI ahora mandan los note-off correctos de las notas que tocás: en el modo acorde sale cada nota del acorde (antes mandaba la tecla tres veces y dejaba notas colgadas), con Thru prendido una tecla sale una sola vez, y una tecla de KIT en un alias GM recibe el note-off de la nota del carril.",
+    "El modo canción (página SONG) ahora se guarda con el proyecto.",
+    "Manual: las notas por defecto de los carriles de KIT en la sección de entrada MIDI son 36, 38, 39, 42, 46, 45, 50 y 70 (no 36 a 43).",
+    "Manual: el MIDI From de Live pasa todos los canales MIDI (no hay forma de elegir uno), y la salida MIDI en Live y REAPER necesita el VST3 (los dos ignoran la salida MIDI de un instrumento Audio Unit).",
+    "Manual: en REAPER, al detener la reproducción o al terminar un ítem MIDI se manda CC 0 de los CC que usó el ítem, lo que mueve las perillas mapeadas a ellos; qué hacer.",
+    "Manual: en Ableton Live, hacé clic en Configure para poner los parámetros del DeviceNTI V en el panel del dispositivo (Live lo llena solo con plugins de 64 parámetros o menos)."
+  ],
   "devicenti-v1.0.0": [
     "Primera versión: una groovebox FM original para downtempo, trip hop, acid jazz, ambient y dark ambient, una sola máquina naranja que se toca y se programa desde su panel.",
     "Cuatro pistas, cada una una voz FM de cuatro operadores en ocho algoritmos con sub, ruido, un filtro que satura, drive y fold, una batería de ocho carriles FM con grupos de choke, o una pista MIDI que toca un sinte externo.",

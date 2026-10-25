@@ -16,7 +16,7 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 | [Pallor](#pallor) | 1.0.2 |
 | [Thrum](#thrum) | 1.0.1 |
 | [AT330](#at330) | 1.0.0 |
-| [DeVicenti](#devicenti) | 1.0.0 |
+| [DeviceNTI V](#devicenti-v) | 1.0.1 |
 | [Orrery](#orrery) | 1.0.7 |
 | [Murmur](#murmur) | 1.0.4 |
 | [Halation](#halation) | 1.0.3 |
@@ -365,7 +365,20 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 - Extras the original did not have: per-key envelopes (Poly, the default), velocity, Freeze, formant shift, vocoder response, pitch bend both ways, mod-wheel vibrato, a movable split, a switchable strings ensemble and a plate reverb.
 - A rendered panel in oiled walnut with every knob and tablet, the band display and the keyboard; an Extended page; 45 presets and a manual in English and Spanish.
 
-## DeVicenti
+## DeviceNTI V
+
+### 1.0.1
+
+- Renamed to DeviceNTI V; projects from 1.0.0 load unchanged, and the presets you saved stay in the preset browser.
+- The Swing parameter (the SWING knob, CC 9 and automation) now swings the sequencer; in 1.0.0 every pattern played straight. The 50 factory presets written with swing (52 to 60 percent) now play with it; the seven sound demos are straight and sound as before.
+- Arpeggiator: a chord pressed on a step plays its first, lowest note on that step and then goes up in order; releasing on a step no longer adds a note.
+- Tempo changes in the middle of an audio block (REAPER tempo markers) no longer cut the sounding notes as if the transport had jumped.
+- Tracks that double their notes to MIDI out now send the right note-offs for notes you play in: in chord mode each chord note goes out (it used to send the key three times and leave notes hanging), with Thru on a key goes out once, and a KIT key on a GM alias gets the lane note's note-off.
+- Song mode (SONG page) is now saved with the project.
+- Manual: the default KIT lane notes in the MIDI in section are 36, 38, 39, 42, 46, 45, 50 and 70 (not 36 to 43).
+- Manual: Live's MIDI From passes every MIDI channel (there is no channel choice), and MIDI out in Live and REAPER needs the VST3 (they ignore an Audio Unit instrument's MIDI output).
+- Manual: in REAPER, stopping playback or the end of a MIDI item sends CC 0 for the CCs the item used, which moves the knobs mapped to them; what to do about it.
+- Manual: in Ableton Live, click Configure to put DeviceNTI V's parameters on the device panel (Live fills it by itself only for plugins with 64 parameters or fewer).
 
 ### 1.0.0
 

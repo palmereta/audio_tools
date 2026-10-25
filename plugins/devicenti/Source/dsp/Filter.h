@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the per-voice filter (runs at the voice's 2x rate).
+// DeviceNTI V: the per-voice filter (runs at the voice's 2x rate).
 //   LP24: a four-pole TPT ladder. The feedback is solved in closed form on the linear model (no unit delay), the
 //         input/feedback sum goes through tanh and every stage output through a soft saturation, so a hard drive
 //         rounds off like a transistor ladder instead of clipping. Resonance 0..1 maps to k 0..3.9 (self-oscillation

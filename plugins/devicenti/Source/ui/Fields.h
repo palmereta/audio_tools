@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: every value the panel does not show on a knob, as "fields" (name, value text, normalised get/set,
+// DeviceNTI V: every value the panel does not show on a knob, as "fields" (name, value text, normalised get/set,
 // number of steps). One list per page serves both the small display (ALGORITHM picks the field with a step held,
 // clicks on the screen step through the fields, DATA edits) and the back pages (all fields of a page at once).
 

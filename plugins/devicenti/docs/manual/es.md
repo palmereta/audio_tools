@@ -1,14 +1,14 @@
-# Manual del DeVicenti
+# Manual del DeviceNTI V
 
-## Qué es el DeVicenti
+## Qué es el DeviceNTI V
 
-El DeVicenti es una groovebox de FM: cuatro pistas, un secuenciador de 64 pasos y un camino de sonido hecho para música lenta, pesada y oscura. Todo el instrumento es una sola unidad naranja que tocás y programás desde su panel. Es un diseño original, no el modelo de ninguna máquina existente.
+El DeviceNTI V es una groovebox de FM: cuatro pistas, un secuenciador de 64 pasos y un camino de sonido hecho para música lenta, pesada y oscura. Todo el instrumento es una sola unidad naranja que tocás y programás desde su panel. Es un diseño original, no el modelo de ninguna máquina existente.
 
 Cada una de las cuatro pistas es una de tres máquinas:
 
 - **TONE**: una voz de FM de cuatro operadores con ocho algoritmos, un filtro saturante, una capa de sub, unison y una capa de ruido. Es polifónica.
 - **KIT**: una caja de ritmos de ocho voces de FM (bombo, redoblante, clap, hi-hat cerrado, hi-hat abierto, tom grave, tom agudo, percusión), cada una un pequeño tambor de FM con sus propios pasos, locks y condiciones.
-- **MIDI**: la pista manda sus notas, acordes y locks a un canal MIDI, así el DeVicenti puede tocar un sinte externo.
+- **MIDI**: la pista manda sus notas, acordes y locks a un canal MIDI, así el DeviceNTI V puede tocar un sinte externo.
 
 Por dónde pasa el sonido:
 
@@ -26,7 +26,7 @@ Qué tiene el secuenciador:
 
 Trae 82 presets, cada uno un proyecto entero (sonidos, patrones y efectos) en bancos con el nombre de la música para la que están hechos: Trip Hop, Downtempo, Acid Jazz, Ambient, Dark Ambient y Heavy.
 
-El DeVicenti funciona como VST3 en macOS, Windows y Linux, como Audio Unit en macOS, como LV2 en Linux y como aplicación independiente. Es un instrumento: se toca desde una pista MIDI. Es software libre y de código abierto bajo la GNU AGPL v3.
+El DeviceNTI V funciona como VST3 en macOS, Windows y Linux, como Audio Unit en macOS, como LV2 en Linux y como aplicación independiente. Es un instrumento: se toca desde una pista MIDI. Es software libre y de código abierto bajo la GNU AGPL v3.
 
 ## Instalación
 
@@ -35,35 +35,39 @@ Cada zip incluye un `INSTALL.txt` con estos pasos.
 ### macOS
 
 1. Descomprimí el archivo.
-2. Copiá `DeVicenti.vst3` a `~/Library/Audio/Plug-Ins/VST3/` y `DeVicenti.component` a `~/Library/Audio/Plug-Ins/Components/`.
+2. Copiá `DeviceNTI V.vst3` a `~/Library/Audio/Plug-Ins/VST3/` y `DeviceNTI V.component` a `~/Library/Audio/Plug-Ins/Components/`.
 3. Volvé a escanear los plugins en tu DAW. En Ableton Live: Settings, Plug-Ins, Rescan.
 
-`DeVicenti.app` es la versión independiente.
+`DeviceNTI V.app` es la versión independiente.
 
-> Los binarios están firmados ad hoc y no notarizados. Si macOS se niega a abrirlos, corré esto en Terminal: `xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/DeVicenti.vst3 ~/Library/Audio/Plug-Ins/Components/DeVicenti.component`
+> Los binarios están firmados ad hoc y no notarizados. Si macOS se niega a abrirlos, corré esto en Terminal: `xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/"DeviceNTI V.vst3" ~/Library/Audio/Plug-Ins/Components/"DeviceNTI V.component"`
 
 ### Windows
 
 1. Descomprimí el archivo.
-2. Copiá la carpeta `DeVicenti.vst3` a `C:\Program Files\Common Files\VST3\`. Windows pide permisos de administrador.
+2. Copiá la carpeta `DeviceNTI V.vst3` a `C:\Program Files\Common Files\VST3\`. Windows pide permisos de administrador.
 3. Volvé a escanear los plugins en tu DAW.
 
-`DeVicenti.exe` es la versión independiente y corre sin DAW.
+`DeviceNTI V.exe` es la versión independiente y corre sin DAW.
 
 > Los binarios no están firmados. SmartScreen de Windows puede pedirte que confirmes la primera vez.
 
 ### Linux
 
-Copiá `DeVicenti.vst3` a `~/.vst3/` y el bundle LV2 a `~/.lv2/`, y volvé a escanear en tu host.
+Copiá `DeviceNTI V.vst3` a `~/.vst3/` y el bundle LV2 a `~/.lv2/`, y volvé a escanear en tu host.
 
-## Cargar el DeVicenti en un DAW
+### Actualizar desde DeVicenti 1.0.0
 
-El DeVicenti aparece con el nombre de fabricante **Audio Tools**, entre los instrumentos, como Audio Tools DeVicenti. Cargalo en una pista MIDI. Abre con el primer preset, Init: un kit en la pista 1 y tres pistas tone, a 88 BPM.
+La versión 1.0.0 se llamaba DeVicenti. Es el mismo instrumento con otro nombre: los proyectos guardados con la 1.0.0 abren igual y los presets que guardaste siguen en el navegador de presets. Si instalaste la 1.0.0 a mano, borrá los bundles viejos `DeVicenti` (y la carpeta de presets `Audio Tools DeVicenti`) antes de instalar esta versión, para que el DAW no la muestre dos veces. El launcher reemplaza la 1.0.0 que instaló él. La aplicación independiente arranca una vez con el audio por defecto.
+
+## Cargar el DeviceNTI V en un DAW
+
+El DeviceNTI V aparece con el nombre de fabricante **Audio Tools**, entre los instrumentos, como Audio Tools DeviceNTI V. Cargalo en una pista MIDI. Abre con el primer preset, Init: un kit en la pista 1 y tres pistas tone, a 88 BPM.
 
 - **El secuenciador sigue al host.** En un DAW el transporte y el tempo son los del host: apretá play en el DAW y los patrones corren. El PLAY y el TEMPO de la unidad sólo funcionan en la app independiente.
 - **Salida de sonido.** La salida estéreo principal lleva todo. Cada pista también puede ir a su propia salida estéreo (página MIX, Output): activá las salidas extra del plugin en tu DAW y mandá esa pista ahí para mezclarla aparte.
-- **Entrada.** Las notas que llegan a la entrada MIDI de la pista tocan el DeVicenti como cualquier instrumento (ver MIDI de entrada).
-- **MIDI de salida.** El DeVicenti también produce MIDI, para manejar otros instrumentos (ver MIDI de salida).
+- **Entrada.** Las notas que llegan a la entrada MIDI de la pista tocan el DeviceNTI V como cualquier instrumento (ver MIDI de entrada).
+- **MIDI de salida.** El DeviceNTI V también produce MIDI, para manejar otros instrumentos (ver MIDI de salida).
 
 La app independiente abre el editor en su propia ventana. Elegí tus dispositivos de audio y MIDI en sus opciones. Ahí la unidad tiene su propio reloj: PLAY lo arranca y lo frena, y TEMPO fija la velocidad.
 
@@ -77,7 +81,7 @@ La app independiente abre el editor en su propia ventana. Elegí tus dispositivo
 
 ## Recorrido por la interfaz
 
-![El DeVicenti con el preset Basement Boom: la unidad en perspectiva bajo la barra superior.](img/overview.jpg)
+![El DeviceNTI V con el preset Basement Boom: la unidad en perspectiva bajo la barra superior.](img/overview.jpg)
 
 ### Barra superior
 
@@ -127,7 +131,7 @@ En una pista TONE todas las perillas editan la voz. En una pista KIT las perilla
 | Control | Girar | FUNC + girar |
 |---|---|---|
 | **TEMPO** | Tempo, de 40 a 240 BPM. En un DAW muestra el tempo del host y manda el host. | **SPEED**: la velocidad de la pista seleccionada en este patrón, de 1/8x a 2x |
-| **SWING** | Swing de todo el patrón, de 50 a 80 por ciento | **TRK SWING**: cuánto de ese swing toma la pista seleccionada, de 0 a 100 por ciento |
+| **SWING** | Swing de todos los patrones, de 50 a 80 por ciento (el parámetro del host Swing, así que se puede automatizar) | **TRK SWING**: cuánto de ese swing toma la pista seleccionada, de 0 a 100 por ciento |
 | **ALGORITHM** | El algoritmo de FM de la pista seleccionada, de 1 a 8. Con un paso sostenido, elige el campo del paso a editar. | **MACHINE**: TONE, KIT o MIDI |
 | **DATA** | Edita el campo que muestra la pantallita. | **PAGE**: elige la página de la pantallita (VOICE, OPS, FILTER/AMP, LFO, MOD, TRIG, CHORD/SCALE, MIX, FX, MIDI, SONG) |
 | **LFO** | Profundidad del LFO 1 de la pista seleccionada, positiva o negativa | **LFO 2**: profundidad del LFO 2 |
@@ -148,7 +152,7 @@ La **pantallita** muestra el diagrama del algoritmo con el rol de cada operador,
 | **CHORD** | Modo de acordes prendido o apagado para la pista seleccionada | **SCALE**: abre la página CHORD/SCALE |
 | **FUNC** | La tecla de mayúsculas | |
 
-En un DAW el transporte del host arranca y frena el DeVicenti: PLAY y STOP sólo muestran un recordatorio. **REC + PLAY** arranca la grabación en vivo (ver Grabación).
+En un DAW el transporte del host arranca y frena el DeviceNTI V: PLAY y STOP sólo muestran un recordatorio. **REC + PLAY** arranca la grabación en vivo (ver Grabación).
 
 ## Los operadores
 
@@ -360,11 +364,11 @@ El arpegiador sigue el tempo, y graba en el patrón como cualquier nota tocada c
 
 ### Patrones
 
-Hay 16 patrones. El parámetro del host **Pattern** elige el actual, así que se puede automatizar. Cada patrón tiene su propia raíz, escala, largo, swing y, por pista, largo, velocidad y cantidad de swing. Una voz de KIT también puede tener su propio largo.
+Hay 16 patrones. El parámetro del host **Pattern** elige el actual, así que se puede automatizar. Cada patrón tiene su propia raíz, escala y largo y, por pista, largo, velocidad y cantidad de swing (cuánto de la perilla SWING toma la pista). Una voz de KIT también puede tener su propio largo.
 
 ### Modo canción
 
-La página **SONG** (FUNC + DATA) es una cadena: hasta 16 filas de patrón y repeticiones (1 a 16). Prendé **Song mode** y el DeVicenti toca la cadena desde la primera fila, repitiendo cada patrón, y vuelve a empezar. Con Song mode apagado, el patrón actual se repite.
+La página **SONG** (FUNC + DATA) es una cadena: hasta 16 filas de patrón y repeticiones (1 a 16). Prendé **Song mode** y el DeviceNTI V toca la cadena desde la primera fila, repitiendo cada patrón, y vuelve a empezar. Con Song mode apagado, el patrón actual se repite.
 
 ### Grabación
 
@@ -386,7 +390,7 @@ La pantallita puede mostrar 11 páginas, y el menú PAGES abre 13 como editores 
 | **LFO** | Los dos LFO: forma, velocidad, sincronía, modo, fade, fase, destino, profundidad |
 | **MOD** | Las ocho ranuras de modulación |
 | **TRIG** | Los campos del paso sostenido (el primer paso si no hay ninguno sostenido) |
-| **CHORD/SCALE** | Raíz, escala, largo y swing del patrón; largo, velocidad y swing de la pista; modo de acordes y tamaño; canal de armonía; las ranuras de memoria de acordes |
+| **CHORD/SCALE** | Raíz, escala y largo del patrón; largo, velocidad y swing de la pista; modo de acordes y tamaño; canal de armonía; las ranuras de memoria de acordes |
 | **MIX** | Para cada pista: level, pan, mute, solo, salida (principal o propia) y machine. Master, tape, glue y limit |
 | **FX** | Delay, reverb, bus master y el insert de la pista (ver Efectos) |
 | **MIDI** | Entrada MIDI, CC, reloj y canales por pista (ver MIDI de entrada) |
@@ -440,7 +444,7 @@ Abrí la página MIDI para los ajustes.
 
 - **Input.** *OMNI to current track*, el valor por defecto, toca la pista seleccionada desde cualquier canal: hacé clic en una tecla TRACK para elegir qué pista toca tu teclado. *Channel per track* le da a cada pista su propio **In channel** (1 a 4 por defecto): las notas del canal 1 tocan la pista 1, y así.
 - **Notas.** Velocity, pitch bend (el rango está en la página VOICE), rueda de modulación (CC 1), aftertouch, poly pressure, breath (CC 2), expression (CC 11) y sustain (CC 64). Todos son fuentes de la página MOD. CC 120 y 123 cortan todo el sonido y todas las notas de la pista.
-- **Pistas KIT.** Las notas tocan las voces por su nota de voz (36 a 43 por defecto).
+- **Pistas KIT.** Las notas tocan las voces por su nota de voz (36, 38, 39, 42, 46, 45, 50 y 70 por defecto: ver Voces del KIT).
 - **Pistas de máquina MIDI.** Las notas salen directo al canal de salida de la pista.
 - **Grabación.** REC + PLAY graba en el patrón lo que tocás.
 
@@ -469,6 +473,8 @@ Cada perilla tiene un número de CC fijo en el canal de cada pista, así lo mape
 
 Más CC que no son perillas del panel: **93** cantidad del insert, **10** pan, **88** TAPE, **89** GLUE, **90** DUCK, **3** LIMIT, **94** realimentación del delay y **95** tamaño de la reverb. TEMPO y las teclas no tienen CC.
 
+> **En REAPER.** Cuando se detiene la reproducción o termina un ítem MIDI, REAPER manda el valor 0 de cada CC que usó el ítem. El DeviceNTI V no puede distinguir ese 0 de uno que tocaste, así que una perilla en ese CC salta a su mínimo (CUTOFF en el CC 74 baja a 20 Hz, RESO en el CC 71 a 0) y el proyecto lo guarda. Dejá esos CC fuera de los ítems MIDI que tocan el DeviceNTI V y automatizá los parámetros, o apagá el reseteo de CC en las preferencias de REAPER (buscá "reset" ahí).
+
 ### MIDI learn
 
 Para asignar cualquier control a un CC propio: hacé clic en **LEARN** en la barra superior (o clic derecho en la perilla y elegí MIDI learn), hacé clic en la perilla y mové el control de tu controlador. El par se guarda con el proyecto. Clic derecho en una perilla y Clear learned CCs los quita. Learn funciona con toda perilla que fija un valor; las teclas y la pantallita no se pueden aprender.
@@ -485,7 +491,7 @@ En la página MIDI, **CC mode** elige Absolute, Relative (two's complement) o Re
 
 ## MIDI de salida: manejar un sinte externo desde un DAW
 
-El DeVicenti puede mandar notas, acordes y locks como MIDI, así un patrón puede tocar un sinte de hardware u otro plugin.
+El DeviceNTI V puede mandar notas, acordes y locks como MIDI, así un patrón puede tocar un sinte de hardware u otro plugin.
 
 **Hacer que una pista mande MIDI**
 
@@ -494,14 +500,14 @@ El DeVicenti puede mandar notas, acordes y locks como MIDI, así un patrón pued
 
 **En un DAW**
 
-1. Poné el DeVicenti en una pista MIDI, con sonido o sin él.
+1. Poné el DeviceNTI V en una pista MIDI, con sonido o sin él.
 2. Creá otra pista MIDI con el sinte que querés manejar, o una que vaya a tu hardware.
-3. Poné la entrada MIDI de esa pista en la pista del DeVicenti (en Ableton Live: **MIDI From**, después la pista, después su plug-in y el canal que fijaste como Out channel; en REAPER: agregá un envío MIDI desde la pista del DeVicenti, o una entrada desde ella) y armala para grabar.
+3. Poné la entrada MIDI de esa pista en la pista del DeviceNTI V (en Ableton Live: **MIDI From**, después la pista y después su plug-in; Live pasa todos los canales, así que usá una instancia del DeviceNTI V por sinte o filtrá el canal en el sinte; en REAPER: agregá un envío MIDI desde la pista del DeviceNTI V, o una entrada desde ella) y armala para grabar.
 4. Arrancá el transporte del DAW. Las notas llegan al sinte a tiempo con el host.
 
 El preset **MIDI Out** del banco Init está hecho para probarlo: la pista 4 es una máquina MIDI en el canal 1, y la pista 2 suena y además manda sus notas por el canal 2.
 
-El MIDI de salida sale retrasado por la latencia del plugin, así queda a tiempo con el sonido que hace el DeVicenti. En la app independiente el MIDI de salida va al dispositivo de salida que elijas y el reloj puede acompañarlo.
+El MIDI de salida sale retrasado por la latencia del plugin, así queda a tiempo con el sonido que hace el DeviceNTI V. Para el MIDI de salida en un DAW usá el VST3: Ableton Live y REAPER no pasan el MIDI que manda un instrumento Audio Unit. En la app independiente el MIDI de salida va al dispositivo de salida que elijas y el reloj puede acompañarlo.
 
 ## Presets
 
@@ -521,7 +527,9 @@ Un preset carga toda la unidad: las cuatro pistas, los patrones, la cadena y los
 
 ## Parámetros del host y automatización
 
-El DeVicenti le muestra 64 parámetros al host. Para cada una de las cuatro pistas (T1 a T4): Cutoff, Resonance, Filter env, Drive, AGE, Delay send, Reverb send, Level, Op A level, Op B level, Op C level, Op D level e Insert amount. Globales: Swing, Master, Delay time, Delay feedback, Reverb size, Reverb decay, Tape, Glue, Duck, Limit, Tempo y Pattern. Todo lo demás (el resto del sonido, los patrones, los modos de efectos y los ajustes MIDI) es parte del estado del proyecto, se edita en el panel y en las páginas, se guarda con el proyecto y se puede cambiar paso a paso con locks.
+El DeviceNTI V le muestra 64 parámetros al host. Para cada una de las cuatro pistas (T1 a T4): Cutoff, Resonance, Filter env, Drive, AGE, Delay send, Reverb send, Level, Op A level, Op B level, Op C level, Op D level e Insert amount. Globales: Swing, Master, Delay time, Delay feedback, Reverb size, Reverb decay, Tape, Glue, Duck, Limit, Tempo y Pattern. Todo lo demás (el resto del sonido, los patrones, los modos de efectos y los ajustes MIDI) es parte del estado del proyecto, se edita en el panel y en las páginas, se guarda con el proyecto y se puede cambiar paso a paso con locks.
+
+> **En Ableton Live.** Live llena por su cuenta el panel de un dispositivo solo cuando el plugin tiene 64 parámetros automatizables o menos, y con el bypass del host el DeviceNTI V tiene 65, así que el panel arranca vacío. Hacé clic en **Configure** en el dispositivo, mové las perillas que quieras automatizar o mapear (en el panel o en la ventana del plugin) y volvé a hacer clic en Configure: quedan en el panel y en las listas de automatización, guardadas con el set de Live.
 
 En una pista KIT los valores por pista actúan sobre el bus del kit: cutoff y resonancia son un pasa-bajos del bus, ENV escala el decay de todas las voces, drive es un drive de bus, y los cuatro niveles de operador son los grupos de voces (A bombo y tom grave, B redoblante y clap, C hi-hats, D tom agudo y percusión).
 
@@ -554,7 +562,7 @@ En una pista KIT los valores por pista actúan sobre el bus del kit: cutoff y re
 2. Activá unos pocos pasos y dales Probability 60 por ciento, o la condición 1:2 o 3:4.
 3. Agregá un paso sólo de lock, con un lock de CUTOFF, al final de uno de los loops.
 
-### Tocar el DeVicenti desde un teclado mientras secuencia
+### Tocar el DeviceNTI V desde un teclado mientras secuencia
 
 1. En la página MIDI dejá Input en OMNI. Hacé clic en TRACK 3.
 2. Tocá un lead sobre el patrón que corre. Girá las perillas: con REC + PLAY prendido, los movimientos se vuelven locks.

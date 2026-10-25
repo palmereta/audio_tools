@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""DeVicenti demo clips (1.0.0): short and sound-first, one sound or effect each (clips.py). `--full` renders the
+"""DeviceNTI V demo clips (1.0.0): short and sound-first, one sound or effect each (clips.py). `--full` renders the
 phase 1 song demos instead (demo_songs.py, kept in audiotools-private/vicenti/demos/2026-10-25-full/).
 
     /Volumes/Docs/Applications/pyaudio-venv/bin/python plugins/devicenti/tools/demos.py OUTDIR [--only 01,04] [--build build-devicenti]
@@ -179,7 +179,7 @@ def main():
         allrows[r["name"]] = r
     json.dump([allrows[k] for k in sorted(allrows)], open(idx, "w"), indent=1)
     with open(os.path.join(outdir, "index.md"), "w") as f:
-        f.write("# DeVicenti demo clips (1.0.0)\n\nShort, sound-first clips: each shows one DeVicenti sound or effect, and each is also a factory preset of "
+        f.write("# DeviceNTI V demo clips (1.0.0)\n\nShort, sound-first clips: each shows one DeviceNTI V sound or effect, and each is also a factory preset of "
                 "the same name. Rendered by `devicentirender` from `plugins/devicenti/tools/demo_projects/` (written by `clips.py`). The phase 1 song demos are "
                 "in `2026-10-25-full/`. 48 kHz / 24-bit WAV and MP3 192k. Loudness by a fixed gain to the target; a true-peak limiter only where the "
                 "peak would pass −1 dBTP (column *Limiter*).\n\n")

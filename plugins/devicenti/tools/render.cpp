@@ -1,4 +1,4 @@
-// devicentirender: the complete DeVicenti processor playing a preset or a project file (its patterns with a simulated
+// devicentirender: the complete DeviceNTI V processor playing a preset or a project file (its patterns with a simulated
 // host clock, or a .mid file played into it), to WAV. Used for the demos, the CPU figures and the processor tests.
 //
 //   devicentirender out.wav [--preset "Name" | --project file.json] [--bars 8 | --seconds 16] [--bpm 88] [--sr 48000]
@@ -13,6 +13,7 @@
 // --tail stops the transport at the end and lets the tails ring. --at moves a parameter at that time (seconds).
 // --midi plays the file into the processor (transport stopped unless --with-pattern). The output starts at time 0
 // (the plugin latency is removed).
+#include <set>
 #include "PluginProcessor.h"
 #include "../../../shared/tools/MidiEvents.h"
 
@@ -20,9 +21,11 @@ class HostClock : public juce::AudioPlayHead
 {
 public:
     double bpm = 120.0, sr = 48000.0; int64_t pos = 0; bool playing = true;
+    int64_t changeAt = -1; double bpm2 = 0.0;      // a tempo change at sample changeAt (to bpm2), anywhere in a block
     juce::Optional<PositionInfo> getPosition() const override
     {
         PositionInfo p; p.setBpm (bpm); p.setIsPlaying (playing); p.setTimeInSamples (pos); p.setPpqPosition ((double) pos / sr * bpm / 60.0);
+        if (changeAt >= 0 && pos >= changeAt) { p.setBpm (bpm2); p.setPpqPosition ((double) changeAt / sr * bpm / 60.0 + (double) (pos - changeAt) / sr * bpm2 / 60.0); }
         p.setTimeSignature (juce::AudioPlayHead::TimeSignature { 4, 4 });
         return p;
     }
@@ -231,6 +234,59 @@ static int midiTest()
         int on = 0, off = 0; for (auto& e : out) { on += e.second.isNoteOn(); off += e.second.isNoteOff(); }
         check ("bypass sends the pending note-offs", on == 1 && off == 1, juce::String (on) + " on, " + juce::String (off) + " off");
     }
+    // 11b. A tempo change inside a block is not a transport jump: a note of 2 beats from step 1 (120 BPM, then 90 BPM
+    //      from sample 6000, inside a block) keeps its length (set in samples when it starts: 1 s), it is not cut at
+    //      the block after the change (DAW QA 2026-10-25: REAPER tempo marker at 4.1 s).
+    {
+        auto p = make();
+        p->editProject ([] (dh::dv::Project& pr) {
+            pr.track[0].machine = dh::dv::kMidiMachine; pr.track[0].outChannel = 1;
+            for (auto& pt : pr.bank.p) pt = dh::dv::Pattern();
+            auto& s = pr.bank.p[0].t[0].lane[0][0]; s.trig = 1; s.nNotes = 1; s.notes[0] = 60; s.len = 8 * 12; }, DeVicentiProcessor::dAll, 0xFFFF);
+        p->setValue ("pattern", 1);
+        HostClock c; c.sr = sr; c.bpm = 120; c.playing = true; c.changeAt = 6000; c.bpm2 = 90;
+        std::vector<std::pair<int, juce::MidiMessage>> out;
+        runBlocks (*p, &c, 300, {}, &out);
+        int off = -1; for (auto& e : out) if (e.second.isNoteOff() && e.second.getNoteNumber() == 60) { off = e.first; break; }
+        const int want = (int) std::lround (2.0 * 60.0 / 120.0 * sr) + p->engineLatency();
+        check ("tempo change inside a block: the 2-beat note is not cut", std::abs (off - want) <= blk, "note-off at " + juce::String (off) + ", expected " + juce::String (want));
+    }
+    // 11c. Doubled notes played in (DAW QA 2026-10-25): chord mode sends each chord note and their note-offs; with
+    //      Thru on a key goes out once; a KIT key on a GM alias (40 = snare lane, note 38) gets the lane note on and off.
+    {
+        auto count = [] (const std::vector<std::pair<int, juce::MidiMessage>>& out, int ch, std::set<int>* onNotes, std::set<int>* offNotes) {
+            int on = 0, off = 0;
+            for (auto& e : out) { if (e.second.getChannel() != ch) continue; if (e.second.isNoteOn()) { ++on; if (onNotes) onNotes->insert (e.second.getNoteNumber()); } else if (e.second.isNoteOff()) { ++off; if (offNotes) offNotes->insert (e.second.getNoteNumber()); } }
+            return std::make_pair (on, off); };
+        {
+            auto p = make();
+            p->editProject ([] (dh::dv::Project& pr) { pr.track[0].machine = dh::dv::kTone; pr.track[0].doubleMidi = true; pr.track[0].outChannel = 2;
+                                                       pr.track[0].chordPlay = true; pr.track[0].chordPlaySize = 3; for (auto& pt : pr.bank.p) pt = dh::dv::Pattern(); }, DeVicentiProcessor::dAll, 0xFFFF);
+            std::vector<std::pair<int, juce::MidiMessage>> out; std::set<int> ons, offs;
+            runBlocks (*p, nullptr, 40, { { 100, MM::noteOn (1, 60, (juce::uint8) 100) }, { 5000, MM::noteOff (1, 60) } }, &out);
+            const auto c = count (out, 2, &ons, &offs);
+            check ("chord mode, doubled: 3 different notes out and their 3 note-offs", c.first == 3 && c.second == 3 && ons.size() == 3 && ons == offs,
+                   juce::String (c.first) + " on (" + juce::String ((int) ons.size()) + " notes), " + juce::String (c.second) + " off");
+        }
+        {
+            auto p = make();
+            p->editProject ([] (dh::dv::Project& pr) { pr.track[0].machine = dh::dv::kTone; pr.track[0].doubleMidi = true; pr.track[0].outChannel = 2; pr.midi.thru = true;
+                                                       for (auto& pt : pr.bank.p) pt = dh::dv::Pattern(); }, DeVicentiProcessor::dAll, 0xFFFF);
+            std::vector<std::pair<int, juce::MidiMessage>> out;
+            runBlocks (*p, nullptr, 40, { { 100, MM::noteOn (1, 60, (juce::uint8) 100) }, { 5000, MM::noteOff (1, 60) } }, &out);
+            const auto c = count (out, 2, nullptr, nullptr);
+            check ("Thru + doubled: a key goes out once (1 on, 1 off)", c.first == 1 && c.second == 1, juce::String (c.first) + " on, " + juce::String (c.second) + " off");
+        }
+        {
+            auto p = make();
+            p->editProject ([] (dh::dv::Project& pr) { pr.track[0].doubleMidi = true; pr.track[0].outChannel = 2; for (auto& pt : pr.bank.p) pt = dh::dv::Pattern(); }, DeVicentiProcessor::dAll, 0xFFFF);
+            std::vector<std::pair<int, juce::MidiMessage>> out; std::set<int> ons, offs;
+            runBlocks (*p, nullptr, 40, { { 100, MM::noteOn (1, 40, (juce::uint8) 100) }, { 5000, MM::noteOff (1, 40) } }, &out);
+            const auto c = count (out, 2, &ons, &offs);
+            check ("KIT doubled, key 40 (snare lane): note 38 on and off", c.first == 1 && c.second == 1 && ons == offs && ons.count (38) == 1,
+                   juce::String (c.first) + " on, " + juce::String (c.second) + " off");
+        }
+    }
     // 12b. Direct jump: pattern 2 starts at once, mid-bar, instead of at the end of pattern 1.
     {
         auto p = make();
@@ -281,6 +337,14 @@ static int stateTest()
         check ("state: saved twice = same bytes", s1 == s2, juce::String ((int) s1.getSize()) + " bytes"); bad += s1 != s2;
         check ("state: save → load → save = same bytes", s1 == s3); bad += s1 != s3;
         check ("new instance = program 0", s1 == s4 && a.getCurrentProgram() == 0); bad += ! (s1 == s4);
+    }
+    // Song mode (SONG page) is saved with the session state (DAW QA 2026-10-25: it came back Off).
+    {
+        DeVicentiProcessor a; a.songMode = true; juce::MemoryBlock s; a.getStateInformation (s);
+        DeVicentiProcessor b; b.setStateInformation (s.getData(), (int) s.getSize());
+        DeVicentiProcessor c; juce::MemoryBlock s0; c.getStateInformation (s0); DeVicentiProcessor d; d.songMode = true; d.setStateInformation (s0.getData(), (int) s0.getSize());
+        const bool ok = b.songMode.load() && ! d.songMode.load();
+        check ("state: Song mode on is restored (and Off from a state saved with it Off)", ok); bad += ok ? 0 : 1;
     }
     for (int k : { 0, 7, 21, 40 })
     {

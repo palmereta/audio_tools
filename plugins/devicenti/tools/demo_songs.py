@@ -1,4 +1,4 @@
-"""DeVicenti: the seven demos of the phase 1 checkpoint (plan §13.4; genre-recipes.md blueprints §1.6 … §6.6).
+"""DeviceNTI V: the seven demos of the phase 1 checkpoint (plan §13.4; genre-recipes.md blueprints §1.6 … §6.6).
 
 Each demo is a project file (patterns + a song chain) written to tools/demo_projects/, rendered by the C++ engine
 through devicentirender (demos.py). The seventh, the controller jam, is a MIDI performance (notes, sustain, knob CCs,

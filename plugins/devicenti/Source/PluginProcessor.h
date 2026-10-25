@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti processor. The project (sounds, patterns, chain, effect modes, MIDI settings) lives here and in the
+// DeviceNTI V processor. The project (sounds, patterns, chain, effect modes, MIDI settings) lives here and in the
 // state; the interface and the preset loader edit it on the message thread and mark what changed; the audio thread
 // copies only the dirty parts into the engine with a try-lock (if the copy is busy it takes it on the next block).
 // Edits that start on the audio thread (MIDI CC to a sound parameter, live recording) are applied to the engine at
@@ -44,7 +44,7 @@ public:
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
-    const juce::String getName() const override { return "DeVicenti"; }
+    const juce::String getName() const override { return "DeviceNTI V"; }
     bool acceptsMidi() const override { return true; }
     bool producesMidi() const override { return true; }
     double getTailLengthSeconds() const override { return 10.0; }

@@ -1882,6 +1882,77 @@ int main (int argc, char** argv)
         std::printf ("%d programas en %s\n", juce::jmax (1, p.getNumPrograms()), dir.getFullPathName().toRawUTF8());
         return 0;
     }
+    // Estado entre versiones (p. ej. un proyecto guardado con 1.0.0 que se abre con 1.0.1): --save-state <dir> guarda,
+    // para tres programas con unos parámetros movidos, el estado que guarda el host, los valores de los parámetros y
+    // 5 s de una frase; --load-state <dir> (con la otra versión) carga cada estado y compara parámetros y audio.
+    if (args.contains ("--save-state") || args.contains ("--load-state"))
+    {
+        const bool saving = args.contains ("--save-state");
+        juce::File dir (juce::File::getCurrentWorkingDirectory().getChildFile (opt (saving ? "--save-state" : "--load-state", "states")));
+        dir.createDirectory();
+        const int np = load (pluginPath)->p->getNumPrograms();
+        int bad = 0;
+        for (int k : { 0, std::max (0, np / 2), std::max (0, np - 1) })
+        {
+            auto pl = load (pluginPath);
+            auto params = realParams (*pl);
+            const auto stFile = dir.getChildFile ("state_" + juce::String (k) + ".bin");
+            const auto parFile = dir.getChildFile ("params_" + juce::String (k) + ".txt");
+            const auto wavFile = dir.getChildFile ("audio_" + juce::String (k) + ".f32");
+            if (saving)
+            {
+                pl->p->setCurrentProgram (k);
+                juce::Random rnd (k + 3);
+                for (int i = 0; i < std::min (6, params.size()); ++i) { auto* pr = params[rnd.nextInt (params.size())]; pr->setValue (juce::jlimit (0.0f, 1.0f, pr->getValue() + 0.1f * (rnd.nextFloat() - 0.5f))); }
+                render (*pl, {}, 2048, {});
+                juce::MemoryBlock st; pl->p->getStateInformation (st);
+                stFile.replaceWithData (st.getData(), st.getSize());
+            }
+            else
+            {
+                juce::MemoryBlock st; stFile.loadFileAsData (st);
+                pl->p->setStateInformation (st.getData(), (int) st.getSize());
+                render (*pl, {}, 2048, {});
+            }
+            juce::String vals; for (auto* pr : params) vals << juce::String (pr->getValue(), 6) << "\t" << pr->getName (40) << "\n";
+            auto ra = render (*pl, phrase (pl->sr), S (5.0, pl->sr), {});
+            const juce::String prog = pl->p->getNumPrograms() > 0 ? pl->p->getProgramName (pl->p->getCurrentProgram()) : juce::String();
+            if (saving)
+            {
+                parFile.replaceWithText (vals);
+                wavFile.replaceWithData (ra.L.data(), ra.L.size() * sizeof (float));
+                std::printf ("guardado programa %d (%s): %d bytes de estado, %d parámetros\n", k, prog.toRawUTF8(), (int) stFile.getSize(), params.size());
+                continue;
+            }
+            auto want = juce::StringArray::fromLines (parFile.loadFileAsString().trimEnd());
+            auto got = juce::StringArray::fromLines (vals.trimEnd());
+            int mism = 0; juce::String which;
+            for (int i = 0; i < std::max (want.size(), got.size()); ++i)
+            {
+                float va = want[i].upToFirstOccurrenceOf ("\t", false, false).getFloatValue(), vb = got[i].upToFirstOccurrenceOf ("\t", false, false).getFloatValue();
+                const float ra = va, rb = vb;
+                const int steps = i < params.size() ? params[i]->getNumSteps() : 0;      // los discretos se comparan por paso, como en testState
+                if (steps > 1 && steps < 100000) { va = std::round (va * (float) (steps - 1)); vb = std::round (vb * (float) (steps - 1)); }
+                // Mismo ajuste si el plugin muestra el mismo texto para los dos valores (un AU alojado no informa pasos).
+                const bool sameText = i < params.size() && params[i]->getText (ra, 40) == params[i]->getText (rb, 40);
+                if (i >= want.size() || i >= got.size() || (std::abs (va - vb) > 1e-4f && ! sameText)) { ++mism; if (mism <= 3) which << got[i].fromFirstOccurrenceOf ("\t", false, false) << " " << want[i] << " / " << got[i] << "; "; }
+            }
+            juce::MemoryBlock ref; wavFile.loadFileAsData (ref);
+            const auto* rl = (const float*) ref.getData(); const size_t rn = ref.getSize() / sizeof (float);
+            double num = 0, da = 0, dbb = 0, maxd = 0;
+            for (size_t i = 0; i < std::min (rn, ra.L.size()); ++i)
+            { num += (double) rl[i] * ra.L[i]; da += (double) rl[i] * rl[i]; dbb += (double) ra.L[i] * ra.L[i]; maxd = std::max (maxd, (double) std::abs (rl[i] - ra.L[i])); }
+            const double corr = da > 0 && dbb > 0 ? num / std::sqrt (da * dbb) : (da == dbb ? 1.0 : 0.0);
+            const double lvl = da > 0 && dbb > 0 ? 10.0 * std::log10 (dbb / da) : 0.0;
+            const bool ok = mism == 0 && corr > 0.999 && std::abs (lvl) < 0.1;
+            bad += ok ? 0 : 1;
+            std::printf ("%s  programa %d (%s): %d bytes, %d/%d parámetros iguales, audio correlación %.6f, nivel %+.3f dB, diferencia máx %.2e%s%s\n",
+                         ok ? "PASS" : "FAIL", k, prog.toRawUTF8(), (int) stFile.getSize(), params.size() - mism, params.size(), corr, lvl, maxd,
+                         mism > 0 ? " — " : "", which.toRawUTF8());
+        }
+        if (! saving) std::printf ("%s: %d programa(s) con diferencias\n", bad == 0 ? "PASS" : "FAIL", bad);
+        return bad == 0 ? 0 : 1;
+    }
     if (args.contains ("--list-params"))
     {
         auto pl = load (pluginPath); int i = 0, autom = 0;

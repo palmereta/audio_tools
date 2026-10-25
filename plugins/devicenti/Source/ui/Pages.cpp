@@ -275,7 +275,7 @@ void SettingsPage::paint (juce::Graphics& g)
     for (auto* l : lines) g.drawText (l, b.removeFromTop (25 * scale), juce::Justification::centredLeft, true);
     b.removeFromTop (16 * scale);
     g.setColour (Theme::dim()); g.setFont (Theme::font (14.0f * scale, false));
-    g.drawText ("Audio Tools DeVicenti " DV_VERSION "   |   latency " + juce::String (proc.engineLatency()) + " samples", b.removeFromTop (24 * scale), juce::Justification::centredLeft);
+    g.drawText ("Audio Tools DeviceNTI V " DV_VERSION "   |   latency " + juce::String (proc.engineLatency()) + " samples", b.removeFromTop (24 * scale), juce::Justification::centredLeft);
 }
 
 void SettingsPage::mouseDown (const juce::MouseEvent& e)

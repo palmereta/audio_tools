@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the two send effects, once per instance (plan §5.6, §13.2).
+// DeviceNTI V: the two send effects, once per instance (plan §5.6, §13.2).
 //
 // DELAY, three modes:
 //   TAPE       one tape loop with wow and flutter on the read, high-pass, tone low-pass and soft saturation in the

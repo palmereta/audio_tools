@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: the 64 host parameters (plan §5.7; Live shows at most 64). Per track (×4): cutoff, resonance, filter
+// DeviceNTI V: the 64 host parameters (plan §5.7; Live shows at most 64). Per track (×4): cutoff, resonance, filter
 // envelope, drive, AGE, delay send, reverb send, level, the four operator levels and the insert amount (13 × 4 = 52);
 // global: swing, master, delay time, delay feedback, reverb size, reverb decay, TAPE, GLUE, DUCK, LIMIT, tempo and
 // pattern (12). Everything else (the rest of the sounds, the patterns, the effect modes, MIDI settings) is state:

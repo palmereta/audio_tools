@@ -348,6 +348,39 @@ int main()
         check (! detect (m2.products[0], db, paths).present, "not detected after remove");
     }
 
+    // ── a product renamed between versions (DeVicenti 1.0.0 → DeviceNTI V 1.0.1): same id, new bundle names. The
+    // update is offered, the new bundles go in, and the old bundles and factory presets of the record are removed.
+    {
+        const auto zipOld = makeProductZip (tmp, "Renamed", "1.0.0");
+        auto mfOld = writeManifest (tmp, "manifest-renamed-100.json", "renamed", "Renamed", "1.0.0", zipOld, sha256Of (zipOld));
+        auto mOld = load (mfOld);
+        const auto r1 = downloadAndInstall (mOld.products[0], mOld, paths, settings, db, progress, notes);
+        check (r1.wasOk() && paths.vst3User.getChildFile ("Renamed.vst3").isDirectory(), "renamed product: 1.0.0 installed under its old name");
+        const auto zipNew = makeProductZip (tmp, "New Name", "1.0.1");
+        auto mfNew = writeManifest (tmp, "manifest-renamed-101.json", "renamed", "New Name", "1.0.1", zipNew, sha256Of (zipNew));
+        auto mNew = load (mfNew);
+        const auto d = detect (mNew.products[0], db, paths);
+        check (d.present && d.viaLauncher && d.version == "1.0.0" && statusOf (mNew.products[0], d) == Status::updateAvailable,
+               "renamed product: the new name in the manifest is an update of the installed 1.0.0 (same id)");
+        const auto r2 = downloadAndInstall (mNew.products[0], mNew, paths, settings, db, progress, notes);
+        check (r2.wasOk() && bundleVersion (paths.vst3User.getChildFile ("New Name.vst3")) == "1.0.1", "renamed product: 1.0.1 installed under the new name");
+        bool oldGone = ! paths.vst3User.getChildFile ("Renamed.vst3").exists();
+       #if JUCE_MAC
+        oldGone = oldGone && ! paths.au.getChildFile ("Renamed.component").exists() && ! paths.apps.getChildFile ("Renamed.app").exists();
+       #elif JUCE_LINUX
+        oldGone = oldGone && ! paths.lv2.getChildFile ("Renamed.lv2").exists() && ! paths.apps.getChildFile ("Renamed/Renamed").exists();
+       #else
+        oldGone = oldGone && ! paths.apps.getChildFile ("Renamed/Renamed.exe").exists();
+       #endif
+        check (oldGone, "renamed product: the old-name bundles are removed");
+        check (! paths.presets.getChildFile ("Renamed/Pads/Warm.vstpreset").exists() && ! paths.presets.getChildFile ("Renamed").exists()
+                 && paths.presets.getChildFile ("New Name/Pads/Warm.vstpreset").loadFileAsString() == "VST3 1.0.1",
+               "renamed product: the factory presets move to the new name's folder");
+        const auto d2 = detect (mNew.products[0], db, paths);
+        check (d2.version == "1.0.1" && statusOf (mNew.products[0], d2) == Status::upToDate && d2.strays.isEmpty(), "renamed product: up to date, no stray copies");
+        remove (mNew.products[0], paths, db);
+    }
+
     // ── images, demos and texts of the manifest; the asset cache
     {
         // A tiny web/ tree: web/downloads/manifest.json and web/assets/...
@@ -394,8 +427,16 @@ int main()
     if (real.isNotEmpty())
     {
         const File z (real);
-        const auto name = z.getFileName().upToFirstOccurrenceOf ("-", false, false);
-        const auto ver = z.getFileName().fromFirstOccurrenceOf ("-", false, false).upToFirstOccurrenceOf ("-", false, false);
+        // <file>-<version>-<OS>.zip; the product name is the VST3's (DeviceNTI-V-1.0.1-macOS.zip holds "DeviceNTI V.vst3").
+        const auto parts = juce::StringArray::fromTokens (z.getFileNameWithoutExtension(), "-", "");
+        const auto ver = parts.size() >= 3 ? parts[parts.size() - 2] : String();
+        String name = parts[0];
+        {
+            juce::ZipFile zf (z);
+            for (int i = 0; i < zf.getNumEntries(); ++i)
+                if (auto* e = zf.getEntry (i); e != nullptr && e->filename.fromFirstOccurrenceOf ("/", false, false).upToFirstOccurrenceOf ("/", false, false).endsWith (".vst3"))
+                { name = e->filename.fromFirstOccurrenceOf ("/", false, false).upToFirstOccurrenceOf (".vst3", false, false); break; }
+        }
         const auto copy = tmp.getChildFile (z.getFileName());
         z.copyFileTo (copy);
         const auto sha = sha256Of (copy);

@@ -1,4 +1,4 @@
-// devicentitest: numbered tests of the DeVicenti engine, without JUCE (plan §7 Phase 1).
+// devicentitest: numbered tests of the DeviceNTI V engine, without JUCE (plan §7 Phase 1).
 //
 //   devicentitest            all tests
 //   devicentitest T3 T7      only some
@@ -46,7 +46,7 @@ struct Rig
     int64_t pos = 0;
     double bpm = 120.0;
     bool playing = false;
-    explicit Rig (int block = 512) { e->prepare (SR, block); for (int t = 0; t < kTracks; ++t) P.t[(size_t) t].levelDb = 0.0f; e->project().midi.focus = 0; }
+    explicit Rig (int block = 512) { e->prepare (SR, block); for (int t = 0; t < kTracks; ++t) P.t[(size_t) t].levelDb = 0.0f; e->project().midi.focus = 0; P.swing = 0.5f; }   // straight unless a test swings
     Project& pr() { return e->project(); }
     // Copy the track sound values that are host parameters into P (so automation does not overwrite them).
     void syncAuto()
@@ -320,8 +320,7 @@ static void demoProject (Project& pr)
     pt.t[1].lane[0][6].micro = 6;
     for (int i : { 0, 8 }) { Step& s = pt.t[2].lane[0][(size_t) i]; s.trig = 1; s.chord = chDegree; s.nNotes = 2; s.notes[0] = (int8_t) (i == 0 ? 0 : 5); s.notes[1] = 4; s.chordSize = 4; s.voicing = vcDrop2; s.len = 60; }
     { Step& s = pt.t[3].lane[0][0]; s.trig = 1; s.chord = chDegree; s.nNotes = 2; s.notes[0] = 0; s.notes[1] = 3; s.chordSize = 3; s.len = 180; s.lockCount = 1; s.lockStart = 0; pt.pool[0] = { (int16_t) CUTOFF, 900.0f }; pt.nLocks = 1; }
-    pt.t[3].length = 13; pt.t[3].speed = 2;
-    pt.swing = 56;
+    pt.t[3].length = 13; pt.t[3].speed = 2;     // swing: renderProject sets the host Swing to 56 %
     pr.fx.reverbMode = kRevVoid; pr.fx.delayMode = kDelayDub;
 }
 
@@ -330,7 +329,7 @@ static std::vector<float> renderProject (int block, int n, std::function<int (in
     static std::unique_ptr<Rig> holder;
     holder = std::make_unique<Rig> (std::max (block, 64));
     Rig& g = *holder;
-    demoProject (g.pr()); g.syncAuto(); g.P.tape = 0.5f; g.P.glue = 0.4f; g.P.duck = 0.3f; g.P.limit = 0.2f; g.P.delayFb = 0.6f; g.P.revDecay = 12.0f;
+    demoProject (g.pr()); g.syncAuto(); g.P.swing = 0.56f; g.P.tape = 0.5f; g.P.glue = 0.4f; g.P.duck = 0.3f; g.P.limit = 0.2f; g.P.delayFb = 0.6f; g.P.revDecay = 12.0f;
     g.bpm = 92; g.playing = true;
     g.run (n, block, { { 1000, mm (0x90, 60, 100) }, { 30000, mm (0x80, 60, 0) } }, fn);
     if (keep) *keep = &g;
@@ -451,7 +450,7 @@ static void T7()
         setStep (pr, 0, 0, 0, 0, 60); setStep (pr, 0, 0, 0, 4, 62); pr.bank.p[0].t[0].lane[0][4].micro = 12;
         setStep (pr, 0, 0, 0, 8, 64); pr.bank.p[0].t[0].lane[0][8].retrig = 3; pr.bank.p[0].t[0].lane[0][8].retrigCount = 4; pr.bank.p[0].t[0].lane[0][8].retrigRamp = -60;
         setStep (pr, 0, 0, 0, 13, 65);
-        pr.bank.p[0].swing = 66;
+        g.P.swing = 0.66f;      // the host Swing parameter
         g.bpm = 120; g.playing = true;
         g.run ((int) (SR * 2.0), 333);
         std::vector<int64_t> ons; std::vector<int> vels;
@@ -464,6 +463,32 @@ static void T7()
         const bool ramp = ok && vels[2] > vels[3] && vels[3] > vels[4] && vels[4] > vels[5];
         report ("T7", "micro timing +12/48, retrig 4 × 1/4 with velocity ramp, swing 66 %", ok && ramp, "%d note-ons; first at %lld %lld %lld …", (int) ons.size(),
                 ons.size() > 0 ? (long long) ons[0] : -1LL, ons.size() > 1 ? (long long) ons[1] : -1LL, ons.size() > 6 ? (long long) ons[6] : -1LL);
+    }
+    // The host Swing parameter is the swing (DAW QA DV1: it did nothing in 1.0.0). Every 16th on a MIDI track and a
+    // TONE track at Swing 50 and 80 %: at 80 % each odd 16th is (0.8 - 0.5) · 2 · 6000 = 3600 samples late, the even
+    // ones stay, and the audio differs.
+    {
+        auto runSw = [] (float sw, std::vector<int64_t>& ons) {
+            Rig g; auto& pr = g.pr(); pr.track[0].machine = kMidiMachine; pr.track[0].outChannel = 1;
+            for (int i = 0; i < 16; ++i) { setStep (pr, 0, 0, 0, i, 60, 100, 3); setStep (pr, 0, 1, 0, i, 57, 100, 3); }
+            g.syncAuto(); g.P.swing = sw; g.bpm = 120; g.playing = true;
+            g.run ((int) (SR * 2.0), 512);
+            for (auto& m : g.midi) if ((m.d[0] & 0xF0) == 0x90 && m.d[2] > 0) ons.push_back (m.offset);
+            return g.L;
+        };
+        std::vector<int64_t> o50, o80;
+        const auto a50 = runSw (0.5f, o50), a80 = runSw (0.8f, o80);
+        int wrong = 0;
+        for (size_t i = 0; i < std::min (o50.size(), o80.size()); ++i)
+        {
+            const int64_t straight = (int64_t) std::llround ((double) i * 6000.0), swung = straight + (i % 2 == 1 ? 3600 : 0);
+            if (std::llabs (o50[i] - straight) > 1 || std::llabs (o80[i] - swung) > 1) ++wrong;
+        }
+        double diff = 0, ref = 0;
+        for (size_t i = 0; i < std::min (a50.size(), a80.size()); ++i) { diff += std::abs (a50[i] - a80[i]); ref += std::abs (a50[i]); }
+        const bool ok = o50.size() == 16 && o80.size() == 16 && wrong == 0 && ref > 0 && diff > 0.1 * ref;
+        report ("T7", "host Swing 50 vs 80 %: odd 16ths 3600 samples late at 80 %, the audio differs", ok,
+                "%d / %d note-ons, %d off their time, audio difference %.0f %% of the level", (int) o50.size(), (int) o80.size(), wrong, ref > 0 ? 100.0 * diff / ref : 0.0);
     }
 }
 
@@ -578,6 +603,29 @@ static void T9()
 
 static void T10()
 {
+    // Arpeggiator (DAW QA DV5): C-E-G pressed on a 1/16 tick at 120 BPM plays C on that tick, then E, G, C, E, one per
+    // tick, and the release on a tick adds nothing. The notes go out as MIDI (doubling) so their times can be read.
+    for (int blk : { 512, 97, 6000 })
+    {
+        Rig g; auto& pr = g.pr(); pr.sounds[0][0] = sineSound(); pr.sounds[0][0][ARP_MODE] = 1; pr.sounds[0][0][ARP_RATE] = 6;
+        pr.track[0].doubleMidi = true; pr.track[0].outChannel = 2;
+        g.syncAuto(); g.bpm = 120; g.playing = true;
+        g.run (60000, blk, { { 12000, mm (0x90, 60, 100) }, { 12000, mm (0x90, 64, 100) }, { 12000, mm (0x90, 67, 100) },
+                             { 42000, mm (0x80, 60, 0) }, { 42000, mm (0x80, 64, 0) }, { 42000, mm (0x80, 67, 0) } });
+        std::vector<std::pair<int64_t, int>> ons; std::set<int> out; int strayOff = 0;
+        for (auto& m : g.midi)
+        {
+            if ((m.d[0] & 0xF0) == 0x90 && m.d[2] > 0) { ons.push_back ({ m.offset, m.d[1] }); out.insert (m.d[1]); }
+            else if (((m.d[0] & 0xF0) == 0x80 || (m.d[0] & 0xF0) == 0x90) && ! out.count (m.d[1])) ++strayOff;
+        }
+        const std::vector<std::pair<int64_t, int>> want { { 12000, 60 }, { 18000, 64 }, { 24000, 67 }, { 30000, 60 }, { 36000, 64 } };
+        bool ok = ons.size() == want.size() && strayOff == 0;
+        for (size_t i = 0; ok && i < want.size(); ++i) ok = std::llabs (ons[i].first - want[i].first) <= 1 && ons[i].second == want[i].second;
+        report ("T10", ("arp: chord on a tick plays C E G C E from that tick, release on a tick adds nothing (blocks of " + std::to_string (blk) + ")").c_str(), ok,
+                "%d note-ons, first %d at %lld, %d note-offs for notes that never went out", (int) ons.size(), ons.empty() ? -1 : ons[0].second,
+                ons.empty() ? -1LL : (long long) ons[0].first, strayOff);
+    }
+
     // Per-channel mode: channel 2 plays track 2.
     {
         Rig g; auto& pr = g.pr(); pr.midi.inMode = 1; for (int t = 0; t < kTracks; ++t) { pr.track[(size_t) t].inChannel = t + 1; pr.sounds[(size_t) t][0] = sineSound(); }

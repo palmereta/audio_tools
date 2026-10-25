@@ -1,14 +1,14 @@
-# DeVicenti user manual
+# DeviceNTI V user manual
 
-## What DeVicenti is
+## What DeviceNTI V is
 
-DeVicenti is an FM groovebox: four tracks, a 64-step sequencer and a sound path built for slow, heavy, dark music. The whole instrument is one orange unit that you play and program from its panel. It is an original design, not a model of any existing machine.
+DeviceNTI V is an FM groovebox: four tracks, a 64-step sequencer and a sound path built for slow, heavy, dark music. The whole instrument is one orange unit that you play and program from its panel. It is an original design, not a model of any existing machine.
 
 Each of the four tracks is one of three machines:
 
 - **TONE**: a four-operator FM voice with eight algorithms, a saturating filter, a sub layer, unison and a noise layer. It is polyphonic.
 - **KIT**: a drum machine of eight FM lanes (kick, snare, clap, closed hat, open hat, low tom, high tom, percussion), each lane a small FM drum with its own steps, locks and conditions.
-- **MIDI**: the track sends its notes, chords and locks to a MIDI channel, so DeVicenti can play an external synth.
+- **MIDI**: the track sends its notes, chords and locks to a MIDI channel, so DeviceNTI V can play an external synth.
 
 What the sound goes through:
 
@@ -26,7 +26,7 @@ What the sequencer has:
 
 It comes with 82 presets, each a whole project (sounds, patterns and effects) in banks named for the music it is made for: Trip Hop, Downtempo, Acid Jazz, Ambient, Dark Ambient and Heavy.
 
-DeVicenti runs as VST3 on macOS, Windows and Linux, as Audio Unit on macOS, as LV2 on Linux, and as a standalone app. It is an instrument: play it from a MIDI track. It is free, open-source software under the GNU AGPL v3.
+DeviceNTI V runs as VST3 on macOS, Windows and Linux, as Audio Unit on macOS, as LV2 on Linux, and as a standalone app. It is an instrument: play it from a MIDI track. It is free, open-source software under the GNU AGPL v3.
 
 ## Installation
 
@@ -35,35 +35,39 @@ Each zip file includes an `INSTALL.txt` with these steps.
 ### macOS
 
 1. Unzip the file.
-2. Copy `DeVicenti.vst3` to `~/Library/Audio/Plug-Ins/VST3/` and `DeVicenti.component` to `~/Library/Audio/Plug-Ins/Components/`.
+2. Copy `DeviceNTI V.vst3` to `~/Library/Audio/Plug-Ins/VST3/` and `DeviceNTI V.component` to `~/Library/Audio/Plug-Ins/Components/`.
 3. Rescan plugins in your DAW. In Ableton Live: Settings, Plug-Ins, Rescan.
 
-`DeVicenti.app` is the standalone version.
+`DeviceNTI V.app` is the standalone version.
 
-> The binaries are signed ad hoc and not notarized. If macOS refuses to open them, run this in Terminal: `xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/DeVicenti.vst3 ~/Library/Audio/Plug-Ins/Components/DeVicenti.component`
+> The binaries are signed ad hoc and not notarized. If macOS refuses to open them, run this in Terminal: `xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/"DeviceNTI V.vst3" ~/Library/Audio/Plug-Ins/Components/"DeviceNTI V.component"`
 
 ### Windows
 
 1. Unzip the file.
-2. Copy the `DeVicenti.vst3` folder to `C:\Program Files\Common Files\VST3\`. Windows asks for administrator rights.
+2. Copy the `DeviceNTI V.vst3` folder to `C:\Program Files\Common Files\VST3\`. Windows asks for administrator rights.
 3. Rescan plugins in your DAW.
 
-`DeVicenti.exe` is the standalone version and runs without a DAW.
+`DeviceNTI V.exe` is the standalone version and runs without a DAW.
 
 > The binaries are not code-signed. Windows SmartScreen may ask you to confirm the first time.
 
 ### Linux
 
-Copy `DeVicenti.vst3` to `~/.vst3/` and the LV2 bundle to `~/.lv2/`, then rescan in your host.
+Copy `DeviceNTI V.vst3` to `~/.vst3/` and the LV2 bundle to `~/.lv2/`, then rescan in your host.
 
-## Loading DeVicenti in a DAW
+### Updating from DeVicenti 1.0.0
 
-DeVicenti appears under the maker name **Audio Tools**, among the instruments, as Audio Tools DeVicenti. Load it on a MIDI track. It opens with the first preset, Init: a kit on track 1 and three tone tracks, at 88 BPM.
+Version 1.0.0 was called DeVicenti. It is the same instrument under a new name: projects saved with 1.0.0 open unchanged, and the presets you saved are still in the preset browser. If you installed 1.0.0 by hand, delete the old `DeVicenti` bundles (and the preset folder `Audio Tools DeVicenti`) before you install this version, so your DAW does not list it twice. The launcher replaces a 1.0.0 it installed. The standalone app starts once with the default audio settings.
+
+## Loading DeviceNTI V in a DAW
+
+DeviceNTI V appears under the maker name **Audio Tools**, among the instruments, as Audio Tools DeviceNTI V. Load it on a MIDI track. It opens with the first preset, Init: a kit on track 1 and three tone tracks, at 88 BPM.
 
 - **The sequencer follows the host.** In a DAW the transport and the tempo are the host's: press play in the DAW and the patterns run. The unit's own PLAY and TEMPO only work in the standalone app.
 - **Sound out.** The main stereo output carries everything. Each track can also go to its own stereo output (MIX page, Output): enable the extra outputs of the plugin in your DAW and send that track there to mix it separately.
-- **Sound in.** Notes on the track's MIDI input play DeVicenti like any instrument (see MIDI in).
-- **MIDI out.** DeVicenti also produces MIDI, to drive other instruments (see MIDI out).
+- **Sound in.** Notes on the track's MIDI input play DeviceNTI V like any instrument (see MIDI in).
+- **MIDI out.** DeviceNTI V also produces MIDI, to drive other instruments (see MIDI out).
 
 The standalone app opens the editor in its own window. Choose your audio and MIDI devices in its options. There the unit has its own clock: PLAY starts and stops it, and TEMPO sets the speed.
 
@@ -77,7 +81,7 @@ The standalone app opens the editor in its own window. Choose your audio and MID
 
 ## A tour of the interface
 
-![DeVicenti with the Basement Boom preset: the unit in perspective under the top bar.](img/overview.jpg)
+![DeviceNTI V with the Basement Boom preset: the unit in perspective under the top bar.](img/overview.jpg)
 
 ### Top bar
 
@@ -127,7 +131,7 @@ On a TONE track every knob edits the voice. On a KIT track the knobs that shape 
 | Control | Turn | FUNC + turn |
 |---|---|---|
 | **TEMPO** | Tempo, 40 to 240 BPM. In a DAW it shows the host's tempo and the host decides. | **SPEED**: the speed of the selected track in this pattern, from 1/8x to 2x |
-| **SWING** | Swing for the whole pattern, 50 to 80 percent | **TRK SWING**: how much of that swing the selected track takes, 0 to 100 percent |
+| **SWING** | Swing for every pattern, 50 to 80 percent (the host parameter Swing, so you can automate it) | **TRK SWING**: how much of that swing the selected track takes, 0 to 100 percent |
 | **ALGORITHM** | The FM algorithm of the selected track, 1 to 8. With a step held, it chooses the trig field to edit. | **MACHINE**: TONE, KIT or MIDI |
 | **DATA** | Edits the field shown on the small display. | **PAGE**: chooses the page on the display (VOICE, OPS, FILTER/AMP, LFO, MOD, TRIG, CHORD/SCALE, MIX, FX, MIDI, SONG) |
 | **LFO** | Depth of LFO 1 of the selected track, positive or negative | **LFO 2**: depth of LFO 2 |
@@ -148,7 +152,7 @@ The **small display** shows the algorithm diagram with the role of each operator
 | **CHORD** | Chord mode on or off for the selected track | **SCALE**: opens the CHORD/SCALE page |
 | **FUNC** | The shift key | |
 
-In a DAW the host's transport starts and stops DeVicenti: PLAY and STOP only show a reminder. **REC + PLAY** starts live recording (see Recording).
+In a DAW the host's transport starts and stops DeviceNTI V: PLAY and STOP only show a reminder. **REC + PLAY** starts live recording (see Recording).
 
 ## The operators
 
@@ -360,11 +364,11 @@ The arpeggiator follows the tempo, and records into the pattern like any played 
 
 ### Patterns
 
-There are 16 patterns. The host parameter **Pattern** chooses the current one, so you can automate it. Each pattern has its own root, scale, length, swing and, per track, length, speed and swing amount. A KIT lane can also have its own length.
+There are 16 patterns. The host parameter **Pattern** chooses the current one, so you can automate it. Each pattern has its own root, scale and length and, per track, length, speed and swing amount (how much of the SWING knob the track takes). A KIT lane can also have its own length.
 
 ### Song mode
 
-The **SONG** page (FUNC + DATA) is a chain: up to 16 rows of pattern and repeats (1 to 16). Turn **Song mode** on and DeVicenti plays the chain from the first row, repeating each pattern, then loops. With Song mode off, the current pattern loops.
+The **SONG** page (FUNC + DATA) is a chain: up to 16 rows of pattern and repeats (1 to 16). Turn **Song mode** on and DeviceNTI V plays the chain from the first row, repeating each pattern, then loops. With Song mode off, the current pattern loops.
 
 ### Recording
 
@@ -386,7 +390,7 @@ The small display can show 11 pages, and the PAGES menu opens 13 as full editors
 | **LFO** | The two LFOs: shape, rate, sync, mode, fade, phase, destination, depth |
 | **MOD** | The eight modulation slots |
 | **TRIG** | The fields of the held step (the first step if none is held) |
-| **CHORD/SCALE** | Root, scale, pattern length and swing; track length, speed and swing; chord mode and size; harmony channel; the chord memory slots |
+| **CHORD/SCALE** | Root, scale and pattern length; track length, speed and swing; chord mode and size; harmony channel; the chord memory slots |
 | **MIX** | For each track: level, pan, mute, solo, output (main or own) and machine. Master, tape, glue and limit |
 | **FX** | Delay, reverb, master bus and the track's insert (see Effects) |
 | **MIDI** | MIDI input, CC, clock and per-track channels (see MIDI in) |
@@ -440,7 +444,7 @@ Open the MIDI page for the settings.
 
 - **Input.** *OMNI to current track*, the default, plays the selected track from any channel: click a TRACK key to choose which track your keyboard plays. *Channel per track* gives each track its own **In channel** (1 to 4 by default): notes on channel 1 play track 1 and so on.
 - **Notes.** Velocity, pitch bend (the bend range is on the VOICE page), mod wheel (CC 1), aftertouch, poly pressure, breath (CC 2), expression (CC 11) and sustain (CC 64). All of them are sources in the MOD page. CC 120 and 123 stop all sound and notes on the track.
-- **KIT tracks.** Notes play the lanes through their lane notes (36 to 43 by default).
+- **KIT tracks.** Notes play the lanes through their lane notes (36, 38, 39, 42, 46, 45, 50 and 70 by default: see KIT lanes).
 - **MIDI machine tracks.** Notes go straight out to the track's out channel.
 - **Recording.** REC + PLAY records what you play into the pattern.
 
@@ -469,6 +473,8 @@ Every knob has a fixed CC number on every track channel, so you can map it once 
 
 More CCs that are not knobs on the panel: **93** insert amount, **10** pan, **88** TAPE, **89** GLUE, **90** DUCK, **3** LIMIT, **94** delay feedback and **95** reverb size. TEMPO and the keys have no CC.
 
+> **In REAPER.** When playback stops or a MIDI item ends, REAPER sends the value 0 for every CC the item used. DeviceNTI V cannot tell that 0 from one you played, so a knob on such a CC jumps to its minimum (CUTOFF on CC 74 falls to 20 Hz, RESO on CC 71 to 0) and the project saves it. Leave those CCs out of the MIDI items that play DeviceNTI V and automate the parameters instead, or turn off the CC reset in REAPER's preferences (search for "reset" there).
+
 ### MIDI learn
 
 To assign any control to a CC of your own: click **LEARN** in the top bar (or right-click the knob and choose MIDI learn), click the knob, and move the control on your controller. The pair is saved with the project. Right-click a knob and choose Clear learned CCs to remove them. Learn works with every knob that sets a value; the keys and the display are not learnable.
@@ -485,7 +491,7 @@ On the MIDI page, **CC mode** chooses Absolute, Relative (two's complement) or R
 
 ## MIDI out: driving an external synth from a DAW
 
-DeVicenti can send notes, chords and locks as MIDI, so one pattern can play a hardware synth or another plugin.
+DeviceNTI V can send notes, chords and locks as MIDI, so one pattern can play a hardware synth or another plugin.
 
 **Make a track send MIDI**
 
@@ -494,14 +500,14 @@ DeVicenti can send notes, chords and locks as MIDI, so one pattern can play a ha
 
 **In a DAW**
 
-1. Put DeVicenti on a MIDI track, sound or not.
+1. Put DeviceNTI V on a MIDI track, sound or not.
 2. Create another MIDI track with the synth you want to drive, or one that goes to your hardware.
-3. Set that track's MIDI input to the DeVicenti track (in Ableton Live: **MIDI From**, then the track, then its plug-in, and the channel you set as Out channel; in REAPER: add a MIDI send from the DeVicenti track, or an input from it) and arm it.
+3. Set that track's MIDI input to the DeviceNTI V track (in Ableton Live: **MIDI From**, then the track, then its plug-in; Live passes every channel, so give each receiving synth its own DeviceNTI V instance or filter the channel in the synth; in REAPER: add a MIDI send from the DeviceNTI V track, or an input from it) and arm it.
 4. Play the DAW's transport. The notes arrive in the synth in time with the host.
 
 The preset **MIDI Out** in the Init bank is made for trying this: track 4 is a MIDI machine on channel 1, and track 2 sounds and also sends its notes on channel 2.
 
-MIDI out is delayed by the plugin's latency, so it stays in time with the sound DeVicenti makes. In the standalone app the MIDI out goes to the output device you choose and the clock can go with it.
+MIDI out is delayed by the plugin's latency, so it stays in time with the sound DeviceNTI V makes. Use the VST3 for MIDI out in a DAW: Ableton Live and REAPER do not pass on the MIDI that an Audio Unit instrument sends. In the standalone app the MIDI out goes to the output device you choose and the clock can go with it.
 
 ## Presets
 
@@ -521,7 +527,9 @@ A preset loads the whole unit: all four tracks, the patterns, the chain and the 
 
 ## Host parameters and automation
 
-DeVicenti shows 64 parameters to the host. For each of the four tracks (T1 to T4): Cutoff, Resonance, Filter env, Drive, AGE, Delay send, Reverb send, Level, Op A level, Op B level, Op C level, Op D level and Insert amount. Global: Swing, Master, Delay time, Delay feedback, Reverb size, Reverb decay, Tape, Glue, Duck, Limit, Tempo and Pattern. Everything else (the rest of the sound, the patterns, the effect modes and the MIDI settings) is part of the project state, edited on the panel and the pages and saved with the project, and can be changed per step with locks.
+DeviceNTI V shows 64 parameters to the host. For each of the four tracks (T1 to T4): Cutoff, Resonance, Filter env, Drive, AGE, Delay send, Reverb send, Level, Op A level, Op B level, Op C level, Op D level and Insert amount. Global: Swing, Master, Delay time, Delay feedback, Reverb size, Reverb decay, Tape, Glue, Duck, Limit, Tempo and Pattern. Everything else (the rest of the sound, the patterns, the effect modes and the MIDI settings) is part of the project state, edited on the panel and the pages and saved with the project, and can be changed per step with locks.
+
+> **In Ableton Live.** Live fills a device's panel by itself only when a plugin has 64 automatable parameters or fewer, and with the host's bypass DeviceNTI V has 65, so the panel starts empty. Click **Configure** on the device, move the knobs you want to automate or map on the panel (or in the plugin window), and click Configure again: they stay on the panel and in the automation lists, saved with the Live set.
 
 On a KIT track, the per-track values act on the kit bus: cutoff and resonance are a bus low-pass, ENV scales the decay of every lane, drive is a bus drive, and the four operator levels are the lane groups (A kick and low tom, B snare and clap, C hats, D high tom and percussion).
 
@@ -554,7 +562,7 @@ On a KIT track, the per-track values act on the kit bus: cutoff and resonance ar
 2. Switch on a few steps and give them Probability 60 percent, or the condition 1:2 or 3:4.
 3. Add a lock-only step with a CUTOFF lock at the end of one of the loops.
 
-### Playing DeVicenti from a keyboard while it sequences
+### Playing DeviceNTI V from a keyboard while it sequences
 
 1. On the MIDI page leave Input on OMNI. Click TRACK 3.
 2. Play a lead over the running pattern. Turn the knobs: with REC + PLAY on, the moves become locks.

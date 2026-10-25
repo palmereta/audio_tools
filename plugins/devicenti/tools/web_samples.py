@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Website clips for DeVicenti: takes the seven sound-first demo clips of audiotools-private/vicenti/demos (rendered by
+"""Website clips for DeviceNTI V: takes the seven sound-first demo clips of audiotools-private/vicenti/demos (rendered by
 devicentirender from tools/demo_projects, written by clips.py; -16 LUFS, the dark ambient and ambient ones -20), encodes them
 like the rest of the site (AAC 160 kb/s with a 1.5 s fade out, web/assets/samples/devicenti/<id>.m4a) and puts their
-waveform and texts in web/assets/samples/samples.json (the earlier DeVicenti entries are removed), which scripts/build-web.py
+waveform and texts in web/assets/samples/samples.json (the earlier DeviceNTI V entries are removed), which scripts/build-web.py
 reads (the .opus for the launcher is made by build-web.py). Each clip is also a factory preset of the same name.
 
     python3 plugins/devicenti/tools/web_samples.py [demos folder]

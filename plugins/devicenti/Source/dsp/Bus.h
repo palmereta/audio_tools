@@ -1,5 +1,5 @@
 #pragma once
-// DeVicenti: what happens on a track bus after the voices (plan §5.3, §13.1, §13.2). Per track, at the host rate:
+// DeviceNTI V: what happens on a track bus after the voices (plan §5.3, §13.1, §13.2). Per track, at the host rate:
 //
 //   FM layer (stereo) → INSERT → AGE tape stage → [sends are taken here] ─┐
 //   SUB layer (mono, delayed to stay aligned) ─────────────────────────────┴→ low-end mono below 120 Hz → fader

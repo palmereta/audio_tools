@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""DeVicenti preset levels: balance the four tracks of every factory preset and check the mix headroom.
+"""DeviceNTI V preset levels: balance the four tracks of every factory preset and check the mix headroom.
 
     /Volumes/Docs/Applications/pyaudio-venv/bin/python plugins/devicenti/tools/headroom.py [--build build-devicenti] [--apply]
 
