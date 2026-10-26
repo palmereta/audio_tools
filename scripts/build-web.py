@@ -2261,6 +2261,9 @@ DVT = {
     origin_sketch_cap="The sketch for the plugin: one unit, every section annotated.",
     alt_concept="Concept art by Bruno de Vicenti: two orange machines with knobs, keys and small screens, seen in perspective in a retro advertisement.",
     alt_sketch="The original pencil and marker sketch of the instrument, with notes on each section.",
+    thanks_h="Thank you, Bruno.",
+    thanks_p="For the drawing that started it all, and for the inspiration that kept it going. DeviceNTI V carries your name: it is yours too.",
+    alt_thanks="Bruno de Vicenti portrayed as a saint on a holy card, with a crown, sunglasses and patch cables around his neck, among golden clouds.",
     slow_h="Play it, or let it play others.",
     slow_p="Play a track from a controller with a fixed CC map, MIDI learn and relative encoders, and record what you play into the pattern. A track can also be a MIDI machine that sends its steps, chords and locks to a hardware synth or another plugin from your DAW.",
     presets_h="Seventy-five presets.",
@@ -2326,6 +2329,9 @@ DVT = {
     origin_sketch_cap="El boceto del plugin: una sola unidad, con cada sección anotada.",
     alt_concept="Arte conceptual de Bruno de Vicenti: dos máquinas naranjas con perillas, teclas y pantallitas, en perspectiva, en un aviso retro.",
     alt_sketch="El boceto original en lápiz y marcador del instrumento, con notas en cada sección.",
+    thanks_h="Gracias, Bruno.",
+    thanks_p="Por el dibujo que lo empezó todo y por la inspiración que lo sostuvo. DeviceNTI V lleva tu nombre: también es tuyo.",
+    alt_thanks="Bruno de Vicenti retratado como un santo de estampita, con corona, anteojos de sol y cables de patch al cuello, entre nubes doradas.",
     slow_h="Tocalo, o dejá que toque a otros.",
     slow_p="Tocá una pista desde un controlador con un mapa de CC fijo, MIDI learn y encoders relativos, y grabá lo que tocás en el patrón. Una pista también puede ser una máquina MIDI que manda sus pasos, acordes y locks a un sinte de hardware o a otro plugin de tu DAW.",
     presets_h="Setenta y cinco presets.",
@@ -4253,6 +4259,10 @@ def page_product(slug, lang):
       <div class="origin-grid">
         <figure class="reveal">{pic(a, "devicenti/origin-concept", t["alt_concept"])}<figcaption>{t['origin_concept_cap']}</figcaption></figure>
         <figure class="reveal">{pic(a, "devicenti/origin-sketch", t["alt_sketch"])}<figcaption>{t['origin_sketch_cap']}</figcaption></figure>
+      </div>
+      <div class="origin-thanks reveal">
+        <figure>{pic(a, "devicenti/origin-thanks", t["alt_thanks"])}</figure>
+        <div><h3>{t['thanks_h']}</h3><p>{t['thanks_p']}</p></div>
       </div>
     </div>
   </section>"""

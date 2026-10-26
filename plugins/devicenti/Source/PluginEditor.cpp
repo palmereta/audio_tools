@@ -82,18 +82,7 @@ void DeVicentiEditor::TopBar::paint (juce::Graphics& g)
         g.setColour (Theme::accent2()); g.setFont (Theme::font (14.0f * s));
         g.drawText (pageName ((Page) ed.page), r.removeFromLeft (120 * s).withTrimmedLeft (8 * s), juce::Justification::centredLeft);
     }
-    // Preset browser in the middle.
-    const float pw = 330 * s;
-    auto pr = juce::Rectangle<float> (b.getCentreX() - pw / 2, r.getY(), pw, r.getHeight());
-    g.setColour (juce::Colour (0xff0e0b09)); g.fillRoundedRectangle (pr, 4 * s);
-    g.setColour (juce::Colours::white.withAlpha (0.08f)); g.drawRoundedRectangle (pr, 4 * s, 1.0f);
-    auto prev = pr.removeFromLeft (28 * s), next = pr.removeFromRight (28 * s);
-    g.setColour (Theme::dim()); g.setFont (Theme::font (16.0f * s));
-    g.drawText (juce::CharPointer_UTF8 ("\xe2\x80\xb9"), prev, juce::Justification::centred); g.drawText (juce::CharPointer_UTF8 ("\xe2\x80\xba"), next, juce::Justification::centred);
-    g.setColour (Theme::ink()); g.setFont (Theme::font (14.5f * s, false));
-    g.drawText (ed.proc.presetDisplayName(), pr, juce::Justification::centred, true);
-    hits.push_back ({ "prev", prev }); hits.push_back ({ "next", next }); hits.push_back ({ "preset", pr });
-    // Buttons on the right.
+    // Buttons on the right first: the preset browser takes the room left between them and the title.
     auto rr = b.reduced (10 * s, 4 * s);
     auto button = [&] (const juce::String& id, const juce::String& label, float w, bool on) {
         auto x = rr.removeFromRight (w * s).reduced (2 * s, 1 * s); rr.removeFromRight (4 * s);
@@ -110,6 +99,19 @@ void DeVicentiEditor::TopBar::paint (juce::Graphics& g)
     button ("midi", "MIDI", 52, ed.page == (int) Page::Midi);
     button ("pages", "PAGES", 64, ed.page >= 0 && ed.page != (int) Page::Midi && ed.page != (int) Page::Settings);
     button ("learn", "LEARN", 62, ed.unit.learnMode);
+    // Preset browser: centred on the bar when it fits, otherwise centred in the free gap (never under the buttons).
+    const float gapL = r.getX() + 8 * s, gapR = rr.getRight() - 8 * s;
+    const float pw = juce::jmin (330 * s, gapR - gapL);
+    const float px = juce::jlimit (gapL, gapR - pw, b.getCentreX() - pw / 2);
+    auto pr = juce::Rectangle<float> (px, r.getY(), pw, r.getHeight());
+    g.setColour (juce::Colour (0xff0e0b09)); g.fillRoundedRectangle (pr, 4 * s);
+    g.setColour (juce::Colours::white.withAlpha (0.08f)); g.drawRoundedRectangle (pr, 4 * s, 1.0f);
+    auto prev = pr.removeFromLeft (28 * s), next = pr.removeFromRight (28 * s);
+    g.setColour (Theme::dim()); g.setFont (Theme::font (16.0f * s));
+    g.drawText (juce::CharPointer_UTF8 ("\xe2\x80\xb9"), prev, juce::Justification::centred); g.drawText (juce::CharPointer_UTF8 ("\xe2\x80\xba"), next, juce::Justification::centred);
+    g.setColour (Theme::ink()); g.setFont (Theme::font (14.5f * s, false));
+    g.drawText (ed.proc.presetDisplayName(), pr, juce::Justification::centred, true);
+    hits.push_back ({ "prev", prev }); hits.push_back ({ "next", next }); hits.push_back ({ "preset", pr });
 }
 
 void DeVicentiEditor::TopBar::mouseDown (const juce::MouseEvent& e)

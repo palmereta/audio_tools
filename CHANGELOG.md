@@ -16,7 +16,7 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 | [Pallor](#pallor) | 1.0.2 |
 | [Thrum](#thrum) | 1.0.1 |
 | [AT330](#at330) | 1.0.0 |
-| [DeviceNTI V](#devicenti-v) | 1.0.1 |
+| [DeviceNTI V](#devicenti-v) | 1.0.2 |
 | [Orrery](#orrery) | 1.0.7 |
 | [Murmur](#murmur) | 1.0.4 |
 | [Halation](#halation) | 1.0.3 |
@@ -366,6 +366,10 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 - A rendered panel in oiled walnut with every knob and tablet, the band display and the keyboard; an Extended page; 45 presets and a manual in English and Spanish.
 
 ## DeviceNTI V
+
+### 1.0.2
+
+- The preset bar: the next-preset arrow was hidden under the LEARN button. The preset box now sits between the title and the buttons, so both arrows show and work, also with a page open.
 
 ### 1.0.1
 

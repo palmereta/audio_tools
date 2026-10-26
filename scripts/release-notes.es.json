@@ -277,6 +277,9 @@
     "Lo que el original no tenía: envolventes por tecla (Poly, por defecto), velocity, Freeze, corrimiento de formantes, respuesta del vocoder, pitch bend para los dos lados, vibrato con la rueda de modulación, división del teclado movible, ensemble de las cuerdas apagable y una reverb de placa.",
     "Un panel renderizado en nogal aceitado con cada perilla y cada llave, el visor de bandas y el teclado; una página Extended; 45 presets y un manual en inglés y castellano."
   ],
+  "devicenti-v1.0.2": [
+    "La barra de presets: la flecha de preset siguiente quedaba tapada por el botón LEARN. La caja de presets ahora se ubica entre el título y los botones, así que las dos flechas se ven y funcionan, también con una página abierta."
+  ],
   "devicenti-v1.0.1": [
     "Ahora se llama DeviceNTI V; los proyectos de la 1.0.0 abren igual y los presets que guardaste siguen en el navegador de presets.",
     "El parámetro Swing (la perilla SWING, el CC 9 y la automatización) ahora le da swing al secuenciador; en la 1.0.0 todos los patrones sonaban derechos. Los 50 presets de fábrica escritos con swing (52 a 60 por ciento) ahora suenan con él; las siete demos de sonido son derechas y suenan igual que antes.",

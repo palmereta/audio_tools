@@ -4,7 +4,7 @@ An original FM groovebox for downtempo, trip hop, acid jazz, ambient and dark am
 four-operator FM voice with a sub layer, a drum machine of eight FM lanes, or a MIDI track for an external synth; a
 64-step sequencer with step locks, conditions, chord mode and chord memory; one insert per track, a delay and a reverb
 on sends, and a master bus with tape, glue, duck and a limiter. VST3 instrument, Audio Unit (macOS), standalone app
-and `devicentirender`, a command-line renderer, on macOS, Windows and Linux (VST3, LV2). Version 1.0.1. Manual in
+and `devicentirender`, a command-line renderer, on macOS, Windows and Linux (VST3, LV2). Version 1.0.2. Manual in
 English and Spanish (`docs/manual/`, inside the plugin and on the website). Version 1.0.0 was called DeVicenti: the slug
 (`devicenti`), the CMake target, the class names, the bundle id, the plugin codes and the LV2 URI keep that name, so
 projects saved with 1.0.0 open in 1.0.1 unchanged.
@@ -93,7 +93,15 @@ build/plugins/devicenti/devicentitest
 | Nothing playing | 0.25 % |
 | Drive 1 + fold 0.5 + feedback, alias energy below 20 kHz | C2-C4 under -38 dB, C5-C7 under -34 dB |
 
-## Release QA (version 1.0.1, 2026-10-25)
+## Release QA (version 1.0.2, 2026-10-26)
+
+1.0.2 only moves the preset box in the top bar (the LEARN button covered the next-preset arrow). Re-run on the 1.0.2
+zips: athosttest VST3 157 PASS, 1 WARN (midisync), 0 FAIL on macOS, Windows and Linux, and the AU 157 PASS, 0 WARN;
+auval passes on the installed AU; pluginval 10 SUCCESS on Windows and Linux (VST3, LV2); devicentitest 0 failures on
+macOS and Windows (on Linux the same two timing checks as below); 82/82 vstpresets; the Windows editor self-test
+passes and idles at 0.8 % of a core. Editor snapshots on macOS show both arrows on the panel and with a page open.
+
+### Version 1.0.1, 2026-10-25
 
 | Where | What | Result |
 |---|---|---|

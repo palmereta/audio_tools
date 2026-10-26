@@ -1,7 +1,7 @@
 # DeviceNTI V (slug devicenti; 1.0.0 was called DeVicenti): an FM groovebox for downtempo, trip hop, acid jazz, ambient and dark ambient. Four tracks (four-operator
 # FM voice with sub, a drum machine of eight FM lanes, or MIDI), a 64-step sequencer with step locks, conditions,
 # chord mode and chord memory, per-track inserts, delay and reverb sends and a master bus (docs/research.md).
-set(DEVICENTI_VERSION 1.0.1)
+set(DEVICENTI_VERSION 1.0.2)
 
 if(APPLE)
     set(DEVICENTI_FORMATS VST3 AU Standalone)
