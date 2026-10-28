@@ -1,5 +1,5 @@
 #pragma once
-// Teoría que usa el generador: escalas, acordes por terceras sobre los grados de la escala, colores
+// Teoría compartida por los generadores de MIDI (Orrery, Valence): escalas, acordes por terceras sobre los grados de la escala, colores
 // (séptimas, novenas, sus, clusters), una progresión lenta por cadena de Markov y la conducción de
 // voces (cada voz va a la nota del acorde nuevo más cercana).
 
@@ -10,7 +10,7 @@
 #include <vector>
 #include <algorithm>
 
-namespace dh::orr {
+namespace dh::theory {
 
 // Matemática determinista: la misma variación tiene que dar la misma música en macOS y Windows, y las
 // funciones de la biblioteca de cada plataforma (log, sin, exp2...) no coinciden al bit. Estas usan sólo
@@ -245,4 +245,4 @@ inline std::vector<int> voiceLead (const std::vector<int>& prev, const Chord& c,
     return out;
 }
 
-} // namespace dh::orr
+} // namespace dh::theory

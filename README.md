@@ -5,8 +5,8 @@
 > original instruments (`plugins/*/docs/ref/`, credited in their `CREDITS.md`) are not included.
 
 Free, open-source recreations of legendary synthesizers, as VST3 / Audio Unit / LV2 / standalone
-plugins for macOS, Windows and Linux, plus six tools of our own: Orrery, a MIDI generator that plays them,
-Murmur, a granular effect, Halation, a delay and reverb in one space, Tarnish, a tape and lo-fi machine,
+plugins for macOS, Windows and Linux, plus seven tools of our own: Orrery, a MIDI generator that plays them,
+Valence, a multi-layer MIDI arpeggiator, Murmur, a granular effect, Halation, a delay and reverb in one space, Tarnish, a tape and lo-fi machine,
 Plumb, real-time pitch correction with 0.67 ms of latency, and Lacquer, an automatic mastering processor.
 
 Each instrument is rebuilt from its original documentation and measurements: service manuals,
@@ -32,6 +32,7 @@ against the hardware and improve.
 | [Pallor](plugins/pallor/) | Original: drum machine for dark wave, coldwave, post-punk and EBM, analog and 80s digital engines, 80s/90s effects, step sequencer | 1.0.2 | Released |
 | [AT330](plugins/at330/) | Roland VP-330 (1979), strings, choir and 10-band vocoder with a BBD ensemble | 1.0.0 | Released |
 | [DeviceNTI V](plugins/devicenti/) | Original: FM groovebox for downtempo, trip hop, acid jazz, ambient and dark ambient: four tracks of four-operator FM with sub, an FM drum machine per track or MIDI out, a 64-step sequencer with step locks, conditions and chord mode, inserts, tape and dub effects | 1.0.0 | Released |
+| [Valence](plugins/valence/) | Original: multi-layer MIDI arpeggiator, four layers of their own length, figure and channel that drift in and out of phase over the chord you hold | 1.0.0 | Released |
 
 ## AT20V
 
@@ -268,6 +269,24 @@ Technical notes: [`plugins/at330/README.md`](plugins/at330/README.md) and the re
 Technical notes: [`plugins/devicenti/README.md`](plugins/devicenti/README.md) and the research behind it,
 [`plugins/devicenti/docs/research.md`](plugins/devicenti/docs/research.md).
 
+## Valence
+
+- A MIDI arpeggiator with four layers that play the chord you hold, each with its own length (1-32 steps),
+  figure (1/4 to 1/32, straight, triplet, dotted), one of 12 patterns or a Euclidean rhythm, octaves, gate,
+  swing, velocity, MIDI channel and mutation. Layers of different lengths drift apart and meet again at the
+  fusion, which the engine predicts (Chinese remainder theorem over the cycles) and the interface counts in bars.
+- Step rows: on, velocity, accent, tie, ratchet, probability, octave, fixed note and a CC value. Complete builds
+  the scale chord on one or two held notes, Auto harmony plays Orrery's chord walk, Lead and Follow share a chord.
+- Deterministic to the sample: steps live on integer ticks (100,800 per beat), so the same chord, settings and
+  variation play the same MIDI with any block size; no hanging notes after a stop, bypass or preset change.
+- Outputs to the host on one channel or per layer, direct MIDI ports, a virtual MIDI port per layer on macOS and
+  Linux, MIDI clock and capture to a file. VST3, AU, an AU MIDI FX for Logic, LV2 and standalone.
+- The interface is an atom (chord as nucleus, layers as orbits, notes as photons) that redraws only what moves:
+  the whole editor at 3.5 % of a Ryzen core under Linux. 43 presets in seven groups, a manual in English and
+  Spanish.
+
+Technical notes: [`plugins/valence/README.md`](plugins/valence/README.md).
+
 ## Plumb
 
 - Three latency modes from one chain: Live 32 samples (0.67 ms at 48 kHz), Tight 128 (2.7 ms), Studio 1024 (21 ms),
@@ -324,6 +343,7 @@ on an M4). Hosts run each instrument on one core, so single-core speed is what c
 | ATMD eight voices, 4x | 4.79 % | 8.32 % |
 | Orrery generator, 8 busy lanes | 0.003 % | 0.009 % |
 | Orrery with its preview sound, busiest preset | 1.6 % | 3.8 % |
+| Valence engine, 4 layers at 1/32 with ratchets, CC rows, mutation and humanize | 0.0035 % | 0.0083 % |
 | Murmur, heaviest factory preset (Granular Wash) | 0.56 % | 1.50 % |
 | Murmur, 128 grains of 1 s with delay and reverb | 2.55 % | 6.22 % |
 | Lacquer, the chain learned from the demo mix | 2.84 % | 4.84 % |
@@ -341,7 +361,7 @@ on an M4). Hosts run each instrument on one core, so single-core speed is what c
 | Plumb, Hard Tune (Tight mode) | 3.16 % | 3.54 % |
 | Plumb, Throat Down (formants moved) | 7.95 % | 9.61 % |
 
-Measured with the offline renderers (`at20vrender`, `at101vrender`, `at42render`, `at700render`, `atfs1render`, `orreryrender`, `murmurrender`, `atmdrender`, `lacquerrender --bench`, `halationrender`, `tarnishrender`, `plumbrender`, and `at303test` for AT303); the minimum
+Measured with the offline renderers (`at20vrender`, `at101vrender`, `at42render`, `at700render`, `atfs1render`, `orreryrender`, `valencerender --bench`, `murmurrender`, `atmdrender`, `lacquerrender --bench`, `halationrender`, `tarnishrender`, `plumbrender`, and `at303test` for AT303); the minimum
 processors are extrapolated from these two machines by single-core benchmark ratios.
 
 ## Download
@@ -384,6 +404,7 @@ plugins/atfs1/        ATFS1: same structure, plus the Formant Sequence library
 plugins/atmd/         ATMD: same structure, the 3D panel pipeline and the hardware reference
 plugins/at303/        AT303: voice and sequencer (JUCE-free), rendered instrument with Inspect, presets, renderer, tests, Blender scene
 plugins/orrery/       Orrery: generator, preview sound, interface, presets, tests, Blender scene
+plugins/valence/      Valence: arpeggiator engine (JUCE-free), atom interface, preview sound, presets, renderer, tests, Blender scene, manual
 plugins/murmur/       Murmur: granular engine, flock interface, presets, tests, Blender scene
 plugins/lacquer/      Lacquer: mastering engine (JUCE-free), plugin with file mode, renderer, tests, Blender scene
 plugins/halation/     Halation: delay/reverb engine (JUCE-free), room view, presets, renderer, tests, Blender scene

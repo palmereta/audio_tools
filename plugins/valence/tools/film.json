@@ -1,0 +1,21 @@
+{
+  "title": "Valence",
+  "tagline": "Four orbits around the chord you hold.",
+  "fps": 24,
+  "audio": {"cmd": ["plugins/valence/tools/blender/film_audio.py", "{out}"]},
+  "edit": {"demo": "10_main/10_main.wav",
+           "parts": [["A_techno", 0.0], ["B_house", 86.4], ["C_dnb", 147.84]],
+           "cuts": [[67.2, 113.28], [140.16, 180.0]]},
+  "shots": [
+    {"name": "open", "seconds": 9.5833},
+    {"name": "side", "seconds": 9.625},
+    {"name": "house", "seconds": 13.4167},
+    {"name": "nucleus", "seconds": 13.4583},
+    {"name": "bridge", "seconds": 7.6667},
+    {"name": "dnb", "seconds": 9.6667},
+    {"name": "rise", "seconds": 9.6667},
+    {"name": "drop", "seconds": 9.625},
+    {"name": "end", "seconds": 3.2083, "in": "dissolve"}
+  ],
+  "poster": {"shot": "drop", "frame": 30}
+}

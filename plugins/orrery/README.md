@@ -42,7 +42,7 @@ Orrery's preview sound" while it plays.
 ## Layout
 
 ```
-Source/gen/Theory.h       scales, chords, voice leading, Markov walk, deterministic math (dm::), RNG
+../../shared/gen/Theory.h scales, chords, voice leading, Markov walk, deterministic math (dm::), RNG
 Source/gen/Generator.h    the engine: harmony, lanes, roles, loops, echoes, sessions, controls, Link
 Source/gen/Constellation.h  Main and satellites: the registry, what a Main publishes, the satellite replica
 Source/gen/Preview.h      the built-in preview sound (one voice per role, plate reverb, delay)

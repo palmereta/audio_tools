@@ -421,6 +421,23 @@ void testInfo()
     auto& p = *pl->p;
     report ("info", p.getName(), "PASS", fmt ("%d in, %d out, MIDI in %d out %d, %d programas, %d parámetros, latencia %d, cola %.1f s",
             pl->ins, pl->outs, (int) p.acceptsMidi(), (int) p.producesMidi(), p.getNumPrograms(), realParams (*pl).size(), p.getLatencySamples(), p.getTailLengthSeconds()));
+    // Live arma su panel con los primeros 64 parámetros que expone el host: tienen que ser los del plugin (no los "MIDI
+    // CC n|m" del VST3 ni el de programa) y, si el plugin tiene 64 automatizables, ésos primero.
+    const auto& all = p.getParameters();
+    int own = 0, autom = 0, totalAutom = 0; juce::String intruder;
+    for (int i = 0; i < all.size(); ++i)
+    {
+        const auto n = all[i]->getName (64);
+        const bool real = ! (n.startsWith ("MIDI CC ") || n == "Program");
+        if (real && all[i]->isAutomatable()) ++totalAutom;
+        if (i >= 64) continue;
+        if (real) ++own; else if (intruder.isEmpty()) intruder = n;
+        if (real && all[i]->isAutomatable()) ++autom;
+    }
+    const int want = juce::jmin (64, all.size());
+    report ("info", U ("los primeros 64 parámetros"), own == want ? "PASS" : "WARN",
+            fmt ("%d de %d propios, %d automatizables (de %d automatizables en total)", own, want, autom, totalAutom)
+                + (intruder.isNotEmpty() ? U (", el primero ajeno: ") + intruder : juce::String()));
 }
 
 void testGeneratorPrograms (bool quick)
@@ -1661,9 +1678,16 @@ void testConstellation()
 // 6. Los carriles como puertos MIDI virtuales (macOS y Linux): se crean, dos instancias no chocan, se borran al cerrar.
 void testPorts()
 {
+    // Orrery publica sus 8 carriles ("Orrery Drone"...), Valence sus 4 capas ("Valence Layer 1"...): el prefijo es el nombre
+    // del plugin y la cantidad, la de parámetros "Lane N On" o "Layer N On".
+    juce::String portParam, prefix; int perInstance = 0;
     {
         auto probe = load (pluginPath);
-        if (paramNamed (*probe, "Publish Lanes As MIDI Ports") == nullptr) return;
+        for (auto* nm : { "Publish Lanes As MIDI Ports", "Publish Layers As MIDI Ports" }) if (paramNamed (*probe, nm) != nullptr) portParam = nm;
+        if (portParam.isEmpty()) return;
+        // El nombre base: "Audio Tools Valence" (VST3), "Audio Tools: Audio Tools Valence" (AU), "... Valence MIDI FX" (AU MIDI FX).
+        prefix = probe->p->getName().fromLastOccurrenceOf ("Audio Tools ", false, false).upToFirstOccurrenceOf (" ", false, false);
+        for (auto* q : realParams (*probe)) { const auto n = q->getName (64); if ((n.startsWith ("Lane ") || n.startsWith ("Layer ")) && n.endsWith (" On")) ++perInstance; }
     }
     auto pump = [] (int ms) {
        #if JUCE_MODAL_LOOPS_PERMITTED
@@ -1674,24 +1698,25 @@ void testPorts()
     };
     auto names = [] { juce::StringArray s; for (auto& d : juce::MidiInput::getAvailableDevices()) s.add (d.name); return s; };
     auto count = [&] (const juce::String& prefix) { int k = 0; for (auto& n : names()) if (n.startsWith (prefix + " ")) ++k; return k; };
-    const int before = count ("Orrery");
+    const int before = count (prefix);
+    const juce::String second = prefix + " 2";
     {
         auto a = load (pluginPath), b = load (pluginPath);
-        for (auto* p : { a.get(), b.get() }) { setChoice (*p, "Role", 1, 4); setChoice (*p, "Publish Lanes As MIDI Ports", 1, 2); p->p->releaseResources(); p->p->prepareToPlay (p->sr, p->block); }
+        for (auto* p : { a.get(), b.get() }) { setChoice (*p, "Role", 1, 4); setChoice (*p, portParam, 1, 2); p->p->releaseResources(); p->p->prepareToPlay (p->sr, p->block); }
         pump (1500);
-        const int one = count ("Orrery") - count ("Orrery 2") - before, two = count ("Orrery 2");
+        const int one = count (prefix) - count (second) - before, two = count (second);
         auto r = render (*a, {}, S (0.5, a->sr));
        #if JUCE_WINDOWS
-        report ("ports", U ("6 puertos virtuales"), one == 0 && two == 0 ? "PASS" : "FAIL", U ("Windows no tiene puertos virtuales propios (loopMIDI)"));
+        report ("ports", U ("puertos virtuales"), one == 0 && two == 0 ? "PASS" : "FAIL", U ("Windows no tiene puertos virtuales propios (loopMIDI)"));
        #else
-        if (one == 0 && two == 0) report ("ports", U ("6 puertos virtuales"), "WARN", U ("el sistema no creó puertos (¿sin servidor MIDI?)"));
-        else report ("ports", U ("6 puertos virtuales, dos instancias"), one == 8 && two == 8 ? "PASS" : "FAIL",
+        if (one == 0 && two == 0) report ("ports", U ("puertos virtuales"), "WARN", U ("el sistema no creó puertos (¿sin servidor MIDI?)"));
+        else report ("ports", fmt ("%d puertos virtuales por instancia, dos instancias", perInstance), one == perInstance && two == perInstance ? "PASS" : "FAIL",
                      fmt ("%d de la primera, %d de la segunda: ", one, two) + names().joinIntoString (", ").substring (0, 160));
        #endif
     }
     pump (1500);
-    const int after = count ("Orrery") - before;
-    report ("ports", U ("6 puertos borrados al cerrar"), after == 0 ? "PASS" : "FAIL", fmt ("%d puertos de Orrery quedan", after));
+    const int after = count (prefix) - before;
+    report ("ports", U ("puertos borrados al cerrar"), after == 0 ? "PASS" : "FAIL", fmt ("%d puertos de ", after) + prefix + U (" quedan"));
 }
 
 void testMidiOut()

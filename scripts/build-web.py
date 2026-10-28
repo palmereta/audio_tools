@@ -172,6 +172,19 @@ WINA330 = f"AT330-{VA330}-Windows.zip"
 VDV = version("devicenti")
 MACDV = f"DeviceNTI-V-{VDV}-macOS.zip"      # 1.0.0 se llamaba DeVicenti (DeVicenti-1.0.0-*.zip)
 WINDV = f"DeviceNTI-V-{VDV}-Windows.zip"
+VVA = version("valence")
+MACVA = f"Valence-{VVA}-macOS.zip"
+WINVA = f"Valence-{VVA}-Windows.zip"
+def preset_counts_va():
+    cats = {}
+    d = os.path.join(ROOT, "plugins", "valence", "assets", "presets")
+    for f in os.listdir(d):
+        if f.endswith(".json"):
+            c = json.load(open(os.path.join(d, f))).get("category", "")
+            cats[c] = cats.get(c, 0) + 1
+    return cats
+PCVA = preset_counts_va()
+NVA = sum(PCVA.values())
 
 # ───────────────────────── AT20V (y textos de la portada sobre código abierto) ─────────────────────────
 T = {
@@ -418,6 +431,10 @@ H = {
              what="An FM groovebox for slow, heavy music.",
              body="Four tracks that are a four-operator FM voice, a kit of eight FM drums or a MIDI sender, a 64-step sequencer with locks on every step, and a sound path of saturating filter, tape wear, inserts, delay and reverb. Made for downtempo, trip hop, acid jazz, ambient and dark ambient. An original instrument, in one orange unit.",
              alt="An orange groovebox rendered in 3D at an angle on a dark surface: a cream plate with a blue block, four yellow and orange operator blocks with black knobs, and sixteen white step keys along the front"),
+        dict(slug="valence", name="Valence", year="2026", img="hero", imgdir="valence/", ver=VVA, mac=MACVA, win=WINVA,
+             what="A MIDI arpeggiator with four layers.",
+             body=f"Four layers orbit the chord you hold, each with its own length, figure, pattern, octaves, gate, swing and channel, so they drift apart and meet again at the fusion. Ratchets, ties, probability and a CC on every step, {NVA} presets for techno, house and drum and bass, drawn as a living atom.",
+             alt="An atom rendered in 3D: warm and cold spheres in a glass nucleus and three coloured orbits with bright electrons"),
     ],
     about="About", dl_mac="macOS", dl_win="Windows", formats="VST3, Audio Unit and standalone app. Free.",
     hero_alt="Close-up of the blue AT101V rendered in 3D: sliders with black caps and the white AT101V logo",
@@ -500,6 +517,10 @@ H = {
              what="Una groovebox de FM para música lenta y pesada.",
              body="Cuatro pistas que son una voz de FM de cuatro operadores, un kit de ocho tambores de FM o un emisor MIDI, un secuenciador de 64 pasos con locks en cada paso, y un camino de sonido con filtro saturante, desgaste de cinta, inserts, delay y reverb. Hecha para downtempo, trip hop, acid jazz, ambient y dark ambient. Un instrumento original, en una sola unidad naranja.",
              alt="Una groovebox naranja renderizada en 3D, en ángulo sobre una superficie oscura: una placa crema con un bloque celeste, cuatro bloques de operadores amarillos y naranjas con perillas negras, y dieciséis teclas blancas de paso en el frente"),
+        dict(slug="valence", name="Valence", year="2026", img="hero", imgdir="valence/", ver=VVA, mac=MACVA, win=WINVA,
+             what="Un arpegiador MIDI de cuatro capas.",
+             body=f"Cuatro capas orbitan el acorde que tocás, cada una con su largo, figura, patrón, octavas, gate, swing y canal, así se separan y se vuelven a encontrar en la fusión. Ratchets, ligaduras, probabilidad y un CC en cada paso, {NVA} presets para techno, house y drum and bass, dibujado como un átomo vivo.",
+             alt="Un átomo renderizado en 3D: esferas cálidas y frías en un núcleo de vidrio y tres órbitas de colores con electrones brillantes"),
     ],
     about="Ver más", dl_mac="macOS", dl_win="Windows", formats="VST3, Audio Unit y aplicación independiente. Gratis.",
     hero_alt="Primer plano del AT101V azul renderizado en 3D: faders con capuchones negros y el logo AT101V en blanco",
@@ -2478,6 +2499,138 @@ A3 = {
 ),
 }
 
+# ───────────────────────── Valence ─────────────────────────
+VA = {
+"en": dict(
+    title="Valence — a free multi-layer MIDI arpeggiator for techno, house and drum and bass | Audio Tools",
+    description=f"Valence is a free, open-source MIDI arpeggiator with four layers: each one plays the chord you hold with its own length, figure, pattern, octaves, gate, swing and MIDI channel, so the layers drift apart and meet again. {NVA} presets for minimal techno, minimal house, drum and bass, acid, dub and ambient. VST3, Audio Unit, AU MIDI FX and standalone app for macOS, Windows and Linux.",
+    listen_p="Every arpeggio in these clips is Valence: a chord held on a keyboard and a preset, rendered by valencerender to one MIDI file per layer, and each layer played by one of our instruments. The drums and some basses and pads were written for the mix, which is brought to the same loudness in every clip. Download the MIDI (one track per layer) and play the layers with your own synths.",
+    sound_h="Polymeter, on purpose.",
+    sound_p1="All four layers walk the same chord, each with its own length in steps, figure, pattern, octave range, gate, swing and MIDI channel. Layers of 16, 15 and 13 steps drift apart one step at a time and only meet again after 3,120 sixteenths, 195 bars. That moment, with every layer back on its first step, is the fusion: Valence works it out in advance and counts the bars to it. Hold one note and Complete builds the chord of the scale on it; with Auto harmony it plays a chord walk by itself.",
+    sound_p2="It was tested like the instruments: the same chord, settings and variation number play the same notes to the sample in any host and at any buffer size; no note hangs after a release, a stop, a bypass or a preset change; 79,192 notes over 50 minutes stayed in the scale; and the busiest possible layer sends 216 MIDI messages per second, where a 5-pin MIDI cable carries about a thousand.",
+    spec=[("Layers", "4, each with its own length (1 to 32 steps), figure (1/4 to 1/32, straight, triplet or dotted), pattern, octaves, gate, swing, velocity, channel and mutation"),
+          ("Patterns", "Up, down, up-down two ways, converge, diverge, as played, random, random walk, chord, pedal and finger order; Euclidean rhythms with rotation"),
+          ("Step rows", "On, velocity, accent, tie, ratchet (1 to 4), probability, octave, fixed note and a CC value, on every step"),
+          ("Chord", "Latch and sustain pedal, chord order, Complete (triad, seventh, ninth or octaves in the scale), Auto harmony, Lead and Follow link between instances"),
+          ("Time", "Host sync or its own tempo, humanize, phrase reset, fusion prediction, variation number"),
+          ("Outputs", "MIDI to the host on one channel or one per layer, direct MIDI ports per layer, virtual ports on macOS and Linux, MIDI clock, capture to a MIDI file, built-in preview sound")],
+    demo_h="See it play.",
+    demo_p="The plugin's own atom, recorded while it played the main demo, with the demo as the sound. Every photon on screen is a note you hear, and the fusions fall where the music changes.",
+    demo_tabs="Demos",
+    demos=[("techno", "Minimal techno", "125 BPM: one chord on layers of 16, 15 and 12 sixteenths; the fusion in the middle brings in the open hats."),
+           ("house", "Minimal house", "125 BPM: layers of 16 sixteenths, 12 eighth-note triplets and 7 eighths that meet every 7 bars."),
+           ("dnb", "Drum and bass", "174 BPM: the break and the reese drop on a fusion, 14 bars in.")],
+    atom_h="An atom you can read.",
+    atom_p="The Simple page is the atom and six macros: figure, density, swing, octaves, mutation and gate, each moving the same setting on all four layers and keeping their differences. The nucleus is the chord: protons are the notes you hold, neutrons the notes Valence adds. Each orbit is a layer with its steps marked on it, an electron runs round as it plays, and every note is a photon fired at the note it played.",
+    atom_caption="The Simple page playing Auto Orbit: layers of 13, 11, 7 and 5 steps, and the next fusion counted in bars.",
+    atom_note="The atom only redraws what moves: with it playing, the whole interface takes 3.5 % of one core of a Ryzen 9 5900XT.",
+    layers_h="Every step under your hand.",
+    layers_p="The Layers page unrolls each orbit into a strip of steps, with the selected layer's settings and every step row below.",
+    layers_facts=[("Ratchets and ties.", "A step can repeat two to four times inside its length, or tie into the next one: to the same note it holds, to another it slides legato."),
+                  ("Probability and mutation.", "Every step has its chance to play, and at each cycle a layer can change a little: a step that appears or goes, an octave, a velocity, a ratchet."),
+                  ("A controller row.", "A CC value per step on the number you pick: 74 opens a filter step by step, as on an acid line."),
+                  ("The same take every time.", "Every random choice comes from the variation number: a new number is a new take, and the old number gives the old take back, note for note.")],
+    layers_caption="The Layers page with Acid Shell: four layers as strips, and layer 1 with its settings and step rows.",
+    out_h="One chord, four synths.",
+    out_p="All the layers can play one synth on channel 1, or each layer its own channel. Each layer can also go straight to a MIDI port, and on macOS and Linux each layer can be a virtual MIDI port of its own.",
+    out_facts=[("Ableton Live.", "Put the VST3 on a MIDI track and set MIDI From to it on each synth track. For a synth per layer, use the layers as MIDI ports, or one multitimbral synth with a channel per layer."),
+               ("Logic.", "Valence MIDI FX, the Audio Unit MIDI FX version, goes in the MIDI FX slot of a software instrument track."),
+               ("Hardware.", "A port per layer and MIDI clock: one Valence plays a rack of synths."),
+               ("Preview sound.", "A pluck, a bass, a chord stab and a sub, one per layer, so it plays the moment you open it.")],
+    out_caption="The Outputs page: output channels, a port for each layer, virtual ports, clock and link.",
+    presets_h="Seven groups.",
+    presets=[(PCVA.get("Minimal Techno", 0), "Minimal techno", "One held chord and layers of different lengths: the drift does the work."),
+             (PCVA.get("Minimal House", 0), "Minimal house", "Swing, short gates, ghost notes by probability and chords built from one note."),
+             (PCVA.get("Drum and Bass", 0), "Drum and bass", "Fast, soft layers over a break, a reese with ratchets, halftime spaces."),
+             (PCVA.get("Acid", 0), "Acid", "Accents, slides and a controller row on the filter, with a ratchet at the end of the bar."),
+             (PCVA.get("Dub", 0), "Dub", "Chord stabs with silences and probability, and a sub on the root."),
+             (PCVA.get("Ambient", 0), "Ambient", "Slow, spaced layers and long gates; Auto Orbit plays its own chord walk."),
+             (PCVA.get("Classics", 0), "Classics", "The arpeggiator everybody knows: up, down, up and down, two octaves, random, chord stabs.")],
+    dl_h=f"Download Valence {VVA}.",
+    dl_p="Free, no account, no activation, no telemetry.",
+    mac_h="macOS", mac_req="macOS 11 or later. Apple silicon and Intel in one universal binary.",
+    mac_fmt="VST3, Audio Unit, Audio Unit MIDI FX and standalone app",
+    mac_steps=["Unzip the file.", "Copy <code>Valence.vst3</code> to <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copy <code>Valence.component</code> and <code>Valence MIDI FX.component</code> to <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "In Ableton Live and REAPER use the VST3; in Logic, Valence MIDI FX."],
+    win_h="Windows", win_req="Windows 10 or 11, 64-bit.", win_fmt="VST3 and standalone app",
+    win_steps=["Unzip the file.", "Copy <code>Valence.vst3</code> to <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Rescan plugins in your DAW.", "<code>Valence.exe</code> runs on its own and plays your MIDI ports."],
+    file_label="file",
+    dl_note="The builds are not code-signed yet. macOS may refuse to open them until you run <code>xattr -dr com.apple.quarantine</code> on the installed plugins, and Windows SmartScreen may ask you to confirm the first time. Both packages include an INSTALL.txt with the exact steps.",
+    os_p="Valence is free software under the GNU Affero General Public License v3, like the JUCE framework it is built on. You can use it, study it, change it and share it. The source code is on <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, with every release.",
+    os_link="Why Audio Tools is open source",
+    trademark="Ableton is a trademark of Ableton AG and Logic a trademark of Apple Inc. Audio Tools is an independent project; Valence is an original design.",
+    photo_credit="The atom in the images and the film is a 3D model made for this page, driven note for note by the MIDI of the demos.",
+    hero_alt="An atom rendered in 3D: warm and cold spheres in a glass nucleus, and three coloured orbits with bright electrons, over black.",
+    alt_simple="Valence's Simple page playing", alt_layers="Valence's Layers page", alt_out="Valence's Outputs page",
+),
+"es": dict(
+    title="Valence — un arpegiador MIDI de varias capas libre para techno, house y drum and bass | Audio Tools",
+    description=f"Valence es un arpegiador MIDI libre y de código abierto con cuatro capas: cada una toca el acorde que tenés apretado con su propio largo, figura, patrón, octavas, gate, swing y canal MIDI, así las capas se separan y se vuelven a encontrar. {NVA} presets para minimal techno, minimal house, drum and bass, acid, dub y ambient. VST3, Audio Unit, AU MIDI FX y aplicación independiente para macOS, Windows y Linux.",
+    listen_p="Cada arpegio de estos clips es Valence: un acorde tocado en un teclado y un preset, renderizados con valencerender a un archivo MIDI por capa, y cada capa tocada por uno de nuestros instrumentos. La batería y algunos bajos y pads se escribieron para la mezcla, que tiene la misma sonoridad en todos los clips. Bajá el MIDI (una pista por capa) y tocá las capas con tus propios sintes.",
+    sound_h="Polimetría, a propósito.",
+    sound_p1="Las cuatro capas recorren el mismo acorde, cada una con su largo en pasos, figura, patrón, rango de octavas, gate, swing y canal MIDI. Capas de 16, 15 y 13 pasos se separan de a un paso y recién se vuelven a encontrar después de 3120 semicorcheas, 195 compases. Ese momento, con todas las capas de nuevo en su primer paso, es la fusión: Valence la calcula de antemano y cuenta los compases que faltan. Tocás una nota y Complete arma encima el acorde de la escala; con la armonía automática, toca sola una progresión.",
+    sound_p2="Se probó como los instrumentos: el mismo acorde, los mismos ajustes y el mismo número de variación tocan las mismas notas, a la muestra, en cualquier host y con cualquier tamaño de buffer; ninguna nota queda colgada al soltar, al parar, con bypass o al cambiar de preset; 79.192 notas en 50 minutos quedaron dentro de la escala; y la capa más cargada posible manda 216 mensajes MIDI por segundo, donde un cable MIDI de 5 pines lleva unos mil.",
+    spec=[("Capas", "4, cada una con su largo (1 a 32 pasos), figura (1/4 a 1/32, normal, tresillo o con puntillo), patrón, octavas, gate, swing, velocidad, canal y mutación"),
+          ("Patrones", "Arriba, abajo, arriba y abajo de dos maneras, hacia adentro, hacia afuera, como se tocó, al azar, paseo al azar, acorde, pedal y orden de dedos; ritmos euclidianos con rotación"),
+          ("Filas por paso", "Encendido, velocidad, acento, ligadura, ratchet (1 a 4), probabilidad, octava, nota fija y un valor de CC, en cada paso"),
+          ("Acorde", "Latch y pedal de sustain, orden del acorde, Complete (tríada, séptima, novena u octavas en la escala), armonía automática, vínculo líder y seguidoras entre instancias"),
+          ("Tiempo", "Sincronía con el host o tempo propio, humanizado, reinicio por frase, predicción de la fusión, número de variación"),
+          ("Salidas", "MIDI al host en un canal o uno por capa, puertos MIDI directos por capa, puertos virtuales en macOS y Linux, reloj MIDI, captura a un archivo MIDI, sonido de prueba incorporado")],
+    demo_h="Mirala tocar.",
+    demo_p="El átomo del propio plugin, grabado mientras tocaba la demo principal, con la demo como sonido. Cada fotón en pantalla es una nota que escuchás, y las fusiones caen donde cambia la música.",
+    demo_tabs="Demos",
+    demos=[("techno", "Minimal techno", "125 BPM: un acorde en capas de 16, 15 y 12 semicorcheas; la fusión del medio trae los hats abiertos."),
+           ("house", "Minimal house", "125 BPM: capas de 16 semicorcheas, 12 tresillos de corchea y 7 corcheas que se encuentran cada 7 compases."),
+           ("dnb", "Drum and bass", "174 BPM: el break y el reese entran en una fusión, a los 14 compases.")],
+    atom_h="Un átomo que se lee.",
+    atom_p="La página Simple es el átomo y seis macros: figura, densidad, swing, octavas, mutación y gate, cada una mueve el mismo ajuste en las cuatro capas y conserva sus diferencias. El núcleo es el acorde: los protones son las notas que tenés apretadas, los neutrones las que agrega Valence. Cada órbita es una capa con sus pasos marcados, un electrón la recorre mientras toca, y cada nota es un fotón disparado hacia la nota que tocó.",
+    atom_caption="La página Simple tocando Auto Orbit: capas de 13, 11, 7 y 5 pasos, y la próxima fusión contada en compases.",
+    atom_note="El átomo sólo redibuja lo que se mueve: mientras toca, toda la interfaz usa el 3,5 % de un núcleo de un Ryzen 9 5900XT.",
+    layers_h="Cada paso en tus manos.",
+    layers_p="La página Layers desenrolla cada órbita en una tira de pasos, con los ajustes de la capa elegida y todas sus filas de pasos abajo.",
+    layers_facts=[("Ratchets y ligaduras.", "Un paso se puede repetir de dos a cuatro veces dentro de su largo, o ligarse al siguiente: con la misma nota la sostiene, con otra pasa en legato."),
+                  ("Probabilidad y mutación.", "Cada paso tiene su chance de sonar, y en cada ciclo una capa puede cambiar un poco: un paso que aparece o se va, una octava, una velocidad, un ratchet."),
+                  ("Una fila de controlador.", "Un valor de CC por paso en el número que elijas: el 74 abre un filtro paso a paso, como en una línea acid."),
+                  ("La misma toma cada vez.", "Cada decisión al azar sale del número de variación: un número nuevo es una toma nueva, y el número viejo devuelve la toma vieja, nota por nota.")],
+    layers_caption="La página Layers con Acid Shell: cuatro capas como tiras, y la capa 1 con sus ajustes y sus filas de pasos.",
+    out_h="Un acorde, cuatro sintes.",
+    out_p="Todas las capas pueden tocar un mismo sinte en el canal 1, o cada capa en su canal. Cada capa también puede salir directo por un puerto MIDI, y en macOS y Linux cada capa puede ser un puerto MIDI virtual propio.",
+    out_facts=[("Ableton Live.", "Ponés el VST3 en una pista MIDI y en cada pista de sinte elegís MIDI From esa pista. Para un sinte por capa, usás las capas como puertos MIDI, o un sinte multitímbrico con un canal por capa."),
+               ("Logic.", "Valence MIDI FX, la versión Audio Unit MIDI FX, va en la ranura MIDI FX de una pista de instrumento."),
+               ("Sintes físicos.", "Un puerto por capa y reloj MIDI: una sola Valence toca un rack de sintes."),
+               ("Sonido de prueba.", "Un pluck, un bajo, un stab de acordes y un sub, uno por capa, para que suene apenas la abrís.")],
+    out_caption="La página Outputs: canales de salida, un puerto por capa, puertos virtuales, reloj y vínculo.",
+    presets_h="Siete grupos.",
+    presets=[(PCVA.get("Minimal Techno", 0), "Minimal techno", "Un acorde sostenido y capas de distinto largo: el corrimiento hace el trabajo."),
+             (PCVA.get("Minimal House", 0), "Minimal house", "Swing, gates cortos, ghost notes por probabilidad y acordes armados desde una nota."),
+             (PCVA.get("Drum and Bass", 0), "Drum and bass", "Capas rápidas y suaves sobre un break, un reese con ratchets, espacios en halftime."),
+             (PCVA.get("Acid", 0), "Acid", "Acentos, ligaduras y una fila de controlador sobre el filtro, con un ratchet al final del compás."),
+             (PCVA.get("Dub", 0), "Dub", "Stabs de acordes con silencios y probabilidad, y un sub en la fundamental."),
+             (PCVA.get("Ambient", 0), "Ambient", "Capas lentas y espaciadas y gates largos; Auto Orbit toca su propia progresión."),
+             (PCVA.get("Classics", 0), "Clásicos", "El arpegiador que todos conocen: arriba, abajo, arriba y abajo, dos octavas, al azar, stabs de acordes.")],
+    dl_h=f"Descargá Valence {VVA}.",
+    dl_p="Gratis, sin cuenta, sin activación, sin telemetría.",
+    mac_h="macOS", mac_req="macOS 11 o posterior. Apple silicon e Intel en un mismo binario universal.",
+    mac_fmt="VST3, Audio Unit, Audio Unit MIDI FX y aplicación independiente",
+    mac_steps=["Descomprimí el archivo.", "Copiá <code>Valence.vst3</code> a <code>~/Library/Audio/Plug-Ins/VST3</code>.",
+               "Copiá <code>Valence.component</code> y <code>Valence MIDI FX.component</code> a <code>~/Library/Audio/Plug-Ins/Components</code>.",
+               "En Ableton Live y REAPER usá el VST3; en Logic, Valence MIDI FX."],
+    win_h="Windows", win_req="Windows 10 u 11, de 64 bits.", win_fmt="VST3 y aplicación independiente",
+    win_steps=["Descomprimí el archivo.", "Copiá <code>Valence.vst3</code> a <code>C:\\Program Files\\Common Files\\VST3</code>.",
+               "Reescaneá los plugins en tu DAW.", "<code>Valence.exe</code> funciona sola y toca tus puertos MIDI."],
+    file_label="archivo",
+    dl_note="Los binarios todavía no están firmados. macOS puede negarse a abrirlos hasta que corras <code>xattr -dr com.apple.quarantine</code> sobre los plugins instalados, y SmartScreen de Windows puede pedirte confirmación la primera vez. Los dos paquetes traen un INSTALL.txt con los pasos exactos.",
+    os_p="Valence es software libre bajo la GNU Affero General Public License v3, como el framework JUCE sobre el que está hecho. Lo podés usar, estudiar, modificar y compartir. El código fuente está en <a href='https://github.com/palmereta/audio_tools'>GitHub</a>, con cada versión.",
+    os_link="Por qué Audio Tools es de código abierto",
+    trademark="Ableton es una marca de Ableton AG y Logic una marca de Apple Inc. Audio Tools es un proyecto independiente; Valence es un diseño original.",
+    photo_credit="El átomo de las imágenes y del film es un modelo 3D hecho para esta página, movido nota por nota por el MIDI de las demos.",
+    hero_alt="Un átomo renderizado en 3D: esferas cálidas y frías en un núcleo de vidrio, y tres órbitas de colores con electrones brillantes, sobre negro.",
+    alt_simple="La página Simple de Valence tocando", alt_layers="La página Layers de Valence", alt_out="La página Outputs de Valence",
+),
+}
+
 # ───────────────────────── presentación (estilo lanzamiento) ─────────────────────────
 # Mediciones de CPU (porcentaje de un núcleo a 48 kHz, sólo el motor, sobremuestreo por defecto
 # salvo donde se indica). Apple M4 con macOS 26; AMD Ryzen 9 5900XT con Windows 11 (MSVC, /fp:fast).
@@ -2526,6 +2679,10 @@ WINCPU_DV = (9.5, 14.0, 6.9)        # Ryzen 9 5900XT: promedio de los 82 presets
 DISK_DV = (67, 31)                  # instalado: VST3 + AU + app en macOS, VST3 + exe en Windows (medido en los zips 1.0.0)
 UICPU_DV = None                     # sin medir: la nota omite la frase del editor
 UICPU_HA = 8
+CPU_VA = 0.0035                     # Apple M4: valencerender --bench (4 capas a 1/32 con ratchets, CC, mutación y humanizado)
+WINCPU_VA = 0.0083                  # Ryzen 9 5900XT: valencetest prueba 12 (README de Valence)
+DISK_VA = None                      # sin zips todavía
+UICPU_VA = None                     # en macOS sin medir con ventana; en Linux con Xvfb la página Simple usa 3,5 % (README)
 DISK_FS1 = (80, 24)
 CPU = {
     "at20v": [("mono", 1.6, 3.6), ("poly8", 11.2, 32.4), ("poly12", 28.9, 78.1)],
@@ -2545,6 +2702,7 @@ CPU = {
     "thrum": [("thavg", CPU_TH[0], WINCPU_TH[0]), ("thheavy", CPU_TH[1], WINCPU_TH[1]), ("thworst", CPU_TH[2], WINCPU_TH[2])],
     "at330": [("a330str", CPU_A330[0], WINCPU_A330[0]), ("a330all", CPU_A330[1], WINCPU_A330[1]), ("a330keys", CPU_A330[2], WINCPU_A330[2])],
     "devicenti": [("dvtyp", CPU_DV[0], WINCPU_DV[0]), ("dvheavy", CPU_DV[1], WINCPU_DV[1]), ("dvworst", CPU_DV[2], WINCPU_DV[2])],
+    "valence": [("vaeng", CPU_VA, WINCPU_VA)],
 }
 CPU_LABEL = {
     "en": {"mono": "Mono patch, 4x", "poly8": "8 voices with delay and reverb, 4x", "poly12": "12 voices, 8x (the heaviest setting)",
@@ -2562,7 +2720,8 @@ CPU_LABEL = {
            "padef": "Night Shift Mercury, sequencer running", "paheavy": "Ash Choir Pulse, the heaviest factory preset", "paworst": "All 16 voices digital on every other step, every effect on",
            "thavg": "Average of the 69 factory presets, each playing its phrase", "thheavy": "The heaviest factory preset", "thworst": "Strummed chords, high-gain amp at 8x, delay and hall",
            "a330str": "Strings, an 8-note chord", "a330all": "Everything on: 16 notes, vocoder and reverb", "a330keys": "All 49 keys held with everything on",
-           "dvtyp": "Average of the 82 factory presets", "dvheavy": "The heaviest factory preset", "dvworst": "All 16 voices sounding"},
+           "dvtyp": "Average of the 82 factory presets", "dvheavy": "The heaviest factory preset", "dvworst": "All 16 voices sounding",
+           "vaeng": "The engine: 4 layers at 1/32 with ratchets, CC rows, mutation and humanize"},
     "es": {"mono": "Patch mono, 4x", "poly8": "8 voces con delay y reverb, 4x", "poly12": "12 voces, 8x (el ajuste más pesado)",
            "poly6": "Pad de 6 voces, 4x", "poly6x8": "Pad de 6 voces, 8x", "drones": "Dos voces drone con efectos, 2x",
            "all2": "Todas las voces y el efector, 2x", "all4": "Todas las voces y el efector, 4x",
@@ -2578,10 +2737,11 @@ CPU_LABEL = {
            "padef": "Night Shift Mercury, con el secuenciador corriendo", "paheavy": "Ash Choir Pulse, el preset de fábrica más pesado", "paworst": "Las 16 voces digitales en un paso de cada dos, todos los efectos prendidos",
            "thavg": "Promedio de los 69 presets de fábrica, cada uno tocando su frase", "thheavy": "El preset de fábrica más pesado", "thworst": "Acordes rasgueados, amplificador de alta ganancia a ×8, delay y sala",
            "a330str": "Cuerdas, un acorde de 8 notas", "a330all": "Todo prendido: 16 notas, vocoder y reverb", "a330keys": "Las 49 teclas apretadas con todo prendido",
-           "dvtyp": "Promedio de los 82 presets de fábrica", "dvheavy": "El preset de fábrica más pesado", "dvworst": "Las 16 voces sonando"},
+           "dvtyp": "Promedio de los 82 presets de fábrica", "dvheavy": "El preset de fábrica más pesado", "dvworst": "Las 16 voces sonando",
+           "vaeng": "El motor: 4 capas a 1/32 con ratchets, filas de CC, mutación y humanizado"},
 }
-UI_CPU = {"at20v": 15, "at101v": 5, "at42": 11, "at700": 8, "atfs1": UICPU_FS1, "orrery": 4, "murmur": UICPU_MM, "atmd": 6, "lacquer": UICPU_LQ, "halation": UICPU_HA, "tarnish": UICPU_TN, "at303": UICPU_A3, "plumb": UICPU_PL, "pallor": UICPU_PA, "thrum": UICPU_TH, "at330": UICPU_A330, "devicenti": UICPU_DV}          # lo que suma el editor abierto en el M4 (% de un núcleo)
-DISK = {"at20v": (219, 73), "at101v": (71, 24), "at42": (125, 42), "at700": (78, 26), "atfs1": DISK_FS1, "orrery": DISK_OR, "murmur": DISK_MM, "atmd": DISK_MD, "lacquer": DISK_LQ, "halation": DISK_HA, "tarnish": DISK_TN, "at303": DISK_A3, "plumb": DISK_PL, "pallor": DISK_PA, "thrum": DISK_TH, "at330": DISK_A330, "devicenti": DISK_DV}
+UI_CPU = {"at20v": 15, "at101v": 5, "at42": 11, "at700": 8, "atfs1": UICPU_FS1, "orrery": 4, "murmur": UICPU_MM, "atmd": 6, "lacquer": UICPU_LQ, "halation": UICPU_HA, "tarnish": UICPU_TN, "at303": UICPU_A3, "plumb": UICPU_PL, "pallor": UICPU_PA, "thrum": UICPU_TH, "at330": UICPU_A330, "devicenti": UICPU_DV, "valence": UICPU_VA}          # lo que suma el editor abierto en el M4 (% de un núcleo)
+DISK = {"at20v": (219, 73), "at101v": (71, 24), "at42": (125, 42), "at700": (78, 26), "atfs1": DISK_FS1, "orrery": DISK_OR, "murmur": DISK_MM, "atmd": DISK_MD, "lacquer": DISK_LQ, "halation": DISK_HA, "tarnish": DISK_TN, "at303": DISK_A3, "plumb": DISK_PL, "pallor": DISK_PA, "thrum": DISK_TH, "at330": DISK_A330, "devicenti": DISK_DV, "valence": DISK_VA}
 
 REQ = {
 "en": dict(
@@ -2595,7 +2755,7 @@ REQ = {
     cpu_note="Percentage of one CPU core at 48 kHz, sound engine only. With the editor open, the interface adds about {ui} % on the M4. Hosts run each instrument on one core, so single-core speed is what counts.",
     cpu_cols=("Setting", "Apple M4", "AMD Ryzen 9 5900XT"),
     disk="Disk space: {mac} MB on macOS (all formats), {win} MB on Windows.",
-    heavy={"at303": "", "pallor": "", "thrum": "", "at330": "", "devicenti": "", "at20v": "The 12-voice, 8x setting needs the recommended processor.", "at101v": "", "at42": "", "at700": "Eight voices at 4x need the recommended processor.", "atfs1": "Thirty-two voices with every operator need the recommended processor.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
+    heavy={"valence": "", "at303": "", "pallor": "", "thrum": "", "at330": "", "devicenti": "", "at20v": "The 12-voice, 8x setting needs the recommended processor.", "at101v": "", "at42": "", "at700": "Eight voices at 4x need the recommended processor.", "atfs1": "Thirty-two voices with every operator need the recommended processor.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
 ),
 "es": dict(
     min_h="Mínimo", rec_h="Recomendado", cpu_h="Carga de CPU medida",
@@ -2608,7 +2768,7 @@ REQ = {
     cpu_note="Porcentaje de un núcleo de CPU a 48 kHz, sólo el motor de sonido. Con el editor abierto, la interfaz suma alrededor de {ui} % en el M4. Los DAW corren cada instrumento en un núcleo, así que lo que cuenta es la velocidad de un núcleo.",
     cpu_cols=("Ajuste", "Apple M4", "AMD Ryzen 9 5900XT"),
     disk="Espacio en disco: {mac} MB en macOS (todos los formatos), {win} MB en Windows.",
-    heavy={"at303": "", "pallor": "", "thrum": "", "at330": "", "devicenti": "", "at20v": "El ajuste de 12 voces a 8x necesita el procesador recomendado.", "at101v": "", "at42": "", "at700": "Ocho voces a 4x necesitan el procesador recomendado.", "atfs1": "Treinta y dos voces con todos los operadores necesitan el procesador recomendado.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
+    heavy={"valence": "", "at303": "", "pallor": "", "thrum": "", "at330": "", "devicenti": "", "at20v": "El ajuste de 12 voces a 8x necesita el procesador recomendado.", "at101v": "", "at42": "", "at700": "Ocho voces a 4x necesitan el procesador recomendado.", "atfs1": "Treinta y dos voces con todos los operadores necesitan el procesador recomendado.", "orrery": "", "murmur": "", "atmd": "", "lacquer": "", "halation": "", "tarnish": "", "plumb": ""},
 ),
 }
 
@@ -2796,6 +2956,24 @@ PRES = {
                     ("orrery/hl-top", "Sesiones que respiran.", "Fijás una duración con fades lentos, llevás la música al ritmo de tu respiración y la dejás suave para dormir.")],
         stats=[("8", "", "carriles, cada uno en su canal MIDI"), ("16", "", "escalas y modos"), (str(NOR), "", "presets en siete climas"), ("&lt;0,01", "%", "de un núcleo para el generador")],
         film_cap="Un orrery de bronce renderizado en 3D: cada planeta orbita a su velocidad y se enciende cuando toca su carril, y el sol respira con la música. El sonido es Orrery tocando First Light con el ATFS1, el AT700 y el AT101V."),
+},
+"valence": {
+    "en": dict(tag="Four orbits around the chord you hold.",
+        highlights=[("valence/hl-atom", "Four layers, four orbits.", "Each layer has its own length, figure and pattern: layers of 16, 15 and 13 steps drift apart and meet again 195 bars later."),
+                    ("valence/hl-nucleus", "Protons and neutrons.", "The notes you hold are the nucleus; Complete adds the rest of the chord in the scale, and every note fires a photon from its orbit."),
+                    ("valence/hl-layers", "Every step has its rows.", "Velocity, accent, tie, ratchet, probability, octave, a fixed note and a controller value, step by step."),
+                    ("valence/hl-fusion", "The fusion.", "Valence knows when every layer will be back on step one and counts the bars to it. Drops land there."),
+                    ("valence/hl-dnb", "Techno, house, drum and bass.", f"{NVA} presets in seven groups, from a minimal chord that drifts for minutes to a reese with ratchets.")],
+        stats=[("4", "", "layers, each on its own MIDI channel"), ("12", "", "patterns, plus Euclidean rhythms"), (str(NVA), "", "presets in seven groups"), ("&lt;0.01", "%", "of a CPU core for the engine")],
+        film_cap="The atom rendered in 3D, driven by the main demo note for note: protons and neutrons in a glass nucleus, an orbit per layer, a photon for every note on the frame it sounds, and a flash at each fusion. The sound is that demo cut to 86 seconds: minimal techno, minimal house and drum and bass, played by DeviceNTI V, ATFS1, ATMD, AT101V and AT330 over Pallor drums."),
+    "es": dict(tag="Cuatro órbitas alrededor del acorde que tocás.",
+        highlights=[("valence/hl-atom", "Cuatro capas, cuatro órbitas.", "Cada capa tiene su largo, su figura y su patrón: capas de 16, 15 y 13 pasos se separan y se vuelven a encontrar 195 compases después."),
+                    ("valence/hl-nucleus", "Protones y neutrones.", "Las notas que tocás son el núcleo; Complete agrega el resto del acorde en la escala, y cada nota dispara un fotón desde su órbita."),
+                    ("valence/hl-layers", "Cada paso tiene sus filas.", "Velocidad, acento, ligadura, ratchet, probabilidad, octava, una nota fija y un valor de controlador, paso por paso."),
+                    ("valence/hl-fusion", "La fusión.", "Valence sabe cuándo todas las capas van a volver al primer paso y cuenta los compases que faltan. Ahí caen los drops."),
+                    ("valence/hl-dnb", "Techno, house, drum and bass.", f"{NVA} presets en siete grupos, desde un acorde minimal que se corre durante minutos hasta un reese con ratchets.")],
+        stats=[("4", "", "capas, cada una en su canal MIDI"), ("12", "", "patrones, más ritmos euclidianos"), (str(NVA), "", "presets en siete grupos"), ("&lt;0,01", "%", "de un núcleo para el motor")],
+        film_cap="El átomo renderizado en 3D, movido por la demo principal nota por nota: protones y neutrones en un núcleo de vidrio, una órbita por capa, un fotón por cada nota en el cuadro en que suena, y un destello en cada fusión. El sonido es esa demo cortada a 86 segundos: minimal techno, minimal house y drum and bass, tocados por el DeviceNTI V, el ATFS1, el ATMD, el AT101V y el AT330 sobre baterías de Pallor."),
 },
 "atmd": {
     "en": dict(tag="The fattest bass ever wired.",
@@ -3091,6 +3269,20 @@ SPECS = {
            ("Salidas", ["MIDI al DAW, un canal por carril", "Puertos MIDI directos por carril (hardware, IAC, loopMIDI) con reloj MIDI", "Vínculo líder y seguidoras entre instancias", "Curvas de controlador y deriva por pitch bend; referencia de 415 a 466 Hz por pitch bend", "Sonido de prueba incorporado con reverb"]),
            ("Formatos", ["VST3 (con salida MIDI), Audio Unit (macOS) y aplicación independiente"])],
 },
+"valence": {
+    "en": [("Arpeggiator", ["4 layers on the same chord, each with length 1-32 steps, figure 1/4 to 1/32 (straight, triplet, dotted) times a multiplier, pattern, octaves 1-4 (stack, alternate, random), register, index shift, gate and swing",
+                            "12 patterns and Euclidean rhythms with rotation; new chord restarts the layer or keeps its phase", "Step rows: on, velocity, accent, tie, ratchet 1-4, probability, octave, fixed note, CC value", "Mutation per cycle with its own random stream; variation number: the same settings and number always play the same notes"]),
+           ("Chord", ["Latch and sustain pedal as latch, transpose, chord order (as played, low to high, high to low, random)", "Complete: triad, seventh, ninth or octaves on the notes held, in the scale and key", "Auto harmony: a chord walk that plays by itself", "Lead and Follow link between instances"]),
+           ("Time", ["Host sync with the song's grid, or its own tempo", "Phrase reset every N bars, or free polymeter", "Fusion prediction, shown in bars"]),
+           ("Outputs", ["MIDI to the host on channel 1 or one channel per layer", "Direct MIDI ports per layer; virtual ports per layer on macOS and Linux", "MIDI clock out, capture of the last minutes as a MIDI file", "Built-in preview sound, one voice per layer"]),
+           ("Formats", ["VST3 (with MIDI output), Audio Unit and Audio Unit MIDI FX (macOS), LV2 (Linux) and standalone app"])],
+    "es": [("Arpegiador", ["4 capas sobre el mismo acorde, cada una con largo de 1 a 32 pasos, figura de 1/4 a 1/32 (normal, tresillo, con puntillo) por un multiplicador, patrón, octavas 1 a 4 (apiladas, alternadas, al azar), registro, corrimiento de índice, gate y swing",
+                           "12 patrones y ritmos euclidianos con rotación; con un acorde nuevo la capa vuelve al principio o mantiene la fase", "Filas por paso: encendido, velocidad, acento, ligadura, ratchet 1 a 4, probabilidad, octava, nota fija, valor de CC", "Mutación por ciclo con su propia serie al azar; número de variación: los mismos ajustes y número tocan siempre las mismas notas"]),
+           ("Acorde", ["Latch y pedal de sustain como latch, transposición, orden del acorde (como se tocó, de grave a agudo, de agudo a grave, al azar)", "Complete: tríada, séptima, novena u octavas sobre las notas apretadas, en la escala y la tonalidad", "Armonía automática: una progresión que toca sola", "Vínculo líder y seguidoras entre instancias"]),
+           ("Tiempo", ["Sincronía con la grilla del tema en el host, o tempo propio", "Reinicio por frase cada N compases, o polimetría libre", "Predicción de la fusión, en compases"]),
+           ("Salidas", ["MIDI al host en el canal 1 o un canal por capa", "Puertos MIDI directos por capa; puertos virtuales por capa en macOS y Linux", "Reloj MIDI de salida, captura de los últimos minutos como archivo MIDI", "Sonido de prueba incorporado, una voz por capa"]),
+           ("Formatos", ["VST3 (con salida MIDI), Audio Unit y Audio Unit MIDI FX (macOS), LV2 (Linux) y aplicación independiente"])],
+},
 "atmd": {
     "en": [("Sound engine", ["Three VCOs: LO and 32' to 2', triangle, triangle-sawtooth (osc 3: reverse sawtooth), sawtooth, square, 29 % and 15 % pulse", "Passive mixer that saturates the filter input; white/pink noise; external input with OVERLOAD lamp",
                              "Four-pole transistor ladder, 24 dB/oct, saturation in every stage, solved without delay", "Two ADS contours with the DECAY switch; glide; 1x to 8x oversampling"]),
@@ -3385,6 +3577,7 @@ PRODUCTS = [  # slug, nombre, año, mac, win, versión
     ("thrum", "Thrum", "2026", MACTH, WINTH, VTH),
     ("at330", "AT330", "1979", MACA330, WINA330, VA330),
     ("devicenti", "DeviceNTI V", "2026", MACDV, WINDV, VDV),
+    ("valence", "Valence", "2026", MACVA, WINVA, VVA),
 ]
 # Un producto entra a la web cuando sus dos zips están en web/downloads: así se puede publicar uno mientras el
 # siguiente sigue en preparación con su texto ya escrito.
@@ -3392,7 +3585,7 @@ PRODUCTS = [p for p in PRODUCTS if all(os.path.exists(os.path.join(WEB, "downloa
 RELEASED = {p[0] for p in PRODUCTS}
 # Menú de productos (encabezado): grupos y color de cada uno. Las miniaturas son web/assets/img/nav/<slug>.jpg.
 NAV_GROUPS = [(g, [x for x in sl if x in RELEASED]) for g, sl in
-              [("synths", ["at20v", "at101v", "at42", "at700", "atfs1", "atmd", "at303", "pallor", "thrum", "at330", "devicenti"]), ("tools", ["orrery", "murmur", "halation", "tarnish", "plumb", "lacquer"])]]
+              [("synths", ["at20v", "at101v", "at42", "at700", "atfs1", "atmd", "at303", "pallor", "thrum", "at330", "devicenti"]), ("tools", ["orrery", "valence", "murmur", "halation", "tarnish", "plumb", "lacquer"])]]
 # El mismo orden en el carrusel de la portada, las fichas y el launcher: sintetizadores a la izquierda,
 # herramientas y efectos a la derecha (pedido del usuario, 2026-10-19).
 _ORDER = [s for _, sl in NAV_GROUPS for s in sl]
@@ -3400,10 +3593,10 @@ PRODUCTS.sort (key=lambda p: _ORDER.index (p[0]) if p[0] in _ORDER else len (_OR
 NAV_LABELS = {"en": {"synths": "Synthesizers", "tools": "Tools and effects", "button": "Plugins", "all": "All plugins", "close": "Close menu"},
               "es": {"synths": "Sintetizadores", "tools": "Herramientas y efectos", "button": "Plugins", "all": "Todos los plugins", "close": "Cerrar el menú"}}
 # La imagen grande de cada página de producto (web/assets/img/<nombre>-1200.jpg); el launcher la usa en su ficha.
-HERO_IMG = {"at20v": "render-hero", "pallor": "pallor/hero", "thrum": "thrum/hero", "at330": "at330/hero", "devicenti": "devicenti/hero", "at303": "at303/hero", "at101v": "at101v/hero-grey", "at42": "at42/hero-blue", "at700": "at700/hero", "atfs1": "atfs1/hero", "orrery": "orrery/hero", "murmur": "murmur/hero", "atmd": "atmd/hero", "lacquer": "lacquer/hero", "halation": "halation/hero", "tarnish": "tarnish/hero", "plumb": "plumb/hero"}
+HERO_IMG = {"at20v": "render-hero", "pallor": "pallor/hero", "thrum": "thrum/hero", "at330": "at330/hero", "devicenti": "devicenti/hero", "at303": "at303/hero", "at101v": "at101v/hero-grey", "at42": "at42/hero-blue", "at700": "at700/hero", "atfs1": "atfs1/hero", "orrery": "orrery/hero", "murmur": "murmur/hero", "atmd": "atmd/hero", "lacquer": "lacquer/hero", "halation": "halation/hero", "tarnish": "tarnish/hero", "plumb": "plumb/hero", "valence": "valence/hero"}
 ACCENT = {"at20v": "#d24a35", "at101v": "#3a7bd5", "at42": "#ea8c3f", "at700": "#e0b341", "atfs1": "#a9c83c", "orrery": "#f2c878",
-          "murmur": "#f3a27e", "atmd": "#e8743b", "lacquer": "#e0563f", "halation": "#b8a5ff", "tarnish": "#3e8c84", "at303": "#f2a03d", "plumb": "#9db4c8", "pallor": "#e0709c", "thrum": "#e8a33d", "at330": "#e2a43b", "devicenti": "#e8792b"}
-TEXTS = lambda slug, lang: {"at20v": T, "at101v": S, "at42": Q, "at700": Z, "atfs1": F, "orrery": O, "murmur": M, "atmd": D, "lacquer": LQ, "halation": HA, "tarnish": TN, "at303": A3, "plumb": PL, "pallor": PA, "thrum": TH, "at330": A330T, "devicenti": DVT}[slug][lang]
+          "murmur": "#f3a27e", "atmd": "#e8743b", "lacquer": "#e0563f", "halation": "#b8a5ff", "tarnish": "#3e8c84", "at303": "#f2a03d", "plumb": "#9db4c8", "pallor": "#e0709c", "thrum": "#e8a33d", "at330": "#e2a43b", "devicenti": "#e8792b", "valence": "#7fd1c7"}
+TEXTS = lambda slug, lang: {"at20v": T, "at101v": S, "at42": Q, "at700": Z, "atfs1": F, "orrery": O, "murmur": M, "atmd": D, "lacquer": LQ, "halation": HA, "tarnish": TN, "at303": A3, "plumb": PL, "pallor": PA, "thrum": TH, "at330": A330T, "devicenti": DVT, "valence": VA}[slug][lang]
 
 # Visitas y descargas: Pulse (analytics.digitalhub.com.ar, la analítica propia), sitio "Audio Tools". Sólo carga en el
 # dominio real, así las pruebas locales no cuentan. Las descargas llegan como eventos (ver site.js); el panel es privado.
@@ -3440,6 +3633,34 @@ def support_dialog(lang):
     <div class="support-actions">{cafecito_button(lang)}<a class="pill primary" href="#" data-support-go>{u['go']}</a></div>
     <p class="support-file" data-support-file></p>
   </dialog>
+"""
+
+
+SHARE = {
+    "en": dict(btn="Share this page", h="Share", close="Close", copy="Copy link", done="Link copied", wa="WhatsApp", tg="Telegram", fb="Facebook", x="X"),
+    "es": dict(btn="Compartir esta página", h="Compartir", close="Cerrar", copy="Copiar enlace", done="Enlace copiado", wa="WhatsApp", tg="Telegram", fb="Facebook", x="X"),
+}
+_SI = {  # íconos monocromos, trazo currentColor
+    "share": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>',
+    "wa": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4.2A8 8 0 1 1 8.3 18.8L4 20z"/><path d="M9 8.5c.3 3 2.5 5.2 5.5 6l1.2-1.4-2-1-.9.7c-.8-.4-1.5-1.1-1.9-1.9l.7-.9-1-2L9 8.5z"/></svg>',
+    "tg": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4 3 11l5.5 2L10 19l3-3.5 4.5 3.3L21 4z"/><path d="M8.5 13 21 4"/></svg>',
+    "fb": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 21v-8h3l.5-3.5H14V7.5c0-1 .4-1.7 1.8-1.7h1.8V3a20 20 0 0 0-2.6-.2c-2.6 0-4.2 1.5-4.2 4.3v2.4H7.5V13h3.3v8H14z"/></svg>',
+    "x": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M20 4 4 20"/></svg>',
+    "copy": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',
+}
+
+def share_ui(lang, path):
+    u = SHARE[lang]
+    page = path.split("/")[0] or "home"
+    links = "".join(
+        f'<li><a href="#" data-share="{m}" target="_blank" rel="noopener">{_SI[k]}<span>{u[k]}</span></a></li>'
+        for m, k in (("whatsapp", "wa"), ("telegram", "tg"), ("facebook", "fb"), ("x", "x")))
+    return f"""  <button class="share-fab" type="button" data-share-open data-page="{page}" aria-label="{u['btn']}" aria-haspopup="dialog" aria-expanded="false">{_SI['share']}</button>
+  <div class="share-sheet" role="dialog" aria-label="{u['h']}" hidden>
+    <div class="share-head"><h2>{u['h']}</h2><button class="share-x" type="button" aria-label="{u['close']}" data-share-close>&times;</button></div>
+    <ul>{links}<li><button type="button" data-share="copy" data-done="{u['done']}">{_SI['copy']}<span>{u['copy']}</span></button></li></ul>
+    <p class="share-msg" role="status" aria-live="polite"></p>
+  </div>
 """
 
 
@@ -3755,6 +3976,7 @@ def shell(lang, path, title, description, body, og_image, footer_extra, body_cla
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{title}</title>
   <meta name="description" content="{html.escape(description)}">
+  <link rel="canonical" href="{SITE_URL}{'es/' if lang == 'es' else ''}{path}">
   <link rel="alternate" hreflang="en" href="{en_href or './'}">
   <link rel="alternate" hreflang="es" href="{es_href}">
   <link rel="alternate" hreflang="x-default" href="{en_href or './'}">
@@ -3792,7 +4014,7 @@ def shell(lang, path, title, description, body, og_image, footer_extra, body_cla
       <div class="row support-row"><span>{SUPPORT[lang]['foot']}</span>{cafecito_button(lang)}</div>
     </div>
   </footer>
-{support_dialog(lang)}</body>
+{support_dialog(lang)}{share_ui(lang, path)}</body>
 </html>
 """
 
@@ -3810,15 +4032,19 @@ def player_html(a, slug, cap, aria):
         </video>"""
 
 # Demos de Orrery: la pantalla del plugin grabada con ORRERY_RECORD (ver plugins/orrery/README.md) y el
-# audio del clip del mismo preset.
+# audio del clip del mismo preset. Las de Valence son tres tramos del video del átomo con la demo principal
+# (VALENCE_RECORD), con sus títulos en los textos de la página ("demos").
 ORRERY_DEMOS = ["tape-loops", "undertow", "breath-six", "orbiting"]
 
-def demos_html(a, t, lang):
+def demos_html(a, t, lang, slug="orrery"):
     import json
-    meta = json.load(open(os.path.join(WEB, "assets", "samples", "samples.json")))
-    items = [(d, html.escape(meta[f"orrery/{d}"]["title"][lang]), html.escape(meta[f"orrery/{d}"]["desc"][lang])) for d in ORRERY_DEMOS]
-    tabs = "".join(f'<button class="demo-tab" type="button" role="tab" aria-selected="{"true" if i == 0 else "false"}" data-src="{a}video/orrery-demo-{d}.mp4?v={asset_v(f"video/orrery-demo-{d}.mp4")}" '
-                   f'data-poster="{a}img/orrery/demo/{d}.jpg" data-cap="{ti}. {de}">{ti}</button>' for i, (d, ti, de) in enumerate(items))
+    if "demos" in t:
+        items = [(d, html.escape(ti), html.escape(de)) for d, ti, de in t["demos"]]
+    else:
+        meta = json.load(open(os.path.join(WEB, "assets", "samples", "samples.json")))
+        items = [(d, html.escape(meta[f"orrery/{d}"]["title"][lang]), html.escape(meta[f"orrery/{d}"]["desc"][lang])) for d in ORRERY_DEMOS]
+    tabs = "".join(f'<button class="demo-tab" type="button" role="tab" aria-selected="{"true" if i == 0 else "false"}" data-src="{a}video/{slug}-demo-{d}.mp4?v={asset_v(f"video/{slug}-demo-{d}.mp4")}" '
+                   f'data-poster="{a}img/{slug}/demo/{d}.jpg" data-cap="{ti}. {de}">{ti}</button>' for i, (d, ti, de) in enumerate(items))
     d0, t0, de0 = items[0]
     return f"""  <section class="sec" id="demos">
     <div class="wrap">
@@ -3826,8 +4052,8 @@ def demos_html(a, t, lang):
       <p class="lede reveal">{t['demo_p']}</p>
       <div class="demo-tabs reveal" role="tablist" aria-label="{t['demo_tabs']}">{tabs}</div>
       <figure class="film-frame demo-frame reveal" data-demo>
-        <video data-player preload="metadata" playsinline poster="{a}img/orrery/demo/{d0}.jpg" aria-label="{t0}">
-          <source src="{a}video/orrery-demo-{d0}.mp4?v={asset_v(f"video/orrery-demo-{d0}.mp4")}" type="video/mp4">
+        <video data-player preload="metadata" playsinline poster="{a}img/{slug}/demo/{d0}.jpg" aria-label="{t0}">
+          <source src="{a}video/{slug}-demo-{d0}.mp4?v={asset_v(f"video/{slug}-demo-{d0}.mp4")}" type="video/mp4">
         </video>
         <figcaption data-demo-cap>{t0}. {de0}</figcaption>
       </figure>
@@ -3931,7 +4157,7 @@ def page_product(slug, lang):
     hero_img = HERO_IMG[slug]
     hero_alt = t.get("hero_alt", name)
 
-    nav = [("highlights", ui["overview"]), ("film", ui["film"])] + ([("demos", "Demos")] if slug == "orrery" else []) + [("listen", ui["listen"])] + ([("colours", ui["colours"])] if colours else []) + [("specs", ui["specs"])]
+    nav = [("highlights", ui["overview"]), ("film", ui["film"])] + ([("demos", "Demos")] if slug in ("orrery", "valence") else []) + [("listen", ui["listen"])] + ([("colours", ui["colours"])] if colours else []) + [("specs", ui["specs"])]
     has_film = os.path.exists(os.path.join(WEB, "assets", "video", slug + ".mp4"))       # AT330 todavía no tiene film
     if not has_film: nav = [n for n in nav if n[0] != "film"]
     navlinks = "".join(f'<a href="#{i}">{l}</a>' for i, l in nav)
@@ -4064,6 +4290,33 @@ def page_product(slug, lang):
 {facts_html(t['out_facts'])}
         </ul></div>
       <figure class="reveal">{pic(a, "orrery/ui-outputs", t["alt_out"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['out_caption']}</figcaption></figure>
+    </div>
+  </section>"""
+    elif slug == "valence":
+        sound_img = ("valence/hl-nucleus", t["hero_alt"])
+        mid = f"""
+  <section class="sec statement" id="atom">
+    <div class="wrap">
+      <h2 class="sec-head reveal">{t['atom_h']}</h2>
+      <p class="lede center reveal">{t['atom_p']}</p>
+      <figure class="statement-img reveal">{pic(a, "valence/ui-simple", t["alt_simple"])}<figcaption>{t['atom_caption']}</figcaption></figure>
+      <p class="muted center reveal">{t['atom_note']}</p>
+    </div>
+  </section>
+  <section class="sec deep" id="layers">
+    <div class="wrap split">
+      <div class="reveal"><h2 class="sec-head">{t['layers_h']}</h2><p class="lede">{t['layers_p']}</p><ul class="facts">
+{facts_html(t['layers_facts'])}
+        </ul></div>
+      <figure class="reveal">{pic(a, "valence/ui-layers", t["alt_layers"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['layers_caption']}</figcaption></figure>
+    </div>
+  </section>
+  <section class="sec" id="outputs">
+    <div class="wrap split reverse">
+      <div class="reveal"><h2 class="sec-head">{t['out_h']}</h2><p class="lede">{t['out_p']}</p><ul class="facts">
+{facts_html(t['out_facts'])}
+        </ul></div>
+      <figure class="reveal">{pic(a, "valence/ui-outputs", t["alt_out"], "(max-width: 900px) 100vw, 58vw")}<figcaption>{t['out_caption']}</figcaption></figure>
     </div>
   </section>"""
     elif slug == "atmd":
@@ -4507,7 +4760,7 @@ def page_product(slug, lang):
   </section>
 
 {film_sec}
-{demos_html(a, t, lang) if slug == "orrery" else ""}
+{demos_html(a, t, lang, slug) if slug in ("orrery", "valence") else ""}
   <section class="sec" id="sound">
     <div class="wrap split">
       <div class="reveal">
@@ -4565,7 +4818,7 @@ def page_product(slug, lang):
   {film_dialog}"""
     foot = f"      <p>{t['trademark']}</p>\n      <p>{t['photo_credit']}</p>"
     title = t["title_20"] if slug == "at20v" else t["title"]
-    og = {"at20v": "og-image.jpg", "pallor": "pallor/og-image.jpg", "thrum": "thrum/og-image.jpg", "at330": "at330/og-image.jpg", "devicenti": "devicenti/og-image.jpg", "at303": "at303/og-image.jpg", "at101v": "at101v/og-image.jpg", "at42": "at42/og-image.jpg", "at700": "at700/og-image.jpg", "atfs1": "atfs1/og-image.jpg", "orrery": "orrery/og-image.jpg", "murmur": "murmur/og-image.jpg", "atmd": "atmd/og-image.jpg", "lacquer": "lacquer/og-image.jpg", "halation": "halation/og-image.jpg", "tarnish": "tarnish/og-image.jpg", "plumb": "plumb/og-image.jpg"}[slug]
+    og = {"at20v": "og-image.jpg", "pallor": "pallor/og-image.jpg", "thrum": "thrum/og-image.jpg", "at330": "at330/og-image.jpg", "devicenti": "devicenti/og-image.jpg", "at303": "at303/og-image.jpg", "at101v": "at101v/og-image.jpg", "at42": "at42/og-image.jpg", "at700": "at700/og-image.jpg", "atfs1": "atfs1/og-image.jpg", "orrery": "orrery/og-image.jpg", "murmur": "murmur/og-image.jpg", "atmd": "atmd/og-image.jpg", "lacquer": "lacquer/og-image.jpg", "halation": "halation/og-image.jpg", "tarnish": "tarnish/og-image.jpg", "plumb": "plumb/og-image.jpg", "valence": "valence/og-image.jpg"}[slug]
     return shell(lang, slug + "/", title, t["description"], body, og, foot, "p-" + slug)
 
 # Las marcas de los instrumentos originales, al pie de la portada y del changelog.
@@ -4640,7 +4893,7 @@ def page_home(lang):
     </div>
     <a class="t-img" href="{home}{slug}/">{pic(a, c['imgdir'] + c['img'], c['alt'])}</a>
   </section>""")
-    synths = [x for x in PRODUCTS if x[0] not in ("orrery", "murmur", "lacquer", "halation", "tarnish", "plumb", "pallor", "thrum", "at330", "devicenti")]
+    synths = [x for x in PRODUCTS if x[0] not in ("orrery", "murmur", "lacquer", "halation", "tarnish", "plumb", "pallor", "thrum", "at330", "devicenti", "valence")]
     cmp_heads = "".join(f"""<div class="cmp-head reveal">{pic(a, cards[s]['imgdir'] + cards[s]['img'], cards[s]['alt'], "(max-width: 900px) 33vw, 380px")}<h3>{n}</h3><p>{PRES[s][lang]['tag']}</p><a class="pill primary small" href="{home}{s}/" style="--accent:{ACCENT[s]}">{ui['learn']}</a></div>""" for s, n, *_ in synths)
     cmp_rows = "".join("".join(f'<div class="cmp-cell"><b>{label}</b><span>{vals[COMPARE_ORDER.index(sl)]}</span></div>' for sl, *_ in synths) for label, vals in COMPARE_ROWS[lang])
     reasons = "\n".join(f'      <div class="reveal"><h3>{k}</h3><p>{v}</p></div>' for k, v in t["reasons"])

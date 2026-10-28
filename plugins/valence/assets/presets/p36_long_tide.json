@@ -1,0 +1,29 @@
+{
+ "category": "Ambient",
+ "name": "Long Tide",
+ "params": {
+  "complete": 3,
+  "key": 5,
+  "l1_gate": 1.0,
+  "l1_humanize": 8,
+  "l1_length": 31,
+  "l1_mutate": 0.2,
+  "l1_octaves": 2,
+  "l1_on": 1,
+  "l1_pattern": 3,
+  "l1_rate": 3,
+  "l1_voice": 0,
+  "l2_on": 0,
+  "l3_gate": 1.0,
+  "l3_length": 3,
+  "l3_octave": -1,
+  "l3_on": 1,
+  "l3_pattern": 9,
+  "l3_rate": 0,
+  "l3_voice": 2,
+  "l4_on": 0,
+  "scale": 0,
+  "tempo": 66
+ },
+ "rows": {}
+}

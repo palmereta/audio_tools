@@ -1,0 +1,38 @@
+{
+ "category": "Dub",
+ "name": "Fog Lights",
+ "params": {
+  "complete": 3,
+  "key": 5,
+  "l1_gate": 0.15,
+  "l1_length": 12,
+  "l1_mutate": 0.4,
+  "l1_on": 1,
+  "l1_pattern": 9,
+  "l1_rate": 4,
+  "l1_voice": 2,
+  "l2_on": 0,
+  "l3_on": 0,
+  "l4_gate": 0.85,
+  "l4_length": 8,
+  "l4_octave": -2,
+  "l4_on": 1,
+  "l4_pattern": 10,
+  "l4_rate": 0,
+  "l4_voice": 3,
+  "scale": 1,
+  "tempo": 118
+ },
+ "rows": {
+  "l1": {
+   "prob": [
+    100,
+    0,
+    60,
+    0,
+    30,
+    0
+   ]
+  }
+ }
+}

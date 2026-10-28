@@ -1,0 +1,22 @@
+--- Valence: playing synths / tocar sintes ---
+Valence is a MIDI arpeggiator: it plays other instruments, it does not make sound by itself
+(Preview sound, next to Play, is a small built-in synth for trying it out; turn it off when
+your synths play).
+- Ableton Live: load the VST3 on a MIDI track and hold a chord on it (arm it or set Monitor = In).
+  On each synth track set MIDI From = that track, "Audio Tools Valence", and Monitor = In.
+  Live sends AU plugins' MIDI nowhere, so use the VST3. Live merges channels between tracks: for
+  one synth per layer turn on "Layers as MIDI ports" (Outputs page, macOS and Linux) and take
+  MIDI From "Valence Layer 1".."Valence Layer 4", or set Output channels = Per layer and use one
+  multitimbral synth. On Windows, create a port with loopMIDI and pick it for the layers.
+- Logic: use "Valence MIDI FX" in the MIDI FX slot of a software instrument track.
+- REAPER: use the VST3.
+- Hardware synths: in Outputs, pick the synth's USB or MIDI interface port for each layer.
+
+Valence es un arpegiador MIDI: toca otros instrumentos (Preview sound, al lado de Play, es un
+sinte chico para probarlo; apagarlo cuando toquen tus sintes). En Ableton Live cargar el VST3 en
+una pista MIDI y tocar un acorde en ella; en cada pista de sinte elegir MIDI From = esa pista,
+"Audio Tools Valence", y Monitor = In. Live no saca el MIDI de los AU, asi que usar el VST3. Para
+un sinte por capa: "Layers as MIDI ports" (pagina Outputs, macOS y Linux) y MIDI From "Valence
+Layer 1".."Valence Layer 4", o Output channels = Per layer con un sinte multitimbrico. En Windows,
+crear un puerto con loopMIDI. En Logic: "Valence MIDI FX" en la ranura MIDI FX. Para sintes
+fisicos, elegir en Outputs el puerto de cada capa.

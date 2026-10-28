@@ -1,0 +1,37 @@
+{
+ "category": "Ambient",
+ "name": "Slow Bells",
+ "params": {
+  "complete": 1,
+  "key": 0,
+  "l1_gate": 1.0,
+  "l1_humanize": 15,
+  "l1_length": 7,
+  "l1_octave": 1,
+  "l1_octaves": 2,
+  "l1_on": 1,
+  "l1_pattern": 7,
+  "l1_rate": 0,
+  "l1_voice": 0,
+  "l2_gate": 1.0,
+  "l2_humanize": 15,
+  "l2_length": 11,
+  "l2_octave": 1,
+  "l2_on": 1,
+  "l2_pattern": 8,
+  "l2_rate": 1,
+  "l2_voice": 0,
+  "l3_on": 0,
+  "l4_on": 0,
+  "scale": 10,
+  "tempo": 70
+ },
+ "rows": {
+  "l1": {
+   "prob": [
+    90,
+    60
+   ]
+  }
+ }
+}

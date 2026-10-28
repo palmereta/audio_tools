@@ -1,0 +1,55 @@
+{
+ "category": "Ambient",
+ "name": "Auto Orbit",
+ "params": {
+  "chord_bars": 4,
+  "complete": 3,
+  "key": 2,
+  "l1_gate": 0.8,
+  "l1_humanize": 10,
+  "l1_length": 13,
+  "l1_octaves": 2,
+  "l1_on": 1,
+  "l1_pattern": 2,
+  "l1_rate": 3,
+  "l1_voice": 0,
+  "l2_gate": 0.7,
+  "l2_length": 11,
+  "l2_octave": 1,
+  "l2_on": 1,
+  "l2_pattern": 7,
+  "l2_rate": 4,
+  "l2_voice": 0,
+  "l3_gate": 1.0,
+  "l3_length": 7,
+  "l3_octave": -1,
+  "l3_on": 1,
+  "l3_pattern": 9,
+  "l3_rate": 0,
+  "l3_voice": 2,
+  "l4_gate": 1.0,
+  "l4_length": 5,
+  "l4_octave": -2,
+  "l4_on": 1,
+  "l4_pattern": 10,
+  "l4_rate": 0,
+  "l4_voice": 3,
+  "scale": 2,
+  "source": 1,
+  "tempo": 84
+ },
+ "rows": {
+  "l2": {
+   "prob": [
+    80,
+    50,
+    70
+   ]
+  },
+  "l3": {
+   "prob": [
+    70
+   ]
+  }
+ }
+}

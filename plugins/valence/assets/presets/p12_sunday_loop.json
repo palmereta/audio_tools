@@ -1,0 +1,43 @@
+{
+ "category": "Minimal House",
+ "name": "Sunday Loop",
+ "params": {
+  "complete": 1,
+  "key": 7,
+  "l1_gate": 0.35,
+  "l1_length": 12,
+  "l1_oct_mode": 1,
+  "l1_octaves": 2,
+  "l1_on": 1,
+  "l1_pattern": 0,
+  "l1_rate": 6,
+  "l1_swing": 57,
+  "l1_voice": 0,
+  "l2_gate": 0.3,
+  "l2_length": 16,
+  "l2_octave": -1,
+  "l2_on": 1,
+  "l2_pattern": 10,
+  "l2_rate": 6,
+  "l2_swing": 57,
+  "l2_voice": 1,
+  "l3_on": 0,
+  "l4_on": 0,
+  "scale": 5,
+  "tempo": 121
+ },
+ "rows": {
+  "l2": {
+   "on": [
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    1,
+    0
+   ]
+  }
+ }
+}

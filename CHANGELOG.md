@@ -18,6 +18,7 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 | [AT330](#at330) | 1.0.0 |
 | [DeviceNTI V](#devicenti-v) | 1.0.2 |
 | [Orrery](#orrery) | 1.0.7 |
+| [Valence](#valence) | 1.0.0 |
 | [Murmur](#murmur) | 1.0.4 |
 | [Halation](#halation) | 1.0.3 |
 | [Tarnish](#tarnish) | 1.0.3 |
@@ -445,6 +446,17 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 ### 1.0.0
 
 - First release: a generative MIDI instrument for ambient, dark ambient and drone: eight lanes with their own role and channel, played into your DAW, out to hardware through MIDI ports, or linked between instances.
+
+## Valence
+
+### 1.0.0
+
+- First release: a MIDI arpeggiator with four layers that play the chord you hold, for minimal techno, minimal house, drum and bass, acid, dub and ambient. It plays other instruments; a small preview sound lets you try it alone.
+- Each layer has its own length (1 to 32 steps), figure (1/4 to 1/32, straight, triplet or dotted), one of 12 patterns or a Euclidean rhythm, octaves, register, gate, swing, velocity, MIDI channel and mutation, so layers of different lengths drift apart and meet again at the fusion, which Valence predicts and counts in bars.
+- Rows on every step: on, velocity, accent, tie, ratchet, probability, octave, a fixed note and a CC value. Complete builds the chord of the scale on one or two held notes; Auto harmony plays a chord walk by itself; Lead and Follow share a chord between instances.
+- Deterministic: the same chord, settings and variation number play the same notes to the sample in any host and at any buffer size. Host sync or its own tempo, phrase reset, MIDI clock out and capture of the last minutes as a MIDI file.
+- Outputs to the host on one channel or one per layer, direct MIDI ports per layer, and on macOS and Linux each layer as a virtual MIDI port. VST3, Audio Unit, an Audio Unit MIDI FX for Logic, LV2 and standalone app.
+- An atom for an interface (the chord as its nucleus, each layer an orbit, every note a photon) that only redraws what moves, six macros, the Layers, Harmony and Outputs pages, 43 presets in seven groups and a manual in English and Spanish.
 
 ## Murmur
 

@@ -1,0 +1,30 @@
+{
+ "category": "Ambient",
+ "name": "Glass Cycles",
+ "params": {
+  "complete": 3,
+  "key": 4,
+  "l1_gate": 0.9,
+  "l1_humanize": 12,
+  "l1_length": 17,
+  "l1_oct_mode": 1,
+  "l1_octaves": 3,
+  "l1_on": 1,
+  "l1_pattern": 4,
+  "l1_rate": 3,
+  "l1_voice": 0,
+  "l2_gate": 0.8,
+  "l2_humanize": 12,
+  "l2_length": 19,
+  "l2_octave": 1,
+  "l2_on": 1,
+  "l2_pattern": 5,
+  "l2_rate": 3,
+  "l2_voice": 0,
+  "l3_on": 0,
+  "l4_on": 0,
+  "scale": 4,
+  "tempo": 76
+ },
+ "rows": {}
+}

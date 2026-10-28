@@ -1,0 +1,44 @@
+{
+ "category": "Ambient",
+ "name": "Polar Night",
+ "params": {
+  "chord_bars": 8,
+  "complete": 2,
+  "key": 11,
+  "l1_gate": 0.9,
+  "l1_humanize": 12,
+  "l1_length": 19,
+  "l1_mutate": 0.3,
+  "l1_octaves": 2,
+  "l1_on": 1,
+  "l1_pattern": 2,
+  "l1_rate": 4,
+  "l1_voice": 0,
+  "l2_gate": 1.0,
+  "l2_length": 13,
+  "l2_octave": 1,
+  "l2_on": 1,
+  "l2_pattern": 7,
+  "l2_rate": 0,
+  "l2_voice": 0,
+  "l3_on": 0,
+  "l4_gate": 1.0,
+  "l4_length": 8,
+  "l4_octave": -2,
+  "l4_on": 1,
+  "l4_pattern": 10,
+  "l4_rate": 0,
+  "l4_voice": 3,
+  "progression": 2,
+  "scale": 3,
+  "source": 1,
+  "tempo": 72
+ },
+ "rows": {
+  "l2": {
+   "prob": [
+    60
+   ]
+  }
+ }
+}

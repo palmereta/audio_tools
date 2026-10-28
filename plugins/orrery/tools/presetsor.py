@@ -2,7 +2,7 @@
 """Presets de fábrica de Orrery (assets/presets/pNN_*.json): tres por clima.
 
 Cada preset nombra sólo lo que cambia (el resto queda en el valor por defecto de ParamsOr.h).
-Roles: 0 Drone, 1 Pad, 2 Melody, 3 Arp, 4 Cloud, 5 Bass, 6 Pulse. Escalas: índice en Theory.h.
+Roles: 0 Drone, 1 Pad, 2 Melody, 3 Arp, 4 Cloud, 5 Bass, 6 Pulse. Escalas: índice en shared/gen/Theory.h.
 """
 import json, os
 

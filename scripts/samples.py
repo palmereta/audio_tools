@@ -845,6 +845,59 @@ def fx_samples(meta, plugin, items):
             print(f"{plugin} {sid:17s} {dur:5.1f} s  {os.path.getsize(m4a) / 1024:5.0f} KB  {r.stdout.strip()[:70]}")
     return keys
 
+# ───────── Valence: las demos de listening (plugins/valence/tools/demos.py, en pc50-wsl) ─────────
+# Las mezclas ya están a −16 LUFS en audiotools-private/valence/demos/<dir>/<dir>.wav (VALENCE_DEMOS cambia la
+# carpeta); el MIDI que se descarga es el all.mid de la demo: una pista por capa, en el canal de cada capa.
+VALENCE = [
+    ("phase-drift", "01_phase_drift", "Phase Drift", "Phase Drift", "Phase Drift",
+     "Minimal techno at 128: one chord held for two minutes. Layers of 16, 15 and 12 steps realign every 15 bars, and the drums change on each fusion. DeviceNTI V plucks, ATFS1 marimba, ATMD bass.",
+     "Minimal techno a 128: un acorde sostenido durante dos minutos. Capas de 16, 15 y 12 pasos vuelven a alinearse cada 15 compases, y la batería cambia en cada fusión. Plucks del DeviceNTI V, marimba del ATFS1, bajo del ATMD."),
+    ("acid-shell", "02_acid_shell", "Acid Shell", "Acid Shell", "Acid Shell",
+     "Minimal techno at 130: accents, slides and a ratchet on the last step, with a CC 74 row on the AT303 filter, against an AT101V stab on 7 steps.",
+     "Minimal techno a 130: acentos, ligaduras y un ratchet en el último paso, con una fila de CC 74 sobre el filtro del AT303, contra un stab del AT101V de 7 pasos."),
+    ("dub-chord", "03_dub_chord", "Dub Chord", "Dub Chord", "Dub Chord",
+     "Dub techno at 124: the whole chord with silences and probability through DeviceNTI V's dub delay, a step that mutates every three cycles, and an ATMD sub on the root.",
+     "Dub techno a 124: el acorde entero con silencios y probabilidad por el delay de dub del DeviceNTI V, un paso que muta cada tres ciclos y un sub del ATMD en la fundamental."),
+    ("bubble", "04_bubble", "Bubble", "Bubble", "Bubble",
+     "Minimal house at 122: an AT101V bass jumping octaves at 58 % swing, and an ATFS1 marimba in eighth-note triplets reading the chord one note later.",
+     "Minimal house a 122: un bajo del AT101V que salta de octava con 58 % de swing, y una marimba del ATFS1 en tresillos de corchea que lee el acorde una nota más adelante."),
+    ("jack-groove", "05_jack_groove", "Jack Groove", "Jack Groove", "Jack Groove",
+     "Minimal house at 124: ghost notes by probability and per-step velocity on an ATMD bass, and a two-note DeviceNTI V organ going up and down.",
+     "Minimal house a 124: ghost notes por probabilidad y velocidad por paso en un bajo del ATMD, y un órgano de dos notas del DeviceNTI V que sube y baja."),
+    ("late-shuffle", "06_late_shuffle", "Late Shuffle", "Late Shuffle", "Late Shuffle",
+     "Minimal house at 120: one note held at a time, and Valence builds the seventh chord on it for AT700 keys and an ATMD bass, at 60 % swing.",
+     "Minimal house a 120: se toca una sola nota por vez y Valence arma la séptima encima para las teclas del AT700 y un bajo del ATMD, con 60 % de swing."),
+    ("liquid-rolls", "07_liquid_rolls", "Liquid Rolls", "Liquid Rolls", "Liquid Rolls",
+     "Liquid drum and bass at 174: a 7-step ATFS1 bell line against an 11-step DeviceNTI V chime in triplets, over a rolling Pallor break and an AT330 pad.",
+     "Drum and bass liquid a 174: una línea de campanas del ATFS1 de 7 pasos contra un chime del DeviceNTI V de 11 pasos en tresillos, sobre un break de Pallor que rueda y un pad del AT330."),
+    ("reese-engine", "08_reese_engine", "Reese Engine", "Reese Engine", "Reese Engine",
+     "Drum and bass at 172: an ATMD reese from a pedal pattern, with a CC 74 row on its filter and four-note ratchets, against a stab every five steps.",
+     "Drum and bass a 172: un reese del ATMD con un patrón de pedal, una fila de CC 74 sobre su filtro y ratchets de cuatro notas, contra un stab cada cinco pasos."),
+    ("halftime", "09_halftime", "Halftime", "Halftime", "Halftime",
+     "Halftime at 172: layers of 23 and 29 eighths, a mutating random walk on an AT20V pluck and a climb on a DeviceNTI V bell, that meet again every 667 steps.",
+     "Halftime a 172: capas de 23 y 29 corcheas, un paseo al azar que muta en un pluck del AT20V y una subida en una campana del DeviceNTI V, que se vuelven a encontrar cada 667 pasos."),
+]
+
+def valence_samples(meta):
+    """Clips de Valence: las demos terminadas (ya a −16 LUFS) en AAC con su forma de onda, y su all.mid."""
+    import shutil
+    demos = os.environ.get("VALENCE_DEMOS", os.path.join(os.path.dirname(ROOT), "audiotools-private", "valence", "demos"))
+    index = json.load(open(os.path.join(demos, "index.json")))
+    d = os.path.join(OUT, "valence"); os.makedirs(d, exist_ok=True)
+    keys = []
+    for sid, did, preset, ten, tes, den, des in VALENCE:
+        wav = os.path.join(demos, did, did + ".wav")
+        dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", wav], capture_output=True, text=True).stdout)
+        m4a = os.path.join(d, sid + ".m4a")
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", wav, "-af", f"afade=t=out:st={max(0.0, dur - 1.5):.2f}:d=1.5",
+                        "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", m4a], check=True)
+        shutil.copyfile(os.path.join(demos, did, "all.mid"), os.path.join(d, sid + ".mid"))
+        meta[f"valence/{sid}"] = dict(plugin="valence", id=sid, preset=preset, title={"en": ten, "es": tes}, desc={"en": den, "es": des},
+                                      secs=round(dur, 1), peaks=peaks(wav), bpm=index[did]["bpm"], kb=round(os.path.getsize(m4a) / 1024))
+        keys.append(f"valence/{sid}")
+        print(f"valence {sid:14s} {dur:5.1f} s  {os.path.getsize(m4a) / 1024:5.0f} KB")
+    return keys
+
 def main():
     only = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else None
     meta_path = os.path.join(OUT, "samples.json")
@@ -865,6 +918,8 @@ def main():
     if only in (None, "pallor"): pallor_keys = pallor_samples(meta)
     thrum_keys = [k for k in meta.get("_order", []) if k.startswith("thrum/")]
     if only in (None, "thrum"): thrum_keys = thrum_samples(meta)
+    valence_keys = [k for k in meta.get("_order", []) if k.startswith("valence/")]
+    if only in (None, "valence"): valence_keys = valence_samples(meta)
     for sid, plugin, preset, song, extra, ten, tes, den, des in SAMPLES:
         if only and plugin != only: continue
         d = os.path.join(OUT, plugin); os.makedirs(d, exist_ok=True)
@@ -884,7 +939,10 @@ def main():
             meta[f"{plugin}/{sid}"] = dict(plugin=plugin, id=sid, preset=preset, title={"en": ten, "es": tes}, desc={"en": den, "es": des},
                                            secs=round(dur, 1), peaks=peaks(loud), bpm=song.bpm, kb=round(os.path.getsize(m4a) / 1024))
             print(f"{plugin:7s} {sid:18s} {dur:5.1f} s  {os.path.getsize(m4a) / 1024:5.0f} KB  {r.stdout.strip()[:60]}")
-    meta["_order"] = [f"{p}/{s}" for s, p, *_ in SAMPLES] + orrery_keys + murmur_keys + halation_keys + tarnish_keys + at303_keys + plumb_keys + pallor_keys + thrum_keys
+    order = [f"{p}/{s}" for s, p, *_ in SAMPLES] + orrery_keys + murmur_keys + halation_keys + tarnish_keys + at303_keys + plumb_keys + pallor_keys + thrum_keys
+    # Los clips que hacen otros scripts (AT330, DeviceNTI V) quedan donde estaban; Valence va al final.
+    order += [k for k in meta.get("_order", []) if k not in order and not k.startswith("valence/")]
+    meta["_order"] = order + valence_keys
     json.dump(meta, open(meta_path, "w"), indent=1, ensure_ascii=False)
 
 if __name__ == "__main__":

@@ -1,0 +1,55 @@
+{
+ "category": "Dub",
+ "name": "Deep Stab",
+ "params": {
+  "complete": 2,
+  "key": 0,
+  "l1_gate": 0.25,
+  "l1_length": 8,
+  "l1_on": 1,
+  "l1_pattern": 9,
+  "l1_rate": 3,
+  "l1_voice": 2,
+  "l2_gate": 0.6,
+  "l2_length": 8,
+  "l2_octave": -1,
+  "l2_on": 1,
+  "l2_pattern": 10,
+  "l2_rate": 3,
+  "l2_voice": 1,
+  "l3_on": 0,
+  "l4_on": 0,
+  "scale": 1,
+  "tempo": 122
+ },
+ "rows": {
+  "l1": {
+   "accent": [
+    0,
+    1
+   ],
+   "on": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+   ]
+  },
+  "l2": {
+   "on": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    0
+   ]
+  }
+ }
+}

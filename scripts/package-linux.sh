@@ -33,7 +33,7 @@ package() {
         cp -R "$f" "$OUT/"
     done
     # Herramientas de línea de comandos del producto (p. ej. lacquerrender).
-    for t in lacquerrender halationrender tarnishrender at303render plumbrender thrumrender pallorrender at330render devicentirender; do
+    for t in lacquerrender halationrender tarnishrender at303render plumbrender thrumrender pallorrender at330render devicentirender valencerender; do
         for f in "$R/$t" "$R/${t}_artefacts/Release/$t"; do [ -f "$f" ] && [ -x "$f" ] && cp "$f" "$OUT/" && break; done
     done
     strip_all "$OUT"
@@ -133,4 +133,5 @@ ONLY=${1:-}
 [ -z "$ONLY" ] || [ "$ONLY" = thrum ] && package thrum Thrum
 [ -z "$ONLY" ] || [ "$ONLY" = at330 ] && package at330 AT330
 [ -z "$ONLY" ] || [ "$ONLY" = devicenti ] && package devicenti "DeviceNTI V" DeviceNTI-V
+[ -z "$ONLY" ] || [ "$ONLY" = valence ] && package valence Valence
 exit 0

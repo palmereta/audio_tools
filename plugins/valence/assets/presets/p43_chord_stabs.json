@@ -1,0 +1,19 @@
+{
+ "category": "Classics",
+ "name": "Chord Stabs",
+ "params": {
+  "key": 0,
+  "l1_gate": 0.3,
+  "l1_length": 8,
+  "l1_on": 1,
+  "l1_pattern": 9,
+  "l1_rate": 3,
+  "l1_voice": 2,
+  "l2_on": 0,
+  "l3_on": 0,
+  "l4_on": 0,
+  "scale": 0,
+  "tempo": 120
+ },
+ "rows": {}
+}

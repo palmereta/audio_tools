@@ -1,0 +1,48 @@
+{
+ "category": "Minimal Techno",
+ "name": "Hollow Loop",
+ "params": {
+  "complete": 3,
+  "key": 0,
+  "l1_gate": 0.4,
+  "l1_length": 16,
+  "l1_octave": -1,
+  "l1_on": 1,
+  "l1_pattern": 10,
+  "l1_rate": 6,
+  "l1_voice": 1,
+  "l2_gate": 0.3,
+  "l2_length": 14,
+  "l2_mutate": 0.25,
+  "l2_oct_mode": 1,
+  "l2_octaves": 2,
+  "l2_on": 1,
+  "l2_pattern": 2,
+  "l2_rate": 6,
+  "l2_voice": 0,
+  "l3_on": 0,
+  "l4_on": 0,
+  "scale": 2,
+  "tempo": 126
+ },
+ "rows": {
+  "l1": {
+   "accent": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+   ],
+   "prob": [
+    100,
+    80,
+    100,
+    60
+   ]
+  }
+ }
+}

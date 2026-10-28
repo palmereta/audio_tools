@@ -1,0 +1,44 @@
+{
+ "category": "Drum and Bass",
+ "name": "Atmos Drift",
+ "params": {
+  "complete": 3,
+  "key": 10,
+  "l1_gate": 0.6,
+  "l1_humanize": 6,
+  "l1_length": 13,
+  "l1_oct_mode": 1,
+  "l1_octaves": 3,
+  "l1_on": 1,
+  "l1_pattern": 2,
+  "l1_rate": 4,
+  "l1_voice": 0,
+  "l2_gate": 0.3,
+  "l2_length": 11,
+  "l2_octave": 1,
+  "l2_on": 1,
+  "l2_pattern": 7,
+  "l2_rate": 6,
+  "l2_voice": 0,
+  "l3_gate": 0.9,
+  "l3_length": 4,
+  "l3_octave": -1,
+  "l3_on": 1,
+  "l3_pattern": 9,
+  "l3_rate": 0,
+  "l3_voice": 2,
+  "l4_on": 0,
+  "scale": 2,
+  "tempo": 170
+ },
+ "rows": {
+  "l2": {
+   "prob": [
+    70,
+    40,
+    90,
+    50
+   ]
+  }
+ }
+}

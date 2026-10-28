@@ -1,0 +1,66 @@
+{
+ "category": "Minimal Techno",
+ "name": "Static Bloom",
+ "params": {
+  "complete": 2,
+  "key": 3,
+  "l1_cc": 74,
+  "l1_gate": 0.25,
+  "l1_length": 16,
+  "l1_on": 1,
+  "l1_pattern": 3,
+  "l1_rate": 6,
+  "l1_vel_mode": 2,
+  "l1_voice": 0,
+  "l2_eu_pulses": 4,
+  "l2_gate": 0.2,
+  "l2_length": 15,
+  "l2_mutate": 0.4,
+  "l2_on": 1,
+  "l2_pattern": 7,
+  "l2_rate": 6,
+  "l2_voice": 2,
+  "l3_on": 0,
+  "l4_on": 0,
+  "scale": 1,
+  "tempo": 130
+ },
+ "rows": {
+  "l1": {
+   "cc": [
+    20,
+    28,
+    36,
+    44,
+    52,
+    60,
+    68,
+    76,
+    84,
+    92,
+    100,
+    108,
+    116,
+    124,
+    110,
+    70
+   ],
+   "prob": [
+    100,
+    50,
+    100,
+    75
+   ],
+   "vel": [
+    110,
+    60,
+    80,
+    60,
+    100,
+    60,
+    80,
+    70
+   ]
+  }
+ }
+}

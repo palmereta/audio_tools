@@ -1,0 +1,19 @@
+{
+ "category": "Classics",
+ "name": "Random Notes",
+ "params": {
+  "key": 0,
+  "l1_gate": 0.5,
+  "l1_length": 16,
+  "l1_on": 1,
+  "l1_pattern": 7,
+  "l1_rate": 6,
+  "l1_voice": 0,
+  "l2_on": 0,
+  "l3_on": 0,
+  "l4_on": 0,
+  "scale": 0,
+  "tempo": 120
+ },
+ "rows": {}
+}

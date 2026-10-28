@@ -292,6 +292,14 @@
     "Manual: en REAPER, al detener la reproducción o al terminar un ítem MIDI se manda CC 0 de los CC que usó el ítem, lo que mueve las perillas mapeadas a ellos; qué hacer.",
     "Manual: en Ableton Live, hacé clic en Configure para poner los parámetros del DeviceNTI V en el panel del dispositivo (Live lo llena solo con plugins de 64 parámetros o menos)."
   ],
+  "valence-v1.0.0": [
+    "Primera versión: un arpegiador MIDI de cuatro capas que tocan el acorde que tenés apretado, para minimal techno, minimal house, drum and bass, acid, dub y ambient. Toca otros instrumentos; un sonido de prueba chico permite probarlo solo.",
+    "Cada capa tiene su largo (1 a 32 pasos), su figura (1/4 a 1/32, normal, tresillo o con puntillo), uno de 12 patrones o un ritmo euclidiano, octavas, registro, gate, swing, velocidad, canal MIDI y mutación, así capas de distinto largo se separan y se vuelven a encontrar en la fusión, que Valence predice y cuenta en compases.",
+    "Filas en cada paso: encendido, velocidad, acento, ligadura, ratchet, probabilidad, octava, una nota fija y un valor de CC. Complete arma el acorde de la escala sobre una o dos notas; la armonía automática toca sola una progresión; el vínculo líder y seguidoras comparte un acorde entre instancias.",
+    "Determinista: el mismo acorde, los mismos ajustes y el mismo número de variación tocan las mismas notas, a la muestra, en cualquier host y con cualquier buffer. Sincronía con el host o tempo propio, reinicio por frase, reloj MIDI de salida y captura de los últimos minutos como archivo MIDI.",
+    "Salidas al host en un canal o uno por capa, puertos MIDI directos por capa, y en macOS y Linux cada capa como puerto MIDI virtual. VST3, Audio Unit, un Audio Unit MIDI FX para Logic, LV2 y aplicación independiente.",
+    "Un átomo como interfaz (el acorde como núcleo, cada capa una órbita, cada nota un fotón) que sólo redibuja lo que se mueve, seis macros, las páginas Layers, Harmony y Outputs, 43 presets en siete grupos y un manual en inglés y castellano."
+  ],
   "devicenti-v1.0.0": [
     "Primera versión: una groovebox FM original para downtempo, trip hop, acid jazz, ambient y dark ambient, una sola máquina naranja que se toca y se programa desde su panel.",
     "Cuatro pistas, cada una una voz FM de cuatro operadores en ocho algoritmos con sub, ruido, un filtro que satura, drive y fold, una batería de ocho carriles FM con grupos de choke, o una pista MIDI que toca un sinte externo.",

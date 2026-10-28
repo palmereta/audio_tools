@@ -1,0 +1,59 @@
+{
+ "category": "Drum and Bass",
+ "name": "Neuro Steps",
+ "params": {
+  "complete": 1,
+  "key": 2,
+  "l1_cc": 74,
+  "l1_gate": 0.5,
+  "l1_length": 16,
+  "l1_octave": -1,
+  "l1_on": 1,
+  "l1_pattern": 7,
+  "l1_rate": 9,
+  "l1_voice": 1,
+  "l2_eu_pulses": 3,
+  "l2_gate": 0.2,
+  "l2_length": 9,
+  "l2_on": 1,
+  "l2_pattern": 9,
+  "l2_rate": 6,
+  "l2_voice": 2,
+  "l3_on": 0,
+  "l4_on": 0,
+  "scale": 8,
+  "tempo": 174
+ },
+ "rows": {
+  "l1": {
+   "cc": [
+    10,
+    127,
+    30,
+    90,
+    50,
+    110
+   ],
+   "on": [
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1
+   ],
+   "ratchet": [
+    1,
+    1,
+    2,
+    1,
+    1,
+    4,
+    1,
+    1
+   ]
+  }
+ }
+}

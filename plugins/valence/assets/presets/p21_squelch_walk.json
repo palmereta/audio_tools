@@ -1,0 +1,69 @@
+{
+ "category": "Acid",
+ "name": "Squelch Walk",
+ "params": {
+  "accent": 28,
+  "complete": 1,
+  "key": 4,
+  "l1_cc": 74,
+  "l1_gate": 0.45,
+  "l1_length": 16,
+  "l1_mutate": 0.3,
+  "l1_octave": -1,
+  "l1_on": 1,
+  "l1_pattern": 7,
+  "l1_rate": 6,
+  "l1_voice": 1,
+  "l2_gate": 0.15,
+  "l2_length": 7,
+  "l2_on": 1,
+  "l2_pattern": 9,
+  "l2_rate": 6,
+  "l2_voice": 2,
+  "l3_on": 0,
+  "l4_on": 0,
+  "scale": 3,
+  "tempo": 132
+ },
+ "rows": {
+  "l1": {
+   "accent": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+   ],
+   "cc": [
+    30,
+    110,
+    50,
+    90,
+    70,
+    127,
+    40,
+    80
+   ],
+   "tie": [
+    0,
+    0,
+    0,
+    1
+   ]
+  },
+  "l2": {
+   "on": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  }
+ }
+}

@@ -8,7 +8,7 @@
 // mandar una curva de CC y una deriva de afinación por pitch bend. Encima: sesión con fades, respiración
 // y un modo suave para escucha tranquila.
 
-#include "Theory.h"
+#include "../../../../shared/gen/Theory.h"
 #include <array>
 #include <atomic>
 #include <cmath>
@@ -16,6 +16,8 @@
 #include <vector>
 
 namespace dh::orr {
+
+using namespace dh::theory;   // escalas, acordes, dm:: y Rng viven en shared/gen/Theory.h
 
 constexpr int kLanes = 8;
 enum Role : int { Drone = 0, Pad, Melody, Arp, Cloud, Bass, Pulse, RoleCount };

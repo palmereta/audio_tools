@@ -292,6 +292,14 @@
     "Manual: in REAPER, stopping playback or the end of a MIDI item sends CC 0 for the CCs the item used, which moves the knobs mapped to them; what to do about it.",
     "Manual: in Ableton Live, click Configure to put DeviceNTI V's parameters on the device panel (Live fills it by itself only for plugins with 64 parameters or fewer)."
   ],
+  "valence-v1.0.0": [
+    "First release: a MIDI arpeggiator with four layers that play the chord you hold, for minimal techno, minimal house, drum and bass, acid, dub and ambient. It plays other instruments; a small preview sound lets you try it alone.",
+    "Each layer has its own length (1 to 32 steps), figure (1/4 to 1/32, straight, triplet or dotted), one of 12 patterns or a Euclidean rhythm, octaves, register, gate, swing, velocity, MIDI channel and mutation, so layers of different lengths drift apart and meet again at the fusion, which Valence predicts and counts in bars.",
+    "Rows on every step: on, velocity, accent, tie, ratchet, probability, octave, a fixed note and a CC value. Complete builds the chord of the scale on one or two held notes; Auto harmony plays a chord walk by itself; Lead and Follow share a chord between instances.",
+    "Deterministic: the same chord, settings and variation number play the same notes to the sample in any host and at any buffer size. Host sync or its own tempo, phrase reset, MIDI clock out and capture of the last minutes as a MIDI file.",
+    "Outputs to the host on one channel or one per layer, direct MIDI ports per layer, and on macOS and Linux each layer as a virtual MIDI port. VST3, Audio Unit, an Audio Unit MIDI FX for Logic, LV2 and standalone app.",
+    "An atom for an interface (the chord as its nucleus, each layer an orbit, every note a photon) that only redraws what moves, six macros, the Layers, Harmony and Outputs pages, 43 presets in seven groups and a manual in English and Spanish."
+  ],
   "devicenti-v1.0.0": [
     "First release: an original FM groovebox for downtempo, trip hop, acid jazz, ambient and dark ambient, one orange unit you play and program from its panel.",
     "Four tracks, each a four-operator FM voice in eight algorithms with a sub layer, noise, a saturating filter, drive and fold, a drum machine of eight FM lanes with choke groups, or a MIDI track that plays an external synth.",

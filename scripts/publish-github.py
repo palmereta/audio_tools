@@ -27,7 +27,7 @@ import base64, json, os, re, subprocess, sys, tempfile, urllib.error, urllib.req
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OWNER, REPO = "palmereta", "audio_tools"
-DESCRIPTION = "Free, open-source synthesizers and effects (VST3, Audio Unit, LV2, standalone) for macOS, Windows and Linux: AT20V, AT101V, AT42, AT700, ATFS1, ATMD, AT303, Pallor, Thrum, Orrery, Murmur, Halation, Tarnish, Plumb, Lacquer."
+DESCRIPTION = "Free, open-source synthesizers and effects (VST3, Audio Unit, LV2, standalone) for macOS, Windows and Linux: AT20V, AT101V, AT42, AT700, ATFS1, ATMD, AT303, Pallor, Thrum, AT330, DeviceNTI V, Orrery, Valence, Murmur, Halation, Tarnish, Plumb, Lacquer."
 HOMEPAGE = "https://audiotools.com.ar"
 WORK = os.path.join(ROOT, "build", "github-publish")          # clon de trabajo del repo público (build/ no se versiona)
 AUTHOR = ("Alejandro Duarte", "alejandro.s.duarte@gmail.com")
