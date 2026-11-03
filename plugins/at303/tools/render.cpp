@@ -1,9 +1,11 @@
 // at303render: el procesador completo del AT303 tocando el patrón de un preset con el reloj de un host simulado.
 //   at303render out.wav --preset "Squelch Line" [--seconds 16] [--bpm 128] [--sr 48000] [--set id=valor ...]
-//               [--at segundos id=valor ...]
+//               [--at segundos id=valor ...] [--midi notas.mid]
+// --midi pasa al modo teclado (MODE KEY) y toca las notas del archivo en vez del patrón.
 // --at mueve un parámetro en ese momento (por ejemplo abrir el filtro a mitad del clip: --at 8 cutoff=0.8).
 // Imprime la CPU (porcentaje de un núcleo). Sin --preset usa el patrón y los valores por defecto.
 #include "PluginProcessor.h"
+#include "../../../shared/tools/MidiEvents.h"
 
 class HostClock : public juce::AudioPlayHead
 {
@@ -45,6 +47,13 @@ int main (int argc, char** argv)
         if (args[i] == "--at")
             ats.push_back ({ (int) (args[i + 1].getDoubleValue() * sr), args[i + 2].upToFirstOccurrenceOf ("=", false, false),
                              args[i + 2].fromFirstOccurrenceOf ("=", false, false).getFloatValue() });
+    std::vector<dh::MidiEv> evs; size_t me = 0;
+    if (const auto mp = opt ("--midi", ""); mp.isNotEmpty())
+    {
+        double len = 0.0;
+        evs = dh::loadMidiFile (cwd.getChildFile (mp), sr, len);
+        p.setValue ("mode", 1.0f);
+    }
     juce::MidiBuffer midi;
     const auto t0 = juce::Time::getMillisecondCounterHiRes();
     for (int pos = 0; pos < total; pos += 512)
@@ -54,6 +63,7 @@ int main (int argc, char** argv)
         clock.pos = pos;
         for (auto& a : ats) if (a.pos >= pos && a.pos < pos + n) p.setValue (a.id, a.v);
         midi.clear();
+        while (me < evs.size() && evs[me].sample < pos + n) { midi.addEvent (evs[me].msg, std::max (0, evs[me].sample - pos)); ++me; }
         p.processBlock (blk, midi);
     }
     const double secs = (juce::Time::getMillisecondCounterHiRes() - t0) / 1000.0;

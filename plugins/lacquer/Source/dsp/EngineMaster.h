@@ -18,7 +18,9 @@
 #include "Dynamics.h"
 #include "Stereo.h"
 #include "Saturation.h"
+#include <chrono>
 #include <cstdio>
+#include <cstdlib>
 #include <functional>
 #include <string>
 
@@ -237,19 +239,47 @@ inline void runStages (Chain& chain, Work& w, int from, int to)
 
 } // namespace detail
 
+// Lo que se puede reutilizar entre dos re-masterizados del mismo audio. El análisis no depende de los controles; y
+// las etapas anteriores a la ganancia (EQ, EQ dinámica, multibanda, glue, estéreo, saturación) sólo dependen de
+// estilo, intensidad y de cuánta dinámica pide el objetivo: cambiar el techo, o un objetivo que pide lo mismo, sólo
+// repite la búsqueda de ganancia. Lo maneja quien llama (un caché por audio; `clear()` al cambiar de audio).
+struct LearnCache
+{
+    static constexpr size_t kMaxSamples = 48000u * 60u * 10u;      // más de 10 minutos: no se guarda (memoria)
+    bool haveRep = false; Report rep;
+    bool haveStages = false; Plan stagesPlan; detail::Work stagesWork;
+    Style kStyle = Style::Balanced; double kIntensity = -1.0, kDynScale = -1.0; bool kMastered = false, kConstLat = false;
+    void clear() { *this = LearnCache(); }
+    bool stagesMatch (const Options& o, double dynScale, bool mastered) const
+    {
+        return haveStages && kStyle == o.style && kIntensity == o.intensity && kDynScale == dynScale && kMastered == mastered && kConstLat == o.constantLatency;
+    }
+};
+
 class Learner
 {
 public:
     // Decide el plan a partir de `n` muestras estéreo. `report` (opcional) recibe el análisis de la entrada.
     static Plan learn (const float* L, const float* R, size_t n, double fs, const Options& opt, Report* report = nullptr,
                        std::vector<float>* outL = nullptr, std::vector<float>* outR = nullptr,
-                       const std::function<void (double)>& progress = {})
+                       const std::function<void (double)>& progress = {}, LearnCache* cache = nullptr,
+                       const std::function<void (const char*)>& stage = {})
     {
         auto prog = [&] (double v) { if (progress) progress (v); };
+        auto say = [&] (const char* what) { if (stage) stage (what); };
         using namespace detail;
         Plan p; p.opt = opt; p.fs = fs;
         if (R == nullptr) R = L;
-        const Report rep = Analyzer::run (L, R, n, fs);
+        const auto tStart = std::chrono::steady_clock::now();
+        auto lap = [&] (const char* what) {
+            if (std::getenv ("LQ_DEBUG"))
+                std::fprintf (stderr, "  [%6.0f ms] %s\n", std::chrono::duration<double, std::milli> (std::chrono::steady_clock::now() - tStart).count(), what);
+        };
+        say ("Listening to the song");
+        Report rep;
+        if (cache != nullptr && cache->haveRep) rep = cache->rep;
+        else { rep = Analyzer::run (L, R, n, fs); if (cache != nullptr && n <= LearnCache::kMaxSamples) { cache->rep = rep; cache->haveRep = true; } }
+        lap ("analysis");
         if (report) *report = rep;
         prog (0.15);
         p.ceilingDb = opt.ceilingDb;
@@ -299,6 +329,18 @@ public:
         Chain chain;
         auto apply = [&] (int from, int to) { chain.prepare (fs, p); runStages (chain, w, from, to); };
 
+        const bool hit = cache != nullptr && cache->stagesMatch (opt, dynScale, p.alreadyMastered);
+        if (hit)
+        {
+            say ("Reusing the tone and dynamics already worked out");
+            p = cache->stagesPlan; p.opt = opt; p.fs = fs;
+            p.ceilingDb = opt.ceilingDb; p.lim.ceilingDb = opt.ceilingDb;
+            p.targetLufs = opt.matchInput ? rep.lufsI : opt.targetLufs;
+            w = cache->stagesWork;
+            prog (0.7);
+        }
+        else
+        {
         // 0) Pasa altos: 20 Hz; 30 Hz si hay retumbe (lo de 20-25 Hz a menos de 6 dB de lo de 40-80 Hz).
         if (x > 0.0)
         {
@@ -307,6 +349,7 @@ public:
             // Retumbe: lo de 20 Hz cerca de los graves musicales y sin caer hacia abajo (un sub de 808 sí cae).
             if (rep.mid[0] > ref - 3.0 && rep.mid[0] >= rep.mid[1] - 1.0) { p.hpfHz = 25.0; p.notes.push_back ("Rumble below 25 Hz: a 25 Hz high-pass cleans it."); }
         }
+        say ("Shaping the tone");
         // 1) EQ tonal: corrección hacia la curva del estilo + color del estilo.
         {
             MatchInputs mi; mi.amount = im.eqAmount * S.eqAmount * (p.alreadyMastered ? 0.5 : 1.0); mi.clampDb = im.eqClamp;
@@ -331,6 +374,7 @@ public:
             // (la cadena aplica el recorte dentro de la EQ; acá se aplicó aparte, mismo resultado salvo redondeo de float)
         }
         prog (0.3);
+        say ("Taming harshness and sibilance");
         // 2) EQ dinámica: umbrales por percentil del nivel relativo de cada banda en las partes fuertes.
         if (x > 0.0 && ! p.alreadyMastered)
         {
@@ -360,6 +404,7 @@ public:
             if (p.harsh.on || p.sib.on) apply (Chain::kDyn, Chain::kDyn + 1);
         }
         prog (0.4);
+        say ("Balancing the three bands");
         // 3) Multibanda: umbral por percentil del nivel de cada banda, con tope de reducción; compensación = GR media.
         {
             const double maxGr = im.mbMaxGr * S.mbScale * dynScale;
@@ -408,6 +453,7 @@ public:
             }
         }
         prog (0.5);
+        say ("Gluing the mix");
         // 4) Glue: umbral tal que la GR media estática en las partes fuertes sea la buscada; compensación = GR media.
         {
             const double grWant = S.glueGrDb * im.glueGr * dynScale;
@@ -447,6 +493,7 @@ public:
             }
         }
         prog (0.6);
+        say ("Setting the stereo image");
         // 5) Estéreo.
         if (x > 0.0)
         {
@@ -467,6 +514,7 @@ public:
             apply (Chain::kStereo, Chain::kStereo + 1);
         }
         prog (0.65);
+        say ("Adding colour");
         // 6) Saturación.
         {
             const double drive = S.satDriveDb * im.satFrac;
@@ -479,6 +527,15 @@ public:
             else if (opt.constantLatency) apply (Chain::kSat, Chain::kSat + 1);     // la región corre igual (latencia fija)
         }
         prog (0.7);
+        if (cache != nullptr && n <= LearnCache::kMaxSamples)
+        {
+            cache->stagesPlan = p; cache->stagesWork = w; cache->haveStages = true;
+            cache->kStyle = opt.style; cache->kIntensity = opt.intensity; cache->kDynScale = dynScale;
+            cache->kMastered = p.alreadyMastered; cache->kConstLat = opt.constantLatency;
+        }
+        }
+        lap ("stages before gain");
+        say ("Reaching the loudness target");
         // 7-9) Sonoridad: ganancia + recortador + limitador, iterado sobre la salida real.
         const double pre = lufsOf (w);
         p.gainDb = p.targetLufs - pre;
@@ -560,6 +617,7 @@ public:
             if (outL) { *outL = std::move (t.L); outL->resize (n); }
             if (outR) { *outR = std::move (t.R); outR->resize (n); }
         }
+        lap ("gain search");
         if (p.limiterAvgGrDb > 4.0) p.notes.push_back ("Reaching " + fmt1 (p.targetLufs) + " LUFS takes heavy limiting (" + fmt1 (p.limiterAvgGrDb) + " dB on average): a quieter target will sound more open.");
         return p;
     }

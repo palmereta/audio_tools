@@ -46,9 +46,9 @@ Con un archivo (la manera más precisa):
 
 1. Abrí la app standalone (o el plugin en cualquier pista).
 2. Apretá **Master a file** y elegí tu mezcla, o soltá el archivo sobre la ventana. Acepta WAV, AIFF, FLAC, Ogg y MP3.
-3. Esperá unos segundos mientras se corta el disco. La línea de estado dice qué tan fuerte era la mezcla y qué tan fuerte quedó el master.
+3. Esperá mientras se corta el disco: una barra de progreso bajo el disco muestra la etapa, el porcentaje y los segundos. La línea de estado dice qué tan fuerte era la mezcla y qué tan fuerte quedó el master.
 4. Apretá **Play**. Hacé clic en cualquier parte del disco para saltar a ese momento de la canción.
-5. Probá otro **Style** u otra **Intensity**: Lacquer vuelve a masterizar la canción solo.
+5. Probá otro **Style** u otra **Intensity**: Lacquer vuelve a masterizar la canción solo. Si volvés a un ajuste que ya probaste, su master vuelve al instante.
 6. Apretá **A/B with the original** para comparar a la misma sonoridad.
 7. Apretá **Export master** para guardar un WAV de 24 bits y su informe.
 

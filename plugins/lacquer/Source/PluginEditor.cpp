@@ -219,6 +219,10 @@ void LacquerEditor::timerCallback()
     playBtn.setButtonText (proc.filePlaying.load() ? "Pause" : "Play");
     playBtn.setEnabled (fs == LacquerProcessor::FileState::ready);
     exportBtn.setEnabled (fs == LacquerProcessor::FileState::ready);
+    {   // Mientras masteriza, el lugar de los botones es de la barra de progreso.
+        const bool ready = fs == LacquerProcessor::FileState::ready;
+        playBtn.setVisible (ready); exportBtn.setVisible (ready); closeBtn.setVisible (ready || fs == LacquerProcessor::FileState::failed);
+    }
 
     // Disco.
     if (ls == LacquerProcessor::LearnState::listening)
@@ -252,6 +256,7 @@ void LacquerEditor::timerCallback()
     modules.repaint();
     compareBtn.setButtonText (proc.hasPlan() ? "A/B with the original (" + signedDb (proc.abGainDb.load()) + ")" : juce::String ("A/B with the original"));
     content.repaint (statusR); content.repaint (underDiscR); content.repaint (turnDownR);
+    if (fs == LacquerProcessor::FileState::rendering || fs == LacquerProcessor::FileState::loading) content.repaint (0, barH - 4, baseW, 4);
 }
 
 void LacquerEditor::chooseFile()
@@ -403,7 +408,37 @@ void LacquerEditor::paintBackdrop (juce::Graphics& g)
         g.drawText (tm (proc.filePos.load()) + " / " + tm (proc.fileSeconds()), underDiscR.getX() + 98, underDiscR.getY() + 8, 110, 34, juce::Justification::centredLeft);
     }
     else if (fs == LacquerProcessor::FileState::loading || fs == LacquerProcessor::FileState::rendering)
-        g.drawText ("Mastering " + proc.fileName() + "  " + juce::String ((int) (proc.fileProgress.load() * 100)) + " %", underDiscR, juce::Justification::centred);
+    {
+        // Barra de progreso: qué etapa está haciendo, el porcentaje y el tiempo que lleva.
+        const float frac = juce::jlimit (0.0f, 1.0f, proc.fileProgress.load());
+        auto card = underDiscR.toFloat().withTrimmedTop (2.0f).withHeight (50.0f);
+        g.setColour (col::display); g.fillRoundedRectangle (card, 8.0f);
+        g.setColour (col::seam); g.drawRoundedRectangle (card.reduced (0.5f), 8.0f, 1.0f);
+        const juce::String stage = fs == LacquerProcessor::FileState::loading ? juce::String ("Reading the file") : proc.fileStage();
+        g.setColour (col::label); g.setFont (bold (17.0f));
+        g.drawText (stage, card.getX() + 14, card.getY() + 5, card.getWidth() - 140, 22, juce::Justification::centredLeft);
+        g.setColour (col::amber); g.setFont (bold (22.0f));
+        g.drawText (juce::String (juce::roundToInt (frac * 100.0f)) + " %", card.getRight() - 84, card.getY() + 3, 70, 24, juce::Justification::centredRight);
+        auto track = juce::Rectangle<float> (card.getX() + 14, card.getBottom() - 18.0f, card.getWidth() - 28, 10.0f);
+        g.setColour (col::amberDim.withAlpha (0.5f)); g.fillRoundedRectangle (track, 5.0f);
+        auto fill = track.withWidth (std::max (10.0f, track.getWidth() * frac));
+        g.setColour (col::amber); g.fillRoundedRectangle (fill, 5.0f);
+        // Brillo que viaja por la parte llena: se ve que está trabajando aun en las etapas largas.
+        const float sheenW = 36.0f, sx = fill.getX() + std::fmod (spin * 90.0f, std::max (1.0f, fill.getWidth() + sheenW)) - sheenW;
+        g.saveState(); g.reduceClipRegion (fill.toNearestInt());
+        { juce::ColourGradient gr (juce::Colours::white.withAlpha (0.0f), sx, 0, juce::Colours::white.withAlpha (0.0f), sx + sheenW, 0, false);
+          gr.addColour (0.5, juce::Colours::white.withAlpha (0.55f)); g.setGradientFill (gr); }
+        g.fillRect (fill);
+        g.restoreState();
+        const double secs = proc.fileRenderSeconds();
+        if (secs >= 1.0)
+        {
+            g.setColour (col::label.withAlpha (0.6f)); g.setFont (regular (13.0f));
+            g.drawText (juce::String ((int) secs) + " s", card.getRight() - 150, card.getY() + 7, 60, 18, juce::Justification::centredRight);
+        }
+        // Y una franja fina en el borde de la barra superior, visible aunque la mirada esté en otro lado.
+        g.setColour (col::amber); g.fillRect (0.0f, (float) barH - 4.0f, (float) baseW * frac, 4.0f);
+    }
     else if (ls == LacquerProcessor::LearnState::listening)
         g.drawText ("Cutting what it hears: " + juce::String ((int) proc.learnedSeconds()) + " s" + (proc.learnedSeconds() < 30.0 ? juce::String (" (30 s is enough for a quick master)") : juce::String (", keep going for the whole song")), underDiscR, juce::Justification::centred);
     else if (proc.hasPlan())

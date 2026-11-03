@@ -23,7 +23,7 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 | [Halation](#halation) | 1.0.3 |
 | [Tarnish](#tarnish) | 1.0.3 |
 | [Plumb](#plumb) | 1.0.2 |
-| [Lacquer](#lacquer) | 1.0.3 |
+| [Lacquer](#lacquer) | 1.0.4 |
 | [Audio Tools Launcher](#audio-tools-launcher) | 1.0.3 |
 
 ## AT20V
@@ -555,6 +555,12 @@ Downloads are on the [releases](https://github.com/palmereta/audio_tools/release
 - First release: real-time pitch correction for voice, from natural to hard, with latency from 0.67 ms.
 
 ## Lacquer
+
+### 1.0.4
+
+- File mode shows a progress bar under the disc with the stage it is working on, the percentage and the seconds elapsed, plus a strip along the top bar.
+- Touching a control while a file is open no longer analyses the song again, and the master comes out of the same pass instead of a second one.
+- Going back to a setting you already tried (style, intensity, target and ceiling) brings its master back from memory instead of processing it again.
 
 ### 1.0.3
 

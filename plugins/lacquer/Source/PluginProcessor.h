@@ -64,6 +64,9 @@ public:
     void seekFile (double seconds);
     juce::String fileName() const { const juce::ScopedLock sl (uiLock); return loadedFile.getFileName(); }
     std::atomic<float> fileProgress { 0.0f };
+    juce::String fileStage() const { const juce::ScopedLock sl (uiLock); return stageText; }   // qué está haciendo ahora
+    double fileRenderSeconds() const { return renderStartMs.load() > 0.0 ? (juce::Time::getMillisecondCounterHiRes() - renderStartMs.load()) / 1000.0 : 0.0; }
+    bool fileRenderWasQuick() const { return lastRenderQuick.load(); }     // la última pasada reutilizó lo ya calculado
 
     // ---- Lo que ve la interfaz (copias bajo uiLock) ----
     dh::lq::Plan planCopy() const { const juce::ScopedLock sl (uiLock); return plan; }
@@ -146,6 +149,16 @@ private:
     std::vector<float> specRing; std::atomic<int> specPos { 0 };
 
     std::atomic<double> paramsDirtyAt { 0.0 }, fileOutLufs { -70.0 };
+    // Masters ya calculados del archivo abierto, uno por combinación de ajustes (los últimos que entren en el presupuesto).
+    struct Rendered { dh::lq::Options o; dh::lq::Plan p; dh::lq::Report rep; juce::AudioBuffer<float> master; std::vector<float> groove; dh::lq::BandCurve mid {}; };
+    static constexpr size_t kRenderedBudgetBytes = 400u * 1024u * 1024u;
+    std::vector<Rendered> rendered; std::vector<float> fileInGroove;
+    void installRendered (const dh::lq::Plan&, const dh::lq::Report&, juce::AudioBuffer<float>&&, std::vector<float>&&, const dh::lq::BandCurve&);
+    dh::lq::LearnCache fileCache;              // análisis y etapas previas a la ganancia del archivo abierto (sólo el trabajador)
+    std::atomic<bool> dropFileCache { false };
+    juce::String stageText;
+    std::atomic<double> renderStartMs { 0.0 };
+    std::atomic<bool> lastRenderQuick { false };
 
     void parameterChanged (const juce::String& id, float v) override;
     void deleteRetired();

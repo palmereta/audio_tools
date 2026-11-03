@@ -62,6 +62,36 @@ int main (int argc, char** argv)
         std::printf ("CPU at %.0f Hz, 512-sample blocks: learned chain %.2f %%, every module on %.2f %% of one core\n", a.fs, learned, all);
         return 0;
     }
+    if (auto v = opt ("--cache-check", ""); ! v.empty())
+    {
+        // Reutilizar lo calculado no puede cambiar el resultado: el plan con caché debe ser idéntico al plan sin él.
+        auto ms = [] (auto t0) { return std::chrono::duration<double, std::milli> (std::chrono::steady_clock::now() - t0).count(); };
+        auto same = [] (const Plan& x, const Plan& y) {
+            return x.gainDb == y.gainDb && x.outLufs == y.outLufs && x.outTruePeakDb == y.outTruePeakDb && x.clipOn == y.clipOn && x.clipThresholdDb == y.clipThresholdDb
+                && x.eqTrimDb == y.eqTrimDb && x.glue.makeupDb == y.glue.makeupDb && x.mb[0].makeupDb == y.mb[0].makeupDb && x.mb[2].thresholdDb == y.mb[2].thresholdDb
+                && x.notes == y.notes && x.targetLufs == y.targetLufs && x.ceilingDb == y.ceilingDb; };
+        LearnCache cache;
+        auto t = std::chrono::steady_clock::now();
+        const Plan first = Learner::learn (a.L.data(), a.R.data(), a.L.size(), a.fs, o, nullptr, nullptr, nullptr, {}, &cache);
+        std::printf ("first pass (fills the cache): %.0f ms\n", ms (t));
+        bool ok = true;
+        auto trial = [&] (const char* what, Options o2) {
+            t = std::chrono::steady_clock::now();
+            const Plan hit = Learner::learn (a.L.data(), a.R.data(), a.L.size(), a.fs, o2, nullptr, nullptr, nullptr, {}, &cache);
+            const double tHit = ms (t); t = std::chrono::steady_clock::now();
+            const Plan ref = Learner::learn (a.L.data(), a.R.data(), a.L.size(), a.fs, o2);
+            const double tRef = ms (t);
+            const bool eq = same (hit, ref); ok = ok && eq;
+            std::printf ("%-22s cached %6.0f ms, from scratch %6.0f ms (%.1fx)  %s  gain %.3f / %.3f, out %.2f LUFS\n", what, tHit, tRef, tRef / std::max (1.0, tHit), eq ? "IDENTICAL" : "DIFFERENT", hit.gainDb, ref.gainDb, hit.outLufs);
+        };
+        Options c1 = o; c1.ceilingDb = std::clamp (o.ceilingDb + 0.5, -3.0, -0.1); trial ("ceiling +0.5 dB", c1);
+        Options c2 = o; c2.targetLufs = o.targetLufs + 1.0; c2.matchInput = false; trial ("target +1 LUFS", c2);
+        Options c3 = o; c3.style = (Style) (((int) o.style + 1) % kStyles); trial ("other style", c3);
+        Options c4 = o; c4.intensity = std::min (1.0, o.intensity + 0.2); trial ("intensity +20", c4);
+        Options c5 = o; trial ("same settings", c5);
+        (void) first;
+        return ok ? 0 : 3;
+    }
     const auto t0 = std::chrono::steady_clock::now();
     const size_t n = a.L.size();
     Report rep;

@@ -46,9 +46,9 @@ With a file (the most accurate way):
 
 1. Open the standalone app (or the plugin in any track).
 2. Press **Master a file** and choose your mix, or drop the file on the window. WAV, AIFF, FLAC, Ogg and MP3 are accepted.
-3. Wait a few seconds while the disc is cut. The status line says how loud the mix was and how loud the master is.
+3. Wait while the disc is cut: a progress bar under the disc shows the stage, the percentage and the seconds. The status line says how loud the mix was and how loud the master is.
 4. Press **Play**. Click anywhere on the disc to jump to that part of the song.
-5. Try another **Style** or **Intensity**: Lacquer re-masters the song automatically.
+5. Try another **Style** or **Intensity**: Lacquer re-masters the song automatically. Going back to a setting you already tried brings its master back at once.
 6. Press **A/B with the original** to compare at the same loudness.
 7. Press **Export master** to save a 24-bit WAV and its report.
 

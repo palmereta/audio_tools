@@ -429,6 +429,11 @@
     "Primera versión: corrección de afinación en tiempo real para voz, de natural a dura, con latencia desde 0,67 ms."
   ],
 
+  "lacquer-v1.0.4": [
+    "El modo archivo muestra una barra de progreso bajo el disco con la etapa que está haciendo, el porcentaje y los segundos transcurridos, y una franja en la barra superior.",
+    "Mover un control con un archivo abierto ya no vuelve a analizar la canción, y el master sale de la misma pasada en vez de una segunda.",
+    "Volver a un ajuste que ya probaste (estilo, intensidad, objetivo y techo) recupera su master de la memoria en vez de procesarlo de nuevo."
+  ],
   "lacquer-v1.0.3": [
     "La lista de presets del host muestra los seis estilos, igual en VST3 y en Audio Unit (antes: ninguno en VST3 y uno \"Untitled\" en AU).",
     "Un editor oculto (Ableton Live lo mantiene vivo) ya no anima ni se redibuja."

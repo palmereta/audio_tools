@@ -429,6 +429,11 @@
     "First release: real-time pitch correction for voice, from natural to hard, with latency from 0.67 ms."
   ],
 
+  "lacquer-v1.0.4": [
+    "File mode shows a progress bar under the disc with the stage it is working on, the percentage and the seconds elapsed, plus a strip along the top bar.",
+    "Touching a control while a file is open no longer analyses the song again, and the master comes out of the same pass instead of a second one.",
+    "Going back to a setting you already tried (style, intensity, target and ceiling) brings its master back from memory instead of processing it again."
+  ],
   "lacquer-v1.0.3": [
     "The host's preset list shows the six styles, the same in VST3 and Audio Unit (before: none in VST3, one \"Untitled\" in AU).",
     "A hidden editor (Ableton Live keeps it alive) no longer animates or repaints."

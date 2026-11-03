@@ -306,6 +306,7 @@ void LacquerProcessor::closeFile()
 {
     filePlaying.store (false);
     fileState.store (FileState::none);
+    dropFileCache.store (true); jobEvent.signal();     // libera la memoria del caché en el trabajador
     restoreLive();                               // el plan, la entrada y el A/B del modo en vivo, como estaban
     setStatus ("Back to live mode: Lacquer processes what comes into the plugin.");
 }
@@ -340,6 +341,7 @@ void LacquerProcessor::runWorker()
         jobEvent.wait (100);
         deleteRetired();
         if (worker->threadShouldExit()) break;
+        if (dropFileCache.exchange (false) && fileState.load() != FileState::ready && fileState.load() != FileState::rendering) { fileCache.clear(); rendered.clear(); fileInGroove.clear(); }
         Job j; { const juce::ScopedLock sl (jobLock); j = nextJob; nextJob = Job(); }
         if (j.kind == Job::loadFile) { doLoadFile (j.file); continue; }
         if (learnState.load() == LearnState::analysing) { doLearn (true); continue; }
@@ -430,6 +432,7 @@ void LacquerProcessor::doLoadFile (const juce::File& f)
     if (r->numChannels == 1) fileOrig.copyFrom (1, 0, fileOrig, 0, 0, len);
     fileRate = r->sampleRate; fileLen = len;
     { const juce::ScopedLock sl (uiLock); loadedFile = f; }
+    fileCache.clear(); rendered.clear(); fileInGroove.clear();     // otro audio: nada de lo guardado vale
     doRenderFile();
 }
 
@@ -437,20 +440,47 @@ void LacquerProcessor::doRenderFile()
 {
     if (fileLen <= 0) return;
     fileState.store (FileState::rendering); filePlaying.store (false);
+    fileProgress.store (0.0f);
+    renderStartMs.store (juce::Time::getMillisecondCounterHiRes());
+    { const juce::ScopedLock sl (uiLock); stageText = "Starting"; }
     setStatus ("Mastering " + fileName() + "…");
     Options o = currentOptions(); o.constantLatency = false;
     const size_t n = (size_t) fileLen;
+    for (auto& r : rendered)
+        if (r.o.style == o.style && r.o.intensity == o.intensity && r.o.targetLufs == o.targetLufs && r.o.ceilingDb == o.ceilingDb && r.o.matchInput == o.matchInput)
+        {
+            // Ya masterizado con exactamente estos ajustes: se vuelve a poner, sin procesar.
+            { const juce::ScopedLock sl (uiLock); stageText = "Recalled from memory"; }
+            lastRenderQuick.store (true);
+            juce::AudioBuffer<float> m; m.makeCopyOf (r.master);
+            installRendered (r.p, r.rep, std::move (m), std::vector<float> (r.groove), r.mid);
+            return;
+        }
     Report rep;
     Plan p;
+    std::vector<float> mL, mR;
+    const bool hadStages = fileCache.haveStages;
+    bool reused = false;
     try
     {
-        p = Learner::learn (fileOrig.getReadPointer (0), fileOrig.getReadPointer (1), n, fileRate, o, &rep, nullptr, nullptr,
-                            [this] (double v) { if (worker->threadShouldExit()) throw Cancelled(); fileProgress.store ((float) (0.9 * v)); });
+        // Un solo recorrido: la búsqueda de ganancia ya deja el master completo (con la latencia compensada), así que no
+        // se vuelve a correr la cadena entera para obtenerlo. Y lo que no depende del control que se movió se reutiliza.
+        p = Learner::learn (fileOrig.getReadPointer (0), fileOrig.getReadPointer (1), n, fileRate, o, &rep, &mL, &mR,
+                            [this] (double v) { if (worker->threadShouldExit()) throw Cancelled(); fileProgress.store ((float) (0.96 * v)); },
+                            &fileCache,
+                            [this, &reused] (const char* s) { if (juce::String (s).startsWith ("Reusing")) reused = true; const juce::ScopedLock sl (uiLock); stageText = s; });
     }
     catch (const Cancelled&) { return; }
-    // Render canónico (el mismo que lacquerrender): cadena completa por bloques, latencia compensada.
+    lastRenderQuick.store (hadStages && reused);
+    { const juce::ScopedLock sl (uiLock); stageText = "Measuring the master"; }
+    if (worker->threadShouldExit()) return;
     juce::AudioBuffer<float> out (2, (int) n + 4);
     out.clear();
+    if (mL.size() >= n && mR.size() >= n)
+    {
+        out.copyFrom (0, 0, mL.data(), (int) n); out.copyFrom (1, 0, mR.data(), (int) n);
+    }
+    else if (p.silent)                         // entrada silenciosa: el plan sólo lleva el limitador de seguridad
     {
         Chain c; c.prepare (fileRate, p);
         const int lat = c.latency();
@@ -462,9 +492,28 @@ void LacquerProcessor::doRenderFile()
             for (size_t i = 0; i < k; ++i) { const size_t s = pos + i; bl[i] = s < n ? fileOrig.getSample (0, (int) s) : 0.0f; br[i] = s < n ? fileOrig.getSample (1, (int) s) : 0.0f; }
             c.process (bl.data(), br.data(), (int) k);
             for (size_t i = 0; i < k; ++i) { const long long s = (long long) (pos + i) - lat; if (s >= 0 && (size_t) s < n) { out.setSample (0, (int) s, bl[i]); out.setSample (1, (int) s, br[i]); } }
-            fileProgress.store ((float) (0.9 + 0.1 * (double) pos / (double) (n + (size_t) lat)));
         }
     }
+    std::vector<float> outGr = grooveOf (out.getReadPointer (0), out.getReadPointer (1), n, fileRate);
+    const BandCurve outMidC = Analyzer::run (out.getReadPointer (0), out.getReadPointer (1), n, fileRate).mid;
+    // Se guarda para cuando se vuelva a este mismo ajuste (A/B entre presets): ahí no se procesa nada.
+    {
+        const size_t bytes = (size_t) out.getNumSamples() * 2 * sizeof (float);
+        const size_t room = bytes > 0 ? (size_t) (kRenderedBudgetBytes / bytes) : 0;
+        if (room > 0)
+        {
+            while (rendered.size() >= room) rendered.erase (rendered.begin());
+            Rendered e; e.o = o; e.p = p; e.rep = rep; e.master.makeCopyOf (out); e.groove = outGr; e.mid = outMidC;
+            rendered.push_back (std::move (e));
+        }
+    }
+    installRendered (p, rep, std::move (out), std::move (outGr), outMidC);
+}
+
+void LacquerProcessor::installRendered (const dh::lq::Plan& p, const dh::lq::Report& rep, juce::AudioBuffer<float>&& out, std::vector<float>&& outGr, const dh::lq::BandCurve& outMidC)
+{
+    using namespace dh::lq;
+    const size_t n = (size_t) fileLen;
     {
         const juce::ScopedLock fl (fileLock);     // la exportación lee fileMaster
         waitForAudioOutOfFile();
@@ -475,14 +524,16 @@ void LacquerProcessor::doRenderFile()
     fileOutLufs.store (p.outLufs);
     json::InputSummary s;
     s.valid = true; s.lufs = rep.lufsI; s.tp = rep.truePeakDb; s.lra = rep.lra; s.plr = rep.plr; s.seconds = rep.seconds; s.correlation = rep.correlation; s.mid = rep.mid;
-    s.groove = grooveOf (fileOrig.getReadPointer (0), fileOrig.getReadPointer (1), n, fileRate);
+    if (fileInGroove.empty()) fileInGroove = grooveOf (fileOrig.getReadPointer (0), fileOrig.getReadPointer (1), n, fileRate);
+    s.groove = fileInGroove;
     {
         const juce::ScopedLock sl (uiLock);
-        input = s; outGroove = grooveOf (fileMaster.getReadPointer (0), fileMaster.getReadPointer (1), n, fileRate);
+        input = s; outGroove = std::move (outGr);
         plan = p; planValid = true;
-        outMid = Analyzer::run (fileMaster.getReadPointer (0), fileMaster.getReadPointer (1), n, fileRate).mid; haveOutMid = true;
+        outMid = outMidC; haveOutMid = true;
     }
     fileProgress.store (1.0f);
+    renderStartMs.store (0.0);
     fileState.store (FileState::ready);
     juce::String msg = fileName() + ": " + juce::String (rep.lufsI, 1) + " LUFS in, " + juce::String (p.outLufs, 1) + " LUFS / " + juce::String (p.outTruePeakDb, 1) + " dBTP out.";
     if (! p.notes.empty()) msg += " " + juce::String (p.notes.front());
