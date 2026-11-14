@@ -145,11 +145,110 @@ void reprepareTest (const char* id, int program)
     report (id, (juce::String ("re-prepared instance == fresh, program ") + juce::String (program)).toRawUTF8(), nullDb < -100.0,
             juce::String::formatted ("null %.1f dB (level %.1f dBFS)", nullDb, 10.0 * std::log10 (e / (double) std::max<size_t> (1, x.size()) + 1e-30)));
 }
+struct fxChunkSet
+{
+    juce::int32 chunkMagic;
+    juce::int32 byteSize;
+    juce::int32 fxMagic;
+    juce::int32 version;
+    juce::int32 fxID;
+    juce::int32 fxVersion;
+    juce::int32 numPrograms;
+    char future[128];
+    juce::int32 chunkSize;
+    char chunk[8];
+};
+
+static juce::int32 fxbName (const char* name) noexcept { return (juce::int32) juce::ByteOrder::littleEndianInt (name); }
+static juce::int32 fxbSwap (juce::int32 x) noexcept    { return (juce::int32) juce::ByteOrder::swapIfLittleEndian ((juce::uint32) x); }
+
+static void exportMpcPresets (const juce::File& outDir, const juce::File& vstFile)
+{
+    outDir.createDirectory();
+    Rig r;
+    auto& proc = *r.p;
+
+    // Dump parameter table
+    juce::File paramCsv = outDir.getParentDirectory().getChildFile ("AT42_Parameters_QLink_Map.csv");
+    juce::String csv = "Index,ParamID,Name,DefaultValue,CurrentText\n";
+    const auto& params = proc.getParameters();
+    for (int i = 0; i < params.size(); ++i)
+    {
+        auto* p = params[i];
+        juce::String pid;
+        if (auto* wp = dynamic_cast<juce::AudioProcessorParameterWithID*> (p))
+            pid = wp->paramID;
+        csv += juce::String (i) + "," + pid + ",\"" + p->getName (64) + "\","
+             + juce::String (p->getDefaultValue(), 4) + ",\"" + p->getCurrentValueAsText() + "\"\n";
+    }
+    paramCsv.replaceWithText (csv);
+
+    juce::PluginDescription desc;
+    desc.name = vstFile.getFileNameWithoutExtension();
+    desc.descriptiveName = "Audio Tools AT42";
+    desc.pluginFormatName = "VST";
+    desc.category = "Synth";
+    desc.manufacturerName = "Audio Tools";
+    desc.version = "V1.0.8";
+    desc.fileOrIdentifier = vstFile.getFullPathName();
+    desc.lastFileModTime = vstFile.getLastModificationTime();
+    desc.lastInfoUpdateTime = juce::Time::getCurrentTime();
+    desc.uniqueId = desc.deprecatedUid = (int) juce::ByteOrder::bigEndianInt ("At42");
+    desc.isInstrument = true;
+    desc.numInputChannels = 2;
+    desc.numOutputChannels = 2;
+    desc.hasSharedContainer = false;
+
+    const int nProg = proc.getNumPrograms();
+    for (int i = 0; i < nProg; ++i)
+    {
+        proc.setCurrentProgram (i);
+        juce::MemoryBlock rawChunk;
+        proc.getStateInformation (rawChunk);
+
+        // Wrap in VST2 fxChunkSet ('CcnK' / 'FBCh') exactly as JUCE VSTPluginInstance::getStateInformation does
+        juce::MemoryBlock fxb;
+        const size_t totalLen = sizeof (fxChunkSet) + rawChunk.getSize() - 8;
+        fxb.setSize (totalLen, true);
+        auto* set = static_cast<fxChunkSet*> (fxb.getData());
+        set->chunkMagic  = fxbName ("CcnK");
+        set->byteSize    = 0;
+        set->fxMagic     = fxbName ("FBCh");
+        set->version     = fxbSwap (1);
+        set->fxID        = fxbSwap (desc.uniqueId);
+        set->fxVersion   = fxbSwap (0x01000800);
+        set->numPrograms = fxbSwap (nProg);
+        set->chunkSize   = fxbSwap ((juce::int32) rawChunk.getSize());
+        rawChunk.copyTo (set->chunk, 0, rawChunk.getSize());
+
+        juce::XmlElement root ("pluginstate");
+        auto* ver = root.createNewChildElement ("version");
+        ver->setAttribute ("file", 1);
+        ver->setAttribute ("date", "2026-11-13-22-00");
+        if (auto plugXml = desc.createXml())
+            root.addChildElement (plugXml.release());
+        auto* stateEl = root.createNewChildElement ("state");
+        stateEl->addTextElement (fxb.toBase64Encoding());
+
+        juce::String safeName = proc.getProgramName (i).replaceCharacter ('/', '-').replaceCharacter (':', '-');
+        juce::String fname = juce::String::formatted ("%02d-%s.xpl", i, safeName.toRawUTF8());
+        root.writeTo (outDir.getChildFile (fname));
+    }
+    std::printf ("Exported %d MPC .xpl presets to %s\n", nProg, outDir.getFullPathName().toRawUTF8());
+}
 } // namespace
 
-int main()
+int main (int argc, char** argv)
 {
     juce::ScopedJuceInitialiser_GUI gui;
+    if (argc >= 3 && std::strcmp (argv[1], "--export-mpc") == 0)
+    {
+        juce::File vstFile = (argc >= 4)
+            ? juce::File (juce::String::fromUTF8 (argv[3]))
+            : juce::File::getSpecialLocation (juce::File::userHomeDirectory).getChildFile ("Library/Audio/Plug-Ins/VST/AT42.vst");
+        exportMpcPresets (juce::File (juce::String::fromUTF8 (argv[2])), vstFile);
+        return 0;
+    }
     std::printf ("AT42 %s: processor tests\n", JucePlugin_VersionString);
 
     {

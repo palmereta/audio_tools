@@ -30,7 +30,11 @@ public:
     void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     juce::AudioProcessorEditor* createEditor() override;
+   #if AT42_HEADLESS
+    bool hasEditor() const override { return false; }
+   #else
     bool hasEditor() const override { return true; }
+   #endif
 
     const juce::String getName() const override { return "AT42"; }
     bool acceptsMidi() const override { return true; }
