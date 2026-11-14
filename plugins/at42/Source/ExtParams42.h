@@ -57,7 +57,7 @@ inline const std::vector<ExtParam>& extParams42()
         { "midi_drone",  "MIDI Drone Keys",   2, 0, 1, 1,     "Off|C1-F1", true },                              // globales: un preset no los cambia
         { "bend_range",  "Pitch Bend Range",  13, 0, 12, 2,   "0|1|2|3|4|5|6|7|8|9|10|11|12", true },
         // Sistema
-        { "quality",     "Oversampling",      3, 0, 2, 1,     "1x|2x|4x", true },
+        { "quality",     "Oversampling",      3, 0, 2, 0,     "1x|2x|4x", true },
         { "output",      "Output",            0, -24, 6, 0,   nullptr, true },
         { "panel",       "Panel Colour",      4, 0, 3, 0,     "Cream|Black|Maize|Blue", true },
     };

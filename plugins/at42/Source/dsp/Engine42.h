@@ -167,8 +167,8 @@ public:
     }
 
 private:
-    float fsBase = 48000.0f, fs = 96000.0f;
-    int os = 2;
+    float fsBase = 48000.0f, fs = 48000.0f;
+    int os = 1;
     std::array<float, jk42::kNumJacks> jv {};
     ClassicVoice d1, d2, d4, d5;
     PapaVoice papa3, papa6;

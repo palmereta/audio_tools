@@ -1,6 +1,8 @@
 #include <set>
 #include "PluginProcessor.h"
+#if ! AT42_HEADLESS
 #include "PluginEditor.h"
+#endif
 #include <cstring>
 
 using namespace dh;
@@ -521,5 +523,9 @@ void AT42Processor::setStateInformation (const void* data, int sizeInBytes)
     notifyUi (onPresetChanged);
 }
 
+#if AT42_HEADLESS
+juce::AudioProcessorEditor* AT42Processor::createEditor() { return nullptr; }
+#else
 juce::AudioProcessorEditor* AT42Processor::createEditor() { return new AT42Editor (*this); }
+#endif
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new AT42Processor(); }
